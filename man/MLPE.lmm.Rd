@@ -1,0 +1,32 @@
+\name{MLPE.lmm}
+\alias{MLPE.lmm}
+\title{Run maximum likelihood population effects mixed effects model (MLPE)}
+\usage{
+MLPE.lmm(resist.dir, genetic.dist, out.dir)
+}
+\arguments{
+  \item{resist.dir}{Directory containing .asc resistance
+  files (presumably optimized resistance surfaces)}
+
+  \item{genetic.dist}{Lower half of pairwise genetic
+  distance matrix}
+
+  \item{out.dir}{If specified, a .csv table will printed to
+  the specified directory (Default = NULL)}
+}
+\value{
+A table of MLPE fitted model coefficients
+}
+\description{
+Runs MLPE as detailed by Clarke et al. (2002). This
+function is designed to generate a table of the fitted
+mixed effects model coefficients
+}
+\references{
+Clarke, R. T., P. Rothery, and A. F. Raybould. 2002.
+Confidence limits for regression relationships between
+distance matrices: Estimating gene flow with distance.
+Journal of Agricultural, Biological, and Environmental
+Statistics 7:361-372.
+}
+

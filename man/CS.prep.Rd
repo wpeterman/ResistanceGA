@@ -1,0 +1,39 @@
+\name{CS.prep}
+\alias{CS.prep}
+\title{Prepare and bundle input CIRCUITSCAPE model parameters}
+\usage{
+CS.prep(n.POPS, RESPONSE, CS_Point.File, CS.exe, Neighbor.Connect)
+}
+\arguments{
+  \item{n.POPS}{The number of populations that are being
+  assessed}
+
+  \item{RESPONSE}{Vector of pairwise genetic distances
+  (lower half of pairwise matrix).}
+
+  \item{CS_Point.File}{The path to the Circuitscape
+  formatted point file. See Circuitscape documentation for
+  help.}
+
+  \item{CS.exe}{The path to the CIRCUITSCAPE executable
+  file (cs_run.exe). See details below.}
+
+  \item{Neighbor.Connect}{Select 4 or 8 to designate the
+  connection scheme to use in CIRCUITSCAPE (Default = 8)}
+}
+\value{
+An R object that is a required input into optimization
+functions
+}
+\description{
+This function will prepare objects needed for running
+optimization functions
+}
+\details{
+\code{CS.exe} Example of path to CIRCUITSCAPE executible:
+
+'"C:/Program Files/Circuitscape/cs_run.exe"'
+
+***NOTE: Double quotation used***
+}
+

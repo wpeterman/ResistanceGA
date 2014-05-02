@@ -1,0 +1,31 @@
+\name{Resistance.Opt_multi}
+\alias{Resistance.Opt_multi}
+\title{Optimize multiple resistance surfaces simultaneously}
+\usage{
+Resistance.Opt_multi(PARM, CS.inputs, GA.inputs, Min.Max)
+}
+\arguments{
+  \item{PARM}{Parameters to transform conintuous surface or
+  resistance values of categorical surface. Should be a
+  vector with parameters specified in the order of
+  resistance surfaces. These values are selected during
+  optimization if called within GA function.}
+
+  \item{CS.inputs}{Object created from running
+  \code{\link{CS.prep}} function}
+
+  \item{GA.inputs}{Object created from running
+  \code{\link{GA.prep}} function}
+
+  \item{Min.Max}{Define whether the optimization function
+  should minimized ('min') or maximized ('max')}
+}
+\value{
+AIC value from mixed effect model
+}
+\description{
+Create composite resistance surface by simultaneously
+optimizing multiple categoricla and continuous surfaces.
+This optimization function is designed to be called from GA
+}
+

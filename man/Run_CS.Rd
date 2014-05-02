@@ -1,0 +1,31 @@
+\name{Run_CS}
+\alias{Run_CS}
+\title{Run CIRCUITSCAPE in R}
+\usage{
+Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
+}
+\arguments{
+  \item{CS.inputs}{Object created from running
+  \code{\link{CS.prep}} function}
+
+  \item{GA.inputs}{Object created from running
+  \code{\link{GA.prep}} function}
+
+  \item{r}{Raster resistance surface}
+
+  \item{CurrentMap}{Logical. If TRUE, the cumulative
+  resistance map will be generated during the CS run
+  (Default = FALSE)}
+
+  \item{EXPORT.dir}{Directory where CS results should be
+  written (Default = GA.inputs$Write.dir, which is a
+  temporary directory for reading/writing CS results)}
+}
+\value{
+Vector of CIRCUITSCAPE resistance distances (lower half of
+"_resistances.out")
+}
+\description{
+Execute CS from R
+}
+
