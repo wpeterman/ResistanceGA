@@ -6,7 +6,7 @@ MLPE.lmm(resist.dir, genetic.dist, out.dir)
 }
 \arguments{
   \item{resist.dir}{Directory containing .asc resistance
-  files (presumably optimized resistance surfaces)}
+  files (optimized resistance surfaces)}
 
   \item{genetic.dist}{Lower half of pairwise genetic
   distance matrix}

@@ -16,6 +16,7 @@ Imports:
     GA,
     lme4 (>= 1.0)
 Suggests:
-    RandomFields
+    RandomFields,
+    ggplot2
 License: GPL-3
 LazyData: true

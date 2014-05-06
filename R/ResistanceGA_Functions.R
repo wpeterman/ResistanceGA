@@ -146,7 +146,7 @@ SS_optim <- function(CS.inputs,GA.inputs){
   write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
   
   # Get parameter estimates
-  MLPE.lmm(resist.dir=GA.inputs$Results.dir,CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
+  MLPE.results<-MLPE.lmm(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
   return(Results.All)
   ###############################################################################################################
 }
@@ -175,7 +175,7 @@ MS_optim<-function(CS.inputs,GA.inputs){
                    crossover=GA.inputs$crossover,
                    pmutation=GA.inputs$pmutation,
                    Min.Max=GA.inputs$Min.Max,
-                   GA.params=GA.inputs,
+                   GA.inputs=GA.inputs,
                    CS.inputs=CS.inputs,
                    min=GA.inputs$ga.min,
                    max=GA.inputs$ga.max,
@@ -183,9 +183,11 @@ MS_optim<-function(CS.inputs,GA.inputs){
                    maxiter=GA.inputs$maxiter,
                    run=GA.inputs$run,
                    keepBest=GA.inputs$keepBest,
-                   suggestions=GA.inputs.nG$SUGGESTS) 
+                   suggestions=GA.inputs$SUGGESTS) 
   
   RAST<-Combine_Surfaces(multi.GA_nG@solution,CS.inputs,GA.inputs)
+  NAME<-paste(GA.inputs$parm.type$name,collapse=".")
+  name(RAST)<-NAME
   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE)
   
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -304,10 +306,11 @@ Response.Figs<- function(Optim.input){
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param out Directory to write combined .asc file. Default is GA.inputs$Results.dir
 #' @return R raster object
 #' @export
 
-Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs){
+Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir){
   t1<-Sys.time()
   GA.params<-GA.inputs
   ID<-CS.inputs$ID
@@ -316,7 +319,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs){
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.exe<-CS.inputs$CS.exe
-  EXPORT.dir<-GA.inputs$Results.dir
+  EXPORT.dir<-out
   
   ######
   r <- GA.params$Resistance.stack
@@ -726,16 +729,18 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
 #' 
 #' Plots a transformed continuous resistance surface against the original resistance values
 #' 
-#' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector with the first term identifying the value of shape parameter (c), and the second term identifying the maximum scale parameter (b)
+#' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)
 #' @param Resistance Path to raw, untransformed resistance surface
-#' @param equation Name of the transformation equation to use (see details below)
-#' @param print Logical. If TRUE, a PDF file of the plot will exported to the current working directory (Default = FALSE)
+#' @param equation Name of the transformation equation to use:\cr
+#' "Inverse-Reverse Monomolecular"\cr"Inverse Monomolecular"\cr"Monomolecular"\cr"Reverse Monomolecular"\cr"Inverse Ricker"\cr"Ricker",\cr"Distance"
+#' @param print.dir Specify the directory where a .tiff of the transformation will be written (Default = NULL)
 #' @return plot of transformed resistance values against original resistance values
-#' @details Equation names can be "Inverse-Reverse Monomolecular", "Inverse Monomolecular", "Monomolecular", "Reverse Monomolecular", "Inverse Ricker" , "Ricker", or "Distance"
-#' @usage PLOT.trans(PARM, Resistance, equation, print)
+#' @details This function will create a ggplot object and plot, so it requires \pkg{ggplot2} to be installed.\cr Equation names can be "Inverse-Reverse Monomolecular", "Inverse Monomolecular", "Monomolecular", "Reverse Monomolecular", "Inverse Ricker", "Ricker", or "Distance". The "Distance" equation sets all cell values equal to 1.
+#' @usage PLOT.trans(PARM, Resistance, equation, print.dir)
 #' @export
+#' @import ggplot2
 
-PLOT.trans <- function(PARM,Resistance,equation, print=FALSE){
+PLOT.trans <- function(PARM,Resistance,equation, print.dir=NULL){
   Resistance <- raster(Resistance)
   Mn=cellStats(Resistance,stat='min')
   Mx=cellStats(Resistance,stat='max') 
@@ -764,7 +769,7 @@ PLOT.trans <- function(PARM,Resistance,equation, print=FALSE){
     Trans.vec <- SCALE.vector(SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN,MIN=1,MAX=PARM[[2]]+1) # Monomolecular
     TITLE <- "Monomolecular"
   } else if(equation=="Reverse Monomolecular") {
-    SIGN<- -1
+    SIGN<- 1
     Trans.vec <- SCALE.vector(SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN,MIN=1,MAX=PARM[[2]]+1) # Reverse Monomolecular
     TITLE <- "Reverse Monomolecular"   
   } else if (equation=="Inverse Ricker") {
@@ -779,18 +784,38 @@ PLOT.trans <- function(PARM,Resistance,equation, print=FALSE){
     TITLE <- "Ricker"
   } 
   
+  plot.data<-data.frame(dat.o,Trans.vec)
   
-  if(print==TRUE){
-    EXPORT.dir<-getwd()
-    pdf(paste0(EXPORT.dir,"Optimized_Response_",Resistance@data@names,".pdf"))
-    plot(dat.o,Trans.vec,main=paste0("Optimization equation: " ,TITLE), xlab=paste0("Original data: ", Resistance@data@names), ylab="Resistance value",type="l", lty=1, lwd=2)
-    #   legend("right",legend=paste0("AIC = ",round(AIC,digits=3)),bty = "n")
-    
-    #   text(.1*max(dat.o),.1*max(Trans.vec), paste0("AIC = ",round(AIC,digits=3)))
-    dev.off()
-    
-    plot(dat.o,Trans.vec,main=paste0("Optimization equation: " ,TITLE), xlab=paste0("Original data: ", Resistance@data@names), ylab="Resistance value",type="l", lty=1, lwd=2)
+  p<- ggplot(plot.data,aes(x=dat.o,y=Trans.vec)) +
+    ggtitle(paste(equation,"Transformation",sep="")) +
+    theme_bw() +
+    geom_line(size=1.5) +
+    xlab(expression(bold("Original data values"))) +
+    ylab(expression(bold("Tansformed data values"))) +
+    theme(plot.title = element_text(lineheight=2, face="bold",size=20),
+          legend.title = element_blank(),
+          legend.key = element_blank(),
+          axis.text.x = element_text(size=14),
+          axis.text.y = element_text(size=14),  
+          axis.title.x = element_text(size=16),
+          axis.title.y = element_text(size=16),
+          axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank()) +
+    scale_x_continuous(limits=c(min(dat.o),max(dat.o)*1.07)) +
+    scale_y_continuous(limits=c(min(Trans.vec),max(Trans.vec)*1.07)) 
+  
+  if(file_test("-d",print.dir)){
+    EXPORT.dir<-print.dir
+    tiff(filename=paste0(print.dir,equation,"_Transformation_plot.tif"),width=160,height=150,units="mm",res=300,compression="lzw")
+    print(p)
+    dev.off()    
+    return(p)
   }
+  return(p)
+  
 }
 
 
@@ -875,7 +900,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     File.name <- Name
   }
   if(cellStats(RESIST,"max")>5e4)  RESIST<-SCALE(RESIST,1,5e4) # Rescale surface in case resistance are too high
-  r <- reclassify(r, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
+  RESIST <- reclassify(RESIST, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
   
   writeRaster(x=RESIST,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
   
@@ -941,7 +966,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 #' 
 #' Runs MLPE as detailed by Clarke et al. (2002). This function is designed to generate a table of the fitted mixed effects model coefficients
 #' 
-#' @param resist.dir Directory containing .asc resistance files (presumably optimized resistance surfaces)
+#' @param resist.dir Directory containing .asc resistance files (optimized resistance surfaces)
 #' @param genetic.dist Lower half of pairwise genetic distance matrix
 #' @param out.dir If specified, a .csv table will printed to the specified directory (Default = NULL)
 #' @return A table of MLPE fitted model coefficients
@@ -978,10 +1003,10 @@ MLPE.lmm <- function(resist.dir, genetic.dist,out.dir=NULL){
     COEF.Table<-rbind(COEF.Table, COEF)
   }
   if(is.null(out.dir)){
-    (COEF.Table[-1,])
+    COEF.Table<-(COEF.Table[-1,])
   } else {
-    COEF.Table[-1,]
-    write.table(COEF.Table,sep=",",row.names=T,col.names=T)
+    COEF.Table<-COEF.Table[-1,]
+    write.table(COEF.Table,file=paste0(out.dir,"MLPE_coeff_Table.csv"),sep=",",row.names=T,col.names=NA)
     (COEF.Table)
   }
 }

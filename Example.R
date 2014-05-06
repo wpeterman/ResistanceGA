@@ -1,11 +1,10 @@
-#'@examples
-#'\dontrun{
-#' Code to conduct analysis of GA to optimize multiple surface simultaneously
 require(RandomFields)
 require(ResistanceGA)
+require(ggplot2)
+
 
 rm(list = ls())
-set.seed(123321)
+set.seed(12345)
 ###################################
 # Where are ASCII files and batch files going to be written to?
 if("ResistanceGA_Example"%in%dir("C:/")==FALSE) dir.create(file.path("C:/", "ResistanceGA_Example")) 
@@ -17,36 +16,39 @@ r.dim <- 60 # number of cells on a side
 cell.size <- 0.025
 min.point <- 0.25*(r.dim*cell.size) # minimum coordinate for generating random points (multiplied by 0.25 to prevent edge effects)
 max.point <- (r.dim*cell.size)-min.point # maximum coordinate for generating random points
-n <- 50 # Number of random "Sample locations" to generate
+n <- 49 # Number of "Sample locations" to generate. This example will generate points on a square grid, so choose a number that has an even square root
 x <- seq(from=min.point,max.point,by=cell.size) # set x & y range to draw random samples from
 y <- seq(from=min.point,max.point,by=cell.size)
+# xy <-c(min.point,max.point,min.point,max.point)
+# SAMPLE<-rSSI(.05,n=n,win=xy,giveup=1000) 
 xy <-cbind(x,y)
 SAMPLE<-SpatialPoints(xy)
-COORD <- spsample(Spatial(bbox=bbox(SAMPLE)), n, type="random")
+COORD <- spsample(Spatial(bbox=bbox(SAMPLE)), n, type="regular") # Generate regularly spaced points on a grid
+min(lower(pointDistance(COORD,lonlat=F)))
 coord.id <-cbind((1:n),COORD@coords)
 
 write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
 
 #####################################################################
 #####################################################################
-# Create random field to represent continuous and categorical landscape surface
+# Using random fields create two resistance surfaces
 model<-RMexp() +
-  RMtrend(mean=5)
+  RMtrend(mean=10)
 
 grid.vars <- GridTopology(cellcentre.offset=c(cell.size/2, cell.size/2),
                           cellsize=c(cell.size, cell.size),
                           cells.dim=rep(r.dim,2))
 
-rf.sim <- RFsimulate(model, x=grid.vars, n=3) # Simulate 3 surfaces
+rf.sim <- RFsimulate(model, x=grid.vars, n=2) # Simulate 2 surfaces
 
 cont.rf <- raster(rf.sim[1]) # Define the first as a continuous surface
 names(cont.rf)<-"cont"
 plot(cont.rf)
-plot(COORD, pch=16, col="blue", add=TRUE)
+plot(COORD, pch=16, col="blue", add=TRUE) # Add randomly generated points
 
-cat.rf <- raster(rf.sim[2]) # Make the second surface a 3-category surface
+cat.rf <- raster(rf.sim[2]) # Make the second surface a 3-class categorical surface
 names(cat.rf)<-"cat"
-cat.cut <- summary(cat.rf) # Define quartiles
+cat.cut <- summary(cat.rf) # Define quartiles, use these to define categories
 
 cat.rf[cat.rf<=cat.cut[2]] <- 0
 cat.rf[cat.rf>0 & cat.rf<=cat.cut[4]] <- 1
@@ -54,16 +56,11 @@ cat.rf[!cat.rf%in%c(0,1)] <- 2
 plot(cat.rf)
 plot(COORD, pch=16, col="blue", add=TRUE)
 
-# rand.rf <- raster(rf.sim[3]) # Define the third as a continuous surface
-# names(rand.rf)<-"rand"
-# plot(rand.rf)
-# plot(COORD, pch=16, col="blue", add=TRUE)
-
 ##############################
-# Make landscape feature
+# Make categorical feature class (like a road)
 feature <- matrix(0,r.dim,r.dim)
 feature[25,] <- 1
-feature[,30:32] <- 1
+feature[,30:31] <- 1
 feature <- raster(feature)
 extent(feature)<-extent(cat.rf)
 plot(feature)
@@ -71,22 +68,9 @@ names(feature)<-"feature"
 plot(feature)
 plot(COORD, pch=16, col="blue", add=TRUE)
 
-# Make random noise surface
-# model<-RMexp(scale=0.01) + 
-#   RMtrend(mean=0)
-# 
-# grid.vars <- GridTopology(cellcentre.offset=c(cell.size/2, cell.size/2),
-#                           cellsize=c(cell.size, cell.size),
-#                           cells.dim=rep(r.dim,2))
-# 
-# NOISE <- RFsimulate(model, x=grid.vars, n=1) # Simulate 1 random noise surface
-# NOISE<-raster(NOISE)
-# plot(NOISE)
-
 # Write original rasters to file for use with CIRCUITSCAPE
 writeRaster(cat.rf,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
-# writeRaster(rand.rf,filename=paste0(write.dir,"rand.asc"),overwrite=TRUE)
 writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 
 #########################################
@@ -103,14 +87,16 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) # Note that RESPONSE is omittted because it has not been made yet
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
-# Only continuous surface affects resistance in the first example
+# Only continuous the surface will affect resistance in the first example
 CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=cont.rf)
 
+# We add some random noise to the response (i.e. CS resistance output)
 NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist))) # Generate random noise matrix
 CS.response<-round((CS.Resist+NOISE),digits=4) # Add random noise to resistance output. Use this as the RESPONSE for single surface testing
+plot(CS.response~CS.Resist)
 write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.names=F)
 
-
+# Remake the CS.inputs file, including the newly created CS.Response
 CS.inputs<-CS.prep(n.POPS=n,
                    RESPONSE=CS.response,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -125,13 +111,9 @@ SS_optim(CS.inputs=CS.inputs,
 
 
 #############################
-# Test and visualize transformation of continuous surface
-dat<-seq(0,10,length.out=100) # data ranging from 0-10
-SIGN=1
-Max.SCALE=5
-SHAPE=2
-Tran<-SIGN*Max.SCALE*(1-exp(-1*dat/SHAPE)) # Monomolecular transformation
-plot(Tran~dat)
+# Visualize transformation of continuous surface. The first term of the PARM function refers to the shape parameter, and the second term refers to the maximum value parameter.
+
+PLOT.trans(PARM=c(2,10),Resistance="C:/ResistanceGA_Example/cont.asc",equation="Reverse Monomolecular",print.dir="C:/ResistanceGA_Example/Results/Plots/")
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
 PARM=c(0,50,100,3,2,100,0,100)
@@ -144,82 +126,39 @@ PARM=c(0,50,100,3,2,100,0,100)
 #        0, # First feature of feature surface
 #        100) # Second feature of feature surface
 
-PARM=c(0,50,100,3,2,100,0,100)
+PARM=c(0,50,150,3,2,300,0,500)
 
-Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=Sim.GA)
-# Resist.Noise<-Resist+NOISE
-CS.Resist<- Run_CS(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,r=Resist)
-CS.TRUTH<- Run_CS(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,r=Resist)
+# Combine resistance surfaces
+Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.15*max(CS.Resist)))
+# Generate new CS response surface by using Run_CS
+CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+
+# Generate some random noise nad add it to the resistance surface
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.1*max(CS.Resist)))
 plot(Resist)
 
-CS.Resist<-round((CS.Resist+NOISE),digits=4)
+CS.response<-round((CS.Resist+NOISE),digits=4)
+plot(CS.response~CS.Resist)
+write.table(CS.response,file=paste0(write.dir,"ombined_response.csv"),sep=",",row.names=F,col.names=F)
 
-write.table(CS.Resist,file=paste0(write.dir,"RESPONSE_Med.csv"),sep=",",row.names=F,col.names=F)
+# Run prep functions
+GA.inputs<-GA.prep(ASCII.dir=write.dir,
+                   pop.mult=5,
+                   min.cat=0,
+                   max.cat=500,
+                   max.cont=750,
+                   run=1) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
-Model.Params<-Function.Params(n.POPS=nrow(coord.id),RESPONSE=CS.Resist,CS.version=cs.vers,CS_Point.File=cs.point,CS.exe=cs,EXPORT.dir=exp.dir)
+CS.inputs<-CS.prep(n.POPS=n,
+                      RESPONSE=CS.response,
+                      CS_Point.File=paste0(write.dir,"samples.txt"),
+                      CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
-AIC.Med <-Resistance_multi.GA_noGaus(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,Min.Max="min")
+Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,GA.inputs=GA.inputs)
+
 mantel(CS.Resist~CS.TRUTH)
 plot(CS.Resist~CS.TRUTH)
 
-# Medium High
-# CONTRAST=150
-# PARM=c(0,3,CONTRAST,3,2,CONTRAST,0,CONTRAST)
-# Resist<-Combine_Surfaces(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA)
-# 
-# CS.Resist<- Run_CS(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA)
-# 
-# CS.Resist<-CS.Resist+NOISE
-# 
-# write.table(CS.Resist,file=paste0(write.dir,"RESPONSE_MedHigh.csv"),sep=",",row.names=F,col.names=F)
-# 
-# Model.Params<-Function.Params(n.POPS=nrow(coord.id),RESPONSE=CS.Resist,CS.version=cs.vers,CS_Point.File=cs.point,CS.exe=cs,EXPORT.dir=exp.dir)
-# 
-# AIC.MedHigh <-Resistance_multi.GA_noGaus(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,Min.Max="min")
-
-#  High Noise
-CONTRAST=100
-PARM=c(0,50,CONTRAST,3,2,CONTRAST,0,CONTRAST,7,1,1)
-Resist<-Combine_Surfaces.nG(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA)
-# Resist.Noise<-Resist+NOISE
-CS.Resist<- Run_CS(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,r=Resist)
-CS.TRUTH<- Run_CS(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,r=Resist)
-
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.25*max(CS.Resist)))
-plot(Resist)
-
-CS.Resist<-round((CS.Resist+NOISE),digits=4)
-
-write.table(CS.Resist,file=paste0(write.dir,"RESPONSE_High.csv"),sep=",",row.names=F,col.names=F)
-
-Model.Params<-Function.Params(n.POPS=nrow(coord.id),RESPONSE=CS.Resist,CS.version=cs.vers,CS_Point.File=cs.point,CS.exe=cs,EXPORT.dir=exp.dir)
-
-AIC.High <-Resistance_multi.GA_noGaus(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,Min.Max="min")
-mantel(CS.Resist~CS.TRUTH)
-plot(CS.Resist~CS.TRUTH)
-#####################################
-#  TRUTH
-# CONTRAST=100
-# PARM=c(0,50,CONTRAST,3,2,CONTRAST,0,CONTRAST,7,1,1)
-# Resist<-Combine_Surfaces.nG(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA)
-# Resist.Noise<-Resist+NOISE
-# CS.Resist<- Run_CS(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,r=Resist)
-# CS.Resist<-round(CS.Resist,digits=4)
-# 
-# write.table(CS.Resist,file=paste0(write.dir,"RESPONSE_TRUTH.csv"),sep=",",row.names=F,col.names=F)
-# 
-# Model.Params<-Function.Params(n.POPS=nrow(coord.id),RESPONSE=CS.Resist,CS.version=cs.vers,CS_Point.File=cs.point,CS.exe=cs,EXPORT.dir=exp.dir)
-# 
-# AIC.TRUTH <-Resistance_multi.GA_noGaus(PARM=PARM,Model.Params=Model.Params,GA.params=Sim.GA,Min.Max="min")
-##################################
-##################################
-# LEVEL <- c("Low", "Med.Low", "Med", "Med.High","High")
-# AIC.val <- c(AIC.Low,AIC.MedLow,AIC.Med,AIC.MedHigh,AIC.High)
-LEVEL <- c("Low", "Med", "High")
-AIC.val <- c(AIC.Low,AIC.Med,AIC.High)
-(Sim.AIC.Table <- data.frame(LEVEL,AIC.val))
-write.table(Sim.AIC.Table,file=paste0(write.dir,"Sim_AIC_Values.txt"),row.names=F,col.names=T,sep="\t")
 
 rm(list=".Random.seed", envir=globalenv()) 

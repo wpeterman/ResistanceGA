@@ -2,7 +2,7 @@
 \alias{Combine_Surfaces}
 \title{Combine multiple resistance surfaces together}
 \usage{
-Combine_Surfaces(PARM, CS.inputs, GA.inputs)
+Combine_Surfaces(PARM, CS.inputs, GA.inputs, out = GA.inputs$Results.dir)
 }
 \arguments{
   \item{PARM}{Parameters to transform conintuous surface or
@@ -15,6 +15,9 @@ Combine_Surfaces(PARM, CS.inputs, GA.inputs)
 
   \item{GA.inputs}{Object created from running
   \code{\link{GA.prep}} function}
+
+  \item{out}{Directory to write combined .asc file. Default
+  is GA.inputs$Results.dir}
 }
 \value{
 R raster object
