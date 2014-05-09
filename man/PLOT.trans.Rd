@@ -2,7 +2,7 @@
 \alias{PLOT.trans}
 \title{Plot continuous surface transformation}
 \usage{
-PLOT.trans(PARM, Resistance, equation, print.dir)
+PLOT.trans(PARM, Resistance, transformation, print.dir)
 }
 \arguments{
   \item{PARM}{Parameters to transform conintuous surface or
@@ -11,11 +11,12 @@ PLOT.trans(PARM, Resistance, equation, print.dir)
   shape parameter (c), and the second term is the value of
   maximum scale parameter (b)}
 
-  \item{Resistance}{Path to raw, untransformed resistance
-  surface}
+  \item{Resistance}{Accepts two types of inputs. Provide
+  either the path to the raw, untransformed resistance
+  surface file or specify an R raster object}
 
-  \item{equation}{Name of the transformation equation to
-  use:\cr "Inverse-Reverse Monomolecular"\cr"Inverse
+  \item{transformation}{Name of the transformation equation
+  to use:\cr "Inverse-Reverse Monomolecular"\cr"Inverse
   Monomolecular"\cr"Monomolecular"\cr"Reverse
   Monomolecular"\cr"Inverse
   Ricker"\cr"Ricker",\cr"Distance"}

@@ -102,6 +102,8 @@ SS_optim <- function(CS.inputs,GA.inputs){
       
       Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
       
+      PLOT.trans(PARM=exp(Optim.nlm$estimate), Resistance=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],".asc"), transformation=EQ, print.dir=GA.inputs$Plots.dir)
+      
       RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param_nG(exp(Optim.nlm$estimate)))
       colnames(RS) <- c("Surface","AICc","Equation","shape","max")
       RESULTS.cont[[cnt2]] <- RS
@@ -128,26 +130,41 @@ SS_optim <- function(CS.inputs,GA.inputs){
   }
   ##################################
   # Compile results into tables
+  cat("\n")
+  cat("\n")
+  if(nrow(Results.cat)>0){
   Features <- array()
   for(i in 1:ncol(Results.cat)-2){
     feature <- paste0("Feature",i)
     Features[i]<-feature
   }
   colnames(Results.cat)<-c("Surface","AICc", Features)
-  colnames(Results.cont)<-c("Surface","AICc","Equation","shape","max")
-  Results.cat
-  Results.cont
+  print(Results.cat)
+  write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
+  }
+  
+  if(ncol(Results.cont)>0){    
+    colnames(Results.cont)<-c("Surface","AICc","Equation","shape","max")
+    write.table(Results.cont,paste0(GA.inputs$Results.dir,"ContinuousResults.csv"),sep=",",col.names=T,row.names=F)
+    print(Results.cont)
+  }
   
   # Full Results
-  Results.All<-rbind(Results.cat[,c(1,2)],Results.cont[,c(1,2)])
-  
-  write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
-  write.table(Results.cont,paste0(GA.inputs$Results.dir,"ContinuousResults.csv"),sep=",",col.names=T,row.names=F)
+  if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
+    Results.All<-rbind(Results.cat[,c(1,2)],Results.cont[,c(1,2)])
+  } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
+    Results.All<-(Results.cont[,c(1,2)])  
+  } else {
+    Results.All<-(Results.cat[,c(1,2)])    
+  }
+ 
+  cat("\n")
+  cat("\n")
   write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
   
   # Get parameter estimates
   MLPE.results<-MLPE.lmm(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
-  return(Results.All)
+  print(Results.All)
   ###############################################################################################################
 }
 
@@ -187,10 +204,9 @@ MS_optim<-function(CS.inputs,GA.inputs){
   
   RAST<-Combine_Surfaces(multi.GA_nG@solution,CS.inputs,GA.inputs)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
-  name(RAST)<-NAME
-  Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE)
+  names(RAST)<-NAME
+  Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
   
-  NAME<-paste(GA.inputs$parm.type$name,collapse=".")
   Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
   
   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs) 
@@ -225,7 +241,7 @@ Response.Figs<- function(Optim.input){
 #' 
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
-#' @param r Raster resistance surface
+#' @param r Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object
 #' @param CurrentMap Logical. If TRUE, the cumulative resistance map will be generated during the CS run (Default = FALSE)
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of "_resistances.out")
@@ -233,7 +249,12 @@ Response.Figs<- function(Optim.input){
 
 #' @export
   Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir){
-  #   t1<-Sys.time()
+if(class(r)[1]!='RasterLayer') {
+  R<-raster(r)
+  NAME <- basename(r)
+  NAME<-sub("^([^.]*).*", "\\1", NAME) 
+  names(R)<-NAME
+}
   
   if (CurrentMap==FALSE){
     File.name <- r@data@names
@@ -400,6 +421,106 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
 }
 ###################################################################################
 
+###############################################################################  
+############ TRANSFORM RESISTANCE SURFACES ############ 
+###############################################################################  
+#' Apply transformation to continuous resistance surface
+#' 
+#' Apply on the six resistance transformations to a continuous resistance surface
+#' 
+#' @param transformation Transformation equation to apply
+#' @param shape Value of the shape parameter
+#' @param max Value of the maximum value parameter
+#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
+#' @param r Resistance surface to be transformed. Can be supplied as full path to .asc file or as a raster object
+#' @param out Directory to write transformed .asc file. Default is NULL, and will not export .asc file
+#' @usage Resistance.tran(transformation, shape, max,CS.inputs,r)
+#' @return R raster object
+#' @details Valid arguements for \code{Transformation} are:\cr
+#' "Inverse-Reverse Monomolecular"\cr"Inverse Monomolecular"\cr"Monomolecular"\cr"Reverse Monomolecular"\cr"Inverse Ricker"\cr"Ricker",\cr"Distance"
+#' @export
+
+Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
+  if(class(r)[1]!='RasterLayer') {
+    R<-raster(r)
+    NAME <- basename(r)
+    NAME<-sub("^([^.]*).*", "\\1", NAME) 
+    names(R)<-NAME
+  } else {
+    R<-r
+    NAME <- r@data@names
+  }
+  
+  ID<-CS.inputs$ID
+  ZZ<-CS.inputs$ZZ
+  RESPONSE<-CS.inputs$RESPONSE
+  CS_Point.File<-CS.inputs$CS_Point.File
+  CS.exe<-CS.inputs$CS.exe
+  parm<-c(get.EQ(transformation),shape, max)
+  EXPORT.dir<-out
+  
+  ######
+  
+      r <-SCALE(data=R,MIN=0,MAX=10)
+
+  # Set equation for continuous surface
+      equation <- floor(parm[1]) # Parameter can range from 1-6.99
+      
+      # Read in resistance surface to be optimized
+      SHAPE <-  (parm[2])
+      Max.SCALE <- (parm[3])
+      
+      # Apply specified transformation
+# Apply specified transformation
+    if(equation==1){
+      SIGN=-1
+      r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Inverse-Reverse Monomolecular
+      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      EQ <- "Inverse-Reverse Monomolecular"
+      
+    } else if(equation==2){
+      SIGN=1
+      r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Reverse Monomolecular
+      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      EQ <- "Reverse Monomolecular"        
+      
+    } else if(equation==3){
+      SIGN=1
+      r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
+      EQ <- "Monomolecular"
+      
+    } else if (equation==4) {
+      SIGN=-1
+      r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Inverse Monomolecular
+      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      EQ <- "Inverse Monomolecular"  	    
+      
+    } else if (equation==5) {
+      SIGN=-1
+      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
+      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      EQ <- "Inverse Ricker"  
+      
+    } else if (equation==6) {
+      SIGN=1
+      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+      EQ <- "Ricker"
+    } else {
+      r <- (r*0)+1 #  Distance
+      EQ <- "Distance"    
+    } # End if-else  
+  File.name <- NAME
+  
+  if(cellStats(R,"max")>5e5)  r<-SCALE(R,1,5e5) # Rescale surface in case resistance are too high
+
+  if(!is.null(out)){
+    writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+    return(r)
+  } else {
+    return(r)
+  }
+}
+###################################################################################
 
 ###############################################################################  
 ############ MULTISURFACE OPTIMIZATION FUNCTION WITH GA--NO GAUSSIAN ############ 
@@ -564,7 +685,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
   
   t2 <-Sys.time()
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AIC = ",round(AICc,4)),"\n","\n")
+  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
   
   
   
@@ -730,28 +851,33 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
 #' Plots a transformed continuous resistance surface against the original resistance values
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)
-#' @param Resistance Path to raw, untransformed resistance surface
-#' @param equation Name of the transformation equation to use:\cr
+#' @param Resistance Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object
+#' @param transformation Name of the transformation equation to use:\cr
 #' "Inverse-Reverse Monomolecular"\cr"Inverse Monomolecular"\cr"Monomolecular"\cr"Reverse Monomolecular"\cr"Inverse Ricker"\cr"Ricker",\cr"Distance"
 #' @param print.dir Specify the directory where a .tiff of the transformation will be written (Default = NULL)
 #' @return plot of transformed resistance values against original resistance values
 #' @details This function will create a ggplot object and plot, so it requires \pkg{ggplot2} to be installed.\cr Equation names can be "Inverse-Reverse Monomolecular", "Inverse Monomolecular", "Monomolecular", "Reverse Monomolecular", "Inverse Ricker", "Ricker", or "Distance". The "Distance" equation sets all cell values equal to 1.
-#' @usage PLOT.trans(PARM, Resistance, equation, print.dir)
+#' @usage PLOT.trans(PARM, Resistance, transformation, print.dir)
 #' @export
 #' @import ggplot2
 
-PLOT.trans <- function(PARM,Resistance,equation, print.dir=NULL){
-  Resistance <- raster(Resistance)
-  Mn=cellStats(Resistance,stat='min')
-  Mx=cellStats(Resistance,stat='max') 
+PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
+  if(class(Resistance)[1]!='RasterLayer') {
+    r<-raster(Resistance)
+    NAME <- basename(Resistance)
+    NAME<-sub("^([^.]*).*", "\\1", NAME) 
+    names(r)<-NAME
+  }
+  Mn=cellStats(r,stat='min')
+  Mx=cellStats(r,stat='max') 
   
-  # Make vector of data
-  dat.o <- seq(from=Mn,to=Mx,length.out=1000)
-  dat.t <- SCALE.vector(data=dat.o,0,10)
+  # Make vector of data 
+  original <- seq(from=Mn,to=Mx,length.out=1000)
+  dat.t <- SCALE.vector(data=original,0,10)
   
   SHAPE <- PARM[[1]]
   Max.SCALE <- PARM[[2]]
-  
+  equation<-transformation
   # Set equation/name combination
   if(equation=="Distance") {
     Trans.vec <- (dat.t*0)+1 
@@ -783,11 +909,11 @@ PLOT.trans <- function(PARM,Resistance,equation, print.dir=NULL){
     Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN #  Ricker
     TITLE <- "Ricker"
   } 
+  transformed<-Trans.vec
+  plot.data<-data.frame(original,transformed)
   
-  plot.data<-data.frame(dat.o,Trans.vec)
-  
-  p<- ggplot(plot.data,aes(x=dat.o,y=Trans.vec)) +
-    ggtitle(paste(equation,"Transformation",sep="")) +
+  p<- ggplot(plot.data,aes(x=original,y=transformed)) +
+    ggtitle(paste(equation," Transformation",sep="")) +
     theme_bw() +
     geom_line(size=1.5) +
     xlab(expression(bold("Original data values"))) +
@@ -804,16 +930,16 @@ PLOT.trans <- function(PARM,Resistance,equation, print.dir=NULL){
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) +
-    scale_x_continuous(limits=c(min(dat.o),max(dat.o)*1.07)) +
-    scale_y_continuous(limits=c(min(Trans.vec),max(Trans.vec)*1.07)) 
+    scale_x_continuous(limits=c(min(original),max(original)*1.07)) +
+    scale_y_continuous(limits=c(min(transformed),max(transformed)*1.07)) 
   
-  if(file_test("-d",print.dir)){
-    EXPORT.dir<-print.dir
+  if(!is.null(print.dir)){
     tiff(filename=paste0(print.dir,equation,"_Transformation_plot.tif"),width=160,height=150,units="mm",res=300,compression="lzw")
     print(p)
     dev.off()    
     return(p)
   }
+  print(p)
   return(p)
   
 }
@@ -954,9 +1080,9 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   
   t2 <-Sys.time()
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AIC = ",round(AIC.stat,3)),"\n")
+  cat(paste0("\t", "AICc = ",round(AICc,3)),"\n")
   
-  OPTIM.DIRECTION(Min.Max)*(AIC.stat) # Function to be minimized    
+  OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized    
   
 }
 ############################################
@@ -966,7 +1092,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 #' 
 #' Runs MLPE as detailed by Clarke et al. (2002). This function is designed to generate a table of the fitted mixed effects model coefficients
 #' 
-#' @param resist.dir Directory containing .asc resistance files (optimized resistance surfaces)
+#' @param resist.dir Directory containing optimized .asc resistance files (optimized resistance surfaces)
 #' @param genetic.dist Lower half of pairwise genetic distance matrix
 #' @param out.dir If specified, a .csv table will printed to the specified directory (Default = NULL)
 #' @return A table of MLPE fitted model coefficients
@@ -1606,6 +1732,7 @@ Increase.starts.nG<-function(x){
 unique.rast<-raster::unique
 
 get.EQ <-function(equation){   # Apply specified transformation
+  if(is.numeric(equation)){
   equation=floor(equation)
   if(equation==1){
     EQ <- "Inverse-Reverse Monomolecular"
@@ -1628,31 +1755,57 @@ get.EQ <-function(equation){   # Apply specified transformation
   } else {
     EQ <- "Distance"  	
   }
-  #   } else {
-  #     EQ <- "Gaussian"  
-  #   } # End if-else
-  (EQ)                                       
+ 
+  (EQ)
+  } else {
+  if(equation=="Inverse-Reverse Monomolecular"){
+    EQ <- 1
+    
+  } else if(equation=="Reverse Monomolecular"){
+    EQ <- 2        
+    
+  } else if(equation=="Monomolecular"){
+    EQ <- 3
+    
+  } else if (equation=="Inverse Monomolecular") {
+    EQ <- 4
+    
+  } else if (equation=="Inverse Ricker") {
+    EQ <- 5
+    
+  } else if (equation=="Ricker") {
+    EQ <- 6
+    
+  } else {
+    EQ <- 7  	
+  }
+ 
+  (EQ)  
+  }
 }
 
 Result.txt <- function(GA.results, GA.inputs){
   SUMMARY<-summary(GA.results)
+  summary.file<-paste0(GA.inputs$Results.dir,"Multisurface_Optim_Summary.txt")
+  AICc<-round(SUMMARY$fitness*-1,digits=4)
   
-  sink(GA.inputs$Results.dir)
-  cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
+  sink(summary.file)
+cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
+cat("\n")
+cat(paste0("Surfaces included in optimization:"),"\n")
+cat(GA.inputs$parm.type$name,"\n")
+cat("\n")
+cat("Genetic Algorithm optimization settings:")
   cat("\n")
-  cat("\n",paste0("Surfaces included in optimization:"),"\n")
-  cat(GA.inputs$parm.type$name,"\n")
-  cat("Genetic Algorithm optimization settings:")
-  cat("\n")
-  cat(paste0("type: ", SUMMARY$type),"\n")
-  cat(paste0("popSize: ", SUMMARY$popSize),"\n")
-  cat(paste0("maxiter: ", SUMMARY$maxiter),"\n")
-  cat(paste0("Retained elistism: ", SUMMARY$elistism),"\n")
-  cat(paste0("pcrossover: ", SUMMARY$pcrossover),"\n")
-  cat(paste0("pmutation: ", SUMMARY$pmutation),"\n")
+  cat(paste0("Type of genetic algorithm used: ", SUMMARY$type),"\n")
+  cat(paste0("popSize at each iteration: ", SUMMARY$popSize),"\n")
+  cat(paste0("Maximum number of iterations: ", SUMMARY$maxiter),"\n")
+  cat(paste0("Number individuals retained each generation (elistism): ", SUMMARY$elistism),"\n")
+  cat(paste0("Crossover probability: ", SUMMARY$pcrossover),"\n")
+  cat(paste0("Mutation probability: ", SUMMARY$pmutation),"\n")
   cat("\n")
   cat(paste0("The Genetic Algorithm completed after ",SUMMARY$iter," iterations"),"\n")
-  cat("\n",paste0("Minimum AICc: -",SUMMARY$fitness),"\n")
+  cat("\n",paste0("Minimum AICc: ",AICc),"\n")
   cat("\n",paste0("Optimized values for each surface:"),"\n")
   cat(SUMMARY$solution,"\n")
   sink()
@@ -1694,3 +1847,8 @@ CheckInstallPackage <- function(packages, repos="http://cran.r-project.org") {
   }
 } 
 ##########################################################################################
+
+get.name<-function(x){
+   nm <-deparse(substitute(x))
+   return(nm)
+   }

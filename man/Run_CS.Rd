@@ -11,7 +11,9 @@ Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
   \item{GA.inputs}{Object created from running
   \code{\link{GA.prep}} function}
 
-  \item{r}{Raster resistance surface}
+  \item{r}{Accepts two types of inputs. Provide either the
+  path to the raw, untransformed resistance surface file or
+  specify an R raster object}
 
   \item{CurrentMap}{Logical. If TRUE, the cumulative
   resistance map will be generated during the CS run
