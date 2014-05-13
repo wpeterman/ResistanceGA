@@ -372,24 +372,25 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
       if(equation==1){
         SIGN=-1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(r[[i]]/SHAPE)) # Inverse-Reverse Monomolecular
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         EQ <- "Inverse-Reverse Monomolecular"
         
       } else if(equation==2){
         SIGN=1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(r[[i]]/SHAPE)) # Reverse Monomolecular
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         EQ <- "Reverse Monomolecular"        
         
       } else if(equation==3){
         SIGN=1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*r[[i]]/SHAPE)) # Monomolecular
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         EQ <- "Monomolecular"
         
       } else if (equation==4) {
         SIGN=-1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*r[[i]]/SHAPE)) # Inverse Monomolecular
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==5) {
@@ -402,6 +403,22 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
         SIGN=1
         r[[i]] <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
         EQ <- "Ricker"     
+        
+      } else if (equation==7) { # HAS NOT BEEN MADE
+        SIGN=-1
+        r[[i]] <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) # Inverse Ricker
+        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        EQ <- "Inverse-Reverse Ricker"  
+        
+      } else if (equation==8) { # MAY NOT BE WORKING
+        SIGN=1
+        R <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
+        R <- rev(R)
+        mat.R<-matrix(data=R,nrow=r[[i]]@nrows,ncol=r[[i]]@ncols)
+        rast.R <- raster(mat.R)
+        extent(rast.R)<-extent(r[[i]])
+        r[[i]] <- rast.R
+        EQ <- "Reverse Ricker"   
         
       } else {
         r[[i]] <- reclassify(r[[i]], c(-Inf,Inf, 0)) # Cancel surface...set to zero  
@@ -475,24 +492,25 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
     if(equation==1){
       SIGN=-1
       r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Inverse-Reverse Monomolecular
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Inverse-Reverse Monomolecular"
       
     } else if(equation==2){
       SIGN=1
       r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Reverse Monomolecular
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Reverse Monomolecular"        
       
     } else if(equation==3){
       SIGN=1
       r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Monomolecular"
       
     } else if (equation==4) {
       SIGN=-1
       r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Inverse Monomolecular
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Inverse Monomolecular"  	    
       
     } else if (equation==5) {
@@ -505,6 +523,22 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
       SIGN=1
       r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
       EQ <- "Ricker"
+    } else if (equation==7) {
+      SIGN=-1
+      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
+      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      EQ <- "Inverse-Reverse Ricker"  
+      
+    } else if (equation==8) {
+      SIGN=1
+      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+      R <- rev(R)
+      mat.R<-matrix(data=R,nrow=r@nrows,ncol=r@ncols)
+      rast.R <- raster(mat.R)
+      extent(rast.R)<-extent(r)
+      r <- rast.R
+      EQ <- "Reverse Ricker"
+   
     } else {
       r <- (r*0)+1 #  Distance
       EQ <- "Distance"    
@@ -577,7 +611,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
       if(equation==1){
         SIGN=-1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(r[[i]]/SHAPE)) # Inverse-Reverse Monomolecular
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
         
         EQ <- "Inverse-Reverse Monomolecular"
@@ -585,20 +619,21 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
       } else if(equation==2){
         SIGN=1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(r[[i]]/SHAPE)) # Reverse Monomolecular
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
         EQ <- "Reverse Monomolecular"  	    
         
       } else if(equation==3){
         SIGN=1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*r[[i]]/SHAPE)) # Monomolecular
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
         EQ <- "Monomolecular"
         
       } else if (equation==4) {
         SIGN=-1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*r[[i]]/SHAPE)) # Inverse Monomolecular
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
+        r[[i]] <- SCALE(r[[i]],MIN=1,MAX=Max.SCALE)
         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
         EQ <- "Inverse Monomolecular"  	    
         
@@ -745,24 +780,25 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
     if(equation==1){
       SIGN=-1
       r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Inverse-Reverse Monomolecular
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Inverse-Reverse Monomolecular"
       
     } else if(equation==2){
       SIGN=1
       r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Reverse Monomolecular
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Reverse Monomolecular"  	    
       
     } else if(equation==3){
       SIGN=1
       r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Monomolecular"
       
     } else if (equation==4) {
       SIGN=-1
       r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Inverse Monomolecular
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      r <- SCALE(r,MIN=1,MAX=Max.SCALE)
       EQ <- "Inverse Monomolecular"  	    
       
     } else if (equation==5) {
@@ -896,37 +932,38 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
   } else if(equation=="Inverse-Reverse Monomolecular"){
     SIGN<- -1
     Trans.vec <- SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN # Inverse-Reverse Monomolecular
-    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec))) # Inverse-Reverse Monomolecular
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=1,MAX=Max.SCALE) # Inverse-Reverse Monomolecular
     TITLE <- "Inverse-Reverse Monomolecular"
   } else if(equation=="Inverse Monomolecular"){
     SIGN<- -1
     Trans.vec <- SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Monomolecular
-    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=1,MAX=Max.SCALE)
     TITLE <- "Inverse Monomolecular"
   } else if(equation=="Monomolecular") {
     SIGN<- 1
     Trans.vec <- SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN # Monomolecular
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=1,MAX=Max.SCALE)
     TITLE <- "Monomolecular"
   } else if(equation=="Reverse Monomolecular") {
     SIGN<- 1
     Trans.vec <- SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN # Reverse Monomolecular
-    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=1,MAX=Max.SCALE)
     TITLE <- "Reverse Monomolecular"   
   } else if (equation=="Inverse Ricker") {
     SIGN <- -1
     Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Ricker
     Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
     TITLE <- "Inverse Ricker" 
-  } else if (equation=="Reverse Ricker") {
-    SIGN <- -1
-    Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Ricker
-    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
+  } else if (equation=="Reverse Ricker") { # NOT CORRECT
+    SIGN <- 1
+    Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Reverse Ricker
+    Trans.vec <- rev(Trans.vec)
     TITLE <- "Reverse Ricker" 
   
-  } else if (equation=="Inverse-Reverse Ricker") {
+  } else if (equation=="Inverse-Reverse Ricker") { # NOT CORRECT YET
     SIGN <- -1
-    Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Ricker
-    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
+    Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse-Reverse Ricker
+    Trans.vec <- rev(SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec))))
     TITLE <- "Inverse-Reverse Ricker" 
     
   }  else  {
@@ -937,7 +974,7 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
   transformed<-Trans.vec
   plot.data<-data.frame(original,transformed)
   
-  p<- ggplot(plot.data,aes(x=original,y=transformed)) +
+ ( p<- ggplot(plot.data,aes(x=original,y=transformed)) +
     ggtitle(paste(equation," Transformation",sep="")) +
     theme_bw() +
     geom_line(size=1.5) +
@@ -957,6 +994,7 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
           panel.background = element_blank()) +
     scale_x_continuous(limits=c(min(original),max(original)*1.07)) +
     scale_y_continuous(limits=c(min(transformed),max(transformed)*1.07)) 
+ )
   
   if(!is.null(print.dir)){
     tiff(filename=paste0(print.dir,equation,"_Transformation_plot.tif"),width=160,height=150,units="mm",res=300,compression="lzw")
@@ -1006,43 +1044,53 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   #   }
   
   # Apply specified transformation
+  # Apply specified transformation
   if(equation==1){
     SIGN=-1
-    RESIST <- SIGN*Max.SCALE*(1-exp(RESIST/SHAPE))+SIGN # Inverse-Reverse Monomolecular
-    #     EQ <- "Inverse-Reverse Monomolecular"
+    r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Inverse-Reverse Monomolecular
+    r <- SCALE(r,MIN=1,MAX=Max.SCALE)
+    EQ <- "Inverse-Reverse Monomolecular"
     
   } else if(equation==2){
     SIGN=1
-    R1 <- SIGN*Max.SCALE*(1-exp(RESIST/SHAPE))+SIGN # Reverse Monomolecular
-    RESIST <- SCALE(R1,MIN=abs(cellStats(R1,stat='max')),MAX=abs(cellStats(R1,stat='min')))
-    #     EQ <- "Reverse Monomolecular"  	    
+    r <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Reverse Monomolecular
+    r <- SCALE(r,MIN=1,MAX=Max.SCALE)
+    EQ <- "Reverse Monomolecular"        
     
   } else if(equation==3){
     SIGN=1
-    RESIST <- SIGN*Max.SCALE*(1-exp(-1*RESIST/SHAPE))+SIGN # Monomolecular
-    #     EQ <- "Monomolecular"
+    r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
+    r <- SCALE(r,MIN=1,MAX=Max.SCALE)
+    EQ <- "Monomolecular"
     
   } else if (equation==4) {
     SIGN=-1
-    R1 <- SIGN*Max.SCALE*(1-exp(-1*RESIST/SHAPE))+SIGN # Inverse Monomolecular
-    RESIST <- SCALE(R1,MIN=abs(cellStats(R1,stat='max')),MAX=abs(cellStats(R1,stat='min')))
-    #     EQ <- "Inverse Monomolecular"  	    
+    r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Inverse Monomolecular
+    r <- SCALE(r,MIN=1,MAX=Max.SCALE)
+    EQ <- "Inverse Monomolecular"  	    
     
   } else if (equation==5) {
     SIGN=-1
-    R1 <- SIGN*(Max.SCALE*RESIST*exp(-1*RESIST/SHAPE))+SIGN # Inverse Ricker
-    RESIST <- SCALE(R1,MIN=abs(cellStats(R1,stat='max')),MAX=abs(cellStats(R1,stat='min')))
-    #     EQ <- "Inverse Ricker"  
-    
+    r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
+    r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+    EQ <- "Inverse Ricker"        
   } else if (equation==6) {
     SIGN=1
-    RESIST <- SIGN*(Max.SCALE*RESIST*exp(-1*RESIST/SHAPE))+SIGN #  Ricker
-    #     EQ <- "Ricker"
-    
+    r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+    EQ <- "Ricker"
+  } else if (equation==7) {
+    SIGN=1
+    r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Reverse Ricker
+    EQ <- "Reverse Ricker"
+  } else if (equation==8) {
+    SIGN=1
+    r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Inverse-Reverse Ricker
+    EQ <- "Inverse-Reverse Ricker"
   } else {
-    RESIST <- (RESIST*0)+1 #  Distance
-    #     EQ <- "Distance"    
+    r <- (r*0)+1 #  Distance
+    EQ <- "Distance"    
   } # End if-else
+} # Close parameter type if-else  
   
   #   File.name <- paste0("exp",TRAN,"_MAX", MAX)
   File.name <- if (get.best==FALSE){
@@ -1050,10 +1098,10 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   } else {
     File.name <- Name
   }
-  if(cellStats(RESIST,"max")>5e4)  RESIST<-SCALE(RESIST,1,5e4) # Rescale surface in case resistance are too high
-  RESIST <- reclassify(RESIST, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
+  if(cellStats(r,"max")>5e4)  r<-SCALE(r,1,5e4) # Rescale surface in case resistance are too high
+  r <- reclassify(r, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
   
-  writeRaster(x=RESIST,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+  writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
   
   #Modify and write Circuitscape.ini file
   #############################################################################################  
