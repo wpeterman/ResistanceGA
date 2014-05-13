@@ -874,7 +874,11 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
     NAME <- basename(Resistance)
     NAME<-sub("^([^.]*).*", "\\1", NAME) 
     names(r)<-NAME
+  } else {
+    r <- Resistance
+    NAME <- r@data@names
   }
+ 
   Mn=cellStats(r,stat='min')
   Mx=cellStats(r,stat='max') 
   
@@ -891,25 +895,39 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
     TITLE <- "Distance"
   } else if(equation=="Inverse-Reverse Monomolecular"){
     SIGN<- -1
-    Trans.vec <- SCALE.vector(SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN,MIN=1,MAX=PARM[[2]]+1) # Inverse-Reverse Monomolecular
+    Trans.vec <- SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN # Inverse-Reverse Monomolecular
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec))) # Inverse-Reverse Monomolecular
     TITLE <- "Inverse-Reverse Monomolecular"
   } else if(equation=="Inverse Monomolecular"){
     SIGN<- -1
-    Trans.vec <- SCALE.vector(SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN,MIN=1,MAX=PARM[[2]]+1) # Inverse Monomolecular
+    Trans.vec <- SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Monomolecular
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
     TITLE <- "Inverse Monomolecular"
   } else if(equation=="Monomolecular") {
     SIGN<- 1
-    Trans.vec <- SCALE.vector(SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN,MIN=1,MAX=PARM[[2]]+1) # Monomolecular
+    Trans.vec <- SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN # Monomolecular
     TITLE <- "Monomolecular"
   } else if(equation=="Reverse Monomolecular") {
     SIGN<- 1
-    Trans.vec <- SCALE.vector(SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN,MIN=1,MAX=PARM[[2]]+1) # Reverse Monomolecular
+    Trans.vec <- SIGN*PARM[[2]]*(1-exp(dat.t/PARM[[1]]))+SIGN # Reverse Monomolecular
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
     TITLE <- "Reverse Monomolecular"   
   } else if (equation=="Inverse Ricker") {
     SIGN <- -1
     Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Ricker
     Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
     TITLE <- "Inverse Ricker" 
+  } else if (equation=="Reverse Ricker") {
+    SIGN <- -1
+    Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Ricker
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
+    TITLE <- "Reverse Ricker" 
+  
+  } else if (equation=="Inverse-Reverse Ricker") {
+    SIGN <- -1
+    Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN # Inverse Ricker
+    Trans.vec <- SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))
+    TITLE <- "Inverse-Reverse Ricker" 
     
   }  else  {
     SIGN <- 1
