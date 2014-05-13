@@ -102,7 +102,7 @@ SS_optim <- function(CS.inputs,GA.inputs){
       
       Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
       
-      PLOT.trans(PARM=exp(Optim.nlm$estimate), Resistance=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],".asc"), transformation=EQ, print.dir=GA.inputs$Plots.dir)
+      PLOT.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir)
       
       RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param_nG(exp(Optim.nlm$estimate)))
       colnames(RS) <- c("Surface","AICc","Equation","shape","max")
@@ -769,12 +769,19 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
       SIGN=-1
       r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
       r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
-      EQ <- "Inverse Ricker"  
-      
+      EQ <- "Inverse Ricker"        
     } else if (equation==6) {
       SIGN=1
       r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
       EQ <- "Ricker"
+    } else if (equation==7) {
+      SIGN=1
+      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Reverse Ricker
+      EQ <- "Reverse Ricker"
+    } else if (equation==8) {
+      SIGN=1
+      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Inverse-Reverse Ricker
+      EQ <- "Inverse-Reverse Ricker"
     } else {
       r <- (r*0)+1 #  Distance
       EQ <- "Distance"    
@@ -1752,6 +1759,12 @@ get.EQ <-function(equation){   # Apply specified transformation
   } else if (equation==6) {
     EQ <- "Ricker"
     
+  } else if (equation==7) {
+    EQ <- "Reverse Ricker"
+  
+  } else if (equation==8) {
+    EQ <- "Inverse-Reverse Ricker"
+  
   } else {
     EQ <- "Distance"  	
   }
@@ -1776,8 +1789,14 @@ get.EQ <-function(equation){   # Apply specified transformation
   } else if (equation=="Ricker") {
     EQ <- 6
     
+  } else if (equation=="Reverse Ricker") {
+    EQ <- 7
+  
+  } else if (equation=="Inverse-Reverse Ricker") {
+    EQ <- 8
+  
   } else {
-    EQ <- 7  	
+    EQ <- 9  	
   }
  
   (EQ)  

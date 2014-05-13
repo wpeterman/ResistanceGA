@@ -105,10 +105,6 @@ plot(Sample.coord, pch = 16, col = "blue", add = TRUE)  # Add randomly generated
 
 Export the raw continuous surface to a .asc file for use with CIRCUITSCAPE
 
-```r
-writeRaster(cont.rf, filename = paste0(write.dir, "cont.asc"), overwrite = TRUE)
-```
-
 ```
 ## class       : RasterLayer 
 ## dimensions  : 60, 60, 3600  (nrow, ncol, ncell)
@@ -116,7 +112,7 @@ writeRaster(cont.rf, filename = paste0(write.dir, "cont.asc"), overwrite = TRUE)
 ## extent      : 0, 1.5, 0, 1.5  (xmin, xmax, ymin, ymax)
 ## coord. ref. : NA 
 ## data source : C:\ResistanceGA_Examples\SingleSurface\cont.asc 
-## names       : cont
+## names       : layer
 ```
 
 
@@ -142,7 +138,6 @@ Transform raw continuous surface using the `Resistance.tran` function to apply o
 r.tran <- Resistance.tran(transformation = "Monomolecular", shape = 2, max = 100, 
     CS.inputs = CS.inputs, r = cont.rf)
 
-
 plot.t <- PLOT.trans(PARM = c(2, 100), Resistance = "C:/ResistanceGA_Examples/SingleSurface/cont.asc", 
     transformation = "Monomolecular")
 ```
@@ -151,7 +146,7 @@ plot.t <- PLOT.trans(PARM = c(2, 100), Resistance = "C:/ResistanceGA_Examples/Si
 
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. We will add some random noise to the resistance values prior to optimization.
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
+
 
 
 Rerun `CS.prep` including the newly created `CS.Response`
@@ -168,13 +163,9 @@ Now run the Single surface optimization function (`SS_optim`)
 SS_optim(CS.inputs = CS.inputs, GA.inputs = GA.inputs)
 ```
 
-```
-## Error: unused argument (equation = EQ)
-```
-
 After executing the function, the console will be updated to report the time to complete each iteration as well as AICc of each iteration. 
 
-What the `SS_optim` function does:
+What the `SS_optim` function does:    
 1. Read each .asc file that is in the specified ASCII.dir, and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.
 2. Optimize each resistance surface
   * Categorical surfaces: The first category/factor is set to a resistance value of 1. All other categories are then adjusted, ranging from the minimum--maximum specified during the `GA.prep`. It is necessary to fix the value of one category, otherwise numerous equivalent solutions may make optimization intractable (e.g. resistance values of 1, 5, & 10 would have the same relative resistance as 2, 10, & 20)
