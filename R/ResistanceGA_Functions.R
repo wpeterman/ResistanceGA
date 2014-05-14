@@ -524,20 +524,22 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
       r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
       EQ <- "Ricker"
     } else if (equation==7) {
-      SIGN=-1
-      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
-      r <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
-      EQ <- "Inverse-Reverse Ricker"  
-      
-    } else if (equation==8) {
       SIGN=1
       R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
-      R <- rev(R)
-      mat.R<-matrix(data=R,nrow=r@nrows,ncol=r@ncols)
-      rast.R <- raster(mat.R)
-      extent(rast.R)<-extent(r)
+      vec.R <- rev(R)
+      rast.R <- setValues(R,values=vec.R)
       r <- rast.R
       EQ <- "Reverse Ricker"
+          
+      
+    } else if (equation==8) {
+      SIGN=-1
+      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
+      R <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      vec.R <- rev(R)
+      rast.R <- setValues(R,values=vec.R)
+      r <- rast.R
+      EQ <- "Inverse-Reverse Ricker"
    
     } else {
       r <- (r*0)+1 #  Distance
@@ -1090,7 +1092,6 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     r <- (r*0)+1 #  Distance
     EQ <- "Distance"    
   } # End if-else
-} # Close parameter type if-else  
   
   #   File.name <- paste0("exp",TRAN,"_MAX", MAX)
   File.name <- if (get.best==FALSE){
