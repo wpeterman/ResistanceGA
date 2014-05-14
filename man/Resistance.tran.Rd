@@ -11,9 +11,6 @@ Resistance.tran(transformation, shape, max,CS.inputs,r)
 
   \item{max}{Value of the maximum value parameter}
 
-  \item{CS.inputs}{Object created from running
-  \code{\link{CS.prep}} function}
-
   \item{r}{Resistance surface to be transformed. Can be
   supplied as full path to .asc file or as a raster object}
 

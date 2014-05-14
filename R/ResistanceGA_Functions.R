@@ -104,7 +104,7 @@ SS_optim <- function(CS.inputs,GA.inputs){
       
       PLOT.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir)
       
-      RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param_nG(exp(Optim.nlm$estimate)))
+      RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
       colnames(RS) <- c("Surface","AICc","Equation","shape","max")
       RESULTS.cont[[cnt2]] <- RS
       
@@ -404,21 +404,20 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
         r[[i]] <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
         EQ <- "Ricker"     
         
-      } else if (equation==7) { # HAS NOT BEEN MADE
-        SIGN=-1
-        r[[i]] <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) # Inverse Ricker
-        r[[i]] <- SCALE(r[[i]],MIN=abs(cellStats(r[[i]],stat='max')),MAX=abs(cellStats(r[[i]],stat='min')))
-        EQ <- "Inverse-Reverse Ricker"  
-        
-      } else if (equation==8) { # MAY NOT BE WORKING
+      } else if (equation==7) { 
         SIGN=1
         R <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
-        R <- rev(R)
-        mat.R<-matrix(data=R,nrow=r[[i]]@nrows,ncol=r[[i]]@ncols)
-        rast.R <- raster(mat.R)
-        extent(rast.R)<-extent(r[[i]])
-        r[[i]] <- rast.R
-        EQ <- "Reverse Ricker"   
+        R.vec <- rev(R)
+        r[[i]] <- setValues(R,values=R.vec)
+        EQ <- "Reverse Ricker" 
+        
+      } else if (equation==8) { 
+        SIGN=1
+        R <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
+        R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))
+        R.vec <- rev(R)
+        r[[i]] <- setValues(R,values=R.vec)
+        EQ <- "Inverse-Reverse Ricker"   
         
       } else {
         r[[i]] <- reclassify(r[[i]], c(-Inf,Inf, 0)) # Cancel surface...set to zero  
@@ -448,7 +447,6 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
 #' @param transformation Transformation equation to apply
 #' @param shape Value of the shape parameter
 #' @param max Value of the maximum value parameter
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param r Resistance surface to be transformed. Can be supplied as full path to .asc file or as a raster object
 #' @param out Directory to write transformed .asc file. Default is NULL, and will not export .asc file
 #' @usage Resistance.tran(transformation, shape, max,CS.inputs,r)
@@ -457,7 +455,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
 #' "Inverse-Reverse Monomolecular"\cr"Inverse Monomolecular"\cr"Monomolecular"\cr"Reverse Monomolecular"\cr"Inverse Ricker"\cr"Ricker",\cr"Distance"
 #' @export
 
-Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
+Resistance.tran <- function(transformation, shape, max, r, out=NULL){
   if(class(r)[1]!='RasterLayer') {
     R<-raster(r)
     NAME <- basename(r)
@@ -468,11 +466,6 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
     NAME <- r@data@names
   }
   
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
-  CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
   parm<-c(get.EQ(transformation),shape, max)
   EXPORT.dir<-out
   
@@ -526,8 +519,8 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
     } else if (equation==7) {
       SIGN=1
       R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
-      vec.R <- rev(R)
-      rast.R <- setValues(R,values=vec.R)
+      R.vec <- rev(R)
+      rast.R <- setValues(R,values=R.vec)
       r <- rast.R
       EQ <- "Reverse Ricker"
           
@@ -536,8 +529,8 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
       SIGN=-1
       R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
       R <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
-      vec.R <- rev(R)
-      rast.R <- setValues(R,values=vec.R)
+      R.vec <- rev(R)
+      rast.R <- setValues(R,values=R.vec)
       r <- rast.R
       EQ <- "Inverse-Reverse Ricker"
    
@@ -547,7 +540,7 @@ Resistance.tran <- function(transformation, shape, max,CS.inputs,r, out=NULL){
     } # End if-else  
   File.name <- NAME
   
-  if(cellStats(R,"max")>5e5)  r<-SCALE(R,1,5e5) # Rescale surface in case resistance are too high
+  if(cellStats(r,"max")>5e5)  r<-SCALE(r,1,5e5) # Rescale surface in case resistance are too high
 
   if(!is.null(out)){
     writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
@@ -651,6 +644,25 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
         r[[i]] <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
         EQ <- "Ricker"
+      
+      } else if (equation==7) {
+        SIGN=1
+        R <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) #  Ricker
+        R.vec<-rev(R)
+        R.rast<-setValues(R,R.vec)
+        R.rast<- reclassify(R.rast, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
+        r[[i]] <-R.rast
+        EQ <- "Reverse Ricker"  
+        
+      } else if (equation==8) {
+        SIGN=-1
+        R <- SIGN*(Max.SCALE*r[[i]]*exp(-1*r[[i]]/SHAPE)) # Inverse Ricker
+        R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))
+        R.vec<-rev(R)
+        R.rast<-setValues(R,R.vec)
+        R.rast<- reclassify(R.rast, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
+        r[[i]] <-R.rast
+        EQ <- "Inverse-Reverse Ricker"
         
       } else {
         r[[i]] <- reclassify(r[[i]], c(-Inf,Inf, 0)) # Cancel surface...set to zero
@@ -814,11 +826,19 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
       EQ <- "Ricker"
     } else if (equation==7) {
       SIGN=1
-      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Reverse Ricker
-      EQ <- "Reverse Ricker"
+      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+      R.vec <- rev(R)
+      rast.R <- setValues(R,values=R.vec)
+      r <- rast.R
+      EQ <- "Reverse Ricker"      
+      
     } else if (equation==8) {
-      SIGN=1
-      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Inverse-Reverse Ricker
+      SIGN=-1
+      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
+      R <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+      R.vec <- rev(R)
+      rast.R <- setValues(R,values=R.vec)
+      r <- rast.R
       EQ <- "Inverse-Reverse Ricker"
     } else {
       r <- (r*0)+1 #  Distance
@@ -1082,11 +1102,19 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     EQ <- "Ricker"
   } else if (equation==7) {
     SIGN=1
-    r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Reverse Ricker
-    EQ <- "Reverse Ricker"
+    R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+    R.vec <- rev(R)
+    rast.R <- setValues(R,values=R.vec)
+    r <- rast.R
+    EQ <- "Reverse Ricker"      
+    
   } else if (equation==8) {
-    SIGN=1
-    r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Inverse-Reverse Ricker
+    SIGN=-1
+    R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Inverse Ricker
+    R <- SCALE(r,MIN=abs(cellStats(r,stat='max')),MAX=abs(cellStats(r,stat='min')))
+    R.vec <- rev(R)
+    rast.R <- setValues(R,values=R.vec)
+    r <- rast.R
     EQ <- "Inverse-Reverse Ricker"
   } else {
     r <- (r*0)+1 #  Distance
@@ -1404,7 +1432,7 @@ GA.prep<-function(ASCII.dir,
       parm.type[i,2]<-3
       parm.type[i,3]<-names[i]
       min.list[[i]]<-c(1,.001,.001) # eq, shape/gaus.opt, max, gaus.sd
-      max.list[[i]]<-c(7.99,15,max.cont)     
+      max.list[[i]]<-c(9.99,15,max.cont)     
     }
   }
   
@@ -1466,70 +1494,9 @@ OPTIM.DIRECTION <- function(x){
 }
 
 
-Cont.Param <- function(PARM){
-  equation<-floor(PARM[1])
-  
-  # Apply specified transformation
-  if(equation==1){
-    EQ <- "Inverse-Reverse Monomolecular"
-    
-  } else if(equation==2){
-    EQ <- "Reverse Monomolecular"  	    
-    
-  } else if(equation==3){
-    EQ <- "Monomolecular"
-    
-  } else if (equation==4) {
-    EQ <- "Inverse Monomolecular"  	    
-    
-  } else if (equation==5) {
-    EQ <- "Inverse Ricker"  
-    
-  } else if (equation==6) {
-    EQ <- "Ricker"
-    
-  } else if (equation==7) {
-    EQ <- "Inverse Gaussian"  	
-    
-  } else {
-    EQ <- "Gaussian"  
-  } # End if-else
-  
-  if(equation<7){
-    df<-data.frame(EQ,PARM[2],PARM[3],NA)
-    colnames(df)<-c("Equation","shape_opt","max","gaus.sd");row.names(df)<-NULL
-    return(df)
-  } else {
-    df<-data.frame(EQ,PARM[2],PARM[3],PARM[4])
-    colnames(df)<-c("Equation","shape_opt","max","gaus.sd");row.names(df)<-NULL
-    return(df)
-  }
-}
 
-Cont.Param_nG <- function(PARM){
-  #   equation<-floor(PARM[1])
-  
-  #   # Apply specified transformation
-  #   if(equation==1){
-  #     EQ <- "Inverse-Reverse Monomolecular"
-  #     
-  #   } else if(equation==2){
-  #     EQ <- "Reverse Monomolecular"        
-  #     
-  #   } else if(equation==3){
-  #     EQ <- "Monomolecular"
-  #     
-  #   } else if (equation==4) {
-  #     EQ <- "Inverse Monomolecular"  	    
-  #     
-  #   } else if (equation==5) {
-  #     EQ <- "Inverse Ricker"  
-  #     
-  #   } else {
-  #     EQ <- "Ricker"    
-  #   
-  #   } # End if-else
-  
+
+Cont.Param <- function(PARM){
   df<-data.frame(PARM[1],PARM[2])
   colnames(df)<-c("shape_opt","max");row.names(df)<-NULL
   return(df) 
@@ -1767,7 +1734,7 @@ sv.cat <-function(levels,pop.size){
 sv.cont.nG <-function(direction,pop.size){
   inc<-c(1,3)
   dec<-c(2,4)
-  peak<-c(5,6)
+  peak<-c(5,6,7,8)
   L<-list()
   cont.starts<-matrix(nrow=pop.size,ncol=3)  
   for(r in 1:pop.size){
@@ -1779,7 +1746,7 @@ sv.cont.nG <-function(direction,pop.size){
     } else if (runif(1)<.5 && direction=="Peaked") {
       z<-c(sample(peak,1),runif(1,.01,10),runif(1,1,100))
     } else {
-      z<-c(runif(1,1,7.99),runif(1,.01,10),runif(1,1,100))
+      z<-c(runif(1,1,9.99),runif(1,.01,10),runif(1,1,100))
     }
     cont.starts[r,]<-z
   } 
