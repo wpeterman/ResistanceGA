@@ -61,7 +61,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   run=2) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
+                   run=25) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -90,8 +90,8 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Single surface optimization
-SS_optim(CS.inputs=CS.inputs,
-         GA.inputs=GA.inputs)
+system.time(SS_optim(CS.inputs=CS.inputs,
+         GA.inputs=GA.inputs))
 
 
 
@@ -163,14 +163,14 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=750,
-                   run=1) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
+                   run=25) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
 CS.inputs<-CS.prep(n.POPS=n,
                       RESPONSE=CS.response,
                       CS_Point.File=paste0(write.dir,"samples.txt"),
                       CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
-Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,GA.inputs=GA.inputs)
+system.time(Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,GA.inputs=GA.inputs))
 
 mantel(CS.Resist~CS.TRUTH)
 plot(CS.Resist~CS.TRUTH)

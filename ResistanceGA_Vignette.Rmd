@@ -26,7 +26,8 @@ Demonstrations
 ### Continuous surface transformations
 
 There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I've added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space.   
-![Continuous Surface Transformations](figure/Transformations.svg)
+
+
 
 
 
@@ -47,8 +48,7 @@ rm(list = ls())
 set.seed(12345)
 ```
 
-Next, make a directory to write where ASCII files, CIRCUITSCAPE batch files, and results will be written. I'm going to make a directory called 'ResistanceGA_Example' to work in
-
+Next, make a directory to write ASCII files, CIRCUITSCAPE batch files, and results will be written. 
 ```{r warning=FALSE, results='hide',message=FALSE}
  
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
@@ -84,7 +84,7 @@ write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,r
 
 
 Using random fields, create one continuous resistance surface
-```{r warning=FALSE, results='hide',message=FALSE}
+```{r single.surface, warning=FALSE, results='hide',message=FALSE}
 model<-RMexp() +
   RMtrend(mean=10)
 
@@ -97,11 +97,13 @@ rf.sim <- RFsimulate(model, x=grid.vars)
 cont.rf <- raster(rf.sim[1]) # Define object as a continuous surface
 names(cont.rf)<-"cont"
 ```
+
 Plot surface and overlay the sample points
-```{r}
+```{r single.surface.plot}
 plot(cont.rf)
 plot(Sample.coord, pch=16, col="blue", add=TRUE) # Add randomly generated points
 ```
+
 Export the raw continuous surface to a .asc file for use with CIRCUITSCAPE
 ```{r echo=FALSE, message=FALSE}
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
@@ -141,7 +143,6 @@ CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 # Add some random noise to the response 
 NOISE <- rnorm(n=length(CS.Resist), mean=0, sd=(0.05*max(CS.Resist))) # Generate random noise matrix
 
-# Add random noise to resistance output. 
 # Use this as the RESPONSE for single surface testing
 CS.response <- CS.Resist+NOISE
 
@@ -158,23 +159,166 @@ CS.inputs<-CS.prep(n.POPS=n,
 ```
 
 Now run the Single surface optimization function (`SS_optim`)
-```{r SS_optim warning=FALSE, results='hide',message=FALSE, cache=TRUE}
+```{r SS_optim, warning=FALSE, results='hide',message=FALSE, cache=TRUE}
 SS_optim(CS.inputs=CS.inputs,
          GA.inputs=GA.inputs)
 ```
 After executing the function, the console will be updated to report the time to complete each iteration as well as AICc of each iteration. 
 
 What the `SS_optim` function does:    
-1. Read each .asc file that is in the specified ASCII.dir, and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.
+1. Read each .asc file that is in the specified ASCII.dir and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.
 2. Optimize each resistance surface
   * Categorical surfaces: The first category/factor is set to a resistance value of 1. All other categories are then adjusted, ranging from the minimum--maximum specified during the `GA.prep`. It is necessary to fix the value of one category, otherwise numerous equivalent solutions may make optimization intractable (e.g. resistance values of 1, 5, & 10 would have the same relative resistance as 2, 10, & 20)
-  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters are passed to a second optimization function that used `nlm` to fine-tune the shape and maximum value parameters.
+  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters are passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters.
 3. Several summary outputs are generated
   * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).
   * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)
   * MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface
-  * In the 'Plots' directory is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
-    
+  * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
+  
+ 
+Following a complete long run of the optimization algorithm, we have recovered the data generating parameters:
+
+
+ ****
+ ### Simultaneous optimization of multiple surfaces
+
+**Simulate data**
+
+First, make a new directory to write ASCII files, CIRCUITSCAPE batch files.
+```{r warning=FALSE, results='hide',message=FALSE}
+ 
+if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
+  dir.create(file.path("C:/", "ResistanceGA_Examples")) 
+
+# Create a subdirectory for the second example
+dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces")) 
+
+write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
+```
+
+Simulate two more continuous surfaces. The first will remain continuous, the second will be converted into a 3-class categorical surface
+```{r multi_surface.sim, warning=FALSE, message=FALSE}
+rf.sim <- RFsimulate(model, x=grid.vars,n=2) # Create two surfaces
+
+cont.rf <- raster(rf.sim[1]) # Define first as a continuous surface
+names(cont.rf)<-"cont"
+
+plot(cont.rf)
+plot(Sample.coord, pch=16, col="blue", add=TRUE)
+
+cat.rf <- raster(rf.sim[2]) 
+names(cat.rf)<-"cat"
+cat.cut <- summary(cat.rf) # Define quartiles, use these to define categories
+
+cat.rf[cat.rf<=cat.cut[2]] <- 0
+cat.rf[cat.rf>0 & cat.rf<=cat.cut[4]] <- 1
+cat.rf[!cat.rf%in%c(0,1)] <- 2
+plot(cat.rf)
+plot(Sample.coord, pch=16, col="blue", add=TRUE)
+
+```
+
+Now make a categorical feature class (like a road)
+```{r feature.sim, warning=FALSE,message=FALSE}
+feature <- matrix(0,r.dim,r.dim)
+feature[25,] <- 1
+feature[,30:31] <- 1
+feature <- raster(feature)
+extent(feature)<-extent(cat.rf)
+plot(feature)
+names(feature)<-"feature"
+plot(feature)
+plot(Sample.coord, pch=16, col="blue", add=TRUE)
+```
+
+Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces)
+```{r write_multi.ASCII, warning=FALSE, results='hide',message=FALSE}
+writeRaster(cat.rf,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
+writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
+writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
+
+GA.inputs<-GA.prep(ASCII.dir=write.dir,
+                   pop.mult=5,
+                   min.cat=0,
+                   max.cat=500,
+                   max.cont=500,
+                   run=25) 
+```
+
+Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter.
+```{r inverse-reverse.mono }
+plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Inverse-Reverse Monomolecular") 
+```
+
+Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`
+  
+```{r combine.surfaces}
+PARM=c(0,150,50,1,2,100,0,250)
+
+# PARM=c(0, # First feature of categorical
+#        150, # Second feature of categorical
+#        50, # Third feature of categorical
+#        1, # Transformation equation for continuous surface
+#        2, #  Shape parameter
+#        100, # Scale parameter
+#        0, # First feature of feature surface
+#        250) # Second feature of feature surface
+
+# Combine resistance surfaces
+Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
+
+# View combined surface
+plot(Resist)
+```
+
+Generate new CS response surface by using `Run_CS`
+```{r combine.cs }
+CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+```
+
+Generate random noise, add it to the resistance surface and export the response object for use with CIRCUITSCAPE
+```{r cs.resposne.multi}
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
+CS.response<-CS.Resist + NOISE
+
+ # Look at relationship between 'truth' and response with added noise
+plot(CS.response~CS.Resist)
+
+write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
+```
+
+Run prep functions
+```{r}
+GA.inputs<-GA.prep(ASCII.dir=write.dir,
+                   pop.mult=5,
+                   min.cat=0,
+                   max.cat=500,
+                   max.cont=750,
+                   run=25) 
+
+# Note that the default value for `run` is 25. 
+# Running this multisurface example took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor
+# You want to change the `run` value to 5 or less, although this will not lead to convergence
+
+CS.inputs<-CS.prep(n.POPS=n,
+                      RESPONSE=CS.response,
+                      CS_Point.File=paste0(write.dir,"samples.txt"),
+                      CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+```
+
+Run `MS_optim`
+```{r Multi_optim, warning=FALSE, results='hide',message=FALSE, cache=TRUE}
+Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,
+                               GA.inputs=GA.inputs)
+
+```
+
+
+
+
+
+rm(list=".Random.seed", envir=globalenv()) 
 
 
 
