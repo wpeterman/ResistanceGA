@@ -15,11 +15,9 @@ PLOT.trans(PARM, Resistance, transformation, print.dir)
   either the path to the raw, untransformed resistance
   surface file or specify an R raster object}
 
-  \item{transformation}{Name of the transformation equation
-  to use:\cr "Inverse-Reverse Monomolecular"\cr"Inverse
-  Monomolecular"\cr"Monomolecular"\cr"Reverse
-  Monomolecular"\cr"Inverse
-  Ricker"\cr"Ricker",\cr"Distance"}
+  \item{transformation}{Transformation equation to apply.
+  Can be provided as the name of the transformation or its
+  numeric equivalent (see details)}
 
   \item{print.dir}{Specify the directory where a .tiff of
   the transformation will be written (Default = NULL)}
@@ -35,9 +33,13 @@ the original resistance values
 \details{
 This function will create a ggplot object and plot, so it
 requires \pkg{ggplot2} to be installed.\cr Equation names
-can be "Inverse-Reverse Monomolecular", "Inverse
-Monomolecular", "Monomolecular", "Reverse Monomolecular",
-"Inverse Ricker", "Ricker", or "Distance". The "Distance"
-equation sets all cell values equal to 1.
+can be: #' \tabular{ll}{ \tab 1 = "Inverse-Reverse
+Monomolecular"\cr \tab 2 = "Reverse Monomolecular"\cr \tab
+3 = "Monomolecular"\cr \tab 4 = "Inverse Monomolecular"\cr
+\tab 5 = "Inverse Ricker"\cr \tab 6 = 'Ricker"\cr \tab 7 =
+"Reverse Ricker"\cr \tab 8 = "Inverse-Reverse Ricker"\cr
+\tab 9 = "Distance"\cr }
+
+The "Distance" equation sets all cell values equal to 1.
 }
 

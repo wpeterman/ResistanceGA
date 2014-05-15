@@ -68,7 +68,6 @@ SS_optim <- function(CS.inputs,GA.inputs){
       colnames(RS)<-c("Surface","AICc", Features)
       
       RESULTS.cat[[cnt1]]<-RS
-      
       # Processing of continuous surfaces    
     } else {
       cnt2 <- cnt2+1    
@@ -330,15 +329,28 @@ if(class(r)[1]!='RasterLayer') {
 #' @param out Directory to write combined .asc file. Default is GA.inputs$Results.dir
 #' @details \code{PARM} is designed to accept the output of \code{MS_optim}. For continuous surfaces, there are three terms: 1) Transformation, 2) shape, and 3) maximum value. Transformation must be provided as a numeric value:\cr
 #' \tabular{ll}{
-#'    \tab 1 = Inverse-Reverse Monomolecular\cr
-#'    \tab 1 = Inverse-Reverse Monomolecular\cr
-#'    Version#'    \tab 1 = Inverse-Reverse Monomolecular\cr
-tab 0.1\cr
-#'    Date: \tab 2014-05-05\cr
-#'    License: \tab GPL-3\cr
+#'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
+#'    \tab 2 = "Reverse Monomolecular"\cr
+#'    \tab 3 = "Monomolecular"\cr
+#'    \tab 4 = "Inverse Monomolecular"\cr
+#'    \tab 5 = "Inverse Ricker"\cr
+#'    \tab 6 = 'Ricker"\cr
+#'    \tab 7 = "Reverse Ricker"\cr
+#'    \tab 8 = "Inverse-Reverse Ricker"\cr
+#'    \tab 9 = "Distance"\cr
+#'    }
+#' @examples
+#' # Assuming one continuous and 4-class categorical surface are being combined,
+#' # this example would apply an Inverse-Reverse Monomolecular transformation with a shape of 2 and max of 100. 
+#' # The four classes/categories of the categorical surface would be reclassified to 1, 75, 50, and 250. 
+#' # Categories are modified sequentially within a layer.
+#' 
+#' Combine_Surfaces(PARM=c(1,2,100,1,75,50,250), 
+#' CS.inputs=CS.inputs, 
+#' GA.inputs=GA.inputs)
+#' 
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
 #' @export
-
 Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir){
   t1<-Sys.time()
   GA.params<-GA.inputs
@@ -377,7 +389,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
       # Apply specified transformation
       if(equation==1){
         SIGN=-1 # Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -386,7 +398,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
         
       } else if(equation==2){
         SIGN=1
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -394,29 +406,29 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
         
       } else if(equation==3){
         SIGN=1
-        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular    
+        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular    
         EQ <- "Monomolecular"
         
       } else if (equation==4) {
         SIGN=-1 #Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==5) {
         SIGN=-1 #Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         EQ <- "Inverse Ricker"  
         
       } else if (equation==6) {
         SIGN=1
-        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
         EQ <- "Ricker"
         
       } else if (equation==7) {
         SIGN=1
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
         R.vec <- rev(R)
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -424,7 +436,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
         
       } else if (equation==8) {
         SIGN=-1 # Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -456,15 +468,25 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
 #' 
 #' Apply on the six resistance transformations to a continuous resistance surface
 #' 
-#' @param transformation Transformation equation to apply
+#' @param transformation Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)
 #' @param shape Value of the shape parameter
 #' @param max Value of the maximum value parameter
 #' @param r Resistance surface to be transformed. Can be supplied as full path to .asc file or as a raster object
 #' @param out Directory to write transformed .asc file. Default is NULL, and will not export .asc file
 #' @usage Resistance.tran(transformation, shape, max,CS.inputs,r)
 #' @return R raster object
-#' @details Valid arguements for \code{Transformation} are:\cr
-#' "Inverse-Reverse Monomolecular"\cr"Inverse Monomolecular"\cr"Monomolecular"\cr"Reverse Monomolecular"\cr"Inverse Ricker"\cr"Ricker"\cr"Reverse Ricker"\cr"Inverse-Reverse Ricker"\cr"Distance"
+#' @details Valid arguements for \code{transformation} are:\cr
+#' \tabular{ll}{
+#'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
+#'    \tab 2 = "Reverse Monomolecular"\cr
+#'    \tab 3 = "Monomolecular"\cr
+#'    \tab 4 = "Inverse Monomolecular"\cr
+#'    \tab 5 = "Inverse Ricker"\cr
+#'    \tab 6 = 'Ricker"\cr
+#'    \tab 7 = "Reverse Ricker"\cr
+#'    \tab 8 = "Inverse-Reverse Ricker"\cr
+#'    \tab 9 = "Distance"\cr
+#'    }
 #' @export
 
 Resistance.tran <- function(transformation, shape, max, r, out=NULL){
@@ -477,8 +499,12 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
     R<-r
     NAME <- r@data@names
   }
+  if(is.numeric(transformation)){
+    parm<-c(transformation,shape, max)    
+  } else {
+     parm<-c(get.EQ(transformation),shape, max)
+  }
   
-  parm<-c(get.EQ(transformation),shape, max)
   EXPORT.dir<-out
   
   ######
@@ -782,15 +808,8 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
     df <- data.frame(id=unique.rast(r),PARM) # Data frame with original raster values and replacement values
     r <-subs(r,df)
     
-    #      r<-r-(cellStats(x=r,stat="min"))
-    
-    
-    #   	  cat(GA.params$layer.names[i],"\n")
-    
+       
   } else {
-    #      r <-SCALE(data=r,MIN=0,MAX=10)
-    #       parm <- PARM[(GA.params$parm.index[iter]+1):(GA.params$parm.index[iter+1])]
-    
     
     # Set equation for continuous surface
     equation <- floor(PARM[1]) # Parameter can range from 1-9.99
@@ -934,11 +953,24 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)
 #' @param Resistance Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object
-#' @param transformation Name of the transformation equation to use:\cr
-#' "Inverse-Reverse Monomolecular"\cr"Inverse Monomolecular"\cr"Monomolecular"\cr"Reverse Monomolecular"\cr"Inverse Ricker"\cr"Ricker",\cr"Distance"
+#' @param transformation Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)
 #' @param print.dir Specify the directory where a .tiff of the transformation will be written (Default = NULL)
 #' @return plot of transformed resistance values against original resistance values
-#' @details This function will create a ggplot object and plot, so it requires \pkg{ggplot2} to be installed.\cr Equation names can be "Inverse-Reverse Monomolecular", "Inverse Monomolecular", "Monomolecular", "Reverse Monomolecular", "Ricker","Inverse Ricker", "Reverse Ricker", "Inverse-Reverse Ricker" or "Distance". The "Distance" equation sets all cell values equal to 1.
+#' @details This function will create a ggplot object and plot, so it requires \pkg{ggplot2} to be installed.\cr 
+#' Equation names can be:
+#' #' \tabular{ll}{
+#'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
+#'    \tab 2 = "Reverse Monomolecular"\cr
+#'    \tab 3 = "Monomolecular"\cr
+#'    \tab 4 = "Inverse Monomolecular"\cr
+#'    \tab 5 = "Inverse Ricker"\cr
+#'    \tab 6 = 'Ricker"\cr
+#'    \tab 7 = "Reverse Ricker"\cr
+#'    \tab 8 = "Inverse-Reverse Ricker"\cr
+#'    \tab 9 = "Distance"\cr
+#'    }
+#'    
+#' The "Distance" equation sets all cell values equal to 1.
 #' @usage PLOT.trans(PARM, Resistance, transformation, print.dir)
 #' @export
 #' @import ggplot2
@@ -963,7 +995,13 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
   
   SHAPE <- PARM[[1]]
   Max.SCALE <- PARM[[2]]
+  
+  if(is.numeric(transformation)){
+   equation<-get.EQ(transformation)
+    
+  } else {
   equation<-transformation
+  }
   # Set equation/name combination
   if(equation=="Distance") {
     Trans.vec <- (dat.t*0)+1 
@@ -1017,13 +1055,15 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
   } 
   transformed<-Trans.vec
   plot.data<-data.frame(original,transformed)
+  x.break<-pretty(original*1.07)
+  y.break<-pretty(transformed*1.07)
   
  ( p<- ggplot(plot.data,aes(x=original,y=transformed)) +
-    ggtitle(paste(equation," Transformation",sep="")) +
+    ggtitle(equation) +
     theme_bw() +
     geom_line(size=1.5) +
     xlab(expression(bold("Original data values"))) +
-    ylab(expression(bold("Tansformed data values"))) +
+    ylab(expression(bold("Transformed data values"))) +
     theme(plot.title = element_text(lineheight=2, face="bold",size=20),
           legend.title = element_blank(),
           legend.key = element_blank(),
@@ -1036,8 +1076,8 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) +
-    scale_x_continuous(limits=c(min(original),max(original)*1.07)) +
-    scale_y_continuous(limits=c(min(transformed),max(transformed)*1.07)) 
+     scale_x_continuous(limits=c(min(original),max(original)),breaks=x.break) +
+     scale_y_continuous(limits=c(min(transformed),max(transformed)),breaks=y.break) 
  )
   
   if(!is.null(print.dir)){
@@ -1069,7 +1109,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     }
   
   
-  RESIST <- Resistance
+  r <- Resistance
   Name <- Resistance@data@names
   t1<-Sys.time()
   

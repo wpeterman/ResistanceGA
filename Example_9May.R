@@ -45,7 +45,7 @@ grid.vars <- GridTopology(cellcentre.offset=c(cell.size/2, cell.size/2),
 
 rf.sim <- RFsimulate(model, x=grid.vars) # Simulate 2 surfaces
 
-cont.rf <- raster(rf.sim[1]) # Define the first as a continuous surface
+cont.rf <- raster(rf.sim) # Define the first as a continuous surface
 names(cont.rf)<-"cont"
 plot(cont.rf)
 plot(Sample.coord, pch=16, col="blue", add=TRUE) # Add randomly generated points
@@ -61,7 +61,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   run=2) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
+                   run=2) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -69,7 +69,7 @@ CS.inputs<-CS.prep(n.POPS=n,
 
 # Monomolecular = equation # 3
 PARM=c(3,2,100)
-Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,CS.inputs=CS.inputs,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
@@ -96,9 +96,8 @@ SS_optim(CS.inputs=CS.inputs,
 
 
 #############################
-
-
-cat.rf <- raster(rf.sim[2]) # Make the second surface a 3-class categorical surface
+# Simulate another continuous surface. This will be converted into a 3-class categorical surface
+cat.rf <- RFsimulate(model, x=grid.vars) 
 names(cat.rf)<-"cat"
 cat.cut <- summary(cat.rf) # Define quartiles, use these to define categories
 

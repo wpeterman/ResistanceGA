@@ -4,21 +4,30 @@ Example Function Use
 ------
 ### Background
 
-With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how one can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, as implements using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
+With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how one can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, implemented using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
 
 
 This package fills a void in the landscape genetics toolbox. There are various methods proposed for determining resistance values (reviewed by [Spear et al., 2010](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2010.04657.x/abstract "Spear et al.")). Previously utilized methods generally searched a limited parameter space and/or relied on expert opinion. [Graves et al. (2013)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12348/abstract "Graves et al.") utilized optimization functions and interindividual genetic distances to determine resistance values, but found that the data generating values were rarely recoverable. I have not assessed the ability of functions/methods utilized in this package to optimize resistance surfaces as in Graves et al. (2013), but do note that very different methods of scaling, transforming, and combining resistance surfaces are utilized in `ResistanceGA`.
 
 
-A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will not be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Hopefully this tutorial will help with that process. Lastly, this is not a fast process. Even with the 80x80 pixel simulated landscapes used in this tutorial, each optimization iteration takes 0.75--1.25 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). The largest surfaces I've attempted to optimize using these methods were 600x600 pixels, which took ~13 seconds per iteration. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--150 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that `r 50*50`--`r 150*150` iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I eager to make this as accessible, functional, and useful as possible, so any and all feedback is appreciated.
+A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will not be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 80x80 pixel simulated landscapes used in this tutorial, each optimization iteration takes 0.75--1.25 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). The largest surfaces I've attempted to optimize using these methods were 600x600 pixels, which took ~13 seconds per iteration. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--150 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that `r 50*50`--`r 150*150` iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I am eager to make this as accessible, functional, and as useful as possible, so any and all feedback is appreciated.
 
 
 **References**   
 * Graves, T. A., P. Beier, and J. A. Royle. 2013. Current approaches using genetic distances produce poor estimates of landscape resistance to           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interindividual dispersal. Molecular Ecology 22:3888--3903.
 * Peterman, W. E., G. M. Connette, R. D. Semlitsch, and L. S. Eggert. in press. Ecological resistance surfaces predict fine scale genetic     
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differentiation in a terrestrial woodland salamander. Molecular Ecology:10.1111/mec.12747.    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413.    
 * Spear, S. F., N. Balkenhol, M. J. Fortin, B. H. McRae, and K. Scribner. 2010. Use of resistance surfaces for landscape genetic studies:     
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;considerations for parameterization and analysis. Molecular Ecology 19:3576--3591.
+
+
+Demonstrations
+------
+### Continuous surface transformations
+
+There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I've added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space.   
+![Continuous Surface Transformations](figure/Transformations.svg)
+
 
 
 
@@ -107,8 +116,10 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   run=1) 
-# Note that the default value for run is 25. It is set to 1 for demonstration only. THIS WILL NOT OPTIMIZE!
+                   run=25) 
+# Note that the default value for `run` is 25. 
+# Running the example below (optimizing a single surface), took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor
+# You want to change the `run` value to 5 or less, although this likely won't lead to convergence
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -118,7 +129,7 @@ Note that `RESPONSE` was not defined in `CS.prep` because it has not been made y
 
 Transform raw continuous surface using the `Resistance.tran` function to apply one of the six transformations, and then view the transformation using `PLOT.trans`. Note that `PLOT.trans` returns a `ggplot2` object as well as the plot. Therefore you can manipulate and modify the plot as desired.
 ```{r}
-r.tran<-Resistance.tran(transformation="Monomolecular", shape=2, max=100, CS.inputs=CS.inputs, r=cont.rf) 
+r.tran<-Resistance.tran(transformation="Monomolecular", shape=2, max=100, r=cont.rf) 
 
 plot.t<-PLOT.trans(PARM=c(2,100), Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc", transformation="Monomolecular") 
 ```
@@ -147,7 +158,7 @@ CS.inputs<-CS.prep(n.POPS=n,
 ```
 
 Now run the Single surface optimization function (`SS_optim`)
-```{r warning=FALSE, results='hide',message=FALSE}
+```{r SS_optim warning=FALSE, results='hide',message=FALSE, cache=TRUE}
 SS_optim(CS.inputs=CS.inputs,
          GA.inputs=GA.inputs)
 ```

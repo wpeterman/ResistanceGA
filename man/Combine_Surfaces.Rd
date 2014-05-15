@@ -6,7 +6,7 @@ Combine_Surfaces(PARM, CS.inputs, GA.inputs, out = GA.inputs$Results.dir)
 }
 \arguments{
   \item{PARM}{Parameters to transform conintuous surface or
-  resistance values of categorical surface. Should be a
+  resistance values of categorical surface. Requires a
   vector with parameters specified in the order of
   resistance surfaces}
 
@@ -20,10 +20,33 @@ Combine_Surfaces(PARM, CS.inputs, GA.inputs, out = GA.inputs$Results.dir)
   is GA.inputs$Results.dir}
 }
 \value{
-R raster object
+R raster object that is the sum all transformed and/or
+reclassified resistance surfaces provided
 }
 \description{
 Combine multiple resistance surfaces into new composite
 surface based on specified parameters
+}
+\details{
+\code{PARM} is designed to accept the output of
+\code{MS_optim}. For continuous surfaces, there are three
+terms: 1) Transformation, 2) shape, and 3) maximum value.
+Transformation must be provided as a numeric value:\cr
+\tabular{ll}{ \tab 1 = "Inverse-Reverse Monomolecular"\cr
+\tab 2 = "Reverse Monomolecular"\cr \tab 3 =
+"Monomolecular"\cr \tab 4 = "Inverse Monomolecular"\cr \tab
+5 = "Inverse Ricker"\cr \tab 6 = 'Ricker"\cr \tab 7 =
+"Reverse Ricker"\cr \tab 8 = "Inverse-Reverse Ricker"\cr
+\tab 9 = "Distance"\cr }
+}
+\examples{
+# Assuming one continuous and 4-class categorical surface are being combined,
+# this example would apply an Inverse-Reverse Monomolecular transformation with a shape of 2 and max of 100.
+# The four classes/categories of the categorical surface would be reclassified to 1, 75, 50, and 250.
+# Categories are modified sequentially within a layer.
+
+Combine_Surfaces(PARM=c(1,2,100,1,75,50,250),
+CS.inputs=CS.inputs,
+GA.inputs=GA.inputs)
 }
 
