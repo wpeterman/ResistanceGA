@@ -649,7 +649,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Inverse-Reverse Monomolecular"
         
       } else if(equation==2){
@@ -657,29 +657,33 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Reverse Monomolecular"        
         
       } else if(equation==3){
         SIGN=1
         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular    
+        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Monomolecular"
         
       } else if (equation==4) {
         SIGN=-1 #Inverse
         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
+        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==5) {
         SIGN=-1 #Inverse
         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Inverse Ricker"  
         
       } else if (equation==6) {
         SIGN=1
         r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Ricker"
         
       } else if (equation==7) {
@@ -687,7 +691,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
         R.vec <- rev(R)
         rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Reverse Ricker"        
         
       } else if (equation==8) {
@@ -696,7 +700,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
@@ -709,7 +713,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
   File.name <- "multi_surface"
   
   multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
-  if(cellStats(multi_surface,"max")>5e4)  multi_surface<-SCALE(multi_surface,1,5e4) # Rescale surface in case resistance are too high
+  if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
   
   #       plot(multi_surface)
   
@@ -1412,7 +1416,7 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' @param pmutation Probability of mutation. Default = 0.1
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
 #' @param maxiter Maximum number of iterations to run before the GA search is halted (Default = 1000)
-#' @param run Number of consecutive generations without any improvement in the best fitness value before the GA is stopped (Default = 25)
+#' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria
 #' @return An R object that is a required input into optimization functions

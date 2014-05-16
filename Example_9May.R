@@ -90,14 +90,31 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Single surface optimization
-system.time(SS_optim(CS.inputs=CS.inputs,
-         GA.inputs=GA.inputs))
+# system.time(SS_optim(CS.inputs=CS.inputs,
+#          GA.inputs=GA.inputs))
 
 
 
 #############################
+if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
+  dir.create(file.path("C:/", "ResistanceGA_Examples")) 
+
+# Create a subdirectory for the second example
+dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces")) 
+
+write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
+
+
 # Simulate another continuous surface. This will be converted into a 3-class categorical surface
-cat.rf <- RFsimulate(model, x=grid.vars) 
+rf.sim <- RFsimulate(model, x=grid.vars,n=2) # Create two surfaces
+
+cont.rf <- raster(rf.sim[1]) # Define first as a continuous surface
+names(cont.rf)<-"cont"
+
+plot(cont.rf)
+plot(Sample.coord, pch=16, col="blue", add=TRUE)
+
+cat.rf <- raster(rf.sim[2]) 
 names(cat.rf)<-"cat"
 cat.cut <- summary(cat.rf) # Define quartiles, use these to define categories
 
@@ -128,7 +145,7 @@ writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 #############################
 # Visualize transformation of continuous surface. The first term of the PARM function refers to the shape parameter, and the second term refers to the maximum value parameter.
 
-plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",equation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
 PARM=c(0,150,50,1,2,100,0,250)

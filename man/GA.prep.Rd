@@ -75,8 +75,8 @@ mutation = gaControl(type)$mutation)
   the GA search is halted (Default = 1000)}
 
   \item{run}{Number of consecutive generations without any
-  improvement in the best fitness value before the GA is
-  stopped (Default = 25)}
+  improvement in AICc before the GA is stopped (Default =
+  25)}
 
   \item{keepBest}{A logical argument specifying if best
   solutions at each iteration should be saved (Default =
