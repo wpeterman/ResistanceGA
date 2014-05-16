@@ -251,8 +251,7 @@ Transform, reclassify, and combine the three resistance surfaces together. Use a
 plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Inverse-Reverse Monomolecular") 
 ```
 
-Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`
-  
+Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`. Note that the minimum value defined for categorical surfaces is 0. This is because 1 is added to the combined surfaces after they are added together. In this way, the lowest resistance possible on the landscape is 1.  
 ```{r combine.surfaces}
 PARM=c(0,150,50,1,2,100,0,250)
 
@@ -279,7 +278,7 @@ CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 Generate random noise, add it to the resistance surface and export the response object for use with CIRCUITSCAPE
 ```{r cs.resposne.multi}
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.07*max(CS.Resist)))
 CS.response<-CS.Resist + NOISE
 
  # Look at relationship between 'truth' and response with added noise

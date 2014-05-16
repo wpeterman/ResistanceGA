@@ -131,7 +131,7 @@ writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",equation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
-PARM=c(0,50,100,3,2,100,0,100)
+PARM=c(0,150,50,1,2,100,0,250)
 # PARM=c(0, # First feature of categorical
 #        50, # Second feature of categorical
 #        100, # Third feature of categorical
@@ -141,7 +141,7 @@ PARM=c(0,50,100,3,2,100,0,100)
 #        0, # First feature of feature surface
 #        100) # Second feature of feature surface
 
-PARM=c(0,50,150,3,2,300,0,500)
+# PARM=c(0,50,150,3,2,300,0,500)
 
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
@@ -150,7 +150,7 @@ Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Ma
 CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # Generate some random noise nad add it to the resistance surface
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.07*max(CS.Resist)))
 plot(Resist)
 
 CS.response<-round((CS.Resist+NOISE),digits=4)
@@ -162,7 +162,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    pop.mult=5,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=750,
+                   max.cont=500,
                    run=25) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
 CS.inputs<-CS.prep(n.POPS=n,

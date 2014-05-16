@@ -4,21 +4,31 @@ Example Function Use
 ------
 ### Background
 
-With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how one can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, as implements using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
+With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how one can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, implemented using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
 
 
 This package fills a void in the landscape genetics toolbox. There are various methods proposed for determining resistance values (reviewed by [Spear et al., 2010](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2010.04657.x/abstract "Spear et al.")). Previously utilized methods generally searched a limited parameter space and/or relied on expert opinion. [Graves et al. (2013)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12348/abstract "Graves et al.") utilized optimization functions and interindividual genetic distances to determine resistance values, but found that the data generating values were rarely recoverable. I have not assessed the ability of functions/methods utilized in this package to optimize resistance surfaces as in Graves et al. (2013), but do note that very different methods of scaling, transforming, and combining resistance surfaces are utilized in `ResistanceGA`.
 
 
-A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will not be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Hopefully this tutorial will help with that process. Lastly, this is not a fast process. Even with the 80x80 pixel simulated landscapes used in this tutorial, each optimization iteration takes 0.75--1.25 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). The largest surfaces I've attempted to optimize using these methods were 600x600 pixels, which took ~13 seconds per iteration. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--150 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that 2500--2.25 &times; 10<sup>4</sup> iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I eager to make this as accessible, functional, and useful as possible, so any and all feedback is appreciated.
+A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will not be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 80x80 pixel simulated landscapes used in this tutorial, each optimization iteration takes 0.75--1.25 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). The largest surfaces I've attempted to optimize using these methods were 600x600 pixels, which took ~13 seconds per iteration. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--150 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that 2500--2.25 &times; 10<sup>4</sup> iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I am eager to make this as accessible, functional, and as useful as possible, so any and all feedback is appreciated.
 
 
 **References**   
 * Graves, T. A., P. Beier, and J. A. Royle. 2013. Current approaches using genetic distances produce poor estimates of landscape resistance to           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interindividual dispersal. Molecular Ecology 22:3888--3903.
 * Peterman, W. E., G. M. Connette, R. D. Semlitsch, and L. S. Eggert. in press. Ecological resistance surfaces predict fine scale genetic     
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differentiation in a terrestrial woodland salamander. Molecular Ecology:10.1111/mec.12747.    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413.    
 * Spear, S. F., N. Balkenhol, M. J. Fortin, B. H. McRae, and K. Scribner. 2010. Use of resistance surfaces for landscape genetic studies:     
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;considerations for parameterization and analysis. Molecular Ecology 19:3576--3591.
+
+
+Demonstrations
+------
+### Continuous surface transformations
+
+There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I've added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space.   
+
+
+
 
 
 
@@ -40,8 +50,7 @@ set.seed(12345)
 ```
 
 
-Next, make a directory to write where ASCII files, CIRCUITSCAPE batch files, and results will be written. I'm going to make a directory called 'ResistanceGA_Example' to work in
-
+Next, make a directory to write ASCII files, CIRCUITSCAPE batch files, and results will be written. 
 
 ```r
 if ("ResistanceGA_Examples" %in% dir("C:/") == FALSE) dir.create(file.path("C:/", 
@@ -94,6 +103,7 @@ cont.rf <- raster(rf.sim[1])  # Define object as a continuous surface
 names(cont.rf) <- "cont"
 ```
 
+
 Plot surface and overlay the sample points
 
 ```r
@@ -101,7 +111,8 @@ plot(cont.rf)
 plot(Sample.coord, pch = 16, col = "blue", add = TRUE)  # Add randomly generated points
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+![plot of chunk single.surface.plot](figure/single_surface_plot.png) 
+
 
 Export the raw continuous surface to a .asc file for use with CIRCUITSCAPE
 
@@ -122,9 +133,11 @@ Run the `GA.prep` and `CS.prep` functions
 
 ```r
 GA.inputs <- GA.prep(ASCII.dir = write.dir, pop.mult = 5, min.cat = 0, max.cat = 500, 
-    max.cont = 500, run = 1)
-# Note that the default value for run is 25. It is set to 1 for
-# demonstration only. THIS WILL NOT OPTIMIZE!
+    max.cont = 500, run = 25)
+# Note that the default value for `run` is 25.  Running the example below
+# (optimizing a single surface), took XX minutes to complete on a computer
+# with an Intel i7 3.4 GHz processor You want to change the `run` value to 5
+# or less, although this likely won't lead to convergence
 
 CS.inputs <- CS.prep(n.POPS = n, CS_Point.File = paste0(write.dir, "samples.txt"), 
     CS.exe = paste("\"C:/Program Files/Circuitscape/4.0/cs_run.exe\""))
@@ -136,13 +149,13 @@ Transform raw continuous surface using the `Resistance.tran` function to apply o
 
 ```r
 r.tran <- Resistance.tran(transformation = "Monomolecular", shape = 2, max = 100, 
-    CS.inputs = CS.inputs, r = cont.rf)
+    r = cont.rf)
 
 plot.t <- PLOT.trans(PARM = c(2, 100), Resistance = "C:/ResistanceGA_Examples/SingleSurface/cont.asc", 
     transformation = "Monomolecular")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. We will add some random noise to the resistance values prior to optimization.
@@ -166,16 +179,196 @@ SS_optim(CS.inputs = CS.inputs, GA.inputs = GA.inputs)
 After executing the function, the console will be updated to report the time to complete each iteration as well as AICc of each iteration. 
 
 What the `SS_optim` function does:    
-1. Read each .asc file that is in the specified ASCII.dir, and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.
+1. Read each .asc file that is in the specified ASCII.dir and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.
 2. Optimize each resistance surface
   * Categorical surfaces: The first category/factor is set to a resistance value of 1. All other categories are then adjusted, ranging from the minimum--maximum specified during the `GA.prep`. It is necessary to fix the value of one category, otherwise numerous equivalent solutions may make optimization intractable (e.g. resistance values of 1, 5, & 10 would have the same relative resistance as 2, 10, & 20)
-  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters are passed to a second optimization function that used `nlm` to fine-tune the shape and maximum value parameters.
+  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters are passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters.
 3. Several summary outputs are generated
   * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).
   * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)
   * MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface
-  * In the 'Plots' directory is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
-    
+  * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
+  
+ 
+Following a complete long run of the optimization algorithm, we have recovered the data generating parameters:
+
+
+ ****
+ ### Simultaneous optimization of multiple surfaces
+
+**Simulate data**
+
+First, make a new directory to write ASCII files, CIRCUITSCAPE batch files.
+
+```r
+if ("ResistanceGA_Examples" %in% dir("C:/") == FALSE) dir.create(file.path("C:/", 
+    "ResistanceGA_Examples"))
+
+# Create a subdirectory for the second example
+dir.create(file.path("C:/ResistanceGA_Examples/", "MultipleSurfaces"))
+
+write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"  # Directory to write .asc files and results
+```
+
+
+Simulate two more continuous surfaces. The first will remain continuous, the second will be converted into a 3-class categorical surface
+
+```r
+rf.sim <- RFsimulate(model, x = grid.vars, n = 2)  # Create two surfaces
+```
+
+```
+## ..
+```
+
+```r
+
+cont.rf <- raster(rf.sim[1])  # Define first as a continuous surface
+names(cont.rf) <- "cont"
+
+plot(cont.rf)
+plot(Sample.coord, pch = 16, col = "blue", add = TRUE)
+```
+
+![plot of chunk multi_surface.sim](figure/multi_surface_sim1.png) 
+
+```r
+
+cat.rf <- raster(rf.sim[2])
+names(cat.rf) <- "cat"
+cat.cut <- summary(cat.rf)  # Define quartiles, use these to define categories
+
+cat.rf[cat.rf <= cat.cut[2]] <- 0
+cat.rf[cat.rf > 0 & cat.rf <= cat.cut[4]] <- 1
+cat.rf[!cat.rf %in% c(0, 1)] <- 2
+plot(cat.rf)
+plot(Sample.coord, pch = 16, col = "blue", add = TRUE)
+```
+
+![plot of chunk multi_surface.sim](figure/multi_surface_sim2.png) 
+
+
+Now make a categorical feature class (like a road)
+
+```r
+feature <- matrix(0, r.dim, r.dim)
+feature[25, ] <- 1
+feature[, 30:31] <- 1
+feature <- raster(feature)
+extent(feature) <- extent(cat.rf)
+plot(feature)
+names(feature) <- "feature"
+plot(feature)
+plot(Sample.coord, pch = 16, col = "blue", add = TRUE)
+```
+
+![plot of chunk feature.sim](figure/feature_sim.png) 
+
+
+Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces)
+
+```r
+writeRaster(cat.rf, filename = paste0(write.dir, "cat.asc"), overwrite = TRUE)
+writeRaster(cont.rf, filename = paste0(write.dir, "cont.asc"), overwrite = TRUE)
+writeRaster(feature, filename = paste0(write.dir, "feature.asc"), overwrite = TRUE)
+
+GA.inputs <- GA.prep(ASCII.dir = write.dir, pop.mult = 5, min.cat = 0, max.cat = 500, 
+    max.cont = 500, run = 25)
+```
+
+
+Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter.
+
+```r
+plot.t <- PLOT.trans(PARM = c(2, 100), Resistance = "C:/ResistanceGA_Example/cont.asc", 
+    transformation = "Inverse-Reverse Monomolecular")
+```
+
+```
+## Error: C:/ResistanceGA_Example/cont.asc does not exist
+```
+
+
+Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`
+  
+
+```r
+PARM = c(0, 150, 50, 1, 2, 100, 0, 250)
+
+# PARM=c(0, # First feature of categorical 150, # Second feature of
+# categorical 50, # Third feature of categorical 1, # Transformation
+# equation for continuous surface 2, # Shape parameter 100, # Scale
+# parameter 0, # First feature of feature surface 250) # Second feature of
+# feature surface
+
+# Combine resistance surfaces
+Resist <- Combine_Surfaces(PARM = PARM, CS.inputs = CS.inputs, GA.inputs = GA.inputs)
+
+# View combined surface
+plot(Resist)
+```
+
+![plot of chunk combine.surfaces](figure/combine_surfaces.png) 
+
+
+Generate new CS response surface by using `Run_CS`
+
+```r
+CS.Resist <- Run_CS(CS.inputs = CS.inputs, GA.inputs = GA.inputs, r = Resist)
+```
+
+
+Generate random noise, add it to the resistance surface and export the response object for use with CIRCUITSCAPE
+
+```r
+NOISE <- rnorm(n = length(CS.Resist), mean = 0, (0.05 * max(CS.Resist)))
+CS.response <- CS.Resist + NOISE
+
+# Look at relationship between 'truth' and response with added noise
+plot(CS.response ~ CS.Resist)
+```
+
+![plot of chunk cs.resposne.multi](figure/cs_resposne_multi.png) 
+
+```r
+
+write.table(CS.response, file = paste0(write.dir, "Combined_response.csv"), 
+    sep = ",", row.names = F, col.names = F)
+```
+
+
+Run prep functions
+
+```r
+GA.inputs <- GA.prep(ASCII.dir = write.dir, pop.mult = 5, min.cat = 0, max.cat = 500, 
+    max.cont = 750, run = 25)
+
+# Note that the default value for `run` is 25.  Running this multisurface
+# example took XX minutes to complete on a computer with an Intel i7 3.4 GHz
+# processor You want to change the `run` value to 5 or less, although this
+# will not lead to convergence
+
+CS.inputs <- CS.prep(n.POPS = n, RESPONSE = CS.response, CS_Point.File = paste0(write.dir, 
+    "samples.txt"), CS.exe = paste("\"C:/Program Files/Circuitscape/4.0/cs_run.exe\""))
+```
+
+
+Run `MS_optim`
+
+```r
+Multi.Surface_optim <- MS_optim(CS.inputs = CS.inputs, GA.inputs = GA.inputs)
+```
+
+```
+## Error: cannot open the connection
+```
+
+
+
+
+
+
+rm(list=".Random.seed", envir=globalenv()) 
 
 
 
