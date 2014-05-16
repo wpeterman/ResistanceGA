@@ -11,9 +11,11 @@ PLOT.trans(PARM, Resistance, transformation, print.dir)
   shape parameter (c), and the second term is the value of
   maximum scale parameter (b)}
 
-  \item{Resistance}{Accepts two types of inputs. Provide
+  \item{Resistance}{Accepts three types of inputs. Provide
   either the path to the raw, untransformed resistance
-  surface file or specify an R raster object}
+  surface file or specify an R raster object.
+  Alternatively, supply a vector with the minimum and
+  manximum values (e.g., c(1,10))}
 
   \item{transformation}{Transformation equation to apply.
   Can be provided as the name of the transformation or its

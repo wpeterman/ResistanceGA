@@ -26,14 +26,26 @@ Setup
 ### Install necessary software and packages
 This package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. You will also need to have [R v3.03](http://www.r-project.org/ "R downloads") or higher installed. Personally, I would highly recommned installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.
 
+*R Packages*
+This package consists of several wrapper functions for implementing functions from other packages, as well pulling together and summarizing results. Necessary packages are: `lme4`, `raster`, `ggplot2`,`plyr`, and `GA`. If you want to simulate resistance surfaces as done in this tutorial, you will also need `RandomFields`.
+
 
 Demonstrations
 ------
 ### Continuous surface transformations
 
-There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I've added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space.   
+There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space.   
 ![Transformations](figures/Transformations.svg)
 
+All of these figures were made with the `PLOT.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
+```{r plot.trans.demo}
+Ricker.plot <- PLOT.trans(PARM=c(1.5, 200),Resistance=c(1,10),transformation="Ricker")
+
+Ricker.plot$labels$title<-"Ricker Tansformation"
+Ricker.plot
+
+Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$data$transformed))]
+```
 
 
 
@@ -120,14 +132,12 @@ writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 Run the `GA.prep` and `CS.prep` functions
 ```{r}
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
-                   pop.mult=5,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500,
-                   run=25) 
-# Note that the default value for `run` is 25. 
-# Running the example below (optimizing a single surface), took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor
-# You want to change the `run` value to 5 or less, although this likely won't lead to convergence
+                   max.cont=500) 
+
+# Running this multisurface example with the default `pop.mult` and `run` settings
+# took 49 minutes to complete on a computer with an Intel i7 3.4 GHz processor
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -166,8 +176,8 @@ CS.inputs<-CS.prep(n.POPS=n,
 
 Now run the Single surface optimization function (`SS_optim`)
 ```{r SS_optim, warning=FALSE, results='hide',message=FALSE, cache=TRUE}
-SS_optim(CS.inputs=CS.inputs,
-         GA.inputs=GA.inputs)
+SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
+                       GA.inputs=GA.inputs)
 ```
 After executing the function, the console will be updated to report the time to complete each iteration as well as AICc of each iteration. 
 
@@ -183,7 +193,10 @@ What the `SS_optim` function does:
   * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
   
  
-Following a complete long run of the optimization algorithm, we have recovered the data generating parameters:
+Following a complete long run of the optimization algorithm, we can inspect the results of the single surface optimization ans see that we have recovered the data generating parameters:
+```{r}
+SS_RESULTS$ContinuousResults
+```
 
 
  ****
@@ -238,21 +251,21 @@ plot(feature)
 plot(Sample.coord, pch=16, col="blue", add=TRUE)
 ```
 
-Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces)
+Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces). Also write the sample location file to the "MultipleSurfaces" directory.
 ```{r write_multi.ASCII, warning=FALSE, results='hide',message=FALSE}
 writeRaster(cat.rf,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 
+write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
+
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
-                   pop.mult=5,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500,
-                   run=25) 
+                   max.cont=500) 
 ```
 
-Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter.
+Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter. Look in the help file for `PLOT.trans` for transformation names/numbers.
 ```{r inverse-reverse.mono }
 plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Inverse-Reverse Monomolecular") 
 ```
@@ -284,7 +297,7 @@ CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 Generate random noise, add it to the resistance surface and export the response object for use with CIRCUITSCAPE
 ```{r cs.resposne.multi}
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.07*max(CS.Resist)))
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
 CS.response<-CS.Resist + NOISE
 
  # Look at relationship between 'truth' and response with added noise
@@ -296,15 +309,12 @@ write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",r
 Run prep functions
 ```{r}
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
-                   pop.mult=5,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=750,
-                   run=25) 
+                   max.cont=750) 
 
-# Note that the default value for `run` is 25. 
-# Running this multisurface example took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor
-# You want to change the `run` value to 5 or less, although this will not lead to convergence
+# Running this multisurface example with the default `pop.mult` and `run` settings
+# took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor
 
 CS.inputs<-CS.prep(n.POPS=n,
                       RESPONSE=CS.response,

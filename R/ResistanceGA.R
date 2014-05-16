@@ -18,7 +18,7 @@
 #'   
 #'   Official release: \url{http://www.circuitscape.org/downloads}
 #' 
-#' @references Please cite: Peterman, W. E., G. M. Connette, R. D. Semlitsch, and L. S. Eggert. (in press). Ecological resistance surfaces predict fine scale genetic differentiation in a terrestrial woodland salamander. \href{http://goo.gl/RJb6Go}{Molecular Ecology:10.1111/mec.12747}
+#' @references Please cite: Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. \href{http://goo.gl/RJb6Go}{Peterman et al.}
 #' 
 #' @author Bill Peterman \email{bill.peterman@@gmail.com}
 #' 

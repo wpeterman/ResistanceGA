@@ -10,9 +10,10 @@
 #' @return This function optimizes multiple resistance surfaces. Following optimization, several summary objects are created.\cr
 #' \enumerate{
 #' \item Diagnostic plots of model fit are output to the "Results/Plots" directory that is automatically generated within the folder containing the optimized ASCII files.
-#' \item A .csv file with the Maximum Likelihood Population Effects mixed effects model coefficient estimates
+#' \item A .csv file with the Maximum Likelihood Population Effects mixed effects model coefficient estimates (MLPE_coeff_Table.csv)
 #' \item Three summary .csv files are generated: CategoricalResults.csv, ContinuousResults.csv, & All_Results_AICc.csv. These tables contain AICc values and optimization summaries for each surface.
 #' }
+#' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
 #' @usage SS_optim(CS.inputs, GA.inputs)
 
 #' @export
@@ -138,14 +139,12 @@ SS_optim <- function(CS.inputs,GA.inputs){
     Features[i]<-feature
   }
   colnames(Results.cat)<-c("Surface","AICc", Features)
-  print(Results.cat)
   write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
   }
   
   if(ncol(Results.cont)>0){    
     colnames(Results.cont)<-c("Surface","AICc","Equation","shape","max")
     write.table(Results.cont,paste0(GA.inputs$Results.dir,"ContinuousResults.csv"),sep=",",col.names=T,row.names=F)
-    print(Results.cont)
   }
   
   # Full Results
@@ -163,7 +162,16 @@ SS_optim <- function(CS.inputs,GA.inputs){
   
   # Get parameter estimates
   MLPE.results<-MLPE.lmm(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
-  print(Results.All)
+  
+  # Full Results
+  if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
+    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results)
+  } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
+    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results)
+  } else {
+    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results)
+  }
+  return(RESULTS)
   ###############################################################################################################
 }
 
@@ -715,8 +723,6 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
   multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
   if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
   
-  #       plot(multi_surface)
-  
   writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
   
   # Modify and write Circuitscape.ini file
@@ -743,7 +749,6 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
   
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
   CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
-  # CS.Run.output<-system(paste(CS.exe, CS.ini), hidden,minimized=FALSE) 
   
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
@@ -788,12 +793,13 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
 #' Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.
+#' @param Resistance Resistance surface to be optimized. This should be an R raster object. If not specified, the function will attempt find the a resistance surface from \code{GA.inputs}
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
-#' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
+#' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max'). Default in 'max'
 #' @return AIC value from mixed effect model
 #' @export
-Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,iter){
+Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='max',iter){
   t1<-Sys.time()
   
   ID<-CS.inputs$ID
@@ -956,7 +962,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
 #' Plots a transformed continuous resistance surface against the original resistance values
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)
-#' @param Resistance Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object
+#' @param Resistance Accepts three types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object. Alternatively, supply a vector with the minimum and manximum values (e.g., c(1,10))
 #' @param transformation Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)
 #' @param print.dir Specify the directory where a .tiff of the transformation will be written (Default = NULL)
 #' @return plot of transformed resistance values against original resistance values
@@ -980,21 +986,26 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max,i
 #' @import ggplot2
 
 PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
-  if(class(Resistance)[1]!='RasterLayer') {
+    if(length(Resistance)>1) {
+    r <- Resistance
+    Mn=min(r)
+    Mx=max(r) 
+    } else if(class(Resistance)[1]!='RasterLayer') {
     r<-raster(Resistance)
     NAME <- basename(Resistance)
     NAME<-sub("^([^.]*).*", "\\1", NAME) 
     names(r)<-NAME
+    Mn=cellStats(r,stat='min')
+    Mx=cellStats(r,stat='max')   
   } else {
     r <- Resistance
     NAME <- r@data@names
-  }
- 
-  Mn=cellStats(r,stat='min')
-  Mx=cellStats(r,stat='max') 
+    Mn=cellStats(r,stat='min')
+    Mx=cellStats(r,stat='max') 
+  }  
   
   # Make vector of data 
-  original <- seq(from=Mn,to=Mx,length.out=1000)
+  original <- seq(from=Mn,to=Mx,length.out=200)
   dat.t <- SCALE.vector(data=original,0,10)
   
   SHAPE <- PARM[[1]]
@@ -1251,7 +1262,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   
   k<-length(PARM)+2
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-  
+    
   t2 <-Sys.time()
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
   cat(paste0("\t", "AICc = ",round(AICc,3)),"\n")
@@ -1307,7 +1318,7 @@ MLPE.lmm <- function(resist.dir, genetic.dist,out.dir=NULL){
   } else {
     COEF.Table<-COEF.Table[-1,]
     write.table(COEF.Table,file=paste0(out.dir,"MLPE_coeff_Table.csv"),sep=",",row.names=T,col.names=NA)
-    (COEF.Table)
+    return(COEF.Table)
   }
 }
 
@@ -1910,30 +1921,33 @@ get.EQ <-function(equation){   # Apply specified transformation
 }
 
 Result.txt <- function(GA.results, GA.inputs){
-  SUMMARY<-summary(GA.results)
   summary.file<-paste0(GA.inputs$Results.dir,"Multisurface_Optim_Summary.txt")
-  AICc<-round(SUMMARY$fitness*-1,digits=4)
+  AICc<-GA.results@fitnessValue
+  AICc<-round(AICc*-1,digits=4)
+  ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
   
-  sink(summary.file)
+sink(summary.file)
 cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
 cat("\n")
 cat(paste0("Surfaces included in optimization:"),"\n")
 cat(GA.inputs$parm.type$name,"\n")
 cat("\n")
 cat("Genetic Algorithm optimization settings:")
-  cat("\n")
-  cat(paste0("Type of genetic algorithm used: ", SUMMARY$type),"\n")
-  cat(paste0("popSize at each iteration: ", SUMMARY$popSize),"\n")
-  cat(paste0("Maximum number of iterations: ", SUMMARY$maxiter),"\n")
-  cat(paste0("Number individuals retained each generation (elistism): ", SUMMARY$elistism),"\n")
-  cat(paste0("Crossover probability: ", SUMMARY$pcrossover),"\n")
-  cat(paste0("Mutation probability: ", SUMMARY$pmutation),"\n")
-  cat("\n")
-  cat(paste0("The Genetic Algorithm completed after ",SUMMARY$iter," iterations"),"\n")
-  cat("\n",paste0("Minimum AICc: ",AICc),"\n")
-  cat("\n",paste0("Optimized values for each surface:"),"\n")
-  cat(SUMMARY$solution,"\n")
-  sink()
+cat("\n")
+cat(paste0("Type of genetic algorithm used: ", GA.results@type),"\n")
+cat(paste0("popSize at each iteration: ", GA.results@popSize),"\n")
+cat(paste0("Maximum number of iterations: ", GA.results@maxiter),"\n")
+cat(paste0("Number individuals retained each generation (elistism): ", ELITE),"\n")
+cat(paste0("Crossover probability: ", GA.results@pcrossover),"\n")
+cat(paste0("Mutation probability: ", GA.results@pmutation),"\n")
+cat("\n")
+cat(paste0("The Genetic Algorithm completed after ",GA.results@iter," iterations"),"\n")
+cat("\n")
+cat(paste0("Minimum AICc: ",AICc),"\n")
+cat("\n")
+cat(paste0("Optimized values for each surface:"),"\n")
+cat(GA.results@solution,"\n")
+sink()
 }
 # Optimiazation preparation
 Optim.input<-function(Response,n.Pops,ASCII.dir,CS_Point.File,CS.exe,Neighbor.Connect=8,Constrained.Max=100,Initial.shape=c(seq(0.2,1,by=0.2),seq(1.25,10.75,by=0.75)),Bootstrap=FALSE,boot.iters=10000,Sample_Proportion=0.75){

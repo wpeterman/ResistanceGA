@@ -76,3 +76,9 @@ test.rast<-raster(TEST)
 svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Transformations.svg",width=15,height=20)
 grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
 dev.off()
+
+
+
+Resistance.Opt_single(PARM=c(3,2,100),
+                      Resistance=CS.Resist,
+                      CS.inputs,GA.inputs,Min.Max='max',iter=1)

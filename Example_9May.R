@@ -56,12 +56,17 @@ writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 
 #########################################
 # Run prep functions
+# GA.inputs<-GA.prep(ASCII.dir=write.dir,
+#                    pop.mult=10,
+#                    min.cat=0,
+#                    max.cat=500,
+#                    max.cont=500,
+#                    run=1) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
+
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
-                   pop.mult=10,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500,
-                   run=25) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
+                   max.cont=500)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -71,11 +76,14 @@ CS.inputs<-CS.prep(n.POPS=n,
 PARM=c(3,2,100)
 Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
+Resist.false<-Resistance.tran(transformation="Monomolecular",shape=3938.497781,max=258,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+
+
 plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
 # Only continuous the surface will affect resistance in the first example
-CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=cont.rf)
+CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # We add some random noise to the response (i.e. CS resistance output)
 NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist))) # Generate random noise matrix
@@ -90,8 +98,8 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Single surface optimization
-# system.time(SS_optim(CS.inputs=CS.inputs,
-#          GA.inputs=GA.inputs))
+system.time(SS_RESULTS<-SS_optim(CS.inputs=CS.inputs,
+         GA.inputs=GA.inputs))
 
 
 
@@ -141,24 +149,29 @@ writeRaster(cat.rf,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 
+# Write the table to a file. This is formatted for input into CIRCUITSCAPE
+write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
 
 #############################
 # Visualize transformation of continuous surface. The first term of the PARM function refers to the shape parameter, and the second term refers to the maximum value parameter.
 
-plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
 PARM=c(0,150,50,1,2,100,0,250)
-# PARM=c(0, # First feature of categorical
-#        50, # Second feature of categorical
-#        100, # Third feature of categorical
-#        3, # Transformation equation for continuous surface
-#        2, #  Shape parameter
-#        100, # Scale parameter
-#        0, # First feature of feature surface
-#        100) # Second feature of feature surface
 
-# PARM=c(0,50,150,3,2,300,0,500)
+
+# GA.inputs<-GA.prep(ASCII.dir=write.dir,
+#                    pop.mult=5,
+#                    min.cat=0,
+#                    max.cat=500,
+#                    max.cont=500,
+#                    run=1) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
+
+GA.inputs<-GA.prep(ASCII.dir=write.dir,
+                   min.cat=0,
+                   max.cat=500,
+                   max.cont=500)
 
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
@@ -166,7 +179,7 @@ Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Ma
 # Generate new CS response surface by using Run_CS
 CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
-# Generate some random noise nad add it to the resistance surface
+# Generate some random noise and add it to the resistance surface
 NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.07*max(CS.Resist)))
 plot(Resist)
 
@@ -175,13 +188,6 @@ plot(CS.response~CS.Resist)
 write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
 
 # Run prep functions
-GA.inputs<-GA.prep(ASCII.dir=write.dir,
-                   pop.mult=5,
-                   min.cat=0,
-                   max.cat=500,
-                   max.cont=500,
-                   run=25) # Only single run selected...THIS WILL NOT OPTIMIZE, done for demostration only
-
 CS.inputs<-CS.prep(n.POPS=n,
                       RESPONSE=CS.response,
                       CS_Point.File=paste0(write.dir,"samples.txt"),

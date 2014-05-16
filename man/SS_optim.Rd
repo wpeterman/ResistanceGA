@@ -19,10 +19,13 @@ are output to the "Results/Plots" directory that is
 automatically generated within the folder containing the
 optimized ASCII files. \item A .csv file with the Maximum
 Likelihood Population Effects mixed effects model
-coefficient estimates \item Three summary .csv files are
-generated: CategoricalResults.csv, ContinuousResults.csv, &
-All_Results_AICc.csv. These tables contain AICc values and
-optimization summaries for each surface. }
+coefficient estimates (MLPE_coeff_Table.csv) \item Three
+summary .csv files are generated: CategoricalResults.csv,
+ContinuousResults.csv, & All_Results_AICc.csv. These tables
+contain AICc values and optimization summaries for each
+surface. } All results tables are also summarized in a
+named list ($ContinuousResults, $CategoricalResults, $AICc,
+$MLPE)
 }
 \description{
 Optimize all surfaces contained in a directory using a

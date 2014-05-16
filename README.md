@@ -13,15 +13,15 @@ install_github("wpeterman/ResistanceGA") # Downloads package
 require(ResistanceGA) # Installs package and the other required packages needed
 ```
 
-###########################################
+### Other notes
 
 In order to use this package, you must have CIRCUITSCAPE installed.
 Version 4.0 or higher is required:
-Official releases can be found [here](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
+Official CIRCUITSCAPEreleases can be found [here](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
 
 
-Further details of of how this method has been implemented can be found in:
+Further details of about the functions included in this package can be found in the [**this tutorial**](INSERT LINK "Tutorial").
 
-Peterman, W. E., G. M. Connette, R. D. Semlitsch, and L. S. Eggert. in press. Ecological resistance surfaces predict fine scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology:10.1111/mec.12747.
+These methods have been developed from the methods first utilized in Peterman et al. (2014). Please cite this paper if you use these methods!
 
-Please cite this paper if you use this method!
+Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. [Molecular Ecology 23:2402–2413](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Peterman et al.").
