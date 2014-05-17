@@ -10,6 +10,11 @@ SS_optim(CS.inputs, GA.inputs)
 
   \item{GA.inputs}{Object created from running
   \code{\link{GA.prep}} function}
+
+  \item{nlm}{Logical, if TRUE, the final step of
+  optimization will use nlm to fine-tune parameter
+  estimates. This may lead to overfitting in some cases.
+  Default = FALSE.}
 }
 \value{
 This function optimizes multiple resistance surfaces.

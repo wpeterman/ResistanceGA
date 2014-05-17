@@ -56,12 +56,12 @@ writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 
 #########################################
 # Run prep functions
-# GA.inputs<-GA.prep(ASCII.dir=write.dir,
-#                    pop.mult=10,
-#                    min.cat=0,
-#                    max.cat=500,
-#                    max.cont=500,
-#                    run=1) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
+GA.inputs<-GA.prep(ASCII.dir=write.dir,
+                   pop.mult=10,
+                   min.cat=0,
+                   max.cat=500,
+                   max.cont=500,
+                   run=1) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
@@ -76,7 +76,7 @@ CS.inputs<-CS.prep(n.POPS=n,
 PARM=c(3,2,100)
 Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
-Resist.false<-Resistance.tran(transformation="Monomolecular",shape=3938.497781,max=258,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+Resist.false<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 
 plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"

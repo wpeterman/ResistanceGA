@@ -7,6 +7,7 @@
 #' 
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.
 #' @return This function optimizes multiple resistance surfaces. Following optimization, several summary objects are created.\cr
 #' \enumerate{
 #' \item Diagnostic plots of model fit are output to the "Results/Plots" directory that is automatically generated within the folder containing the optimized ASCII files.
@@ -17,7 +18,7 @@
 #' @usage SS_optim(CS.inputs, GA.inputs)
 
 #' @export
-SS_optim <- function(CS.inputs,GA.inputs){
+SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
   RESULTS.cat <- list() # List to store categorical results within
   RESULTS.cont <-list() # List to store continuous results within
   cnt1<-0
@@ -94,6 +95,7 @@ SS_optim <- function(CS.inputs,GA.inputs){
       # Using GA results, optimize with nlm  
       start.vals <- single.GA@solution[-1]
       
+     if(nlm==TRUE){
       # Informed start values; these are the optimized values from the single parameter optimization
       EQ <-get.EQ(single.GA@solution[1])
       Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,CS.inputs=CS.inputs,Min.Max='min')
@@ -107,7 +109,20 @@ SS_optim <- function(CS.inputs,GA.inputs){
       RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
       colnames(RS) <- c("Surface","AICc","Equation","shape","max")
       RESULTS.cont[[cnt2]] <- RS
+     
+      } else {
+        
+        r.tran <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
+        names(r.tran)<-GA.inputs$layer.names[i]
       
+        Run_CS(CS.inputs,GA.inputs,r.tran,EXPORT.dir=GA.inputs$Results.dir)
+      
+        Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
+  
+        RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,get.EQ(single.GA@solution[1]),single.GA@solution[2],single.GA@solution[3])
+      colnames(RS) <- c("Surface","AICc","Equation","shape","max")
+      RESULTS.cont[[cnt2]] <- RS
+      }     
     } # Close if-else    
   } # Close ascii loop
   
@@ -1210,8 +1225,8 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   } else {
     File.name <- Name
   }
-  if(cellStats(r,"max")>5e4)  r<-SCALE(r,1,5e4) # Rescale surface in case resistance are too high
-  r <- reclassify(r, c(-Inf,1e-06, 1e-06,10e6,Inf,10e6))
+  if(cellStats(r,"max")>5e5)  r<-SCALE(r,1,5e5) # Rescale surface in case resistance are too high
+  r <- reclassify(r, c(-Inf,1e-06, 1e-06,5e5,Inf,5e5))
   
   writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
   
