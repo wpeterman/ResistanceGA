@@ -63,10 +63,10 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    max.cont=500,
                    run=1) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
-GA.inputs<-GA.prep(ASCII.dir=write.dir,
-                   min.cat=0,
-                   max.cat=500,
-                   max.cont=500)
+# GA.inputs<-GA.prep(ASCII.dir=write.dir,
+#                    min.cat=0,
+#                    max.cat=500,
+#                    max.cont=500)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),

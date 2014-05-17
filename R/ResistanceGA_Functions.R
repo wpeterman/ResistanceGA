@@ -176,7 +176,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
   write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
   
   # Get parameter estimates
-  MLPE.results<-MLPE.lmm(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
+  MLPE.results<-MLPE.lmm_coef(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
   
   # Full Results
   if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
@@ -1298,10 +1298,10 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 #' @return A table of MLPE fitted model coefficients
 
 #' @export
-#' @usage MLPE.lmm(resist.dir, genetic.dist, out.dir)
+#' @usage MLPE.lmm_coef(resist.dir, genetic.dist, out.dir)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
-MLPE.lmm <- function(resist.dir, genetic.dist,out.dir=NULL){ 
+MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){ 
   RESPONSE=genetic.dist
   resist.mat<-list.files(resist.dir,pattern="*_resistances.out",full.names=TRUE)
   resist.names<-gsub(pattern="_resistances.out","",x=list.files(resist.dir,pattern="*_resistances.out"))
@@ -1335,6 +1335,44 @@ MLPE.lmm <- function(resist.dir, genetic.dist,out.dir=NULL){
     write.table(COEF.Table,file=paste0(out.dir,"MLPE_coeff_Table.csv"),sep=",",row.names=T,col.names=NA)
     return(COEF.Table)
   }
+}
+
+
+
+# Run Mixed effects models, recovery parameter estimates
+#' Run maximum likelihood population effects mixed effects model (MLPE)
+#' 
+#' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
+#' 
+#' @param pairwise.resist Lower half of pairwise resistance distance matrix (resistances.out from CS results)
+#' @param genetic.dist Lower half of pairwise genetic distance matrix
+#' @return A glmer object from the fitted model
+
+#' @export
+#' @usage MLPE.lmm(pairwise.resist, pairwise.genetic)
+#' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
+
+MLPE.lmm <- function(pairwise.resist, pairwise.genetic){ 
+  RESPONSE=pairwise.genetic
+
+  m<-length(pairwise.resist)
+    mm<-pairwise.resist
+    ID<-To.From.ID(POPS=m)
+    ZZ<-ZZ.mat(ID=ID)
+    cs.matrix<-scale(lower(mm),center=TRUE,scale=TRUE)
+    
+    dat<-cbind(ID,cs.matrix,RESPONSE)
+    
+    # Assign value to layer
+    LAYER<-assign("Resist",value=dat$cs.matrix)
+    
+    # Fit model
+    mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+    mod$reTrms$Zt <- ZZ
+    dfun <- do.call(mkLmerDevfun,mod)
+    opt <- optimizeLmer(dfun)
+    MOD <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))   
+  return(MOD)
 }
 
 ##################################

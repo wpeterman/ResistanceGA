@@ -1,22 +1,26 @@
-\name{MLPE.lmm}
-\alias{MLPE.lmm}
+\name{MLPE.lmm_coef}
+\alias{MLPE.lmm_coef}
 \title{Run maximum likelihood population effects mixed effects model (MLPE)}
 \usage{
-MLPE.lmm(pairwise.resist, pairwise.genetic)
+MLPE.lmm_coef(resist.dir, genetic.dist, out.dir)
 }
 \arguments{
-  \item{pairwise.resist}{Lower half of pairwise resistance
-  distance matrix (resistances.out from CS results)}
+  \item{resist.dir}{Directory containing optimized .asc
+  resistance files (optimized resistance surfaces)}
 
   \item{genetic.dist}{Lower half of pairwise genetic
   distance matrix}
+
+  \item{out.dir}{If specified, a .csv table will printed to
+  the specified directory (Default = NULL)}
 }
 \value{
-A glmer object from the fitted model
+A table of MLPE fitted model coefficients
 }
 \description{
 Runs MLPE as detailed by Clarke et al. (2002). This
-function will run the model and return glmer object
+function is designed to generate a table of the fitted
+mixed effects model coefficients
 }
 \references{
 Clarke, R. T., P. Rothery, and A. F. Raybould. 2002.
