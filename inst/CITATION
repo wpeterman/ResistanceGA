@@ -1,0 +1,17 @@
+citHeader("To cite ResistanceGA in publications use:")
+
+citEntry(entry = "Article",
+         title = "Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander",
+         author = personList(as.person("William E. Peterman"),as.person("Grant M. Connette"),as.person("Raymond D. Semlitsch"),as.person("Lori S. Eggert")),
+         journal = "Molecular Ecology",
+         year   = "2014",
+         volume = "23",
+         number = "10",
+         pages = "2402-2413",
+         url    = "http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract",
+
+ textVersion  =
+  paste("Peterman et al. (2014).",
+        "Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander.",
+        "Molecular Ecology, 23:2402-2414.")
+)

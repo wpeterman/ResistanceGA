@@ -11,7 +11,8 @@
 #' @param Resistance An R Raster object
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @usage Grid.Search <- (shape, max, transformation, Resistance, CS.inputs)
-#' @return This function will return values that can plotted to visualize the response surface
+#' @export
+#' @return This function will return values that can be plotted to visualize the response surface
 #' @details This function will perform a full factorial grid search of the values provided in the shape and max.scale vectors. Depending on the number of values provided for each, and the time it takes to run each iteration, this process may take a while to complete. \cr Suitable values for transformation:\cr
 #' \tabular{ll}{
 #'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
@@ -35,11 +36,11 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs) {
 
 for(i in 1:nrow(GRID)){
   AICc<-Resistance.Optimization_cont.nlm(log(GRID[i,]),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min')
-  results<-as.matrix(cbind(GRID[i,],AIC.stat))
+  results<-as.matrix(cbind(GRID[i,],AICc))
   RESULTS[i,]<-results  
 }
 
-Results.mat <- akima::interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
+Results.mat <- interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
 return(Results.mat)
 }
 ########################################################################################  
@@ -1549,7 +1550,6 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' It is recommended to first run GA optimization with the default settings
 
 #' @export
-#' @autoImports
 #' @usage GA.prep(ASCII.dir,
 #' Min.Max="max",
 #' min.cat=0,

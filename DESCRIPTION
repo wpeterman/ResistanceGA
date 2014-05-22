@@ -9,14 +9,14 @@ Description: This package contains functions to optimize
     multiple surfaces can be simultaneously optimized to create
     novel resistance surfaces.
 Depends:
-    R (>= 3.0.3),
+    R (>= 3.0.3)
+Imports:
+    akima,
     raster,
     plyr,
     GA,
     lme4 (>= 1.0),
     ggplot2
-Imports:
-    akima
 Suggests:
     RandomFields
 License: GPL-3
