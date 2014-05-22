@@ -14,8 +14,8 @@ Resistance.Opt_single(PARM, Resistance, CS.inputs, GA.inputs, Min.Max = "max",
 
   \item{Resistance}{Resistance surface to be optimized.
   This should be an R raster object. If not specified, the
-  function will attempt find the a resistance surface from
-  \code{GA.inputs}}
+  function will attempt to find the a resistance surface
+  from \code{GA.inputs}}
 
   \item{CS.inputs}{Object created from running
   \code{\link{CS.prep}} function}

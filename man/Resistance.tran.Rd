@@ -29,10 +29,10 @@ resistance surface
 \details{
 Valid arguements for \code{transformation} are:\cr
 \tabular{ll}{ \tab 1 = "Inverse-Reverse Monomolecular"\cr
-\tab 2 = "Reverse Monomolecular"\cr \tab 3 =
-"Monomolecular"\cr \tab 4 = "Inverse Monomolecular"\cr \tab
-5 = "Inverse Ricker"\cr \tab 6 = 'Ricker"\cr \tab 7 =
-"Reverse Ricker"\cr \tab 8 = "Inverse-Reverse Ricker"\cr
+\tab 2 = "Inverse-Reverse Ricker"\cr \tab 3 =
+"Monomolecular"\cr \tab 4 = "Ricker"\cr \tab 5 = "Reverse
+Monomolecular"\cr \tab 6 = 'Reverse Ricker"\cr \tab 7 =
+"Inverse Monomolecular"\cr \tab 8 = "Inverse Ricker"\cr
 \tab 9 = "Distance"\cr }
 }
 

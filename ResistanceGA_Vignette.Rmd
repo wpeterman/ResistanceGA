@@ -34,7 +34,7 @@ Demonstrations
 ------
 ### Continuous surface transformations
 
-There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space.   
+There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are better, more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
 ![Transformations](figures/Transformations.svg)
 
 All of these figures were made with the `PLOT.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
@@ -66,7 +66,7 @@ rm(list = ls())
 set.seed(12345)
 ```
 
-Next, make a directory to write ASCII files, CIRCUITSCAPE batch files, and results will be written. 
+Next, make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. 
 ```{r warning=FALSE, results='hide',message=FALSE}
  
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
@@ -80,13 +80,13 @@ write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      # Directory to write
 
 Define the data simulation parameters:
 ```{r}
-r.dim <- 60       # number of cells on a side
+r.dim <- 50       # number of cells on a side
 cell.size <- 0.025        # raster cell dimension     
-min.point <- 0.20*(r.dim*cell.size)       # minimum coordinate for generating random points (multiplied by 0.25 to prevent edge effects)
+min.point <- 0.25*(r.dim*cell.size)       # minimum coordinate for generating random points (multiplied by 0.25 to prevent edge effects)
 max.point <- (r.dim*cell.size)-min.point        # maximum coordinate for generating random points
 
 # Number of "Sample locations" to generate. This example will generate points on a square grid, so choose a number that has an even square root
-n <- 49 
+n <- 25 
 
 x <- seq(from=min.point,max.point,by=cell.size)       # set x & y range to draw random samples from
 y <- seq(from=min.point,max.point,by=cell.size)
@@ -112,14 +112,14 @@ grid.vars <- GridTopology(cellcentre.offset=c(cell.size/2, cell.size/2),
 
 rf.sim <- RFsimulate(model, x=grid.vars)
 
-cont.rf <- raster(rf.sim[1]) # Define object as a continuous surface
+cont.rf <- raster(rf.sim[1]) # Define object as a continuous raster surface
 names(cont.rf)<-"cont"
 ```
 
 Plot surface and overlay the sample points
 ```{r single.surface.plot}
 plot(cont.rf)
-plot(Sample.coord, pch=16, col="blue", add=TRUE) # Add randomly generated points
+plot(Sample.coord, pch=16, col="blue", add=TRUE) # Add points
 ```
 
 Export the raw continuous surface to a .asc file for use with CIRCUITSCAPE
@@ -135,9 +135,6 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500) 
-
-# Running this multisurface example with the default `pop.mult` and `run` settings
-# took 49 minutes to complete on a computer with an Intel i7 3.4 GHz processor
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -174,23 +171,24 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
-Now run the Single surface optimization function (`SS_optim`)
+Now run the Single surface optimization function (`SS_optim`). Running this example with the default settings
+took ~22 minutes to complete on a computer with an Intel i7 3.4 GHz processor.
 ```{r SS_optim, warning=FALSE, results='hide',message=FALSE, cache=TRUE}
 SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
                        GA.inputs=GA.inputs)
 ```
 After executing the function, the console will be updated to report the time to complete each iteration as well as AICc of each iteration. 
 
-What the `SS_optim` function does:    
+What the `SS_optim` function does:       
 1. Read each .asc file that is in the specified ASCII.dir and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.
 2. Optimize each resistance surface
-  * Categorical surfaces: The first category/factor is set to a resistance value of 1. All other categories are then adjusted, ranging from the minimum--maximum specified during the `GA.prep`. It is necessary to fix the value of one category, otherwise numerous equivalent solutions may make optimization intractable (e.g. resistance values of 1, 5, & 10 would have the same relative resistance as 2, 10, & 20)
-  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters are passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters.
+ *Categorical surfaces: The first category/factor is set to a resistance value of 1. All other categories are then adjusted, ranging from the minimum--maximum specified during the `GA.prep`. It is necessary to fix the value of one category, otherwise numerous equivalent solutions may make optimization intractable (e.g. resistance values of 1, 5, & 10 would have the same relative resistance as 2, 10, & 20)
+ *Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters are passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters.
 3. Several summary outputs are generated
-  * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).
-  * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)
-  * MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface
-  * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
+ *In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).
+ *Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)
+ *MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface
+ *In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
   
  
 Following a complete long run of the optimization algorithm, we can inspect the results of the single surface optimization ans see that we have recovered the data generating parameters:

@@ -1,4 +1,48 @@
 ########################################################################################  
+############ CONDUCT GRID SEARCH OF PARAMETER SPACE TO VIEW RESPONSE SURFACE ########### 
+########################################################################################  
+#' Conduct response surface grid search
+#' 
+#' Visualize the AICc response surface
+#' 
+#' @param shape A vector values for the shape parameter
+#' @param max A vector of values for the maximum value parameter
+#' @param transformation Transformation to apply. Can be either numeric or character of transformation name
+#' @param Resistance An R Raster object
+#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
+#' @usage Grid.Search <- (shape, max, transformation, Resistance, CS.inputs)
+#' @return This function will return values that can plotted to visualize the response surface
+#' @details This function will perform a full factorial grid search of the values provided in the shape and max.scale vectors. Depending on the number of values provided for each, and the time it takes to run each iteration, this process may take a while to complete. \cr Suitable values for transformation:\cr
+#' \tabular{ll}{
+#'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
+#'    \tab 2 = "Reverse Monomolecular"\cr
+#'    \tab 3 = "Monomolecular"\cr
+#'    \tab 4 = "Inverse Monomolecular"\cr
+#'    \tab 5 = "Inverse Ricker"\cr
+#'    \tab 6 = 'Ricker"\cr
+#'    \tab 7 = "Reverse Ricker"\cr
+#'    \tab 8 = "Inverse-Reverse Ricker"\cr
+#'    \tab 9 = "Distance"\cr
+#'    }
+
+Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs) {
+  r <-SCALE(Resistance,0,10)
+  
+   
+  GRID <- expand.grid(shape,max)
+  RESULTS <- matrix(nrow=nrow(GRID),ncol=3); colnames(RESULTS)<-c("shape","max","AICc")
+  EQ<-get.EQ(transformation)
+
+for(i in 1:nrow(GRID)){
+  AICc<-Resistance.Optimization_cont.nlm(log(GRID[i,]),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min')
+  results<-as.matrix(cbind(GRID[i,],AIC.stat))
+  RESULTS[i,]<-results  
+}
+
+Results.mat <- akima::interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
+return(Results.mat)
+}
+########################################################################################  
 ############ Single command function to execute single surface optimization ############ 
 ########################################################################################  
 #' Single surface optimization
@@ -665,7 +709,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
       SHAPE <-  (parm[2])
       Max.SCALE <- (parm[3])
       
-      if(equation==2|4|6|8 & SHAPE>5){
+      if(equation==2|4|6|8 & SHAPE>6){
         equation<-9
       }
       
@@ -812,7 +856,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
 #' Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.
-#' @param Resistance Resistance surface to be optimized. This should be an R raster object. If not specified, the function will attempt find the a resistance surface from \code{GA.inputs}
+#' @param Resistance Resistance surface to be optimized. This should be an R raster object. If not specified, the function will attempt to find the a resistance surface from \code{GA.inputs}
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max'). Default in 'max'
@@ -849,7 +893,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
     
     # Apply specified transformation
     # Apply specified transformation
-    if(equation==2|4|6|8 & SHAPE>5){
+    if(equation==2||equation==4||equation==6||equation==8 & SHAPE>6){
       equation<-9
     }
     
@@ -1166,7 +1210,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   #   }
   
   # Apply specified transformation
-  if(equation==2|4|6|8 & SHAPE>5){
+  if(equation==2|4|6|8 & SHAPE>6){
     equation<-9
   }
   
@@ -1358,6 +1402,7 @@ MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){
 #' 
 #' @param cs.resistance Pairwise resistance distance matrix (resistances.out) from CS results
 #' @param genetic.dist Lower half of pairwise genetic distance matrix
+#' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = TRUE.
 #' @return A glmer object from the fitted model
 
 #' @export

@@ -16,12 +16,12 @@ dir.create(file.path("C:/ResistanceGA_Examples/","SingleSurface"))
 write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      # Directory to write .asc files and results
 
 # Random point and raster parameters
-r.dim <- 60 # number of cells on a side
+r.dim <- 50 # number of cells on a side
 cell.size <- 0.025
 min.point <- 0.25*(r.dim*cell.size) # minimum Sample.coordinate for generating random points (multiplied by 0.25 to prevent edge effects)
 max.point <- (r.dim*cell.size)-min.point # maximum Sample.coordinate for generating random points
 # Number of "Sample locations" to generate. This example will generate points on a square grid, so choose a number that has an even square root
-n <- 49 
+n <- 25 
 
 x <- seq(from=min.point,max.point,by=cell.size)       # set x & y range to draw random samples from
 y <- seq(from=min.point,max.point,by=cell.size)
@@ -63,23 +63,23 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    max.cont=500,
                    run=1) # Only two runs selected...THIS WILL NOT OPTIMIZE, done for demostration only
 
-# GA.inputs<-GA.prep(ASCII.dir=write.dir,
-#                    min.cat=0,
-#                    max.cat=500,
-#                    max.cont=500)
+GA.inputs<-GA.prep(ASCII.dir=write.dir,
+                   min.cat=0,
+                   max.cat=500,
+                   max.cont=500)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) # Note that RESPONSE is omittted because it has not been made yet
 
 # Monomolecular = equation # 3
-PARM=c(3,2,100)
-Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+PARM=c(3,2,250)
+Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=250,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 Resist.false<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 
-plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
 # Only continuous the surface will affect resistance in the first example
