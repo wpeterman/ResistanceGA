@@ -2,11 +2,11 @@
 \alias{MLPE.lmm}
 \title{Run maximum likelihood population effects mixed effects model (MLPE)}
 \usage{
-MLPE.lmm(pairwise.resist, pairwise.genetic)
+MLPE.lmm(cs.resistance, pairwise.genetic)
 }
 \arguments{
-  \item{pairwise.resist}{Lower half of pairwise resistance
-  distance matrix (resistances.out from CS results)}
+  \item{cs.resistance}{Pairwise resistance distance matrix
+  (resistances.out) from CS results}
 
   \item{genetic.dist}{Lower half of pairwise genetic
   distance matrix}
