@@ -1,3 +1,8 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Optimize resistance surfaces with the Resistance GA Library}
+-->
+
 ResistanceGA: An R Package for Optimizing Resistance Surfaces using Genetic Algorithms
 =====
 Example Function Use
@@ -144,9 +149,9 @@ Note that `RESPONSE` was not defined in `CS.prep` because it has not been made y
 
 Transform raw continuous surface using the `Resistance.tran` function to apply one of the six transformations, and then view the transformation using `PLOT.trans`. Note that `PLOT.trans` returns a `ggplot2` object as well as the plot. Therefore you can manipulate and modify the plot as desired.
 ```{r}
-r.tran<-Resistance.tran(transformation="Monomolecular", shape=2, max=100, r=cont.rf) 
+r.tran<-Resistance.tran(transformation="Monomolecular", shape=2, max=250, r=cont.rf) 
 
-plot.t<-PLOT.trans(PARM=c(2,100), Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc", transformation="Monomolecular") 
+plot.t<-PLOT.trans(PARM=c(2,250), Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc", transformation="Monomolecular") 
 ```
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. We will add some random noise to the resistance values prior to optimization.
@@ -191,9 +196,27 @@ What the `SS_optim` function does:
  *In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.
   
  
-Following a complete long run of the optimization algorithm, we can inspect the results of the single surface optimization ans see that we have recovered the data generating parameters:
+Following a complete long run of the optimization algorithm, we can inspect the results of the single surface optimization ans see that we have recovered the data generating parameters reasonably well (see below for comments):
 ```{r}
 SS_RESULTS$ContinuousResults
+```
+
+To view the AICc response surface for the Monomolecular optimization of this surface, run `Grid.Search`
+```{r Grid.Search_example, echo=F,cache=TRUE}
+Grid.Results<-Grid.Search(shape=seq(1,5,by=.1),max=seq(25,500,by=25),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
+
+filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value")
+```
+This plot highlights an important point about optimization with these methods: you can accurately recover the shape of the transformation, but determining maximum resistance values is much less precise. As can be seen in the contour plot, there is a very narrow trough identifying the correct shape, but this trough extends the range of tested resistance values. It is important to remember that resistance measures are relative. While precise optimization of maximum resistance values remains difficult for single surfaces, it appears to be more tractable when optimizing multiple resistance simultaneously (see below). 
+
+The actual difference in AICc values between the minimum AICc from the grid search and the AICc from the data generating parameters is minimal
+```{r}
+# Best from Grid.Search
+Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
+
+# Data generating values
+Grid.Results$AICc[match(interaction(2,250),interaction(Grid.Results$AICc[,c(1,2)])),]
+
 ```
 
 
@@ -240,7 +263,7 @@ Now make a categorical feature class (like a road)
 ```{r feature.sim, warning=FALSE,message=FALSE}
 feature <- matrix(0,r.dim,r.dim)
 feature[25,] <- 1
-feature[,30:31] <- 1
+feature[,28:29] <- 1
 feature <- raster(feature)
 extent(feature)<-extent(cat.rf)
 plot(feature)
@@ -265,21 +288,21 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
 
 Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter. Look in the help file for `PLOT.trans` for transformation names/numbers.
 ```{r inverse-reverse.mono }
-plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Inverse-Reverse Monomolecular") 
+plot.t<-PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Example/cont.asc",transformation="Inverse-Reverse Monomolecular") 
 ```
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`. Note that the minimum value defined for categorical surfaces is 0. This is because 1 is added to the combined surfaces after they are added together. In this way, the lowest resistance possible on the landscape is 1.  
 ```{r combine.surfaces}
-PARM=c(0,150,50,1,2,100,0,250)
+PARM=c(0,150,50,1,2,250,0,400)
 
 # PARM=c(0, # First feature of categorical
 #        150, # Second feature of categorical
 #        50, # Third feature of categorical
 #        1, # Transformation equation for continuous surface
 #        2, #  Shape parameter
-#        100, # Scale parameter
+#        250, # Scale parameter
 #        0, # First feature of feature surface
-#        250) # Second feature of feature surface
+#        400) # Second feature of feature surface
 
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
@@ -309,10 +332,7 @@ Run prep functions
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=750) 
-
-# Running this multisurface example with the default `pop.mult` and `run` settings
-# took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor
+                   max.cont=500) 
 
 CS.inputs<-CS.prep(n.POPS=n,
                       RESPONSE=CS.response,
@@ -320,11 +340,10 @@ CS.inputs<-CS.prep(n.POPS=n,
                       CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
-Run `MS_optim`
+Run `MS_optim`. Running this multisurface example with the default settings took XX minutes to complete on a computer with an Intel i7 3.4 GHz processor.
 ```{r Multi_optim, warning=FALSE, results='hide',message=FALSE, cache=TRUE}
 Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,
                                GA.inputs=GA.inputs)
-
 ```
 
 

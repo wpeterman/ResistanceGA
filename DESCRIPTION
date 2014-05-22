@@ -8,6 +8,7 @@ Description: This package contains functions to optimize
     Continuous and categorical surfaces can be optimized, and
     multiple surfaces can be simultaneously optimized to create
     novel resistance surfaces.
+VignetteBuilder: knitr
 Depends:
     R (>= 3.0.3)
 Imports:
@@ -18,6 +19,7 @@ Imports:
     lme4 (>= 1.0),
     ggplot2
 Suggests:
-    RandomFields
+    RandomFields,
+    knitr
 License: GPL-3
 LazyData: true

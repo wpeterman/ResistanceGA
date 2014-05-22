@@ -82,3 +82,27 @@ dev.off()
 Resistance.Opt_single(PARM=c(3,2,100),
                       Resistance=CS.Resist,
                       CS.inputs,GA.inputs,Min.Max='max',iter=1)
+
+##################################
+Grid.Results<-Grid.Search(shape=seq(1,5,by=.1),max=seq(25,500,by=25),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
+
+
+Grid.Results<-Grid.Search(shape=seq(1,10,by=.25),max=seq(25,500,by=25),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
+
+# Alternatively
+filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value")
+
+filled.contour(Grid.Results,col=terrain.colors(30),xlab="Shape parameter",ylab="Maximum value")
+
+Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
+
+
+
+# Good
+wireframe(abs(z) ~ y*x, data = Grid.Results,shade=FALSE, aspect=c(1,1),
+          xlab = "Max value", ylab = "Shape parameter",zlab=list("abs(AICc)",rot=90),
+          main = "Absolute AICc across Max*Shape parameter space",
+          drape = TRUE,
+          scales=list(arrows=F),
+          screen = list(z=-20, x=-85, y=-10)
+)

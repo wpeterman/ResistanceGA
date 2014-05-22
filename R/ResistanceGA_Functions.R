@@ -1,7 +1,7 @@
 ########################################################################################  
 ############ CONDUCT GRID SEARCH OF PARAMETER SPACE TO VIEW RESPONSE SURFACE ########### 
 ########################################################################################  
-#' Conduct response surface grid search
+#' Conduct grid search of response surface 
 #' 
 #' Visualize the AICc response surface
 #' 
@@ -35,12 +35,19 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs) {
   EQ<-get.EQ(transformation)
 
 for(i in 1:nrow(GRID)){
-  AICc<-Resistance.Optimization_cont.nlm(log(GRID[i,]),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min')
+  AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min')
+  
   results<-as.matrix(cbind(GRID[i,],AICc))
+  
   RESULTS[i,]<-results  
 }
-
+RESULTS <- data.frame(RESULTS)
 Results.mat <- interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
+
+AICc<-RESULTS
+colnames(AICc)<-c("shape","max","AICc")
+Results.mat<-list(Plot.data=Results.mat,AICc=AICc)
+
 return(Results.mat)
 }
 ########################################################################################  
@@ -710,7 +717,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
       SHAPE <-  (parm[2])
       Max.SCALE <- (parm[3])
       
-      if(equation==2|4|6|8 & SHAPE>6){
+      if(equation==2||equation==4||equation==6||equation==8 & SHAPE>6){
         equation<-9
       }
       
@@ -1211,7 +1218,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   #   }
   
   # Apply specified transformation
-  if(equation==2|4|6|8 & SHAPE>6){
+  if(equation==2||equation==4||equation==6||equation==8 & SHAPE>6){
     equation<-9
   }
   
@@ -1345,7 +1352,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 ############################################
 
 # Run Mixed effects models, recovery parameter estimates
-#' Run maximum likelihood population effects mixed effects model (MLPE)
+#' Obtain coefficients from maximum likelihood population effects mixed effects model (MLPE)
 #' 
 #' Runs MLPE as detailed by Clarke et al. (2002). This function is designed to generate a table of the fitted mixed effects model coefficients
 #' 

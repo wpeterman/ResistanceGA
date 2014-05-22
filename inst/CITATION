@@ -11,7 +11,7 @@ citEntry(entry = "Article",
          url    = "http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract",
 
  textVersion  =
-  paste("Peterman et al. (2014).",
+  paste("Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014.",
         "Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander.",
         "Molecular Ecology, 23:2402-2414.")
 )

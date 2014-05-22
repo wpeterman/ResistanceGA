@@ -24,4 +24,4 @@ Further details of about the functions included in this package can be found in 
 
 These methods have been developed from the methods first utilized in Peterman et al. (2014). Please cite this paper if you use these methods!
 
-Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. [Molecular Ecology 23:2402–2413](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Peterman et al.").
+Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. [PDF](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/peterman_et_al._2014--mec.pdf "Peterman et al.").

@@ -136,7 +136,7 @@ plot(Sample.coord, pch=16, col="blue", add=TRUE)
 # Make categorical feature class (like a road)
 feature <- matrix(0,r.dim,r.dim)
 feature[25,] <- 1
-feature[,30:31] <- 1
+feature[,28:29] <- 1
 feature <- raster(feature)
 extent(feature)<-extent(cat.rf)
 plot(feature)
@@ -155,10 +155,10 @@ write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,r
 #############################
 # Visualize transformation of continuous surface. The first term of the PARM function refers to the shape parameter, and the second term refers to the maximum value parameter.
 
-plot.t<-PLOT.trans(PARM=c(2,100),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
-PARM=c(0,150,50,1,2,100,0,250)
+PARM=c(0,150,50,1,2,250,0,400)
 
 
 # GA.inputs<-GA.prep(ASCII.dir=write.dir,
@@ -180,7 +180,7 @@ Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Ma
 CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # Generate some random noise and add it to the resistance surface
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.07*max(CS.Resist)))
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
 plot(Resist)
 
 CS.response<-round((CS.Resist+NOISE),digits=4)
