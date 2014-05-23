@@ -156,15 +156,10 @@ r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=250, r=co
 plot.t <- PLOT.trans(PARM=c(2,250), Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc", transformation="Monomolecular") 
 ```
 
-Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. We will add some random noise to the resistance values prior to optimization.
+Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. This will be our response that we optimize on.
 ```{r echo=FALSE}
-CS.Resist <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
-
-# Add some random noise to the response 
-NOISE <- rnorm(n=length(CS.Resist), mean=0, sd=(0.05*max(CS.Resist))) # Generate random noise matrix
-
-# Use this as the RESPONSE for single surface testing
-CS.response <- CS.Resist+NOISE
+# Create the true resistance/response surface
+CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 
 # Write CS.response to file for use with optimization
 write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.names=F)
@@ -207,15 +202,14 @@ SS_RESULTS$ContinuousResults
 1    cont 2114.687 Monomolecular 2.119496 389.0944
 ```
 
-To view the AICc response surface for the Monomolecular optimization of this surface, run `Grid.Search`
+To view the AICc response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relavent for single continuous surfaces.
 ```{r eval=FALSE}
 Grid.Results <- Grid.Search(shape=seq(1,5,by=0.1),max=seq(50,750,by=50),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
 
 filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value")
 ```
 ![GRID.Surface](figure/Grid.Surface.svg)
-
-This plot highlights an important point about optimization with these methods: you can accurately recover the shape of the transformation, but determining maximum resistance values is much less precise. As can be seen in the contour plot, there is a very narrow trough identifying the correct shape, but this trough extends the range of tested resistance values. It is important to remember that resistance measures are relative. While precise optimization of maximum resistance values remains difficult for single surfaces, it appears to be more tractable when optimizing multiple resistance simultaneously (see below). 
+Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. 
 
 The actual difference in AICc values between the minimum AICc from the grid search and the AICc from the data generating parameters is minimal
 ```{r eval=FALSE}
@@ -323,16 +317,7 @@ plot(Resist)
 
 Generate new CS response surface by using `Run_CS`
 ```{r combine.cs }
-CS.Resist <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
-```
-
-Generate random noise, add it to the resistance surface and export the response object for use with CIRCUITSCAPE
-```{r cs.resposne.multi}
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
-CS.response<-CS.Resist + NOISE
-
- # Look at relationship between 'truth' and response with added noise
-plot(CS.response~CS.Resist, ylab = "Response (CS.Resist + Noise", xlab = "Original resistance (CS.Resist)")
+CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # Write the response to a file
 write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
