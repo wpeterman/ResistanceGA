@@ -94,14 +94,14 @@ write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.name
 
 # Remake the CS.inputs file, including the newly created CS.Response
 CS.inputs<-CS.prep(n.POPS=n,
-                   RESPONSE=CS.response,
+                   RESPONSE=CS.Resist,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Grid search
-Grid.Results <- Grid.Search(shape=seq(1,4,by=0.05),max=seq(50,500,by=50),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
+Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=50),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
 
-filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value")
+filled.contour(Grid.Results$Plot.data,col=topo.colors(12),xlab="Shape parameter",ylab="Maximum value")
 
 # Best from Grid.Search
 Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
@@ -189,14 +189,14 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
 Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 # Generate new CS response surface by using Run_CS
-CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+CS.response<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
-# Generate some random noise and add it to the resistance surface
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
-plot(Resist)
-
-CS.response<-round((CS.Resist+NOISE),digits=4)
-plot(CS.response~CS.Resist)
+# # Generate some random noise and add it to the resistance surface
+# NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
+# plot(Resist)
+# 
+# CS.response<-round((CS.Resist+NOISE),digits=4)
+# plot(CS.response~CS.Resist)
 write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
 
 # Run prep functions
