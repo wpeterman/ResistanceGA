@@ -73,7 +73,7 @@ test.rast<-raster(TEST)
 
 
 # Arrange the 8 charts
-svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Transformations.svg",width=15,height=20)
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Transformations.svg",width=10,height=13.33)
 grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
 dev.off()
 
@@ -84,18 +84,22 @@ Resistance.Opt_single(PARM=c(3,2,100),
                       CS.inputs,GA.inputs,Min.Max='max',iter=1)
 
 ##################################
-Grid.Results<-Grid.Search(shape=seq(1,5,by=.1),max=seq(25,500,by=25),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
+Grid.Results<-Grid.Search(shape=seq(1,5,by=0.1),max=seq(50,750,by=50),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
 
 
 Grid.Results<-Grid.Search(shape=seq(1,10,by=.25),max=seq(25,500,by=25),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
 
 # Alternatively
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=4,height=4)
 filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value")
+dev.off()
 
-filled.contour(Grid.Results,col=terrain.colors(30),xlab="Shape parameter",ylab="Maximum value")
+
+# filled.contour(Grid.Results,col=terrain.colors(30),xlab="Shape parameter",ylab="Maximum value")
 
 Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
 
+Grid.Results$AICc[match(interaction(2,250),interaction(Grid.Results$AICc[,c(1,2)])),]
 
 
 # Good

@@ -20,7 +20,8 @@ keepBest=TRUE,
 population = gaControl(type)$population,
 selection = gaControl(type)$selection,
 crossover="gareal_blxCrossover",
-mutation = gaControl(type)$mutation)
+mutation = gaControl(type)$mutation,
+quiet = FALSE)
 }
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized.}
@@ -60,6 +61,8 @@ mutation = gaControl(type)$mutation)
 \item{keepBest}{A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)}
 
 \item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria}
+
+\item{quiet}{Logical. If TRUE, AICc and iteration time will not be printed to the screen after each iteration. Default = FALSE}
 }
 \value{
 An R object that is a required input into optimization functions

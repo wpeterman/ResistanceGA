@@ -8,7 +8,7 @@
 #' @param shape A vector values for the shape parameter
 #' @param max A vector of values for the maximum value parameter
 #' @param transformation Transformation to apply. Can be either numeric or character of transformation name
-#' @param Resistance An R Raster object
+#' @param Resistance An R Raster object, or path to a .asc file
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @usage Grid.Search <- (shape, max, transformation, Resistance, CS.inputs)
 #' @export
@@ -27,8 +27,12 @@
 #'    }
 
 Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs) {
-  r <-SCALE(Resistance,0,10)
-  
+  if(class(Resistance)[1]!='RasterLayer') {  
+    r <- raster(Resistance)
+    r <- SCALE(r,0,10)
+  } else {    
+    r <-SCALE(Resistance,0,10)
+  }
    
   GRID <- expand.grid(shape,max)
   RESULTS <- matrix(nrow=nrow(GRID),ncol=3); colnames(RESULTS)<-c("shape","max","AICc")
@@ -100,7 +104,8 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
                      run=GA.inputs$run,
                      keepBest=GA.inputs$keepBest,
                      elitism=GA.inputs$percent.elite, 
-                     iter=i) 
+                     iter=i,
+                     quiet = GA.inputs$quiet) 
       
       df <- data.frame(id=unique.rast(r),single.GA@solution) 
       r <-subs(r,df)
@@ -142,7 +147,8 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
                      run=GA.inputs$run,
                      keepBest=GA.inputs$keepBest,
                      elitism=GA.inputs$percent.elite, 
-                     iter=i)  
+                     iter=i,
+                     quiet = GA.inputs$quiet)  
       
       # Using GA results, optimize with nlm  
       start.vals <- single.GA@solution[-1]
@@ -274,7 +280,8 @@ MS_optim<-function(CS.inputs,GA.inputs){
                    maxiter=GA.inputs$maxiter,
                    run=GA.inputs$run,
                    keepBest=GA.inputs$keepBest,
-                   suggestions=GA.inputs$SUGGESTS) 
+                   suggestions=GA.inputs$SUGGESTS,
+                   quiet = GA.inputs$quiet) 
   
   RAST<-Combine_Surfaces(multi.GA_nG@solution,CS.inputs,GA.inputs)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -283,7 +290,7 @@ MS_optim<-function(CS.inputs,GA.inputs){
   
   Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
   
-  Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs) 
+  Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, CS.inputs=CS.inputs) 
   return(multi.GA_nG)
 }
 
@@ -678,9 +685,10 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
+#' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @return AIC value from mixed effect model
 #' @export
-Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
+Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE){
   t1<-Sys.time()
   
   ID<-CS.inputs$ID
@@ -848,9 +856,10 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   
   t2 <-Sys.time()
+  if(quiet==FALSE){
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
   cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
-  
+  }
   
   
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
@@ -868,9 +877,11 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max){
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max'). Default in 'max'
+#' @param iter A counter for the number of surfaces that will be optimized
+#' @param quiet Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.
 #' @return AIC value from mixed effect model
 #' @export
-Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='max',iter){
+Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='max',iter, quiet=FALSE){
   t1<-Sys.time()
   
   ID<-CS.inputs$ID
@@ -1022,9 +1033,10 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   k<-length(PARM)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   t2 <-Sys.time()
+  if(quiet==FALSE){    
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
   cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
-  
+  }
   
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 }
@@ -1061,7 +1073,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
 #' @import ggplot2
 
 PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
-    if(length(Resistance)>1) {
+    if(length(Resistance)==2) {
     r <- Resistance
     Mn=min(r)
     Mx=max(r) 
@@ -1185,7 +1197,7 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL){
 ############################################################################  
 ############ OPTIMIZATION FUNCTION USING GA STARTS: CONTINUOUS ############ 
 ############################################################################  
-Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS.inputs,Min.Max) {
+Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS.inputs,Min.Max,quiet=FALSE) {
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
   RESPONSE<-CS.inputs$RESPONSE
@@ -1343,9 +1355,10 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
     
   t2 <-Sys.time()
+  if(quiet==FALSE){    
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
   cat(paste0("\t", "AICc = ",round(AICc,3)),"\n")
-  
+  }
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized    
   
 }
@@ -1548,6 +1561,7 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria
+#' @param quiet Logical. If TRUE, AICc and iteration time will not be printed to the screen after each iteration. Default = FALSE
 #' @return An R object that is a required input into optimization functions
 #' 
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
@@ -1574,7 +1588,8 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' population = gaControl(type)$population,
 #' selection = gaControl(type)$selection,
 #' crossover="gareal_blxCrossover",
-#' mutation = gaControl(type)$mutation)
+#' mutation = gaControl(type)$mutation,
+#' quiet = FALSE)
 
 GA.prep<-function(ASCII.dir,
                   Min.Max='max',
@@ -1593,7 +1608,8 @@ GA.prep<-function(ASCII.dir,
                   population = gaControl(type)$population,
                   selection = gaControl(type)$selection,
                   crossover="gareal_blxCrossover",
-                  mutation = gaControl(type)$mutation) {   
+                  mutation = gaControl(type)$mutation,
+                  quiet = FALSE) {   
   
   ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
   
@@ -1661,7 +1677,7 @@ GA.prep<-function(ASCII.dir,
   }
   SUGGESTS <-matrix(unlist(SUGGESTS), nrow=nrow(SUGGESTS[[1]]), byrow=F)
   
-  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.dir, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max)  
+  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.dir, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, quiet = quiet)  
   
 }
 #####################################
@@ -2037,11 +2053,12 @@ get.EQ <-function(equation){   # Apply specified transformation
   }
 }
 
-Result.txt <- function(GA.results, GA.inputs){
+Result.txt <- function(GA.results, GA.inputs, CS.inputs){
   summary.file<-paste0(GA.inputs$Results.dir,"Multisurface_Optim_Summary.txt")
   AICc<-GA.results@fitnessValue
   AICc<-round(AICc*-1,digits=4)
   ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
+  mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE)
   
 sink(summary.file)
 cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
@@ -2064,6 +2081,9 @@ cat(paste0("Minimum AICc: ",AICc),"\n")
 cat("\n")
 cat(paste0("Optimized values for each surface:"),"\n")
 cat(GA.results@solution,"\n")
+cat("\n")
+cat(paste0("MLPE parameter coefficients:"),"\n")
+cat(mlpe.results,"\n")
 sink()
 }
 # Optimiazation preparation

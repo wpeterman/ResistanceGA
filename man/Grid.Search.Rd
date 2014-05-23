@@ -12,7 +12,7 @@ Grid.Search <- (shape, max, transformation, Resistance, CS.inputs)
 
 \item{transformation}{Transformation to apply. Can be either numeric or character of transformation name}
 
-\item{Resistance}{An R Raster object}
+\item{Resistance}{An R Raster object, or path to a .asc file}
 
 \item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}
 }

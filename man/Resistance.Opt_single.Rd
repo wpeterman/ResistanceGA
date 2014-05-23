@@ -4,7 +4,7 @@
 \title{Optimize resistance surfaces individually}
 \usage{
 Resistance.Opt_single(PARM, Resistance, CS.inputs, GA.inputs, Min.Max = "max",
-  iter)
+  iter, quiet = FALSE)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.}
@@ -16,6 +16,10 @@ Resistance.Opt_single(PARM, Resistance, CS.inputs, GA.inputs, Min.Max = "max",
 \item{GA.inputs}{Object created from running \code{\link{GA.prep}} function}
 
 \item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max'). Default in 'max'}
+
+\item{iter}{A counter for the number of surfaces that will be optimized}
+
+\item{quiet}{Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.}
 }
 \value{
 AIC value from mixed effect model
