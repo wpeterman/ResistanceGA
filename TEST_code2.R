@@ -73,7 +73,7 @@ test.rast<-raster(TEST)
 
 
 # Arrange the 8 charts
-svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Transformations.svg",width=10,height=13.33)
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Transformations.svg",width=9,height=12)
 grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
 dev.off()
 
@@ -90,8 +90,8 @@ Grid.Results<-Grid.Search(shape=seq(1,5,by=0.1),max=seq(50,750,by=50),transforma
 Grid.Results<-Grid.Search(shape=seq(1,10,by=.25),max=seq(25,500,by=25),transformation="Monomolecular",Resistance=cont.rf,CS.inputs)
 
 # Alternatively
-svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=4,height=4)
-filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value")
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=6,height=6)
+filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value parameter")
 dev.off()
 
 

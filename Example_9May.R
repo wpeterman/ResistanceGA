@@ -4,7 +4,7 @@ require(ggplot2)
 
 
 rm(list = ls())
-set.seed(112233)
+set.seed(321123)
 ###################################
 # Where are ASCII files and batch files going to be written to?
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
@@ -74,20 +74,20 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) # Note that RESPONSE is omittted because it has not been made yet
 
 # Monomolecular = equation # 3
-PARM=c(3,2,250)
-Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=250,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+PARM=c(3,2,275)
+Resist<-Resistance.tran(transformation="Monomolecular",shape=2,max=275,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
-Resist.false<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+# Resist.false<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 
-plot.t<-PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-PLOT.trans(PARM=c(2,275),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
 # Only continuous the surface will affect resistance in the first example
 CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # We add some random noise to the response (i.e. CS resistance output)
-NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.025*max(CS.Resist))) # Generate random noise matrix
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.005*max(CS.Resist))) # Generate random noise matrix
 CS.response<-round((CS.Resist+NOISE),digits=4) # Add random noise to resistance output. Use this as the RESPONSE for single surface testing
 plot(CS.response~CS.Resist)
 write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.names=F)
@@ -99,15 +99,23 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Grid search
-Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=50),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
+Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
 
-filled.contour(Grid.Results$Plot.data,col=topo.colors(12),xlab="Shape parameter",ylab="Maximum value")
+filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value parameter")
+# Alternatively
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=6,height=6)
+filled.contour(Grid.Results$Plot.data,col=topo.colors(25),xlab="Shape parameter",ylab="Maximum value parameter")
+dev.off()
+
+png("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.png",units="in", width=4,height=4,res=150)
+filled.contour(Grid.Results$Plot.data,col=topo.colors(25),xlab="Shape parameter",ylab="Maximum value parameter")
+dev.off()
 
 # Best from Grid.Search
 Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
 
 # Data generating values
-Grid.Results$AICc[match(interaction(2,250),interaction(Grid.Results$AICc[,c(1,2)])),]
+Grid.Results$AICc[match(interaction(2,275),interaction(Grid.Results$AICc[,c(1,2)])),]
 
 # Single surface optimization
 system.time(SS_RESULTS<-SS_optim(CS.inputs=CS.inputs,

@@ -9,13 +9,13 @@ Example Function Use
 ------
 ### Background
 
-With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how one can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, implemented using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
+With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how you can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, implemented using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
 
 
 This package fills a void in the landscape genetics toolbox. There are various methods proposed for determining resistance values (reviewed by [Spear et al., 2010](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2010.04657.x/abstract "Spear et al.")). Previously utilized methods generally searched a limited parameter space and/or relied on expert opinion. [Graves et al. (2013)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12348/abstract "Graves et al.") utilized optimization functions and interindividual genetic distances to determine resistance values, but found that the data generating values were rarely recoverable. I have not assessed the ability of functions/methods utilized in this package to optimize resistance surfaces as in Graves et al. (2013), but do note that very different methods of scaling, transforming, and combining resistance surfaces are utilized in `ResistanceGA`.
 
 
-A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. Please make sure you carefully read through the [CIRCUITSCAPE](http://www.circuitscape.org/home "CIRCUITSCAPE") documentation, as well as other relevant papers by [Brad McCrae](http://www.circuitscape.org/pubs "McCrae papers") . If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will not be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 80x80 pixel simulated landscapes used in this tutorial, each optimization iteration takes 0.75--1.25 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). The largest surfaces I've attempted to optimize using these methods were 600x600 pixels, which took ~13 seconds per iteration. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--150 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that 2500--2.25 &times; 10<sup>4</sup> iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I am eager to make this as accessible, functional, and as useful as possible, so any and all feedback is appreciated.
+A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. Please make sure you carefully read through the [CIRCUITSCAPE](http://www.circuitscape.org/home "CIRCUITSCAPE") documentation, as well as other relevant papers by [Brad McCrae](http://www.circuitscape.org/pubs "McCrae papers") to get a more complete understanding of resistance modeling and circuit theory. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will not be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 50x50 pixel simulated landscapes used in this tutorial, each optimization iteration takes 0.75--1.00 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). The largest surfaces I've attempted to optimize using these methods were 600x600 pixels, which took ~13 seconds per iteration. It appears that under most circumstances the resolution of the landscape can be reduced without loss of information. If you want to use the optimization procedures in `ResistanceGA`, but are working with a large landscape, I might suggest reducing the resolution first. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--150 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that 2500--2.25 &times; 10<sup>4</sup> iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I am eager to make this as accessible, functional, and as useful as possible, so any and all feedback is appreciated.
 
 
 **References**   
@@ -188,7 +188,7 @@ plot.t <- PLOT.trans(PARM = c(2, 250), Resistance = "C:/ResistanceGA_Examples/Si
 ![plot of chunk monomolec.plot](figure/monomolec_plot.png) 
 
 
-Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. We will add some random noise to the resistance values prior to optimization.
+Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. After we add some random noise, this will be our response that we optimize on.
 
 
 
@@ -230,40 +230,35 @@ SS_RESULTS$ContinuousResults
 1    cont 2114.687 Monomolecular 2.119496 389.0944
 ```
 
-To view the AICc response surface for the Monomolecular optimization of this surface, run `Grid.Search`
+To view the AICc response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relavent for single continuous surfaces.
+
+```r
+Grid.Results <- Grid.Search(shape = seq(1, 5, by = 0.1), max = seq(50, 750, 
+    by = 50), transformation = "Monomolecular", Resistance = cont.rf, CS.inputs)
+
+filled.contour(Grid.Results$Plot.data, col = topo.colors(30), xlab = "Shape parameter", 
+    ylab = "Maximum value")
+```
+
+![GRID.Surface](figure/Grid.Surface.png)      
+Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely.
 
 
-This plot highlights an important point about optimization with these methods: you can accurately recover the shape of the transformation, but determining maximum resistance values is much less precise. As can be seen in the contour plot, there is a very narrow trough identifying the correct shape, but this trough extends the range of tested resistance values. It is important to remember that resistance measures are relative. While precise optimization of maximum resistance values remains difficult for single surfaces, it appears to be more tractable when optimizing multiple resistance simultaneously (see below). 
 
-The actual difference in AICc values between the minimum AICc from the grid search and the AICc from the data generating parameters is minimal
+Determine the best value from `Grid.Search`
 
 ```r
 # Best from Grid.Search
-Grid.Results$AICc[match(min(Grid.Results$AICc$AICc), Grid.Results$AICc$AICc), 
-    ]
-```
+Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
 
-```
-##     shape max AICc
-## 791   2.1 500 2115
-```
-
-```r
-
-# Data generating values
-Grid.Results$AICc[match(interaction(2, 250), interaction(Grid.Results$AICc[, 
-    c(1, 2)])), ]
-```
-
-```
-##     shape max AICc
-## 380     2 250 2115
+  shape max      AICc
+135     2 250 -17229.74
 ```
 
 
 
  ****
- ###Simultaneous optimization of multiple surfaces
+ ### Simultaneous optimization of multiple surfaces
 
 **Simulate data**
 
@@ -372,26 +367,16 @@ plot(Resist)
 ![plot of chunk combine.surfaces](figure/combine_surfaces.png) 
 
 
-Generate new CS response surface by using `Run_CS`
+Generate new CS response surface by using `Run_CS`, and then add some random noise.
 
 ```r
-CS.Resist <- Run_CS(CS.inputs = CS.inputs, GA.inputs = GA.inputs, r = Resist)
-```
+# Create the true resistance/response surface
+CS.response <- Run_CS(CS.inputs = CS.inputs, GA.inputs = GA.inputs, r = Resist)
 
+# Generate some random noise and add it to the resistance surface
+NOISE <- rnorm(n = length(CS.Resist), mean = 0, (0.025 * max(CS.Resist)))
 
-Generate random noise, add it to the resistance surface and export the response object for use with CIRCUITSCAPE
-
-```r
-NOISE <- rnorm(n = length(CS.Resist), mean = 0, (0.05 * max(CS.Resist)))
 CS.response <- CS.Resist + NOISE
-
-# Look at relationship between 'truth' and response with added noise
-plot(CS.response ~ CS.Resist, ylab = "Response (CS.Resist + Noise", xlab = "Original resistance (CS.Resist)")
-```
-
-![plot of chunk cs.resposne.multi](figure/cs_resposne_multi.png) 
-
-```r
 
 # Write the response to a file
 write.table(CS.response, file = paste0(write.dir, "Combined_response.csv"), 
@@ -467,5 +452,5 @@ pairs(ms.stack)
 ![plot of chunk combined.plots](figure/combined_plots3.png) 
 
 
-##Summary
+### Summary   
 Hopefully this simple vignette/tutorial has aqequately demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of a single surface, as demonstrated in the grid search. However, when surfaces are optimized simultaneously, the maximum values of each surface are more accurately recovered. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided. While this approach certainly isn't without its flaws, and overfitting is always a concern, hopefully these methods will be accessible and useful to others. Development and advancement of these methods will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.

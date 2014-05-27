@@ -855,10 +855,20 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   k<-max(GA.params$parm.index)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   
+  RUN<-GA.inputs$run
+  
+  if(AICc<RUN.val||RUN.val==NA){
+    RUN.val<-AICc
+    RUN.iter<-RUN    
+  } else {
+    RUN.iter<-RUN.iter-1    
+  }
+  
   t2 <-Sys.time()
   if(quiet==FALSE){
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
+  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
+  cat(paste0("\t", RUN.iter," iterations to completion if no improvement in AICc","\n","\n")
   }
   
   
@@ -1032,10 +1042,19 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   
   k<-length(PARM)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
+  
+  if(AICc<RUN.val||RUN.val==NA){
+    RUN.val<-AICc
+    RUN.iter<-RUN    
+  } else {
+    RUN.iter<-RUN.iter-1    
+  }
+  
   t2 <-Sys.time()
-  if(quiet==FALSE){    
-  cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
+  if(quiet==FALSE){
+    cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
+    cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
+    cat(paste0("\t", RUN.iter," iterations to completion if no improvement in AICc","\n","\n")
   }
   
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
