@@ -67,7 +67,8 @@ writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500)
+                   max.cont=500,
+                   seed = 5)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -101,21 +102,25 @@ CS.inputs<-CS.prep(n.POPS=n,
 # Grid search
 Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
 
-filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value parameter")
-# Alternatively
-svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=6,height=6)
-filled.contour(Grid.Results$Plot.data,col=topo.colors(25),xlab="Shape parameter",ylab="Maximum value parameter")
-dev.off()
-
-png("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.png",units="in", width=4,height=4,res=150)
-filled.contour(Grid.Results$Plot.data,col=topo.colors(25),xlab="Shape parameter",ylab="Maximum value parameter")
-dev.off()
+filled.contour(Grid.Results$Plot.data,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
 
 # Best from Grid.Search
 Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
 
 # Data generating values
 Grid.Results$AICc[match(interaction(2,275),interaction(Grid.Results$AICc[,c(1,2)])),]
+
+#############################
+# Alternatively
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=6,height=6)
+filled.contour(Grid.Results$Plot.data,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
+dev.off()
+
+png("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.png",units="in", width=4,height=4,res=150)
+filled.contour(Grid.Results$Plot.data,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
+dev.off()
+#############################
+
 
 # Single surface optimization
 system.time(SS_RESULTS<-SS_optim(CS.inputs=CS.inputs,
@@ -124,6 +129,7 @@ system.time(SS_RESULTS<-SS_optim(CS.inputs=CS.inputs,
 
 
 #############################
+set.seed(5)
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
   dir.create(file.path("C:/", "ResistanceGA_Examples")) 
 
@@ -191,7 +197,8 @@ PARM=c(0,150,50,1,2,250,0,400)
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500)
+                   max.cont=500,
+                   seed = 5)
 
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file

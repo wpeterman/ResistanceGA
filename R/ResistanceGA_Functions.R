@@ -90,7 +90,11 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       r<-GA.inputs$Resistance.stack[[i]]
       names(r)<-GA.inputs$layer.names[i]
       
-      single.GA <-ga(type= "real-valued",fitness=Resistance.Opt_single,Resistance=r, 
+      single.GA <-ga(type= "real-valued",
+                     fitness=Resistance.Opt_single,
+                     Resistance=r, 
+                     population = GA.inputs$population,
+                     selection = GA.inputs$selection,
                      pcrossover=GA.inputs$pcrossover,
                      pmutation=GA.inputs$pmutation,
                      crossover=GA.inputs$crossover,
@@ -104,8 +108,11 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
                      run=GA.inputs$run,
                      keepBest=GA.inputs$keepBest,
                      elitism=GA.inputs$percent.elite, 
+                     mutation = GA.inputs$mutation,
+                     seed = GA.inputs$seed,
                      iter=i,
                      quiet = GA.inputs$quiet) 
+      
       
       df <- data.frame(id=unique.rast(r),single.GA@solution) 
       r <-subs(r,df)
@@ -133,7 +140,11 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       r<-SCALE(GA.inputs$Resistance.stack[[i]],0,10)
       names(r)<-GA.inputs$layer.names[i]
       
-      single.GA <-ga(type= "real-valued",fitness=Resistance.Opt_single,Resistance=r, 
+      single.GA <-ga(type= "real-valued",
+                     fitness=Resistance.Opt_single,
+                     Resistance=r, 
+                     population = GA.inputs$population,
+                     selection = GA.inputs$selection,
                      pcrossover=GA.inputs$pcrossover,
                      pmutation=GA.inputs$pmutation,
                      crossover=GA.inputs$crossover,
@@ -147,8 +158,10 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
                      run=GA.inputs$run,
                      keepBest=GA.inputs$keepBest,
                      elitism=GA.inputs$percent.elite, 
+                     mutation = GA.inputs$mutation,
+                     seed = GA.inputs$seed,
                      iter=i,
-                     quiet = GA.inputs$quiet)  
+                     quiet = GA.inputs$quiet) 
       
       # Using GA results, optimize with nlm  
       start.vals <- single.GA@solution[-1]
@@ -280,8 +293,11 @@ MS_optim<-function(CS.inputs,GA.inputs){
                    maxiter=GA.inputs$maxiter,
                    run=GA.inputs$run,
                    keepBest=GA.inputs$keepBest,
+                   seed = GA.inputs$seed,
                    suggestions=GA.inputs$SUGGESTS,
                    quiet = GA.inputs$quiet) 
+  
+  
   
   RAST<-Combine_Surfaces(multi.GA_nG@solution,CS.inputs,GA.inputs)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -855,20 +871,11 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   k<-max(GA.params$parm.index)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   
-  RUN<-GA.inputs$run
-  
-  if(AICc<RUN.val||RUN.val==NA){
-    RUN.val<-AICc
-    RUN.iter<-RUN    
-  } else {
-    RUN.iter<-RUN.iter-1    
-  }
-  
+ 
   t2 <-Sys.time()
   if(quiet==FALSE){
   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
-  cat(paste0("\t", RUN.iter," iterations to completion if no improvement in AICc","\n","\n")
+  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
   }
   
   
@@ -1042,19 +1049,12 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   
   k<-length(PARM)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-  
-  if(AICc<RUN.val||RUN.val==NA){
-    RUN.val<-AICc
-    RUN.iter<-RUN    
-  } else {
-    RUN.iter<-RUN.iter-1    
-  }
+
   
   t2 <-Sys.time()
   if(quiet==FALSE){
     cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-    cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
-    cat(paste0("\t", RUN.iter," iterations to completion if no improvement in AICc","\n","\n")
+    cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
   }
   
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
@@ -1580,6 +1580,7 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria
+#' @param seed Random number seed to replicate \code{ga} optimization
 #' @param quiet Logical. If TRUE, AICc and iteration time will not be printed to the screen after each iteration. Default = FALSE
 #' @return An R object that is a required input into optimization functions
 #' 
@@ -1608,6 +1609,7 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' selection = gaControl(type)$selection,
 #' crossover="gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
+#' seed = runif(1,1,9999),
 #' quiet = FALSE)
 
 GA.prep<-function(ASCII.dir,
@@ -1628,6 +1630,7 @@ GA.prep<-function(ASCII.dir,
                   selection = gaControl(type)$selection,
                   crossover="gareal_blxCrossover",
                   mutation = gaControl(type)$mutation,
+                  seed = runif(1,1,9999),
                   quiet = FALSE) {   
   
   ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
