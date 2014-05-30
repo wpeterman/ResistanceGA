@@ -219,7 +219,15 @@ This package consists of several wrapper functions for implementing functions fr
 
 <h3>Continuous surface transformations</h3>
 
-<p>Load the required R packages, clear your workspace, and set a random number seed. The <code>RandomFields</code> package will be used to simulate resistance surfaces. The <code>akima</code> package is needed to interpolate response grids.  The <code>ResistanceGA</code> package requires the <code>raster</code>, <code>plyr</code>, <code>GA</code>, <code>lme4</code> (&gt;= 1.0), and <code>ggplot2</code> packages.</p>
+<p>First, install <code>ResistanceGA</code> from GitHub. This will require the <code>devtools</code> package</p>
+
+<pre><code class="r">install.packages(&quot;devtools&quot;)  # Installs the &#39;devtools&#39; package
+library(devtools)  # Loads devtools
+
+install_github(&quot;wpeterman/ResistanceGA&quot;)  # Downloads package
+</code></pre>
+
+<p>Load the required R packages, clear your workspace, and set a random number seed.</p>
 
 <pre><code class="r">require(RandomFields)
 require(ResistanceGA)

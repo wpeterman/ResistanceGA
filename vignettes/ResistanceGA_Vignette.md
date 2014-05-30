@@ -42,7 +42,17 @@ Demonstrations
 ------
 ### Continuous surface transformations
 
-Load the required R packages, clear your workspace, and set a random number seed. The `RandomFields` package will be used to simulate resistance surfaces. The `akima` package is needed to interpolate response grids.  The `ResistanceGA` package requires the `raster`, `plyr`, `GA`, `lme4` (>= 1.0), and `ggplot2` packages.
+First, install `ResistanceGA` from GitHub. This will require the `devtools` package
+
+```r
+install.packages("devtools")  # Installs the 'devtools' package
+library(devtools)  # Loads devtools
+
+install_github("wpeterman/ResistanceGA")  # Downloads package
+```
+
+
+Load the required R packages, clear your workspace, and set a random number seed.
 
 ```r
 require(RandomFields)

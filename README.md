@@ -17,14 +17,13 @@ Once the package is installed, you can further explore the functions by opening 
 vignette('ResistanceGA_Vignette')  # Opens tutorial in web browser
 ```
 *****
-Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' located in the help files.
 
 ### Other notes
 
 In order to use this package, you must have CIRCUITSCAPE installed.
 Version 4.0 or higher is required.
 Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
-*****
+
 
 This approach has been developed from the methods first utilized in Peterman et al. (2014). **_Please cite this paper if you use these methods!_**
 
