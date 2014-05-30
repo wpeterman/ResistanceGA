@@ -9,7 +9,7 @@
 #' @param max A vector of values for the maximum value parameter
 #' @param transformation Transformation to apply. Can be either numeric or character of transformation name
 #' @param Resistance An R Raster object, or path to a .asc file
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 #' @export
 #' @return This function will return values that can be plotted to visualize the response surface
@@ -63,8 +63,8 @@ return(Results.mat)
 #' 
 #' Optimize all surfaces contained in a directory using a genetic algorithm executed with the \code{\link[GA]{ga}} function in the Genetic Algorithms package \pkg{GA}
 #' 
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.
 #' @return This function optimizes multiple resistance surfaces. Following optimization, several summary objects are created.\cr
 #' \enumerate{
@@ -276,8 +276,8 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
 #' 
 #' Optimize multiple resistance surfaces simultaneously using genetic algorithms
 #' 
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @return This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.
 #' @usage MS_optim(CS.inputs, GA.inputs)
 
@@ -346,8 +346,8 @@ Response.Figs<- function(Optim.input){
 #' 
 #' Execute CS from R
 #' 
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param r Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object
 #' @param CurrentMap Logical. If TRUE, the cumulative resistance map will be generated during the CS run (Default = FALSE)
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)
@@ -432,8 +432,8 @@ if(class(r)[1]!='RasterLayer') {
 #' Combine multiple resistance surfaces into new composite surface based on specified parameters
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param out Directory to write combined .asc file. Default is GA.inputs$Results.dir
 #' @details \code{PARM} is designed to accept the output of \code{MS_optim}. For continuous surfaces, there are three terms: 1) Transformation, 2) shape, and 3) maximum value. Transformation must be provided as a numeric value:\cr
 #' \tabular{ll}{
@@ -703,8 +703,8 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
 #' Create composite resistance surface by simultaneously optimizing multiple categoricla and continuous surfaces. This optimization function is designed to be called from GA
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @return AIC value from mixed effect model
@@ -897,8 +897,8 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.
 #' @param Resistance Resistance surface to be optimized. This should be an R raster object. If not specified, the function will attempt to find the a resistance surface from \code{GA.inputs}
-#' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @param GA.inputs Object created from running \code{\link{GA.prep}} function
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max'). Default in 'max'
 #' @param iter A counter for the number of surfaces that will be optimized
 #' @param quiet Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.

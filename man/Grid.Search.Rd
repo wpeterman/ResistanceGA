@@ -14,7 +14,7 @@ Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 
 \item{Resistance}{An R Raster object, or path to a .asc file}
 
-\item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
 }
 \value{
 This function will return values that can be plotted to visualize the response surface

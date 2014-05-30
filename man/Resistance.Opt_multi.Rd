@@ -8,9 +8,9 @@ Resistance.Opt_multi(PARM, CS.inputs, GA.inputs, Min.Max, quiet = FALSE)
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.}
 
-\item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
 
-\item{GA.inputs}{Object created from running \code{\link{GA.prep}} function}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max')}
 
