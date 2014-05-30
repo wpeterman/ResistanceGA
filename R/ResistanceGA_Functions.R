@@ -753,7 +753,8 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
       SHAPE <-  (parm[2])
       Max.SCALE <- (parm[3])
       
-      if(equation==2||equation==4||equation==6||equation==8 & SHAPE>6){
+      rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+      if(rick.eq==TRUE & SHAPE>6){
         equation<-9
       }
       
@@ -941,7 +942,8 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
     Max.SCALE <- (PARM[3])
     
     # Apply specified transformation
-    if(equation==2||equation==4||equation==6||equation==8 & SHAPE>6){
+    rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+    if(rick.eq==TRUE & SHAPE>6){
       equation<-9
     }
     
@@ -1267,7 +1269,8 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   cat("\n", Name, as.character(EQ),paste0("| Shape = ",SHAPE,"; "),paste0("Maximum scale = ",Max.SCALE,"\n"))  
    
   # Apply specified transformation
-  if(equation==2||equation==4||equation==6||equation==8 & SHAPE>6){
+  rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+  if(rick.eq==TRUE & SHAPE>6){
     equation<-9
   }
   

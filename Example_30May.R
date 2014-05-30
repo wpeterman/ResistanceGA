@@ -74,14 +74,14 @@ CS.inputs<-CS.prep(n.POPS=n,
                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) # Note that RESPONSE is omittted because it has not been made yet
 
 # Monomolecular = equation # 3
-PARM=c(2,2,275)
-Resist<-Resistance.tran(transformation="Reverse Ricker",shape=2,max=275,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+PARM=c(2,3.2,125)
+Resist<-Resistance.tran(transformation="Inverse-Reverse Ricker",shape=3.2,max=125,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 names(Resist)<-"Resist"
 
 # Resist.false<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 
-plot.t<-PLOT.trans(PARM=c(2,275),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Reverse Ricker") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-PLOT.trans(PARM=c(3.2,125),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Inverse-Reverse Ricker") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
 # Only continuous the surface will affect resistance in the first example
@@ -102,7 +102,7 @@ CS.inputs<-CS.prep(n.POPS=n,
 # Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Write.dir,"Resist_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Write.dir)
 
 # Grid search
-Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Reverse Ricker",Resistance=cont.rf, CS.inputs)
+Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Inverse-Reverse Ricker",Resistance=cont.rf, CS.inputs)
 
 filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value parameter")
 
@@ -110,7 +110,7 @@ filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter"
 Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
 
 # Data generating values
-Grid.Results$AICc[match(interaction(2,275),interaction(Grid.Results$AICc[,c(1,2)])),]
+Grid.Results$AICc[match(interaction(3.2,125),interaction(Grid.Results$AICc[,c(1,2)])),]
 
 #############################
 # svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Grid.Surface.svg",width=6,height=6)
@@ -227,3 +227,7 @@ plot(Resist.opt)
 
 
 rm(list=".Random.seed", envir=globalenv()) 
+
+rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+(equation==2||equation==4||equation==6||equation==8 & SHAPE>6)
+(rick.eq==TRUE & SHAPE>6)
