@@ -73,7 +73,7 @@ test.rast<-raster(TEST)
 
 
 # Arrange the 8 charts
-svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/figure/Transformations.svg",width=9,height=12)
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/vignettes//figure/Transformations.svg",width=10,height=13.333)
 grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
 dev.off()
 

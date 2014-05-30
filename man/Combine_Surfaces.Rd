@@ -34,14 +34,4 @@ Combine multiple resistance surfaces into new composite surface based on specifi
    \tab 9 = "Distance"\cr
    }
 }
-\examples{
-# Assuming one continuous and 4-class categorical surface are being combined,
-# this example would apply an Inverse-Reverse Monomolecular transformation with a shape of 2 and max of 100.
-# The four classes/categories of the categorical surface would be reclassified to 1, 75, 50, and 250.
-# Categories are modified sequentially within a layer.
-
-Combine_Surfaces(PARM=c(1,2,100,1,75,50,250),
-CS.inputs=CS.inputs,
-GA.inputs=GA.inputs)
-}
 

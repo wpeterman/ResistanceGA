@@ -3,7 +3,7 @@
 \alias{Resistance.tran}
 \title{Apply transformation to continuous resistance surface}
 \usage{
-Resistance.tran(transformation, shape, max,CS.inputs,r)
+Resistance.tran(transformation, shape, max, r, out)
 }
 \arguments{
 \item{transformation}{Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)}

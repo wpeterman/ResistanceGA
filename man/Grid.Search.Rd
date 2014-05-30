@@ -3,7 +3,7 @@
 \alias{Grid.Search}
 \title{Conduct grid search of response surface}
 \usage{
-Grid.Search <- (shape, max, transformation, Resistance, CS.inputs)
+Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 }
 \arguments{
 \item{shape}{A vector of values for the shape parameter}

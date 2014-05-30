@@ -10,7 +10,7 @@
 #' @param transformation Transformation to apply. Can be either numeric or character of transformation name
 #' @param Resistance An R Raster object, or path to a .asc file
 #' @param CS.inputs Object created from running \code{\link{CS.prep}} function
-#' @usage Grid.Search <- (shape, max, transformation, Resistance, CS.inputs)
+#' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 #' @export
 #' @return This function will return values that can be plotted to visualize the response surface
 #' @details This function will perform a full factorial grid search of the values provided in the shape and max.scale vectors. Depending on the number of values provided for each, and the time it takes to run each iteration, this process may take a while to complete. \cr Suitable values for transformation:\cr
@@ -25,6 +25,8 @@
 #'    \tab 8 = "Inverse Ricker"\cr
 #'    \tab 9 = "Distance"\cr
 #'    }
+
+
 
 Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs) {
   if(class(Resistance)[1]!='RasterLayer') {  
@@ -71,7 +73,7 @@ return(Results.mat)
 #' \item Three summary .csv files are generated: CategoricalResults.csv, ContinuousResults.csv, & All_Results_AICc.csv. These tables contain AICc values and optimization summaries for each surface.
 #' }
 #' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
-#' @usage SS_optim(CS.inputs, GA.inputs)
+#' @usage SS_optim(CS.inputs, GA.inputs, nlm)
 
 #' @export
 SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
@@ -445,15 +447,6 @@ if(class(r)[1]!='RasterLayer') {
 #'    \tab 8 = "Inverse Ricker"\cr
 #'    \tab 9 = "Distance"\cr
 #'    }
-#' @examples
-#' # Assuming one continuous and 4-class categorical surface are being combined,
-#' # this example would apply an Inverse-Reverse Monomolecular transformation with a shape of 2 and max of 100. 
-#' # The four classes/categories of the categorical surface would be reclassified to 1, 75, 50, and 250. 
-#' # Categories are modified sequentially within a layer.
-#' 
-#' Combine_Surfaces(PARM=c(1,2,100,1,75,50,250), 
-#' CS.inputs=CS.inputs, 
-#' GA.inputs=GA.inputs)
 #' 
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
 #' @export
@@ -583,7 +576,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
 #' @param max Value of the maximum value parameter
 #' @param r Resistance surface to be transformed. Can be supplied as full path to .asc file or as a raster object
 #' @param out Directory to write transformed .asc file. Default is NULL, and will not export .asc file
-#' @usage Resistance.tran(transformation, shape, max,CS.inputs,r)
+#' @usage Resistance.tran(transformation, shape, max, r, out)
 #' @return R raster object
 #' @details Valid arguements for \code{transformation} are:\cr
 #' \tabular{ll}{
@@ -1106,7 +1099,6 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
 #' The "Distance" equation sets all cell values equal to 1.
 #' @usage PLOT.trans(PARM, Resistance, transformation, print.dir, Name)
 #' @export
-#' @import ggplot2
 
 PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="layer"){
     if(length(Resistance)==2) {
@@ -1462,16 +1454,16 @@ MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){
 #' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
 #' 
 #' @param cs.resistance Pairwise resistance distance matrix (resistances.out) from CS results
-#' @param genetic.dist Lower half of pairwise genetic distance matrix
-#' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = TRUE.
+#' @param pairwise.genetic Lower half of pairwise genetic distance matrix
+#' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE
 #' @return A glmer object from the fitted model
 #' @details An AIC value will only be returned if \code{REML = FALSE}
 
 #' @export
-#' @usage MLPE.lmm(cs.resistance, pairwise.genetic)
+#' @usage MLPE.lmm(cs.resistance, pairwise.genetic, REML)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
-MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=TRUE){ 
+MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){ 
   RESPONSE=pairwise.genetic
 
     mm<-(read.table(cs.resistance)[-1,-1])
@@ -1507,7 +1499,7 @@ MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=TRUE){
 #' @return A four panel PDF including residual scatterplot, historgram of residuals, qqplot, and 
 
 #' @export
-#' @usage Diagnostic.Plots(resist.layer.path, genetic.dist, XLAB,YLAB, plot.dir)
+#' @usage Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
 
 Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir){
   RESPONSE=genetic.dist
@@ -1588,7 +1580,6 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)
-#' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @param pop.mult Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.
 #' @param percent.elite Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.
 #' @param type Default is "real-valued"
@@ -1787,7 +1778,7 @@ To.From.ID<-function(POPS){
 
 # Create ZZ matrix for mixed effects model
 ZZ.mat <- function(ID) {
-  Zl <- lapply(c("pop1","pop2"), function(nm) Matrix:::fac2sparse(ID[[nm]],"d", drop=FALSE))
+  Zl <- lapply(c("pop1","pop2"), function(nm) Matrix::fac2sparse(ID[[nm]],"d", drop=FALSE))
   ZZ <- Reduce("+", Zl[-1], Zl[[1]])
   return(ZZ)
 }
@@ -2134,11 +2125,6 @@ Optim.input<-function(Response,n.Pops,ASCII.dir,CS_Point.File,CS.exe,Neighbor.Co
   libs=c("raster", "lme4", "plyr")
   CheckInstallPackage(packages=libs)
   
-  # Load libraries
-  require(raster)
-  require(lme4)
-  require(plyr)
-  require(GA)
   #####################
   if(is.vector(Response)==TRUE || dim(Response)[1]!=dim(Response)[2]) {warning("Must provide square distance matrix with no column or row names")}
   Response.vec<-Response[lower.tri(Response)]

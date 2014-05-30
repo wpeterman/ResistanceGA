@@ -1,7 +1,10 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Optimize resistance surfaces with the Resistance GA Library}
+%\VignetteIndexEntry{A Vignette/Tutorial to use ResistanceGA}
 -->
+
+
+
 
 ResistanceGA: An R Package for Optimizing Resistance Surfaces using Genetic Algorithms
 =====
@@ -356,30 +359,11 @@ plot(Resist)
 ![plot of chunk combine.surfaces](figure/combine_surfaces.png) 
 
 
-Generate new CS response surface by using `Run_CS`, and then add some random noise.
+Generate new CS response surface by using `Run_CS`.
 
 ```r
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs = CS.inputs, GA.inputs = GA.inputs, r = Resist)
-
-# Generate some random noise and add it to the resistance surface
-NOISE <- rnorm(n = length(CS.Resist), mean = 0, (0.025 * max(CS.Resist)))
-```
-
-```
-## Error: object 'CS.Resist' not found
-```
-
-```r
-
-CS.response <- CS.Resist + NOISE
-```
-
-```
-## Error: object 'CS.Resist' not found
-```
-
-```r
 
 # Write the response to a file
 write.table(CS.response, file = paste0(write.dir, "Combined_response.csv"), 
@@ -429,26 +413,19 @@ PARM
 The optimized values appear to be ~1.77 times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (1 = Inverse-Reverse Monomolecular). Visually, the resistance values of the two surfaces are nearly identical:
 
 ```r
-plot(Resist, main = "True Resistance")  # Original
-```
-
-![plot of chunk combined.plots](figure/combined_plots1.png) 
-
-```r
-
 # Read in combined, optimized resistance surface
 optim.resist <- raster("C:/ResistanceGA_Examples/MultipleSurfaces/Results/cat.cont.feature.asc")
-plot(optim.resist, main = "Optimized Resistance")  # Optimized
+ms.stack <- stack(Resist, optim.resist)
+plot(ms.stack, main = c("True Resistance", "Optimized Resistance"))  # Optimized
 ```
 
-![plot of chunk combined.plots](figure/combined_plots2.png) 
+![plot of chunk combined.plots](figure/combined_plots.png) 
 
 
 We can look at the correaltion between 'Truth' and 'Optimized' resistance surfaces, and can see that they are perfectly correlated.  
 
 ```r
 # Correlation between the two surfaces
-ms.stack <- stack(Resist, optim.resist)
 names(ms.stack) <- c("Truth", "Optimized")
 pairs(ms.stack)
 ```

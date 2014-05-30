@@ -3,14 +3,14 @@
 \alias{MLPE.lmm}
 \title{Run maximum likelihood population effects mixed effects model (MLPE)}
 \usage{
-MLPE.lmm(cs.resistance, pairwise.genetic)
+MLPE.lmm(cs.resistance, pairwise.genetic, REML)
 }
 \arguments{
 \item{cs.resistance}{Pairwise resistance distance matrix (resistances.out) from CS results}
 
-\item{genetic.dist}{Lower half of pairwise genetic distance matrix}
+\item{pairwise.genetic}{Lower half of pairwise genetic distance matrix}
 
-\item{REML}{Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = TRUE.}
+\item{REML}{Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE}
 }
 \value{
 A glmer object from the fitted model

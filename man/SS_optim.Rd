@@ -3,7 +3,7 @@
 \alias{SS_optim}
 \title{Single surface optimization}
 \usage{
-SS_optim(CS.inputs, GA.inputs)
+SS_optim(CS.inputs, GA.inputs, nlm)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}

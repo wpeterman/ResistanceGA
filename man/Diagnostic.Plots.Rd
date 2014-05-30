@@ -3,7 +3,7 @@
 \alias{Diagnostic.Plots}
 \title{Create diagnostic plots}
 \usage{
-Diagnostic.Plots(resist.layer.path, genetic.dist, XLAB,YLAB, plot.dir)
+Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
 }
 \arguments{
 \item{cs.resistance.mat}{Path to CIRCUITSCAPE "_resistances.out" file}

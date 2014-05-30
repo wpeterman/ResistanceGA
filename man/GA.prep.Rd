@@ -35,8 +35,6 @@ quiet = FALSE)
 
 \item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)}
 
-\item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
-
 \item{pop.mult}{Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.}
 
 \item{percent.elite}{Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.}
