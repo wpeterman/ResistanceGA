@@ -6,9 +6,9 @@
 Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
 }
 \arguments{
-\item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
 
-\item{GA.inputs}{Object created from running \code{\link{GA.prep}} function}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{r}{Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object}
 

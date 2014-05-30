@@ -6,9 +6,9 @@
 SS_optim(CS.inputs, GA.inputs, nlm)
 }
 \arguments{
-\item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
 
-\item{GA.inputs}{Object created from running \code{\link{GA.prep}} function}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{nlm}{Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.}
 }

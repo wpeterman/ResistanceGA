@@ -8,9 +8,9 @@ Combine_Surfaces(PARM, CS.inputs, GA.inputs, out = GA.inputs$Results.dir)
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces}
 
-\item{CS.inputs}{Object created from running \code{\link{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
 
-\item{GA.inputs}{Object created from running \code{\link{GA.prep}} function}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{out}{Directory to write combined .asc file. Default is GA.inputs$Results.dir}
 }
