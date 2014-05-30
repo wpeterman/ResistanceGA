@@ -28,9 +28,9 @@ Valid arguements for \code{transformation} are:\cr
    \tab 1 = "Inverse-Reverse Monomolecular"\cr
    \tab 2 = "Inverse-Reverse Ricker"\cr
    \tab 3 = "Monomolecular"\cr
-   \tab 4 = "Ricker"\cr
+   \tab 4 = "Ricker"\cr"
    \tab 5 = "Reverse Monomolecular"\cr
-   \tab 6 = 'Reverse Ricker"\cr
+   \tab 6 = "Reverse Ricker"\cr
    \tab 7 = "Inverse Monomolecular"\cr
    \tab 8 = "Inverse Ricker"\cr
    \tab 9 = "Distance"\cr

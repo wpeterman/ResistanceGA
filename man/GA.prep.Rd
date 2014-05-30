@@ -21,6 +21,7 @@ population = gaControl(type)$population,
 selection = gaControl(type)$selection,
 crossover="gareal_blxCrossover",
 mutation = gaControl(type)$mutation,
+seed = floor(runif(1,1,99999)),
 quiet = FALSE)
 }
 \arguments{
@@ -61,6 +62,8 @@ quiet = FALSE)
 \item{keepBest}{A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)}
 
 \item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria}
+
+\item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
 \item{quiet}{Logical. If TRUE, AICc and iteration time will not be printed to the screen after each iteration. Default = FALSE}
 }

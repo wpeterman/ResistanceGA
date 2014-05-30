@@ -3,7 +3,7 @@
 \alias{PLOT.trans}
 \title{Plot continuous surface transformation}
 \usage{
-PLOT.trans(PARM, Resistance, transformation, print.dir)
+PLOT.trans(PARM, Resistance, transformation, print.dir, Name)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)}
@@ -13,6 +13,8 @@ PLOT.trans(PARM, Resistance, transformation, print.dir)
 \item{transformation}{Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)}
 
 \item{print.dir}{Specify the directory where a .tiff of the transformation will be written (Default = NULL)}
+
+\item{Name}{Name of resistance surface being transformed (optional). This will be added to the output file name.}
 }
 \value{
 plot of transformed resistance values against original resistance values
