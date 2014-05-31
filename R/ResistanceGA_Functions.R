@@ -304,6 +304,12 @@ MS_optim<-function(CS.inputs,GA.inputs){
                    suggestions=GA.inputs$SUGGESTS,
                    quiet = GA.inputs$quiet) 
   
+  # Run second optimization to determine if maximum resistance values should be adjusted
+  optim(PARM, 
+        MAx.optim_Brent,
+        method = "Brent",
+        lower = 0,
+        upper = 100)
   
   
   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
@@ -319,6 +325,8 @@ MS_optim<-function(CS.inputs,GA.inputs){
   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, CS.inputs=CS.inputs) 
   return(multi.GA_nG)
 }
+
+
 
 ###############################################################################  
 ############ Create continuous surface response figures ############ 

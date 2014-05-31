@@ -197,7 +197,8 @@ PARM=c(0,150,50,1,2,250,0,400)
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500)
+                   max.cont=500,
+                   seed = 99)
 
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file

@@ -130,13 +130,13 @@ system.time(SS_RESULTS<-SS_optim(CS.inputs=CS.inputs,
 
 #############################
 set.seed(321)
-if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
-  dir.create(file.path("C:/", "ResistanceGA_Examples")) 
+if("ResistanceGA_Examples2"%in%dir("C:/")==FALSE) 
+  dir.create(file.path("C:/", "ResistanceGA_Examples2")) 
 
 # Create a subdirectory for the second example
-dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces")) 
+dir.create(file.path("C:/ResistanceGA_Examples2/","MultipleSurfaces")) 
 
-write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
+write.dir <- "C:/ResistanceGA_Examples2/MultipleSurfaces/"      # Directory to write .asc files and results
 
 
 # Simulate another continuous surface. This will be converted into a 3-class categorical surface
@@ -184,7 +184,7 @@ write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,r
 plot.t<-PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
-PARM=c(0,150,50,1,2,250,0,400)
+PARM1=c(0,150,50,1,2,250,0,400)
 
 
 # GA.inputs<-GA.prep(ASCII.dir=write.dir,
@@ -197,13 +197,23 @@ PARM=c(0,150,50,1,2,250,0,400)
 GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
-                   max.cont=500)
+                   max.cont=500,
+                   seed = 99)
 
 # Combine resistance surfaces
-Resist<-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
+Resist<-Combine_Surfaces(PARM=PARM1,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
 
 # Generate new CS response surface by using Run_CS
+names(Resist)<-"r.truth"
 CS.response<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+
+# Optimized values
+PARM2=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1 ,225.7778)
+Resist.opt<-Combine_Surfaces(PARM=PARM2,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
+names(Resist.opt)<-"r.opt"
+
+CS.response2<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist.opt)
+
 
 # # Generate some random noise and add it to the resistance surface
 # NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
@@ -215,15 +225,25 @@ write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",r
 
 # Run prep functions
 CS.inputs<-CS.prep(n.POPS=n,
-                      RESPONSE=CS.response,
-                      CS_Point.File=paste0(write.dir,"samples.txt"),
-                      CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+                   RESPONSE=CS.response,
+                   CS_Point.File=paste0(write.dir,"samples.txt"),
+                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
-system.time(Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,GA.inputs=GA.inputs))
+# CS.inputs2<-CS.prep(n.POPS=n,
+#                    RESPONSE=CS.response2,
+#                    CS_Point.File=paste0(write.dir,"samples.txt"),
+#                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+
 
 Resist.opt<-Combine_Surfaces(PARM=Multi.Surface_optim@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
 plot(Resist.opt)
 
+### How does AICc differ?
+(Resist.truth <- MLPE.lmm(cs.resistance=paste0(GA.inputs$Write.dir,"r.truth_resistances.out"),pairwise.genetic=CS.inputs$RESPONSE,REML=FALSE))
+(Resist.opt <- MLPE.lmm(cs.resistance=paste0(GA.inputs$Write.dir, "r.opt_resistances.out"),pairwise.genetic=CS.inputs2$RESPONSE,REML=FALSE))
+
+
+system.time(Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,GA.inputs=GA.inputs))
 
 
 rm(list=".Random.seed", envir=globalenv()) 
