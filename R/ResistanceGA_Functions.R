@@ -305,15 +305,16 @@ MS_optim<-function(CS.inputs,GA.inputs){
                    quiet = GA.inputs$quiet) 
   
   # Run second optimization to determine if maximum resistance values should be adjusted
-  Parm.multiplier <- optim(PARM=1, 
-                           MAx.optim_Brent,
-                           method = "Brent",
-                           lower = 0,
-                           upper = 100,
-                           GA.inputs = GA.inputs,
-                           CS.inputs = CS.inputs,
-                           GA.opt = multi.GA_nG@solution)
-  
+#   Parm.multiplier <- optim(par=1,
+#                            fn = Max.optim_Brent,
+#                            method = "Brent",
+#                            lower = 0,
+#                            upper = 25,
+#                            GA.inputs = GA.inputs,
+#                            CS.inputs = CS.inputs,
+#                            GA.opt = multi.GA_nG@solution)
+#                              c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1, 225.7778))
+#   
   
   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -336,14 +337,14 @@ MS_optim<-function(CS.inputs,GA.inputs){
 #' 
 #' Following GA optimization, determine if the maximum resistance values are correct. This optimization function is designed to take results from GA optimization
 #' 
-#' @param PARM A single multiplier value to pass to Brent optimization algorithm. Can range from 0--100.
+#' @param PARM A single multiplier value to pass to Brent optimization algorithm. Can range from 0--25
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @param GA.opt Optimied parameters from GA optimization
 #' @return AIC value from mixed effect model
-MAx.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE, GA.opt){
+Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE, GA.opt){
   t1<-Sys.time()
   
   ID<-CS.inputs$ID
@@ -366,9 +367,6 @@ MAx.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
       
       r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))
       
-      
-      #       cat(GA.params$layer.names[i],"\n")
-      
     } else {
       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
       parm <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
@@ -379,7 +377,7 @@ MAx.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
       
       # Read in resistance surface to be optimized
       SHAPE <-  (parm[2])
-      Max.SCALE <- (parm[3])
+      Max.SCALE <- (parm[3])*PARM[1]
       
       rick.eq<-(equation==2||equation==4||equation==6||equation==8)
       if(rick.eq==TRUE & SHAPE>6){

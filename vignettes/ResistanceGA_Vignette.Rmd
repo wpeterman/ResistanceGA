@@ -367,8 +367,9 @@ PARM
 ```
 The optimized values appear to be ~`r round(400/225.7778, 2)` times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (1 = Inverse-Reverse Monomolecular). Visually, the resistance values of the two surfaces are nearly identical:
 ```{r combined.plots,fig.width=12,fig.height=8}
-# Read in combined, optimized resistance surface
-optim.resist <- raster("C:/ResistanceGA_Examples/MultipleSurfaces/Results/cat.cont.feature.asc")
+# Make combined, optimized resistance surface.
+# This could also be read in from the results directory
+optim.resist <- Combine_Surfaces(PARM=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1, 225.7778),CS.inputs,GA.inputs)
 ms.stack <- stack(Resist, optim.resist)
 plot(ms.stack, main=c("True Resistance", "Optimized Resistance")) # Optimized
 ```
