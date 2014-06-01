@@ -369,8 +369,7 @@ MS_optim<-function(CS.inputs,GA.inputs){
 #       
 #     } else {
 #       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
-#       parm <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
-#       
+#       parm <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]#       
 #       
 #       # Set equation for continuous surface
 #       equation <- floor(parm[1]) # Parameter can range from 1-9.99
