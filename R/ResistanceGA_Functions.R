@@ -1823,7 +1823,7 @@ CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' selection = gaControl(type)$selection,
 #' crossover="gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
-#' seed = floor(runif(1,1,99999)),
+#' seed = NULL,
 #' quiet = FALSE)
 
 GA.prep<-function(ASCII.dir,
