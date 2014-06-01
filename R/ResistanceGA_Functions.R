@@ -343,183 +343,183 @@ MS_optim<-function(CS.inputs,GA.inputs){
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @param GA.opt Optimied parameters from GA optimization
-#' @return AIC value from mixed effect model
-Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE, GA.opt){
-  t1<-Sys.time()
-  
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
-  #   CS.version<-CS.inputs$CS.version
-  CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
-  EXPORT.dir<-GA.inputs$Write.dir
-  GA.params<-GA.inputs
-  ######
-  r <- GA.params$Resistance.stack
-  
-  for(i in 1:GA.params$n.layers){
-    if(GA.params$surface.type[i]=="cat"){
-      ga.p <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
-      parm <- (ga.p-1)*PARM[1]
-      df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
-      r[[i]] <-subs(r[[i]],df)
-      
-      r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))
-      
-    } else {
-      rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
-      parm <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
-      
-      
-      # Set equation for continuous surface
-      equation <- floor(parm[1]) # Parameter can range from 1-9.99
-      
-      # Read in resistance surface to be optimized
-      SHAPE <-  (parm[2])
-      Max.SCALE <- (parm[3])*PARM[1]
-      
-      rick.eq<-(equation==2||equation==4||equation==6||equation==8)
-      if(rick.eq==TRUE & SHAPE>6){
-        equation<-9
-      }
-      
-      # Apply specified transformation
-      if(equation==1){
-        SIGN=-1 # Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
-        R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-        R.vec <- rev(R) # Reverse
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Inverse-Reverse Monomolecular"
-        
-      } else if(equation==5){
-        SIGN=1
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
-        R.vec <- rev(R) # Reverse
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Reverse Monomolecular"        
-        
-      } else if(equation==3){
-        SIGN=1
-        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular    
-        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Monomolecular"
-        
-      } else if (equation==7) {
-        SIGN=-1 #Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
-        r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Inverse Monomolecular"        
-        
-      } else if (equation==8) {
-        SIGN=-1 #Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
-        r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Inverse Ricker"  
-        
-      } else if (equation==4) {
-        SIGN=1
-        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
-        r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Ricker"
-        
-      } else if (equation==6) {
-        SIGN=1
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
-        R.vec <- rev(R)
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Reverse Ricker"        
-        
-      } else if (equation==2) {
-        SIGN=-1 # Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
-        R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-        R.vec <- rev(R) # Reverse
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-        EQ <- "Inverse-Reverse Ricker"
-        
-      } else {
-        r[[i]] <- (rast*0) #  Cancel layer...set to zero
-      } # End if-else  
-    } # Close parameter type if-else  
-  } # Close layer loop
-  
-  
-  File.name <- "multi_surface"
-  
-  multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
-  if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
-  
-  writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
-  
-  # Modify and write Circuitscape.ini file
-  #############################################################################################  
-  BATCH<-paste0(EXPORT.dir,File.name,".ini")        
-  OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
-  HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
-  LOCATION.FILE <- paste0("point_file = ", CS.inputs$CS_Point.File)
-  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
-  CONNECTION=paste0("connect_four_neighbors_only=",connect)
-  
-  #   if(CS.version=='3.5.8'){
-  #     write.CS_3.5.8(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,VERSION=VERSION)
-  #   } else {
-  write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
-  #   }
-  
-  ##########################################################################################
-  # Run Circuitscape
-  CS.exe<-CS.exe
-  
-  # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-  hidden = TRUE
-  
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
-  
-  #########################################
-  # Run mixed effect model on each Circuitscape effective resistance
-  
-  CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
-  
-  # Get AIC statistic for transformed-scaled resistance surface
-  cs.matrix<-read.matrix(CS.results)
-  cs.matrix<-scale(cs.matrix,center=TRUE,scale=TRUE)
-  # cs.matrix2<-round(read.matrix(CS.results),4)
-  
-  data<-cbind(ID,cs.matrix,RESPONSE)
-  
-  # Assign value to layer
-  LAYER<-assign("LAYER",value=data$cs.matrix)
-  
-  # Fit model
-  mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=data,REML=FALSE)
-  mod$reTrms$Zt <- ZZ
-  dfun <- do.call(mkLmerDevfun,mod)
-  opt <- optimizeLmer(dfun)
-  AIC.stat <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-  #    summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-  
-  k<-max(GA.params$parm.index)+1
-  AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-  
- 
-  t2 <-Sys.time()
-  if(quiet==FALSE){
-  cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
-  }
-  
-  
-  OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
-}
+# #' @return AIC value from mixed effect model
+# Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE, GA.opt){
+#   t1<-Sys.time()
+#   
+#   ID<-CS.inputs$ID
+#   ZZ<-CS.inputs$ZZ
+#   RESPONSE<-CS.inputs$RESPONSE
+#   #   CS.version<-CS.inputs$CS.version
+#   CS_Point.File<-CS.inputs$CS_Point.File
+#   CS.exe<-CS.inputs$CS.exe
+#   EXPORT.dir<-GA.inputs$Write.dir
+#   GA.params<-GA.inputs
+#   ######
+#   r <- GA.params$Resistance.stack
+#   
+#   for(i in 1:GA.params$n.layers){
+#     if(GA.params$surface.type[i]=="cat"){
+#       ga.p <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+#       parm <- (ga.p-1)*PARM[1]
+#       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
+#       r[[i]] <-subs(r[[i]],df)
+#       
+#       r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))
+#       
+#     } else {
+#       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
+#       parm <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+#       
+#       
+#       # Set equation for continuous surface
+#       equation <- floor(parm[1]) # Parameter can range from 1-9.99
+#       
+#       # Read in resistance surface to be optimized
+#       SHAPE <-  (parm[2])
+#       Max.SCALE <- (parm[3])*PARM[1]
+#       
+#       rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+#       if(rick.eq==TRUE & SHAPE>6){
+#         equation<-9
+#       }
+#       
+#       # Apply specified transformation
+#       if(equation==1){
+#         SIGN=-1 # Inverse
+#         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+#         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
+#         R.vec <- rev(R) # Reverse
+#         rast.R <- setValues(R,values=R.vec)
+#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Inverse-Reverse Monomolecular"
+#         
+#       } else if(equation==5){
+#         SIGN=1
+#         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+#         R.vec <- rev(R) # Reverse
+#         rast.R <- setValues(R,values=R.vec)
+#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Reverse Monomolecular"        
+#         
+#       } else if(equation==3){
+#         SIGN=1
+#         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular    
+#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Monomolecular"
+#         
+#       } else if (equation==7) {
+#         SIGN=-1 #Inverse
+#         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+#         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
+#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Inverse Monomolecular"        
+#         
+#       } else if (equation==8) {
+#         SIGN=-1 #Inverse
+#         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
+#         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Inverse Ricker"  
+#         
+#       } else if (equation==4) {
+#         SIGN=1
+#         r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Ricker"
+#         
+#       } else if (equation==6) {
+#         SIGN=1
+#         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+#         R.vec <- rev(R)
+#         rast.R <- setValues(R,values=R.vec)
+#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Reverse Ricker"        
+#         
+#       } else if (equation==2) {
+#         SIGN=-1 # Inverse
+#         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
+#         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+#         R.vec <- rev(R) # Reverse
+#         rast.R <- setValues(R,values=R.vec)
+#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
+#         EQ <- "Inverse-Reverse Ricker"
+#         
+#       } else {
+#         r[[i]] <- (rast*0) #  Cancel layer...set to zero
+#       } # End if-else  
+#     } # Close parameter type if-else  
+#   } # Close layer loop
+#   
+#   
+#   File.name <- "multi_surface"
+#   
+#   multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
+#   if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
+#   
+#   writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+#   
+#   # Modify and write Circuitscape.ini file
+#   #############################################################################################  
+#   BATCH<-paste0(EXPORT.dir,File.name,".ini")        
+#   OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
+#   HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
+#   LOCATION.FILE <- paste0("point_file = ", CS.inputs$CS_Point.File)
+#   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
+#   CONNECTION=paste0("connect_four_neighbors_only=",connect)
+#   
+#   #   if(CS.version=='3.5.8'){
+#   #     write.CS_3.5.8(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,VERSION=VERSION)
+#   #   } else {
+#   write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
+#   #   }
+#   
+#   ##########################################################################################
+#   # Run Circuitscape
+#   CS.exe<-CS.exe
+#   
+#   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
+#   hidden = TRUE
+#   
+#   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+#   CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+#   
+#   #########################################
+#   # Run mixed effect model on each Circuitscape effective resistance
+#   
+#   CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
+#   
+#   # Get AIC statistic for transformed-scaled resistance surface
+#   cs.matrix<-read.matrix(CS.results)
+#   cs.matrix<-scale(cs.matrix,center=TRUE,scale=TRUE)
+#   # cs.matrix2<-round(read.matrix(CS.results),4)
+#   
+#   data<-cbind(ID,cs.matrix,RESPONSE)
+#   
+#   # Assign value to layer
+#   LAYER<-assign("LAYER",value=data$cs.matrix)
+#   
+#   # Fit model
+#   mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=data,REML=FALSE)
+#   mod$reTrms$Zt <- ZZ
+#   dfun <- do.call(mkLmerDevfun,mod)
+#   opt <- optimizeLmer(dfun)
+#   AIC.stat <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+#   #    summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+#   
+#   k<-max(GA.params$parm.index)+1
+#   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
+#   
+#  
+#   t2 <-Sys.time()
+#   if(quiet==FALSE){
+#   cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
+#   cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
+#   }
+#   
+#   
+#   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
+# }
 
 ###############################################################################  
 ############ Create continuous surface response figures ############ 
