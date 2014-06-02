@@ -184,7 +184,7 @@ write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,r
 plot.t<-PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
-PARM1=c(0,150,50,1,2,250,0,400)
+PARM1=c(1,150,50,1,2,250,1,400)
 
 
 # GA.inputs<-GA.prep(ASCII.dir=write.dir,
@@ -200,6 +200,10 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    max.cont=500,
                    seed = 99)
 
+CS.inputs<-CS.prep(n.POPS=n,
+                   CS_Point.File=paste0(write.dir,"samples.txt"),
+                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM1,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
 
@@ -209,7 +213,9 @@ CS.response<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # Optimized values
 PARM2=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1 ,225.7778)
-Resist.opt<-Combine_Surfaces(PARM=PARM2,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
+PARM3=c(1, 151.2563, 50.47424, 1.75012, 1.831599, 268.444,  1 ,399.6267)
+
+Resist.opt<-Combine_Surfaces(PARM=PARM3,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
 names(Resist.opt)<-"r.opt"
 
 CS.response2<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist.opt)
@@ -221,7 +227,7 @@ CS.response2<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist.opt)
 # 
 # CS.response<-round((CS.Resist+NOISE),digits=4)
 # plot(CS.response~CS.Resist)
-write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
+# write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
 
 # Run prep functions
 CS.inputs<-CS.prep(n.POPS=n,
@@ -240,7 +246,7 @@ plot(Resist.opt)
 
 ### How does AICc differ?
 (Resist.truth <- MLPE.lmm(cs.resistance=paste0(GA.inputs$Write.dir,"r.truth_resistances.out"),pairwise.genetic=CS.inputs$RESPONSE,REML=FALSE))
-(Resist.opt <- MLPE.lmm(cs.resistance=paste0(GA.inputs$Write.dir, "r.opt_resistances.out"),pairwise.genetic=CS.inputs2$RESPONSE,REML=FALSE))
+(Resist.opt <- MLPE.lmm(cs.resistance=paste0(GA.inputs$Write.dir, "r.opt_resistances.out"),pairwise.genetic=CS.inputs$RESPONSE,REML=FALSE))
 
 
 system.time(Multi.Surface_optim <-MS_optim(CS.inputs=CS.inputs,GA.inputs=GA.inputs))

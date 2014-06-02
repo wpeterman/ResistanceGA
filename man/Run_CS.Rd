@@ -17,7 +17,7 @@ Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
 \item{EXPORT.dir}{Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)}
 }
 \value{
-Vector of CIRCUITSCAPE resistance distances (lower half of "_resistances.out")
+Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out")
 }
 \description{
 Execute CS from R
