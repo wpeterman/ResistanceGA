@@ -306,6 +306,7 @@ MS_optim<-function(CS.inputs,GA.inputs){
 
   #####  RUN BRENT OPTIMIZATION ####
 #   Run second optimization to determine if maximum resistance values should be adjusted
+#   GA.opt = Multi.Surface_optim@solution
 #   Parm.multiplier <- optim(par=1,
 #                            fn = Max.optim_Brent,
 #                            method = "Brent",
@@ -313,11 +314,13 @@ MS_optim<-function(CS.inputs,GA.inputs){
 #                            upper = 25,
 #                            GA.inputs = GA.inputs,
 #                            CS.inputs = CS.inputs,
-#                            GA.opt = c(1, 151.2563, 50.47424, 1.75012, 1.831599, 268.444,  1 ,399.6267))
+#                            GA.opt = Multi.Surface_optim@solution)
 #   
-# PARM2=c(1, 151.2563, 50.47424, 1.75012, 1.831599, 268.444,  1 ,399.6267)
-# PARM1=   c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1, 225.7778)                        
-# 
+# # PARM2=c(1, 151.2563, 50.47424, 1.75012, 1.831599, 268.444,  1 ,399.6267)
+# PARM1=   c(1, 98.22186*2.02, 32.81873*2.02, 1.75012, 1.831599, 165.4868*2.02,  1, 261.2629*2.02)                        
+# PARM.t=c(1,150,50,1,2,250,1,400)
+# PARM.t2=c(1,149,50,1,2,250,1,399)
+# P.opt <- c(1, 98.22186, 32.81873, 1.480131, 1.964162, 165.4868,  1, 261.2629)
 # # GA.opt = multi.GA_nG@solution
 # 
 # PARM<-Parm.multiplier$par
@@ -335,9 +338,9 @@ MS_optim<-function(CS.inputs,GA.inputs){
 #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
 #     }
 # }
-######
-multi.GA_nG@solution <- Opt.parm
-multi.GA_nG@fitnessValue <- Parm.multiplier$value
+# ####
+# multi.GA_nG@solution <- Opt.parm
+# multi.GA_nG@fitnessValue <- Parm.multiplier$value
   
   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -1291,7 +1294,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
 #' 
 #' Plots a transformed continuous resistance surface against the original resistance values
 #' 
-#' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)
+#' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term is the value of shape parameter (c), and the second term is the value of maximum scale parameter (b)
 #' @param Resistance Accepts three types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object. Alternatively, supply a vector with the minimum and manximum values (e.g., c(1,10))
 #' @param transformation Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)
 #' @param print.dir Specify the directory where a .tiff of the transformation will be written (Default = NULL)

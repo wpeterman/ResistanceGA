@@ -50,10 +50,12 @@ Demonstrations
 
 First, install `ResistanceGA` from GitHub. This will require the `devtools` package
 ```{r install.package, eval=FALSE}
-install.packages("devtools") # Installs the 'devtools' package
+if ("devtools" %in% rownames(installed.packages()) == FALSE) {
+    install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) # Installs 'devtools' package, if needed
+}
 library(devtools) # Loads devtools
 
-install_github("wpeterman/ResistanceGA") # Downloads package
+install_github("wpeterman/ResistanceGA") # Download package
 ```
 
 Load the required R packages, clear your workspace, and set a random number seed.

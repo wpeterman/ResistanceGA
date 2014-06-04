@@ -6,10 +6,12 @@ ResistanceGA
 To install this package, execute the following commands in R:
 
 ```
-install.packages("devtools") # Installs the 'devtools' package
+if ("devtools" %in% rownames(installed.packages()) == FALSE) {
+    install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) # Installs 'devtools' package, if needed
+}
 library(devtools) # Loads devtools
 
-install_github("wpeterman/ResistanceGA") # Downloads package
+install_github("wpeterman/ResistanceGA") # Download package
 require(ResistanceGA) # Installs package and the other required packages needed
 ```
 Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' using the code below, or you can view the vignette directly [**here**](https://dl.dropboxusercontent.com/u/23513016/ResistanceGA_Vignette.html "Vignette")

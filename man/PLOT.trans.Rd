@@ -6,7 +6,7 @@
 PLOT.trans(PARM, Resistance, transformation, print.dir, Name)
 }
 \arguments{
-\item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term isthe value of shape parameter (c), and the second term is the value of maximum scale parameter (b)}
+\item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term is the value of shape parameter (c), and the second term is the value of maximum scale parameter (b)}
 
 \item{Resistance}{Accepts three types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object. Alternatively, supply a vector with the minimum and manximum values (e.g., c(1,10))}
 

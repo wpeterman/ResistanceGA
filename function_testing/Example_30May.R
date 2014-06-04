@@ -198,7 +198,8 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 99)
+                   seed = 101,
+                   run=1)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -209,7 +210,7 @@ Resist<-Combine_Surfaces(PARM=PARM1,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
 
 # Generate new CS response surface by using Run_CS
 names(Resist)<-"r.truth"
-CS.response<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
 # Optimized values
 PARM2=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1 ,225.7778)
@@ -222,12 +223,12 @@ CS.response2<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist.opt)
 
 
 # # Generate some random noise and add it to the resistance surface
-# NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.05*max(CS.Resist)))
+NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.015*max(CS.Resist)))
 # plot(Resist)
-# 
-# CS.response<-round((CS.Resist+NOISE),digits=4)
-# plot(CS.response~CS.Resist)
-# write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
+
+CS.response<-round((CS.Resist+NOISE),digits=4)
+plot(CS.response~CS.Resist)
+write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
 
 # Run prep functions
 CS.inputs<-CS.prep(n.POPS=n,
