@@ -51,8 +51,9 @@ Demonstrations
 First, install `ResistanceGA` from GitHub. This will require the `devtools` package
 ```{r install.package, eval=FALSE}
 if ("devtools" %in% rownames(installed.packages()) == FALSE) {
-    install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) # Installs 'devtools' package, if needed
-}
+    install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
+} # Installs 'devtools' package, if needed
+
 library(devtools) # Loads devtools
 
 install_github("wpeterman/ResistanceGA") # Download package
@@ -322,10 +323,15 @@ Resist <- Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out
 plot(Resist)
 ```
 
-Generate new CS response surface by using `Run_CS`.
+Generate new CS response surface by using `Run_CS`. We'll add a small amount of random noise to the response.
 ```{r combine.cs }
 # Create the true resistance/response surface
-CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+CS.Resist <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
+
+NOISE <- rnorm(n=length(CS.Resist), mean=0,(0.015*max(CS.Resist)))
+
+CS.response <- CS.Resist + NOISE
+plot(CS.response~CS.Resist)
 
 # Write the response to a file
 write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
