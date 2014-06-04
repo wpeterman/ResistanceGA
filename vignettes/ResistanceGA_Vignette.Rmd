@@ -302,9 +302,10 @@ GA.inputs <- GA.prep(ASCII.dir=write.dir,
 ```
 
 Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter. Look in the help file for `PLOT.trans` for transformation names/numbers.
-```{r inverse-reverse.mono }
+```{r inverse-reverse.mono, eval=FALSE }
 plot.t <- PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") 
 ```
+![inv-rev_mono](figure/inverse-reverse.mono.png) 
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`. Note that the minimum value defined for categorical surfaces is 0. This is because 1 is added to the combined surfaces after they are added together. In this way, the lowest resistance possible on the landscape is 1.  
 ```{r combine.surfaces,eval=FALSE}

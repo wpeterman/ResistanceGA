@@ -355,8 +355,7 @@ plot.t <- PLOT.trans(PARM = c(2, 250), Resistance = "C:/ResistanceGA_Examples/Mu
     transformation = "Inverse-Reverse Monomolecular")
 ```
 
-![plot of chunk inverse-reverse.mono](figure/inverse-reverse_mono.png) 
-
+![inv-rev_mono](figure/inverse-reverse.mono.png) 
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`. Note that the minimum value defined for categorical surfaces is 0. This is because 1 is added to the combined surfaces after they are added together. In this way, the lowest resistance possible on the landscape is 1.  
 
