@@ -1,7 +1,6 @@
 require(RandomFields)
 require(ResistanceGA)
-require(ggplot2)
-
+require(raster)
 
 rm(list = ls())
 set.seed(12345)
@@ -198,8 +197,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 101,
-                   run=1)
+                   seed = 101)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -226,7 +224,7 @@ CS.response2<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist.opt)
 NOISE <- rnorm(n=length(CS.Resist),mean=0,(0.015*max(CS.Resist)))
 # plot(Resist)
 
-CS.response<-round((CS.Resist+NOISE),digits=4)
+CS.response<-CS.Resist+NOISE
 plot(CS.response~CS.Resist)
 write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
 

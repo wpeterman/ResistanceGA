@@ -50,9 +50,10 @@ Demonstrations
 
 First, install `ResistanceGA` from GitHub. This will require the `devtools` package
 ```{r install.package, eval=FALSE}
+# Install 'devtools' package, if needed
 if ("devtools" %in% rownames(installed.packages()) == FALSE) {
     install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
-} # Installs 'devtools' package, if needed
+}
 
 library(devtools) # Loads devtools
 
@@ -94,7 +95,7 @@ Example Function Use
 
 
 Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. 
-```{r warning=FALSE, results='hide',message=FALSE}
+```{r warning=FALSE, results='hide',message=FALSE, eval=FALSE}
  
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
   dir.create(file.path("C:/", "ResistanceGA_Examples")) 
@@ -120,12 +121,12 @@ Sample.points<-expand.grid(x,y)
 
 Sample.coord <- SpatialPoints(Sample.points)
 coord.id <- cbind((1:n),Sample.coord@coords)       # Combine location ID with coordinates
-
-# Write the table to a file. This is formatted for input into CIRCUITSCAPE
-write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
-
 ```
 
+Write the table to a file. This is formatted for input into CIRCUITSCAPE
+```{r eval=FALSE}
+write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
+```
 
 Using random fields, create one continuous resistance surface
 ```{r single.surface, warning=FALSE, results='hide',message=FALSE}
@@ -150,14 +151,14 @@ plot(Sample.coord, pch=16, col="blue", add=TRUE) # Add points
 ```
 
 Export the raw continuous surface to a .asc file for use with CIRCUITSCAPE
-```{r message=FALSE,results='hide'}
+```{r message=FALSE,results='hide',eval=FALSE}
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 ```
 
 
 ## Prepare data for optimization   
 Run the `GA.prep` and `CS.prep` functions
-```{r}
+```{r eval=FALSE}
 # Set the random number seed to reproduce the results presented
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
@@ -179,7 +180,7 @@ plot.t <- PLOT.trans(PARM=c(2,275), Resistance="C:/ResistanceGA_Examples/SingleS
 ```
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. This will be our response that we optimize on.
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 
@@ -188,7 +189,7 @@ write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.name
 ```
 
 Rerun `CS.prep` including the newly created `CS.Response`
-```{r}
+```{r eval=FALSE}
 CS.inputs <- CS.prep(n.POPS=n,
                    RESPONSE=CS.response,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -237,7 +238,7 @@ Note that actual response surfaces tend to be slightly flatter, and the maximum 
 **Simulate data**
 
 First, make a new directory to write ASCII files, CIRCUITSCAPE batch files, and results.
-```{r warning=FALSE, results='hide',message=FALSE}
+```{r warning=FALSE, results='hide',message=FALSE, eval=FALSE}
 set.seed(321)
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
   dir.create(file.path("C:/", "ResistanceGA_Examples")) 
@@ -283,14 +284,16 @@ plot(Sample.coord, pch=16, col="blue", add=TRUE)
 ```
 
 Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces). Also write the sample location file to the "MultipleSurfaces" directory.
-```{r write_multi.ASCII, warning=FALSE, results='hide',message=FALSE}
+```{r write_multi.ASCII, warning=FALSE, results='hide',message=FALSE,eval=FALSE}
 writeRaster(cat.rf,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 
 write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
+```
 
-# Run `GA.prep`
+Run `GA.prep`
+```{r eval=FALSE}
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
@@ -304,7 +307,7 @@ plot.t <- PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/Multiple
 ```
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`. Note that the minimum value defined for categorical surfaces is 0. This is because 1 is added to the combined surfaces after they are added together. In this way, the lowest resistance possible on the landscape is 1.  
-```{r combine.surfaces}
+```{r combine.surfaces,eval=FALSE}
 PARM <- c(0,150,50,1,2,250,0,400)
 
 # PARM<- c(0,   # First feature of categorical   
@@ -322,9 +325,10 @@ Resist <- Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out
 # View combined surface
 plot(Resist)
 ```
+![RESIST.Surface](figure/combine.surfaces.png) 
 
 Generate new CS response surface by using `Run_CS`. We'll add a small amount of random noise to the response.
-```{r combine.cs }
+```{r combine.cs,eval=FALSE }
 # Create the true resistance/response surface
 CS.Resist <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
@@ -336,9 +340,10 @@ plot(CS.response~CS.Resist)
 # Write the response to a file
 write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",row.names=F,col.names=F)
 ```
+![corr.plot](figure/combine_cs.png) 
 
 Run `CS.prep` functions
-```{r}
+```{r eval=FALSE}
 CS.inputs<-CS.prep(n.POPS=n,
                       RESPONSE=CS.response,
                       CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -374,20 +379,23 @@ PARM
 [1]   0 150  50   1   2 250   0 400
 ```
 The optimized values appear to be ~`r round(400/225.7778, 2)` times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (1 = Inverse-Reverse Monomolecular). Visually, the resistance values of the two surfaces are nearly identical:
-```{r combined.plots,fig.width=12,fig.height=8}
+```{r combined.plots,fig.width=12,fig.height=8,eval=FALSE}
 # Make combined, optimized resistance surface.
 # This could also be read in from the results directory
 optim.resist <- Combine_Surfaces(PARM=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1, 225.7778),CS.inputs,GA.inputs)
 ms.stack <- stack(Resist, optim.resist)
 plot(ms.stack, main=c("True Resistance", "Optimized Resistance")) # Optimized
 ```
+![combined.plots](figure/combined.plots.png) 
 
 We can look at the correlation between 'Truth' and 'Optimized' resistance surfaces, and can see that they are perfectly correlated.  
-```{r correlation.plot}
+```{r correlation.plot, eval=FALSE}
 # Correlation between the two surfaces
 names(ms.stack) <- c("Truth", "Optimized")
 pairs(ms.stack)
 ```
+![correlation.plots](figure/correlation.plot.png) 
+
 This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. While some may see this as a limitation/weakness, these methods still capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions and researcher bias.   
 
 **Comments on multiple surface optimization:**
