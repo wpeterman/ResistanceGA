@@ -307,40 +307,33 @@ MS_optim<-function(CS.inputs,GA.inputs){
   #####  RUN BRENT OPTIMIZATION ####
 #   Run second optimization to determine if maximum resistance values should be adjusted
 #   GA.opt = Multi.Surface_optim@solution
-#   Parm.multiplier <- optim(par=1,
-#                            fn = Max.optim_Brent,
-#                            method = "Brent",
-#                            lower = 0,
-#                            upper = 25,
-#                            GA.inputs = GA.inputs,
-#                            CS.inputs = CS.inputs,
-#                            GA.opt = Multi.Surface_optim@solution)
-#   
-# # PARM2=c(1, 151.2563, 50.47424, 1.75012, 1.831599, 268.444,  1 ,399.6267)
-# PARM1=   c(1, 98.22186*2.02, 32.81873*2.02, 1.75012, 1.831599, 165.4868*2.02,  1, 261.2629*2.02)                        
-# PARM.t=c(1,150,50,1,2,250,1,400)
-# PARM.t2=c(1,149,50,1,2,250,1,399)
-# P.opt <- c(1, 98.22186, 32.81873, 1.480131, 1.964162, 165.4868,  1, 261.2629)
-# # GA.opt = multi.GA_nG@solution
-# 
-# PARM<-Parm.multiplier$par
-# Opt.parm<-vector(length=length(multi.GA_nG@solution))
-# for(i in 1:GA.inputs$n.layers){
-#     if(GA.inputs$surface.type[i]=="cat"){
-#       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       parm <- ((ga.p-1)*PARM[1])+1
-#       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-#       
-#     } else {
-#       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       mx<-parm[3]*PARM[1]
-#       parm[3]<-mx
-#       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-#     }
-# }
+  Parm.multiplier <- optim(par=1,
+                           fn = Max.optim_Brent,
+                           method = "Brent",
+                           lower = 0,
+                           upper = 25,
+                           GA.inputs = GA.inputs,
+                           CS.inputs = CS.inputs,
+                           GA.opt = multi.GA_nG@solution)
+
+PARM<-Parm.multiplier$par
+Opt.parm<-multi.GA_nG@solution
+for(i in 1:GA.inputs$n.layers){
+    if(GA.inputs$surface.type[i]=="cat"){
+      ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+      parm <- ((ga.p-1)*PARM[1])+1
+      Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+      
+    } else {
+      parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+      mx<-parm[3]*PARM[1]
+      parm[3]<-mx
+      Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+    }
+}
 # ####
-# multi.GA_nG@solution <- Opt.parm
-# multi.GA_nG@fitnessValue <- Parm.multiplier$value
+multi.GA_nG@solution <- Opt.parm
+multi.GA_nG@fitnessValue <- Parm.multiplier$value
   
   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -2309,7 +2302,7 @@ get.EQ <-function(equation){   # Apply specified transformation
 Result.txt <- function(GA.results, GA.inputs, CS.inputs){
   summary.file<-paste0(GA.inputs$Results.dir,"Multisurface_Optim_Summary.txt")
   AICc<-GA.results@fitnessValue
-  AICc<-round(AICc*-1,digits=4)
+  AICc<-round(AICc,digits=4)
   ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
 #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE)
   

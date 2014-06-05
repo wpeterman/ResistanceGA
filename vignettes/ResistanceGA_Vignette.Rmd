@@ -176,7 +176,7 @@ Transform raw continuous surface using the `Resistance.tran` function to apply o
 ```{r monomolec.plot}
 r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=cont.rf) 
 
-plot.t <- PLOT.trans(PARM=c(2,275), Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc", transformation="Monomolecular") 
+plot.t <- PLOT.trans(PARM=c(2,275), Resistance=cont.rf, transformation="Monomolecular") 
 ```
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. This will be our response that we optimize on.
