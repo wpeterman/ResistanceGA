@@ -317,7 +317,7 @@ MS_optim<-function(CS.inputs,GA.inputs){
                            GA.opt = multi.GA_nG@solution)
 
 PARM<-Parm.multiplier$par
-Opt.parm<-multi.GA_nG@solution
+Opt.parm <- GA.opt <- multi.GA_nG@solution
 for(i in 1:GA.inputs$n.layers){
     if(GA.inputs$surface.type[i]=="cat"){
       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
