@@ -2,7 +2,7 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{A Vignette/Tutorial to use ResistanceGA}
 -->
-```{r load.packages, echo = FALSE, message = FALSE}
+```{r load.packages, echo = FALSE, message = FALSE, warning=FALSE}
 library(akima)
 library(raster)
 library(plyr)
@@ -151,7 +151,7 @@ plot(Sample.coord, pch=16, col="blue", add=TRUE) # Add points
 ```
 
 Export the raw continuous surface to a .asc file for use with CIRCUITSCAPE
-```{r message=FALSE,results='hide',eval=FALSE}
+```{r message=FALSE,results='hide', eval=FALSE}
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 ```
 
@@ -284,7 +284,7 @@ plot(Sample.coord, pch=16, col="blue", add=TRUE)
 ```
 
 Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces). Also write the sample location file to the "MultipleSurfaces" directory.
-```{r write_multi.ASCII, warning=FALSE, results='hide',message=FALSE,eval=FALSE}
+```{r write_multi.ASCII, warning=FALSE, results='hide',message=FALSE, eval=FALSE}
 writeRaster(cat.rf,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
 writeRaster(cont.rf,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
 writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
@@ -298,27 +298,27 @@ GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 99) 
+                   seed = 101) 
 ```
 
 Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `PLOT.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter. Look in the help file for `PLOT.trans` for transformation names/numbers.
-```{r inverse-reverse.mono, eval=FALSE }
-plot.t <- PLOT.trans(PARM=c(2,250),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Inverse-Reverse Monomolecular") 
+```{r reverse.ricker, eval=FALSE }
+plot.t <- PLOT.trans(PARM=c(3.5,400),Resistance=cont.rf,transformation="Reverse Ricker") 
 ```
-![inv-rev_mono](figure/inverse-reverse.mono.png) 
+![rev.ricker](figure/reverse_ricker.png) 
 
-Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`. Note that the minimum value defined for categorical surfaces is 0. This is because 1 is added to the combined surfaces after they are added together. In this way, the lowest resistance possible on the landscape is 1.  
-```{r combine.surfaces,eval=FALSE}
-PARM <- c(0,150,50,1,2,250,0,400)
+Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`.   
+```{r combine.surfaces, eval=FALSE}
+PARM <- c(1,150,50,6,3.5,400,1,300)
 
-# PARM<- c(0,   # First feature of categorical   
+# PARM<- c(1,   # First feature of categorical   
 #        150, # Second feature of categorical   
 #        50,  # Third feature of categorical   
-#        1,   # Transformation equation for continuous surface    
-#        2,   # Shape parameter    
-#        250, # Scale parameter    
-#        0,   # First feature of feature surface    
-#        400) # Second feature of feature surface    
+#        6,   # Transformation equation for continuous surface    
+#        3.5,   # Shape parameter    
+#        400, # Scale parameter    
+#        1,   # First feature of feature surface    
+#        300) # Second feature of feature surface    
 
 # Combine resistance surfaces
 Resist <- Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=NULL)
@@ -326,10 +326,10 @@ Resist <- Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out
 # View combined surface
 plot(Resist)
 ```
-![RESIST.Surface](figure/combine.surfaces.png) 
+![RESIST.Surface](figure/combine_surfaces.png) 
 
 Generate new CS response surface by using `Run_CS`. We'll add a small amount of random noise to the response.
-```{r combine.cs,eval=FALSE }
+```{r combine.cs, eval=FALSE }
 # Create the true resistance/response surface
 CS.Resist <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 
@@ -351,7 +351,7 @@ CS.inputs<-CS.prep(n.POPS=n,
                       CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
-Run `MS_optim`. Running this multisurface example with the default settings took 325 iterations and ~6 hours to complete on a computer with an Intel i7 3.4 GHz processor.
+Run `MS_optim`. Running this multisurface example with the default settings took 89 iterations and ~1.5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
 ```{r eval=FALSE}
 Multi.Surface_optim <- MS_optim(CS.inputs=CS.inputs,
                                GA.inputs=GA.inputs)
@@ -372,22 +372,22 @@ The multisurface optimization procedure has done a pretty good job of recovering
 ```{r eval=FALSE}
 Multi.Surface_optim@solution # Optimized values
 
-Optimized values for each surface: 
-1 85.45554 28.51652 1.75012 1.831599 151.6633  1 225.7778
+# Optimized values for each surface: 
+ 1 44.97949 15.44869 6.487836 3.54321 109.9903  1 85.59366
 
 # Simulated values
 PARM
-[1]   0 150  50   1   2 250   0 400
+[1]   1.0 150.0  50.0   6.0   3.5 400.0   1.0 300.0
 ```
-The optimized values appear to be ~`r round(400/225.7778, 2)` times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (1 = Inverse-Reverse Monomolecular). Visually, the resistance values of the two surfaces are nearly identical:
-```{r combined.plots,fig.width=12,fig.height=8,eval=FALSE}
+The optimized values appear to be ~`r round(300/85.59366, 2)` times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (6 = Reverse Ricker). Visually, the resistance values of the two surfaces are nearly identical:
+```{r combined.plots,fig.width=12,fig.height=8, eval=FALSE}
 # Make combined, optimized resistance surface.
 # This could also be read in from the results directory
-optim.resist <- Combine_Surfaces(PARM=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1, 225.7778),CS.inputs,GA.inputs)
+optim.resist <- Combine_Surfaces(PARM=c(1, 44.97949, 15.44869, 6.487836, 3.54321, 109.9903,  1, 85.59366),CS.inputs,GA.inputs)
 ms.stack <- stack(Resist, optim.resist)
 plot(ms.stack, main=c("True Resistance", "Optimized Resistance")) # Optimized
 ```
-![combined.plots](figure/combined.plots.png) 
+![combined.plots](figure/combined_plots.png) 
 
 We can look at the correlation between 'Truth' and 'Optimized' resistance surfaces, and can see that they are perfectly correlated.  
 ```{r correlation.plot, eval=FALSE}
@@ -395,15 +395,15 @@ We can look at the correlation between 'Truth' and 'Optimized' resistance surfac
 names(ms.stack) <- c("Truth", "Optimized")
 pairs(ms.stack)
 ```
-![correlation.plots](figure/correlation.plot.png) 
+![correlation.plots](figure/correlation_plot.png) 
 
 This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. While some may see this as a limitation/weakness, these methods still capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions and researcher bias.   
 
 **Comments on multiple surface optimization:**
 * If the optimized resistance values are near the maximum value specified in `GA.prep`, it is recommended that you increase the maximum value and rerun the optimization.  
-* If the optimization seems to end very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these setting to determine 'optimal' values, but found that the current defaults (mutation = 0.10, crossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data.
+* If the optimization seems to end very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (mutation = 0.10, crossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data.
 * Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.   
 
 
 ### Summary   
-Hopefully this simple vignette/tutorial has adequately demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of surfaces, as demonstrated in the grid search. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided. While this approach certainly isn't without its flaws, and over fitting is always a concern, hopefully these methods will be accessible and useful to others. Development and advancement of these methods will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
+Hopefully this simple vignette/tutorial has adequately demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of surfaces. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided. While this approach certainly isn't without its flaws, and over fitting is always a concern, hopefully these methods will be accessible and useful to others. Development and advancement of these methods will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
