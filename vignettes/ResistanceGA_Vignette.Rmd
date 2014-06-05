@@ -293,7 +293,7 @@ write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,r
 ```
 
 Run `GA.prep`
-```{r eval=FALSE}
+```{r}
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
