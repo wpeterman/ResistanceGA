@@ -27,7 +27,7 @@ In order to use this package, you must have CIRCUITSCAPE installed.
 Version 4.0 or higher is required.
 Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
 
-This package will only work on Windows machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I will can work to incorporate that capability in future releases.
+This package will only work on Windows machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I can work to incorporate that capability in future releases.
 
 
 This approach has been developed from the methods first utilized in Peterman et al. (2014). **_Please cite this paper if you use these methods!_**
