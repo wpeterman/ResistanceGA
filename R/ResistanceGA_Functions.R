@@ -75,7 +75,6 @@ return(Results.mat)
 #' }
 #' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
 #' @usage SS_optim(CS.inputs, GA.inputs, nlm)
-
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
 SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){

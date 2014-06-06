@@ -180,7 +180,7 @@ plot.t <- Plot.trans(PARM=c(2,275), Resistance=cont.rf, transformation="Monomole
 ```
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. This will be our response that we optimize on.
-```{r echo=FALSE, eval=FALSE}
+```{r eval=FALSE}
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 
@@ -202,6 +202,13 @@ took 176 iterations and ~75 minutes to complete on a computer with an Intel i7 3
 SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
                        GA.inputs=GA.inputs)
 ```
+If you happen to get the error:
+```
+Error in initializePtr() : 
+  function 'dataptr' not provided by package 'Rcpp'
+```
+Reinstall the `Rcpp` package and execute the `SS_optim` function again.
+
 After executing the function, the console will be updated to report the time to complete each iteration as well as AICc of each iteration. If you do not wish to view updates at each iteration of the optimization, set `quiet = TRUE` in `GAp.prep`
 
 What the `SS_optim` function does:       
