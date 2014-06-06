@@ -1,5 +1,5 @@
 ########################################################################################  
-############ CONDUCT GRID SEARCH OF PARAMETER SPACE TO VIEW RESPONSE SURFACE ########### 
+############ CONDUCT GRID SEARCH OF PARAMETER SPACE TO VIEW response SURFACE ########### 
 ########################################################################################  
 #' Conduct grid search of response surface 
 #' 
@@ -122,7 +122,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       
       Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
       
-      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
+      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir)
   
    
       RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
@@ -175,9 +175,9 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       
       OPTIM <- Resistance.Optimization_cont.nlm(PARM=(Optim.nlm$estimate),Resistance=r, equation=single.GA@solution[1],get.best=TRUE,CS.inputs=CS.inputs,Min.Max='min')
       
-      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
+      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir)
       
-      PLOT.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
+      Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
       
       RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
       colnames(RS) <- c("Surface","AICc","Equation","shape","max")
@@ -190,9 +190,9 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       
         Run_CS(CS.inputs,GA.inputs,r.tran,EXPORT.dir=GA.inputs$Results.dir)
       
-        Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
+        Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir)
         
-        PLOT.trans(PARM=single.GA@solution[-1], 
+        Plot.trans(PARM=single.GA@solution[-1], 
                    Resistance=GA.inputs$Resistance.stack[[i]], 
                    transformation=EQ, 
                    print.dir=GA.inputs$Plots.dir)
@@ -254,7 +254,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
   write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
   
   # Get parameter estimates
-  MLPE.results<-MLPE.lmm_coef(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)
+  MLPE.results<-MLPE.lmm_coef(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir)
   
   # Full Results
   if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
@@ -340,10 +340,10 @@ multi.GA_nG@fitnessValue <- Parm.multiplier$value
   names(RAST)<-NAME
   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
   
-  Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Plots.dir)
+  Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir)
   
   # Get parameter estimates
-  MLPE.results<-MLPE.lmm_coef(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE,out.dir=GA.inputs$Results.dir)  
+  MLPE.results<-MLPE.lmm_coef(resist.dir=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir)  
   
   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, CS.inputs=CS.inputs) 
   return(multi.GA_nG)
@@ -355,7 +355,7 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
+  response<-CS.inputs$response
   Opt.parm <-vector(length=length(PARM))
 
   CS_Point.File<-CS.inputs$CS_Point.File
@@ -504,13 +504,13 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   cs.matrix<-scale(cs.matrix,center=TRUE,scale=TRUE)
   # cs.matrix2<-round(read.matrix(CS.results),4)
   
-  data<-cbind(ID,cs.matrix,RESPONSE)
+  data<-cbind(ID,cs.matrix,response)
   
   # Assign value to layer
   LAYER<-assign("LAYER",value=data$cs.matrix)
   
   # Fit model
-  mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=data,REML=FALSE)
+  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
@@ -586,7 +586,7 @@ if(class(r)[1]!='RasterLayer') {
   }
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
+  response<-CS.inputs$response
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.exe<-CS.inputs$CS.exe
   
@@ -666,7 +666,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
   GA.params<-GA.inputs
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
+  response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.exe<-CS.inputs$CS.exe
@@ -925,7 +925,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
+  response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.exe<-CS.inputs$CS.exe
@@ -1072,13 +1072,13 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   cs.matrix<-scale(cs.matrix,center=TRUE,scale=TRUE)
   # cs.matrix2<-round(read.matrix(CS.results),4)
   
-  data<-cbind(ID,cs.matrix,RESPONSE)
+  data<-cbind(ID,cs.matrix,response)
   
   # Assign value to layer
   LAYER<-assign("LAYER",value=data$cs.matrix)
   
   # Fit model
-  mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=data,REML=FALSE)
+  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
@@ -1120,7 +1120,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
+  response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.exe<-CS.inputs$CS.exe
@@ -1253,13 +1253,13 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   # Get AIC statistic for transformed-scaled resistance surface
   cs.matrix<-scale(read.matrix(CS.results),center=TRUE,scale=TRUE)
   
-  data<-cbind(ID,cs.matrix,RESPONSE)
+  data<-cbind(ID,cs.matrix,response)
   
   # Assign value to layer
   LAYER<-assign("LAYER",value=data$cs.matrix)
   
   # Fit model
-  mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=data,REML=FALSE)
+  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
@@ -1281,7 +1281,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
 }
 
 ################################################### 
-############ PLOT RESPONSE CURVES ############ 
+############ PLOT response CURVES ############ 
 ################################################### 
 #' Plot continuous surface transformation
 #' 
@@ -1308,10 +1308,10 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
 #'    }
 #'    
 #' The "Distance" equation sets all cell values equal to 1.
-#' @usage PLOT.trans(PARM, Resistance, transformation, print.dir, Name)
+#' @usage Plot.trans(PARM, Resistance, transformation, print.dir, Name)
 #' @export
 
-PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="layer"){
+Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="layer"){
     if(length(Resistance)==2) {
         r <- Resistance
         Mn=min(r)
@@ -1447,7 +1447,7 @@ PLOT.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
 Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS.inputs,Min.Max,quiet=FALSE) {
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
-  RESPONSE<-CS.inputs$RESPONSE
+  response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.exe<-CS.inputs$CS.exe
@@ -1582,13 +1582,13 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   # Get AIC statistic for transformed-scaled resistance surface
   cs.matrix<-scale(read.matrix(CS.results),center=TRUE,scale=TRUE)
   
-  data<-cbind(ID,cs.matrix,RESPONSE)
+  data<-cbind(ID,cs.matrix,response)
   
   # Assign value to layer
   LAYER<-assign("LAYER",value=data$cs.matrix)
   
   # Fit model
-  mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=data,REML=FALSE)
+  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
@@ -1622,7 +1622,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
 MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){ 
-  RESPONSE=genetic.dist
+  response=genetic.dist
   resist.mat<-list.files(resist.dir,pattern="*_resistances.out",full.names=TRUE)
   resist.names<-gsub(pattern="_resistances.out","",x=list.files(resist.dir,pattern="*_resistances.out"))
   COEF.Table<-array()
@@ -1633,13 +1633,13 @@ MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){
     ZZ<-ZZ.mat(ID=ID)
     cs.matrix<-scale(mm[lower.tri(mm)],center=TRUE,scale=TRUE)
     
-    dat<-cbind(ID,cs.matrix,RESPONSE)
+    dat<-cbind(ID,cs.matrix,response)
     
     # Assign value to layer
     LAYER<-assign(resist.names[i],value=dat$cs.matrix)
     
     # Fit model
-    mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+    mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
     mod$reTrms$Zt <- ZZ
     dfun <- do.call(mkLmerDevfun,mod)
     opt <- optimizeLmer(dfun)
@@ -1675,7 +1675,7 @@ MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
 MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){ 
-  RESPONSE=pairwise.genetic
+  response=pairwise.genetic
 
     mm<-(read.table(cs.resistance)[-1,-1])
     m<-nrow(mm)
@@ -1683,13 +1683,13 @@ MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){
     ZZ<-ZZ.mat(ID=ID)
     cs.matrix<-scale(lower(mm),center=TRUE,scale=TRUE)
     
-    dat<-cbind(ID,cs.matrix,RESPONSE)
+    dat<-cbind(ID,cs.matrix,response)
     
     # Assign value to layer
     LAYER<-assign("Resist",value=dat$cs.matrix)
     
     # Fit model
-    mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=dat,REML=REML)
+    mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=REML)
     mod$reTrms$Zt <- ZZ
     dfun <- do.call(mkLmerDevfun,mod)
     opt <- optimizeLmer(dfun)
@@ -1703,7 +1703,7 @@ MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){
 #' This function will generate mixed effect model diagnostic plots following optimization
 #' 
 #' @param cs.resistance.mat Path to CIRCUITSCAPE "_resistances.out" file
-#' @param genetic.dist Vector of pairwise genetic distances (lower half of pairwise matrix). Can be input as CS.inputs$RESPONSE
+#' @param genetic.dist Vector of pairwise genetic distances (lower half of pairwise matrix). Can be input as CS.inputs$response
 #' @param XLAB Label for x-axis (Defaults to "Estimated resistance")
 #' @param YLAB Label for y-axis (Defaults to "Genetic distance")
 #' @param plot.dir Directory to output PDF of diagnostic plots
@@ -1713,7 +1713,7 @@ MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){
 #' @usage Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
 
 Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir){
-  RESPONSE=genetic.dist
+  response=genetic.dist
   NAME<-gsub(pattern="*_resistances.out","",x=(basename(cs.resistance.mat)))
   mm<-read.table(cs.resistance.mat)[-1,-1]
   m<-length(mm)
@@ -1721,13 +1721,13 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
   ZZ<-ZZ.mat(ID=ID)
   cs.matrix<-scale(lower(mm),center=TRUE,scale=TRUE)
   cs.unscale<-lower(mm)
-  dat<-cbind(ID,cs.matrix,RESPONSE)
+  dat<-cbind(ID,cs.matrix,response)
   
   # Assign value to layer
   LAYER<-assign("LAYER",value=dat$cs.matrix)
   
   # Fit model
-  mod <- lFormula(RESPONSE ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+  mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
@@ -1760,23 +1760,23 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
 #' This function will prepare objects needed for running optimization functions
 #' 
 #' @param n.POPS The number of populations that are being assessed
-#' @param RESPONSE Vector of pairwise genetic distances (lower half of pairwise matrix).
+#' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param CS.exe The path to the CIRCUITSCAPE executable file (cs_run.exe). See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @return An R object that is a required input into optimization functions
 
 #' @export
-#' @usage CS.prep(n.POPS, RESPONSE, CS_Point.File, CS.exe, Neighbor.Connect)
+#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.exe, Neighbor.Connect)
 #' @details \code{CS.exe} Example of path to CIRCUITSCAPE executible: 
 #' 
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
 #'
 #' ***NOTE: Double quotation used***
-CS.prep <- function(n.POPS, RESPONSE=NULL,CS_Point.File,CS.exe,Neighbor.Connect=8){# Make to-from population list
+CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.exe,Neighbor.Connect=8){# Make to-from population list
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
-  list(ID=ID,ZZ=ZZ,RESPONSE=RESPONSE,CS_Point.File=CS_Point.File,CS.exe=CS.exe,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS)
+  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.exe=CS.exe,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS)
 }
 
 ##########################################################################################
@@ -2304,7 +2304,7 @@ Result.txt <- function(GA.results, GA.inputs, CS.inputs){
   AICc<-GA.results@fitnessValue
   AICc<-round(AICc,digits=4)
   ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
-#   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$RESPONSE)
+#   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
   
 sink(summary.file)
 cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
