@@ -116,7 +116,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
                      iter=i,
                      quiet = GA.inputs$quiet)
       
-      
+      single.GA@solution <- single.GA@solution/min(single.GA@solution)
       df <- data.frame(id=unique.rast(r),single.GA@solution) 
       r <-subs(r,df)
       names(r)<-GA.inputs$layer.names[i]
@@ -324,6 +324,7 @@ for(i in 1:GA.inputs$n.layers){
     if(GA.inputs$surface.type[i]=="cat"){
       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       parm <- ((ga.p-1)*PARM[1])+1
+      parm <- parm/min(parm)
       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
       
     } else {
@@ -372,6 +373,7 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
       ga.p <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
       parm <- ((ga.p-1)*PARM[1])+1
       Opt.parm[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]<-parm
+      parm<-parm/min(parm)
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
@@ -682,6 +684,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
   for(i in 1:GA.params$n.layers){
     if(GA.params$surface.type[i]=="cat"){
       parm <- PARM[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+      parm <- parm/min(parm)
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
@@ -943,6 +946,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   for(i in 1:GA.params$n.layers){
     if(GA.params$surface.type[i]=="cat"){
       parm <- PARM[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+      parm <- parm/min(parm)
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
@@ -1137,6 +1141,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   r <- Resistance
   
   if(GA.params$surface.type[iter]=="cat"){
+    PARM<-PARM/min(PARM)
     #       parm <- PARM[(GA.params$parm.index[iter]+1):(GA.params$parm.index[iter+1])]
     df <- data.frame(id=unique.rast(r),PARM) # Data frame with original raster values and replacement values
     r <-subs(r,df)
