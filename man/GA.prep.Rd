@@ -78,4 +78,7 @@ Only files that you wish to optimize, either in isolation or simultaneously, sho
 
 It is recommended to first run GA optimization with the default settings
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

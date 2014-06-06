@@ -18,6 +18,9 @@ A table of MLPE fitted model coefficients
 \description{
 Runs MLPE as detailed by Clarke et al. (2002). This function is designed to generate a table of the fitted mixed effects model coefficients
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 \references{
 Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 }

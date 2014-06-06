@@ -17,7 +17,8 @@ Imports:
     raster,
     GA,
     lme4 (>= 1.0),
-    ggplot2
+    ggplot2,
+    Matrix
 Suggests:
     RandomFields,
     knitr

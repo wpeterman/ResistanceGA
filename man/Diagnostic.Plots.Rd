@@ -8,7 +8,7 @@ Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
 \arguments{
 \item{cs.resistance.mat}{Path to CIRCUITSCAPE "_resistances.out" file}
 
-\item{genetic.dist}{Vector of pairwise genetic distances (lower half of pairwise matrix). Can be input as CS.inputs$RESPONSE}
+\item{genetic.dist}{Vector of pairwise genetic distances (lower half of pairwise matrix). Can be input as CS.inputs$response}
 
 \item{XLAB}{Label for x-axis (Defaults to "Estimated resistance")}
 
@@ -21,5 +21,8 @@ A four panel PDF including residual scatterplot, historgram of residuals, qqplot
 }
 \description{
 This function will generate mixed effect model diagnostic plots following optimization
+}
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
 }
 

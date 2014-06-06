@@ -36,4 +36,7 @@ This function will perform a full factorial grid search of the values provided i
    \tab 9 = "Distance"\cr
    }
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

@@ -3,12 +3,12 @@
 \alias{CS.prep}
 \title{Prepare and bundle input CIRCUITSCAPE model parameters}
 \usage{
-CS.prep(n.POPS, RESPONSE, CS_Point.File, CS.exe, Neighbor.Connect)
+CS.prep(n.POPS, response, CS_Point.File, CS.exe, Neighbor.Connect)
 }
 \arguments{
 \item{n.POPS}{The number of populations that are being assessed}
 
-\item{RESPONSE}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
+\item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 
 \item{CS_Point.File}{The path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 
@@ -28,5 +28,8 @@ This function will prepare objects needed for running optimization functions
 '"C:/Program Files/Circuitscape/cs_run.exe"'
 
 ***NOTE: Double quotation used***
+}
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
 }
 

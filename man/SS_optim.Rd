@@ -24,4 +24,7 @@ All results tables are also summarized in a named list ($ContinuousResults, $Cat
 \description{
 Optimize all surfaces contained in a directory using a genetic algorithm executed with the \code{\link[GA]{ga}} function in the Genetic Algorithms package \pkg{GA}
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

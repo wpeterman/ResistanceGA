@@ -22,4 +22,7 @@ Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"
 \description{
 Execute CS from R
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

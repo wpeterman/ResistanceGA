@@ -22,4 +22,7 @@ AIC value from mixed effect model
 \description{
 Create composite resistance surface by simultaneously optimizing multiple categoricla and continuous surfaces. This optimization function is designed to be called from GA
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

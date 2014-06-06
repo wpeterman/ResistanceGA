@@ -27,4 +27,7 @@ AIC value from mixed effect model
 \description{
 Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

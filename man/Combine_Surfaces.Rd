@@ -34,4 +34,7 @@ Combine multiple resistance surfaces into new composite surface based on specifi
    \tab 9 = "Distance"\cr
    }
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 

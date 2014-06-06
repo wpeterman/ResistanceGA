@@ -36,4 +36,7 @@ Valid arguements for \code{transformation} are:\cr
    \tab 9 = "Distance"\cr
    }
 }
+\author{
+Bill Peterman <Bill.Peterman@gmail.com>
+}
 
