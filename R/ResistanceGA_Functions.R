@@ -12,6 +12,7 @@
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @return This function will return values that can be plotted to visualize the response surface
 #' @details This function will perform a full factorial grid search of the values provided in the shape and max.scale vectors. Depending on the number of values provided for each, and the time it takes to run each iteration, this process may take a while to complete. \cr Suitable values for transformation:\cr
 #' \tabular{ll}{
@@ -75,6 +76,7 @@ return(Results.mat)
 #' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
 #' @usage SS_optim(CS.inputs, GA.inputs, nlm)
 
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
 SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
   RESULTS.cat <- list() # List to store categorical results within
@@ -282,6 +284,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
 #' @usage MS_optim(CS.inputs, GA.inputs)
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim<-function(CS.inputs,GA.inputs){
   multi.GA_nG <-ga(type= "real-valued",
                    fitness=Resistance.Opt_multi,
@@ -566,7 +569,8 @@ Response.Figs<- function(Optim.input){
 #' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
 
 #' @export
-  Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir){
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir){
 if(class(r)[1]!='RasterLayer') {
   R<-raster(r)
   NAME <- basename(r)
@@ -661,6 +665,7 @@ if(class(r)[1]!='RasterLayer') {
 #' 
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir){
   t1<-Sys.time()
   GA.params<-GA.inputs
@@ -802,6 +807,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
 #'    \tab 9 = "Distance"\cr
 #'    }
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
 Resistance.tran <- function(transformation, shape, max, r, out=NULL){
   if(class(r)[1]!='RasterLayer') {
@@ -920,6 +926,7 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @return AIC value from mixed effect model
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE){
   t1<-Sys.time()
   
@@ -1115,6 +1122,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
 #' @param quiet Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.
 #' @return AIC value from mixed effect model
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='max',iter, quiet=FALSE){
   t1<-Sys.time()
   
@@ -1310,6 +1318,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
 #' The "Distance" equation sets all cell values equal to 1.
 #' @usage Plot.trans(PARM, Resistance, transformation, print.dir, Name)
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
 Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="layer"){
     if(length(Resistance)==2) {
@@ -1618,6 +1627,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 #' @return A table of MLPE fitted model coefficients
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage MLPE.lmm_coef(resist.dir, genetic.dist, out.dir)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
@@ -1671,6 +1681,7 @@ MLPE.lmm_coef <- function(resist.dir, genetic.dist,out.dir=NULL){
 #' @details An AIC value will only be returned if \code{REML = FALSE}
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage MLPE.lmm(cs.resistance, pairwise.genetic, REML)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
@@ -1710,6 +1721,7 @@ MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){
 #' @return A four panel PDF including residual scatterplot, historgram of residuals, qqplot, and 
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
 
 Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir){
@@ -1767,6 +1779,7 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
 #' @return An R object that is a required input into optimization functions
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage CS.prep(n.POPS, response, CS_Point.File, CS.exe, Neighbor.Connect)
 #' @details \code{CS.exe} Example of path to CIRCUITSCAPE executible: 
 #' 
@@ -1815,6 +1828,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.exe,Neighbor.Connect=
 #' It is recommended to first run GA optimization with the default settings
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
 #' Min.Max="max",
 #' min.cat=0,
@@ -1937,6 +1951,7 @@ GA.prep<-function(ASCII.dir,
 #' @details This is a convenience function to obtain the lower half of a matrix, which is required as input for several other functions
 
 #' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
 lower<-function(matrix){
   if(is.vector(matrix)==TRUE || dim(matrix)[1]!=dim(matrix)[2]) {warning("Must provide square distance matrix with no column or row names")}
