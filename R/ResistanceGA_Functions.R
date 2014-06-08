@@ -123,7 +123,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       
       Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
       
-      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir)
+      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical")
   
    
       RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
@@ -176,7 +176,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       
       OPTIM <- Resistance.Optimization_cont.nlm(PARM=(Optim.nlm$estimate),Resistance=r, equation=single.GA@solution[1],get.best=TRUE,CS.inputs=CS.inputs,Min.Max='min')
       
-      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir)
+      Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous")
       
       Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
       
@@ -262,7 +262,9 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
     RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results)
   } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
     RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results)
-  } else {
+  } else if(nrow(Results.cat)>0 & nrow(Results.cont)<1){
+    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results)
+  } else {    
     RESULTS<-list(ContinuousResults=NULL, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results)
   }
   return(RESULTS)
@@ -1721,14 +1723,15 @@ MLPE.lmm <- function(cs.resistance, pairwise.genetic, REML=FALSE){
 #' @param genetic.dist Vector of pairwise genetic distances (lower half of pairwise matrix). Can be input as CS.inputs$response
 #' @param XLAB Label for x-axis (Defaults to "Estimated resistance")
 #' @param YLAB Label for y-axis (Defaults to "Genetic distance")
-#' @param plot.dir Directory to output PDF of diagnostic plots
-#' @return A four panel PDF including residual scatterplot, historgram of residuals, qqplot, and 
+#' @param plot.dir Directory to output TIFF of diagnostic plots
+#' @param type Specify whether the optimized surface is "continuous" or "categorical"
+#' @return A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model 
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
+#' @usage Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type)
 
-Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir){
+Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir, type="categorical"){
   response=genetic.dist
   NAME<-gsub(pattern="*_resistances.out","",x=(basename(cs.resistance.mat)))
   mm<-read.table(cs.resistance.mat)[-1,-1]
@@ -1750,7 +1753,7 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
   Mod <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
   #######
   # Make diagnostic plots
-  #   par(mfrow=c(2,2))
+  if(type!="categorical"){
   tiff(filename = paste0(plot.dir,NAME,"_DiagnosticPlots.tif"), 
        width = 279, height = 215, units = "mm", 
        compression = c("lzw"),
@@ -1767,6 +1770,21 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
   qqline(resid(Mod))
   dev.off()
   par(mfrow=c(1,1))  
+  } else {
+    tiff(filename = paste0(plot.dir,NAME,"_DiagnosticPlots.tif"), 
+       width = 279, height = 215, units = "mm", 
+       compression = c("lzw"),
+       bg = "white", res = 300)
+  par(mfrow=c(2,1),
+      oma = c(0,4,0,0) + 0.1,
+      mar = c(4,4,1,1) + 0.1)  
+  hist(residuals(Mod),xlab="Residuals",main="")
+  qqnorm(resid(Mod),main="")
+  qqline(resid(Mod))
+  dev.off()
+  par(mfrow=c(1,1))
+  }
+  
 }
 ##########################################################################################
 # Function to bundle input parameters
