@@ -25,7 +25,7 @@ An R object that is a required input into optimization functions
 This function will prepare objects needed for running optimization functions
 }
 \details{
-\code{CS.exe} Example of path to CIRCUITSCAPE executible on Windows:
+\code{CS.program} Example of path to CIRCUITSCAPE executible on Windows:
 
 '"C:/Program Files/Circuitscape/cs_run.exe"'
 
