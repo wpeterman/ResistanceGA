@@ -64,7 +64,7 @@ rm(list = ls())
 ```
 
 
-There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are better, more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
+There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
 ![Transformations](figure/Transformations.svg)
 
 All of these figures were made with the `Plot.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
@@ -184,7 +184,7 @@ GA.inputs <- GA.prep(ASCII.dir=write.dir,
 
 CS.inputs <- CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) 
+                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) 
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet.
 
@@ -214,7 +214,7 @@ Rerun `CS.prep` including the newly created `CS.response`
 CS.inputs <- CS.prep(n.POPS=n,
                    response=CS.response,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
 Run the Single surface optimization function (`SS_optim`). Running this example with the default settings
@@ -236,8 +236,8 @@ After executing the function, the console will be updated to report the time to 
 What the `SS_optim` function does:       
 * Read each .asc file that is in the specified ASCII.dir and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.   
 * Optimize each resistance surface   
- * Categorical surfaces: The first category/factor is set to a resistance value of 1. All other categories are then adjusted, ranging from the minimum--maximum specified during the `GA.prep`. It is necessary to fix the value of one category, otherwise numerous equivalent solutions may make optimization intractable (e.g. resistance values of 1, 5, & 10 would have the same relative resistance as 2, 10, & 20)   
- * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
+ * Categorical surfaces: Each optimized value represents the resistance of that category to current flow   
+ * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
 * Several summary outputs are generated   
  * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).   
  * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)   
@@ -259,7 +259,14 @@ To view the AICc response surface for the Monomolecular optimization of this sur
 ```r
 Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
 ```
-![GRID.Surface](figure/Grid.Surface.png)      
+![GRID.Surface](figure/grid_topo.png)      
+
+You can change the color scheme and color breaks by manually recreating the response surface from the generated data [default = topo.colors(20)]
+
+```r
+filled.contour(Grid.Results$Plot.data,col=rainbow(23),xlab="Shape parameter",ylab="Maximum value parameter")
+```
+![GRID.Surface.update](figure/Raindow_Surface.png) 
 Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response (perhaps more realistic of 'noisy' genetic data), the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Also, despite setting random number seeds, there appears to be some variation from run to run. Regardless, the algorithm generally recovers the data generating parameters. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it may be good practice to run all optimizations at least twice to confirm parameter estimates.       
 
  ****
@@ -395,7 +402,7 @@ Run `CS.prep` functions
 CS.inputs<-CS.prep(n.POPS=n,
                       response=CS.response,
                       CS_Point.File=paste0(write.dir,"samples.txt"),
-                      CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+                      CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
 Run `MS_optim`. Running this multisurface example with the default settings took 89 iterations and ~1.5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
@@ -454,10 +461,11 @@ This is an important point to realize, and I do not know if there is a solution 
 * If the optimized resistance values are near the maximum value specified in `GA.prep`, it is recommended that you increase the maximum value and rerun the optimization.  
 * If the optimization seems to end very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (mutation = 0.10, crossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data.
 * Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.   
+* As mentioned abover concerning single surface optimization: this is stichastic optimization process and optimized value will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates.       
 
 
 ### Summary   
-Hopefully this simple vignette/tutorial has adequately demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of surfaces. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided. While this approach certainly isn't without its flaws, and over fitting is always a concern, hopefully these methods will be accessible and useful to others. Development and advancement of these methods will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
+Hopefully this simple vignette/tutorial has adequately demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of surfaces. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided.  The goal of this package is to make these methods accessible and useful to others. Development and advancement will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
 
 
 ### Acknowledgements

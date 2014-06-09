@@ -70,7 +70,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) # Note that RESPONSE is omittted because it has not been made yet
+                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) # Note that RESPONSE is omittted because it has not been made yet
 
 # Monomolecular = equation # 3
 PARM=c(2,3.2,125)
@@ -94,9 +94,9 @@ write.table(CS.Resist,paste0(write.dir,"CS.response.txt"),col.names=F,row.names=
 
 # Remake the CS.inputs file, including the newly created CS.Response
 CS.inputs<-CS.prep(n.POPS=n,
-                   RESPONSE=CS.Resist,
+                   response=CS.Resist,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Write.dir,"Resist_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Write.dir)
 
@@ -201,7 +201,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 # Combine resistance surfaces
 Resist<-Combine_Surfaces(PARM=PARM1,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 
@@ -233,13 +233,13 @@ write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",r
 CS.inputs<-CS.prep(n.POPS=n,
                    RESPONSE=CS.response,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 Resistance.Opt_multi(PARM=PARM1,CS.inputs,GA.inputs,Min.Max='min')
 # CS.inputs2<-CS.prep(n.POPS=n,
 #                    RESPONSE=CS.response2,
 #                    CS_Point.File=paste0(write.dir,"samples.txt"),
-#                    CS.exe=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
+#                    CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 
 
 Resist.opt<-Combine_Surfaces(PARM=Multi.Surface_optim@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs) 

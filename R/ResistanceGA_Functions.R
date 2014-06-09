@@ -13,7 +13,7 @@
 #' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @return This function will return values that can be plotted to visualize the response surface
+#' @return This function will return a \code{filled.contour} plot. Additionally, an object with values that can be plotted with \code{filled.contour} to visualize the response surface
 #' @details This function will perform a full factorial grid search of the values provided in the shape and max.scale vectors. Depending on the number of values provided for each, and the time it takes to run each iteration, this process may take a while to complete. \cr Suitable values for transformation:\cr
 #' \tabular{ll}{
 #'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
@@ -50,6 +50,7 @@ for(i in 1:nrow(GRID)){
 }
 RESULTS <- data.frame(RESULTS)
 Results.mat <- interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
+filled.contour(Results.mat,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value parameter")
 
 AICc<-RESULTS
 colnames(AICc)<-c("shape","max","AICc")
@@ -364,7 +365,7 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   Opt.parm <-vector(length=length(PARM))
 
   CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
+  CS.program<-CS.inputs$CS.program
   EXPORT.dir<-GA.inputs$Write.dir
   GA.params<-GA.inputs
   ######
@@ -491,14 +492,20 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   #   }
   
   ##########################################################################################
-  # Run Circuitscape
-  CS.exe<-CS.exe
-  
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-  hidden = TRUE
+  hidden = TRUE  
+  # Run Circuitscape
+  if(CS.inputs$platform=="pc"){
+    CS.exe<-CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+  } else {
+    CS.py <- CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
+    CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+  }
   
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
   
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
@@ -595,7 +602,7 @@ if(class(r)[1]!='RasterLayer') {
   ZZ<-CS.inputs$ZZ
   response<-CS.inputs$response
   CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
+  CS.program<-CS.inputs$CS.program
   
   ######
   multi_surface=r
@@ -623,15 +630,20 @@ if(class(r)[1]!='RasterLayer') {
   #     }
   
   ##########################################################################################
-  # Run Circuitscape
-  CS.exe<-CS.exe
-  
-  # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-  hidden = TRUE
-  
+# Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
+hidden = TRUE  
+# Run Circuitscape
+if(CS.inputs$platform=="pc"){
+  CS.exe<-CS.program
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
   CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
-  # CS.Run.output<-system(paste(CS.exe, CS.ini), hidden,minimized=FALSE) 
+} else {
+  CS.py <- CS.program
+  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+  #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
+  CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+}
+ 
   
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
@@ -677,7 +689,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
   response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
+  CS.program<-CS.inputs$CS.program
   EXPORT.dir<-out
   
   ######
@@ -939,7 +951,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
+  CS.program<-CS.inputs$CS.program
   EXPORT.dir<-GA.inputs$Write.dir
   GA.params<-GA.inputs
   ######
@@ -1065,14 +1077,19 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   #   }
   
   ##########################################################################################
-  # Run Circuitscape
-  CS.exe<-CS.exe
-  
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-  hidden = TRUE
-  
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+  hidden = TRUE  
+  # Run Circuitscape
+  if(CS.inputs$platform=="pc"){
+    CS.exe<-CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+  } else {
+    CS.py <- CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
+    CS.Run.output<-system(paste("python", CS.py, CS.ini), hidden)
+  }
   
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
@@ -1136,7 +1153,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
+  CS.program<-CS.inputs$CS.program
   EXPORT.dir<-GA.inputs$Write.dir
   GA.params<-GA.inputs
   ######
@@ -1249,15 +1266,19 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
   # }
   ##########################################################################################
-  # Run Circuitscape
-  CS.exe<-CS.exe
-  
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-  hidden = TRUE
-  
-  # CS.Batch<- list.files(path=EXPORT.dir, pattern = "\\.ini$") # Make list of all files with '.asc' extension
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.exe, CS.ini), hidden) 
+  hidden = TRUE  
+  # Run Circuitscape
+  if(CS.inputs$platform=="pc"){
+    CS.exe<-CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+  } else {
+    CS.py <- CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
+    CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+  }
   
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
@@ -1465,7 +1486,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   response<-CS.inputs$response
   #   CS.version<-CS.inputs$CS.version
   CS_Point.File<-CS.inputs$CS_Point.File
-  CS.exe<-CS.inputs$CS.exe
+  CS.program<-CS.inputs$CS.program
   
   EXPORT.dir<-  if(get.best==FALSE){
     EXPORT.dir<-GA.inputs$Write.dir} else{
@@ -1579,15 +1600,19 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
   # }
   ##########################################################################################
-  # Run Circuitscape
-  CS.exe<-CS.exe
-  
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-  hidden = TRUE
-  
-  # CS.Batch<- list.files(path=EXPORT.dir, pattern = "\\.ini$") # Make list of all files with '.asc' extension
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.exe, CS.ini), hidden) 
+  hidden = TRUE  
+  # Run Circuitscape
+  if(CS.inputs$platform=="pc"){
+    CS.exe<-CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+  } else {
+    CS.py <- CS.program
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
+    CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+  }
   
   ##########################################################################################
   # Run mixed effect model on each Circuitscape effective resistance
@@ -1796,22 +1821,24 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
 #' @param n.POPS The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
-#' @param CS.exe The path to the CIRCUITSCAPE executable file (cs_run.exe). See details below. 
+#' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) if using a Windows PC. If using Linux or Mac, this should be the directory to the CIRCUITSCAPE python file (cs_run.py). See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
+#' @param platform What computing platform are you using ("pc", "other")
 #' @return An R object that is a required input into optimization functions
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.exe, Neighbor.Connect)
-#' @details \code{CS.exe} Example of path to CIRCUITSCAPE executible: 
+#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, platform)
+#' @details \code{CS.exe} Example of path to CIRCUITSCAPE executible on Windows: 
 #' 
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
 #'
 #' ***NOTE: Double quotation used***
-CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.exe,Neighbor.Connect=8){# Make to-from population list
+
+CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program,Neighbor.Connect=8, platform="pc"){# Make to-from population list
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
-  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.exe=CS.exe,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS)
+  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform)
 }
 
 ##########################################################################################
@@ -2115,14 +2142,17 @@ sink()
 }
 
 
-write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0"){
+write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0", MASK = "source_file = (Browse for a raster mask file)"){
 sink(BATCH)
 cat("[Options for advanced mode]
 ground_file_is_resistances = True
 remove_src_or_gnd = rmvsrc
 ground_file = (Browse for a raster mask file)
-use_unit_currents = False
-source_file = (Browse for a raster mask file)
+use_unit_currents = False")
+cat("\n")
+cat(MASK)
+cat("\n")
+cat("
 use_direct_grounds = False
 
 [Mask file]

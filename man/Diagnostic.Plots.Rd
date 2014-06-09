@@ -3,7 +3,7 @@
 \alias{Diagnostic.Plots}
 \title{Create diagnostic plots}
 \usage{
-Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
+Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type)
 }
 \arguments{
 \item{cs.resistance.mat}{Path to CIRCUITSCAPE "_resistances.out" file}
@@ -14,10 +14,12 @@ Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir)
 
 \item{YLAB}{Label for y-axis (Defaults to "Genetic distance")}
 
-\item{plot.dir}{Directory to output PDF of diagnostic plots}
+\item{plot.dir}{Directory to output TIFF of diagnostic plots}
+
+\item{type}{Specify whether the optimized surface is "continuous" or "categorical"}
 }
 \value{
-A four panel PDF including residual scatterplot, historgram of residuals, qqplot, and
+A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model
 }
 \description{
 This function will generate mixed effect model diagnostic plots following optimization

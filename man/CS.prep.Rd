@@ -3,7 +3,7 @@
 \alias{CS.prep}
 \title{Prepare and bundle input CIRCUITSCAPE model parameters}
 \usage{
-CS.prep(n.POPS, response, CS_Point.File, CS.exe, Neighbor.Connect)
+CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, platform)
 }
 \arguments{
 \item{n.POPS}{The number of populations that are being assessed}
@@ -12,9 +12,11 @@ CS.prep(n.POPS, response, CS_Point.File, CS.exe, Neighbor.Connect)
 
 \item{CS_Point.File}{The path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 
-\item{CS.exe}{The path to the CIRCUITSCAPE executable file (cs_run.exe). See details below.}
+\item{CS.program}{The path to the CIRCUITSCAPE executable file (cs_run.exe) if using a Windows PC. If using Linux or Mac, this should be the directory to the CIRCUITSCAPE python file (cs_run.py). See details below.}
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
+
+\item{platform}{What computing platform are you using ("pc", "other")}
 }
 \value{
 An R object that is a required input into optimization functions
@@ -23,7 +25,7 @@ An R object that is a required input into optimization functions
 This function will prepare objects needed for running optimization functions
 }
 \details{
-\code{CS.exe} Example of path to CIRCUITSCAPE executible:
+\code{CS.exe} Example of path to CIRCUITSCAPE executible on Windows:
 
 '"C:/Program Files/Circuitscape/cs_run.exe"'
 
