@@ -17,7 +17,7 @@ Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
 }
 \value{
-This function will return values that can be plotted to visualize the response surface
+This function will return a \code{filled.contour} plot. Additionally, an object with values that can be plotted with \code{filled.contour} to visualize the response surface
 }
 \description{
 Visualize the AICc response surface

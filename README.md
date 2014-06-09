@@ -15,7 +15,7 @@ library(devtools) # Loads devtools
 install_github("wpeterman/ResistanceGA") # Download package
 require(ResistanceGA) # Installs package and the other required packages needed
 ```
-Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' using the code below, or you can view the vignette directly [**here**](https://dl.dropboxusercontent.com/u/23513016/ResistanceGA_Vignette.html "Vignette")
+Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' using the code below, or you can view the vignette directly [**here**](https://dl.dropboxusercontent.com/u/23513016/ResistanceGA.html "Vignette")
 ```
 vignette('ResistanceGA')  # Opens tutorial in web browser
 ```
