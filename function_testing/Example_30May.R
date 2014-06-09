@@ -266,3 +266,5 @@ rm(list=".Random.seed", envir=globalenv())
 rick.eq<-(equation==2||equation==4||equation==6||equation==8)
 (equation==2||equation==4||equation==6||equation==8 & SHAPE>6)
 (rick.eq==TRUE & SHAPE>6)
+
+########################################

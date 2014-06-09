@@ -496,9 +496,8 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
-    CS.exe<-CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
   } else {
     CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
@@ -547,21 +546,21 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
 ###############################################################################  
 ############ Create continuous surface response figures ############ 
 ############################################################################### 
-Response.Figs<- function(Optim.input){
-  Top.params <- read.csv(file=paste0(Optim.input$Results.dir,"/TopModel_Optimization_Parameters.csv"),header=T)
-  dir.create(file.path(Optim.input$Results.dir, "Plots"))
-  
-  PDF.dir <- paste0(Optim.input$Results.dir,"Plots/")
-  for (i in 1:nrow(Top.params)){
-    ASCII.file <- list.files(Optim.input$ASCII.dir,pattern=paste0(Top.params[i,1],".asc"),full.names=TRUE)
-    if(Top.params[i,5]<1e-5 | Top.params[i,6]<1e-5) {
-      cat("\n","\n",paste0("Plotting of ", Top.params[i,1]," could not be completed due to extremely small parameter estimates."),"\n")
-      next # Use 'next' command to avoid testing invalid combinations    
-    } else {
-      PLOT.response(PARM=Top.params[i,c(5,6)],Resistance=ASCII.file,equation=Top.params[i,2],AIC=Top.params[i,7], OutputFolder=PDF.dir)
-    }
-  }
-}
+# Response.Figs<- function(Optim.input){
+#   Top.params <- read.csv(file=paste0(Optim.input$Results.dir,"/TopModel_Optimization_Parameters.csv"),header=T)
+#   dir.create(file.path(Optim.input$Results.dir, "Plots"))
+#   
+#   PDF.dir <- paste0(Optim.input$Results.dir,"Plots/")
+#   for (i in 1:nrow(Top.params)){
+#     ASCII.file <- list.files(Optim.input$ASCII.dir,pattern=paste0(Top.params[i,1],".asc"),full.names=TRUE)
+#     if(Top.params[i,5]<1e-5 | Top.params[i,6]<1e-5) {
+#       cat("\n","\n",paste0("Plotting of ", Top.params[i,1]," could not be completed due to extremely small parameter estimates."),"\n")
+#       next # Use 'next' command to avoid testing invalid combinations    
+#     } else {
+#       PLOT.response(PARM=Top.params[i,c(5,6)],Resistance=ASCII.file,equation=Top.params[i,2],AIC=Top.params[i,7], OutputFolder=PDF.dir)
+#     }
+#   }
+# }
 
 ###############################################################################  
 ############ RUN CIRCUITSCAPE ############ 
@@ -634,9 +633,8 @@ if(class(r)[1]!='RasterLayer') {
 hidden = TRUE  
 # Run Circuitscape
 if(CS.inputs$platform=="pc"){
-  CS.exe<-CS.program
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+  CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
 } else {
   CS.py <- CS.program
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
@@ -1081,9 +1079,8 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
-    CS.exe<-CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
   } else {
     CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
@@ -1270,9 +1267,8 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
-    CS.exe<-CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
   } else {
     CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
@@ -1604,9 +1600,8 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
-    CS.exe<-CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.exe, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
   } else {
     CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
@@ -1823,13 +1818,13 @@ Diagnostic.Plots<-function(cs.resistance.mat, genetic.dist, XLAB="Estimated resi
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) if using a Windows PC. If using Linux or Mac, this should be the directory to the CIRCUITSCAPE python file (cs_run.py). See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
-#' @param platform What computing platform are you using ("pc", "other")
+#' @param platform What computing platform are you using ("pc", "other"). This code has only been tested on PC!!!
 #' @return An R object that is a required input into optimization functions
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, platform)
-#' @details \code{CS.exe} Example of path to CIRCUITSCAPE executible on Windows: 
+#' @details \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows: 
 #' 
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
 #'
@@ -2142,17 +2137,14 @@ sink()
 }
 
 
-write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0", MASK = "source_file = (Browse for a raster mask file)"){
+write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0"){
 sink(BATCH)
 cat("[Options for advanced mode]
 ground_file_is_resistances = True
 remove_src_or_gnd = rmvsrc
 ground_file = (Browse for a raster mask file)
-use_unit_currents = False")
-cat("\n")
-cat(MASK)
-cat("\n")
-cat("
+use_unit_currents = False
+source_file = (Browse for a raster mask file)
 use_direct_grounds = False
 
 [Mask file]
@@ -2397,26 +2389,26 @@ cat(GA.results@solution,"\n")
 cat("\n")
 sink()
 }
-# Optimiazation preparation
-Optim.input<-function(Response,n.Pops,ASCII.dir,CS_Point.File,CS.exe,Neighbor.Connect=8,Constrained.Max=100,Initial.shape=c(seq(0.2,1,by=0.2),seq(1.25,10.75,by=0.75)),Bootstrap=FALSE,boot.iters=10000,Sample_Proportion=0.75){
-  # Install necessary packages
-  libs=c("raster", "lme4", "plyr")
-  CheckInstallPackage(packages=libs)
-  
-  #####################
-  if(is.vector(Response)==TRUE || dim(Response)[1]!=dim(Response)[2]) {warning("Must provide square distance matrix with no column or row names")}
-  Response.vec<-Response[lower.tri(Response)]
-  ID <- To.From.ID(n.Pops)
-  ZZ<-ZZ.mat(ID)
-  ASCII.files<-list.files(ASCII.dir,pattern="*.asc",full.names=TRUE)
-  ASCII.names<-gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
-  dir.create(file.path(ASCII.dir, "Results"))
-  Results.dir<-paste0(ASCII.dir, "/Results/")
-  dir.create(file.path(Results.dir, "tmp"))
-  Write.dir <-paste0(Results.dir,"/tmp/")  
-  
-  list(Response.vec=Response.vec,Response.mat=Response,n.Pops=n.Pops,ID=ID,ZZ=ZZ,ASCII.files=ASCII.files,ASCII.names=ASCII.names,ASCII.dir=ASCII.dir,Write.dir=Write.dir,Results.dir=Results.dir,CS_Point.File=CS_Point.File,CS.exe=CS.exe,Neighbor.Connect=Neighbor.Connect,Constrained.Max=Constrained.Max,Initial.shape=Initial.shape,Bootstrap=Bootstrap,boot.iters=boot.iters,Sample_Proportion=Sample_Proportion)
-}
+# Optimization preparation
+# Optim.input<-function(Response,n.Pops,ASCII.dir,CS_Point.File,CS.exe,Neighbor.Connect=8,Constrained.Max=100,Initial.shape=c(seq(0.2,1,by=0.2),seq(1.25,10.75,by=0.75)),Bootstrap=FALSE,boot.iters=10000,Sample_Proportion=0.75){
+#   # Install necessary packages
+#   libs=c("raster", "lme4", "plyr")
+#   CheckInstallPackage(packages=libs)
+#   
+#   #####################
+#   if(is.vector(Response)==TRUE || dim(Response)[1]!=dim(Response)[2]) {warning("Must provide square distance matrix with no column or row names")}
+#   Response.vec<-Response[lower.tri(Response)]
+#   ID <- To.From.ID(n.Pops)
+#   ZZ<-ZZ.mat(ID)
+#   ASCII.files<-list.files(ASCII.dir,pattern="*.asc",full.names=TRUE)
+#   ASCII.names<-gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
+#   dir.create(file.path(ASCII.dir, "Results"))
+#   Results.dir<-paste0(ASCII.dir, "/Results/")
+#   dir.create(file.path(Results.dir, "tmp"))
+#   Write.dir <-paste0(Results.dir,"/tmp/")  
+#   
+#   list(Response.vec=Response.vec,Response.mat=Response,n.Pops=n.Pops,ID=ID,ZZ=ZZ,ASCII.files=ASCII.files,ASCII.names=ASCII.names,ASCII.dir=ASCII.dir,Write.dir=Write.dir,Results.dir=Results.dir,CS_Point.File=CS_Point.File,CS.exe=CS.exe,Neighbor.Connect=Neighbor.Connect,Constrained.Max=Constrained.Max,Initial.shape=Initial.shape,Bootstrap=Bootstrap,boot.iters=boot.iters,Sample_Proportion=Sample_Proportion)
+# }
 
 #########################################
 # Install necessary packages
