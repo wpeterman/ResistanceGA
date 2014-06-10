@@ -68,6 +68,7 @@ return(Results.mat)
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.
+#' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the AICc output table
 #' @return This function optimizes multiple resistance surfaces. Following optimization, several summary objects are created.\cr
 #' \enumerate{
 #' \item Diagnostic plots of model fit are output to the "Results/Plots" directory that is automatically generated within the folder containing the optimized ASCII files.
@@ -75,10 +76,10 @@ return(Results.mat)
 #' \item Three summary .csv files are generated: CategoricalResults.csv, ContinuousResults.csv, & All_Results_AICc.csv. These tables contain AICc values and optimization summaries for each surface.
 #' }
 #' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
-#' @usage SS_optim(CS.inputs, GA.inputs, nlm)
+#' @usage SS_optim(CS.inputs, GA.inputs, nlm, dist_mod)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
-SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
+SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE, dist_mod=TRUE){
   RESULTS.cat <- list() # List to store categorical results within
   RESULTS.cont <-list() # List to store continuous results within
   cnt1<-0
@@ -203,7 +204,18 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
       colnames(RS) <- c("Surface","AICc","Equation","shape","max")
       RESULTS.cont[[cnt2]] <- RS
       }     
-    } # Close if-else    
+    } # Close if-else  
+    if (dist_mod==TRUE){
+      r <- reclassify(r, c(-Inf,Inf, 1))
+      names(r)<-"dist"
+      Run_CS(CS.inputs,GA.inputs,r)
+      Dist.AIC <- MLPE.lmm(cs.resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"), pairwise.genetic=CS.inputs$response)
+      k<-2
+  AICc <- (Dist.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
+  Dist.AICc<-data.frame("Distance", AICc); colnames(Dist.AICc)<-c("Surface","AICc")
+      
+    }
+    
   } # Close ascii loop
   
   ####################################################
@@ -250,6 +262,7 @@ SS_optim <- function(CS.inputs,GA.inputs, nlm=FALSE){
   } else {
     Results.All<-(Results.cat[,c(1,2)])    
   }
+  Results.All<-rbind(Results.All,Dist.AICc)
  
   cat("\n")
   cat("\n")
