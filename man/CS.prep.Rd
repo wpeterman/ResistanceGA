@@ -16,7 +16,7 @@ CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, platform)
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
-\item{platform}{What computing platform are you using ("pc", "other")}
+\item{platform}{What computing platform are you using ("pc", "other"). This code has only been tested on PC!!!}
 }
 \value{
 An R object that is a required input into optimization functions

@@ -66,7 +66,8 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 99)
+                   seed = 99,
+                   run=1)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -80,7 +81,7 @@ names(Resist)<-"Resist"
 # Resist.false<-Resistance.tran(transformation="Monomolecular",shape=2,max=100,r=cont.rf) # Make Combine_Surfaces so that it can take both an R raster object or read a .asc file
 
 
-plot.t<-PLOT.trans(PARM=c(3.2,125),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Inverse-Reverse Ricker") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-Plot.trans(PARM=c(3.2,125),Resistance="C:/ResistanceGA_Examples/SingleSurface/cont.asc",transformation="Inverse-Reverse Ricker") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
 # Only continuous the surface will affect resistance in the first example

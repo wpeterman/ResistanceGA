@@ -3,7 +3,7 @@
 \alias{SS_optim}
 \title{Single surface optimization}
 \usage{
-SS_optim(CS.inputs, GA.inputs, nlm)
+SS_optim(CS.inputs, GA.inputs, nlm, dist_mod, null_mod)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
@@ -11,6 +11,10 @@ SS_optim(CS.inputs, GA.inputs, nlm)
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{nlm}{Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.}
+
+\item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the AICc output table (default = TRUE)}
+
+\item{null_mod}{Logical, if TRUE, a Null model will be calculated and added to the AICc output table (default = TRUE)}
 }
 \value{
 This function optimizes multiple resistance surfaces. Following optimization, several summary objects are created.\cr

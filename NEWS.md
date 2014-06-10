@@ -2,5 +2,5 @@
 ****
 * All functions are fully documented
 * Added `filled.contour` plot to `Grid.Search`
-* Added Distance model output option to `SS_optim`
+* Added Distance and Null model output options to `SS_optim`
 * Vignette has been updated
