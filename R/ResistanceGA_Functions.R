@@ -398,15 +398,14 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   CS_Point.File<-CS.inputs$CS_Point.File
   CS.program<-CS.inputs$CS.program
   EXPORT.dir<-GA.inputs$Write.dir
-  GA.params<-GA.inputs
   ######
-  r <- GA.params$Resistance.stack
+  r <- GA.inputs$Resistance.stack
   
-  for(i in 1:GA.params$n.layers){
-    if(GA.params$surface.type[i]=="cat"){
-      ga.p <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+  for(i in 1:GA.inputs$n.layers){
+    if(GA.inputs$surface.type[i]=="cat"){
+      ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       parm <- ((ga.p-1)*PARM[1])+1
-      Opt.parm[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]<-parm
+      Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
       parm<-parm/min(parm)
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
@@ -415,10 +414,10 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
       
     } else {
       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
-      parm <- GA.opt[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+      parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       mx<-parm[3]*PARM[1]
       parm[3]<-mx
-      Opt.parm[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]<-parm
+      Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
       
       # Set equation for continuous surface
       equation <- floor(parm[1]) # Parameter can range from 1-9.99
@@ -500,7 +499,7 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   } # Close layer loop
   
   
-  File.name <- "multi_surface"
+  File.name <- "resist_surface"
   
   multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
   if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
@@ -528,12 +527,10 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
   } else {
-    CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
-    CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+    CS.Run.output<-system(paste(python, CS.inputs$CS.program, CS.ini), hidden)
   }
   
   
@@ -560,7 +557,7 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
   AIC.stat <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
   #    summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
   
-  k<-max(GA.params$parm.index)+1
+  k<-max(GA.inputs$parm.index)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   
  
@@ -628,11 +625,6 @@ if(class(r)[1]!='RasterLayer') {
     MAP="write_cum_cur_map_only = True"
     CURRENT.MAP="write_cur_maps = 1"
   }
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  response<-CS.inputs$response
-  CS_Point.File<-CS.inputs$CS_Point.File
-  CS.program<-CS.inputs$CS.program
   
   ######
   multi_surface=r
@@ -646,31 +638,23 @@ if(class(r)[1]!='RasterLayer') {
   
   # Modify and write Circuitscape.ini file
   #############################################################################################  
-  BATCH<-paste0(EXPORT.dir,File.name,".ini")        
-  OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
-  HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
-  LOCATION.FILE <- paste0("point_file = ", CS.inputs$CS_Point.File)
-  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
-  CONNECTION=paste0("connect_four_neighbors_only=",connect)
-  
-  #     if(CS.version=='3.5.8'){
-  #       write.CS_3.5.8(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION,CURRENT.MAP=CURRENT.MAP,MAP=MAP)
-  #     } else {
-  write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION,MAP=MAP,CURRENT.MAP=CURRENT.MAP)    
-  #     }
-  
+ ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
+
+  write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
+               OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
+               HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
+               LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
+               CONNECTION=paste0("connect_four_neighbors_only=",connect))
   ##########################################################################################
 # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
 hidden = TRUE  
 # Run Circuitscape
 if(CS.inputs$platform=="pc"){
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
 } else {
-  CS.py <- CS.program
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
-  CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+  CS.Run.output<-system(paste(python, CS.inputs$CS.program, CS.ini), hidden)
 }
  
   
@@ -712,7 +696,7 @@ if(CS.inputs$platform=="pc"){
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir){
   t1<-Sys.time()
-  GA.params<-GA.inputs
+  GA.inputs<-GA.inputs
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
   response<-CS.inputs$response
@@ -722,11 +706,11 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
   EXPORT.dir<-out
   
   ######
-  r <- GA.params$Resistance.stack
+  r <- GA.inputs$Resistance.stack
   
-  for(i in 1:GA.params$n.layers){
-    if(GA.params$surface.type[i]=="cat"){
-      parm <- PARM[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+  for(i in 1:GA.inputs$n.layers){
+    if(GA.inputs$surface.type[i]=="cat"){
+      parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       parm <- parm/min(parm)
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
@@ -736,7 +720,7 @@ Combine_Surfaces <- function(PARM,CS.inputs,GA.inputs, out=GA.inputs$Results.dir
       
     } else {
       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
-      parm <- PARM[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+      parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       
       
       # Set equation for continuous surface
@@ -973,34 +957,23 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE){
-  t1<-Sys.time()
-  
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  response<-CS.inputs$response
-  #   CS.version<-CS.inputs$CS.version
-  CS_Point.File<-CS.inputs$CS_Point.File
-  CS.program<-CS.inputs$CS.program
+  t1<-Sys.time() 
   EXPORT.dir<-GA.inputs$Write.dir
-  GA.params<-GA.inputs
   ######
-  r <- GA.params$Resistance.stack
+  r <- GA.inputs$Resistance.stack
   
-  for(i in 1:GA.params$n.layers){
-    if(GA.params$surface.type[i]=="cat"){
-      parm <- PARM[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+  for(i in 1:GA.inputs$n.layers){
+    if(GA.inputs$surface.type[i]=="cat"){
+      parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       parm <- parm/min(parm)
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
       r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))
       
-      
-      #   	  cat(GA.params$layer.names[i],"\n")
-      
     } else {
       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
-      parm <- PARM[(GA.params$parm.index[i]+1):(GA.params$parm.index[i+1])]
+      parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       
       
       # Set equation for continuous surface
@@ -1083,7 +1056,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   } # Close layer loop
   
   
-  File.name <- "multi_surface"
+  File.name <- "resist_surface"
   
   multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
   if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
@@ -1092,57 +1065,31 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
   
   # Modify and write Circuitscape.ini file
   #############################################################################################  
-  BATCH<-paste0(EXPORT.dir,File.name,".ini")        
-  OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
-  HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
-  LOCATION.FILE <- paste0("point_file = ", CS.inputs$CS_Point.File)
-  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
-  CONNECTION=paste0("connect_four_neighbors_only=",connect)
-  
-  #   if(CS.version=='3.5.8'){
-  #     write.CS_3.5.8(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,VERSION=VERSION)
-  #   } else {
-  write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
-  #   }
-  
+ ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
+
+  write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
+               OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
+               HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
+               LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
+               CONNECTION=paste0("connect_four_neighbors_only=",connect))
   ##########################################################################################
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
   } else {
-    CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
-    CS.Run.output<-system(paste("python", CS.py, CS.ini), hidden)
+    CS.Run.output<-system(paste("python", CS.inputs$CS.program, CS.ini), hidden)
   }
   
   #########################################
-  # Run mixed effect model on each Circuitscape effective resistance
-  
-  CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
-  
-  # Get AIC statistic for transformed-scaled resistance surface
-  cs.matrix<-read.matrix(CS.results)
-  cs.matrix<-scale(cs.matrix,center=TRUE,scale=TRUE)
-  # cs.matrix2<-round(read.matrix(CS.results),4)
-  
-  data<-cbind(ID,cs.matrix,response)
-  
-  # Assign value to layer
-  LAYER<-assign("LAYER",value=data$cs.matrix)
-  
-  # Fit model
-  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
-  mod$reTrms$Zt <- ZZ
-  dfun <- do.call(mkLmerDevfun,mod)
-  opt <- optimizeLmer(dfun)
-  AIC.stat <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-  #    summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-  
-  k<-max(GA.params$parm.index)+1
+    # Run mixed effect model on each Circuitscape effective resistance
+  AIC.stat <- AIC(MLPE.lmm(cs.resistance=paste0(EXPORT.dir,File.name,"_resistances.out"),
+                           pairwise.genetic=CS.inputs$response))
+
+  k<-max(GA.inputs$parm.index)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   
  
@@ -1176,23 +1123,14 @@ Resistance.Opt_multi <- function(PARM,CS.inputs,GA.inputs, Min.Max, quiet=FALSE)
 Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='max',iter, quiet=FALSE){
   t1<-Sys.time()
   
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  response<-CS.inputs$response
-  #   CS.version<-CS.inputs$CS.version
-  CS_Point.File<-CS.inputs$CS_Point.File
-  CS.program<-CS.inputs$CS.program
   EXPORT.dir<-GA.inputs$Write.dir
-  GA.params<-GA.inputs
   ######
   r <- Resistance
   
-  if(GA.params$surface.type[iter]=="cat"){
+  if(GA.inputs$surface.type[iter]=="cat"){
     PARM<-PARM/min(PARM)
-    #       parm <- PARM[(GA.params$parm.index[iter]+1):(GA.params$parm.index[iter+1])]
     df <- data.frame(id=unique.rast(r),PARM) # Data frame with original raster values and replacement values
-    r <-subs(r,df)
-    
+    r <-subs(r,df)    
        
   } else {
     r<-SCALE(r,0,10)
@@ -1271,7 +1209,6 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
       EQ <- "Distance"    
     } # End if-else  
   } # Close parameter type if-else  
-  
   File.name <- "resist_surface"
   
   if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
@@ -1281,55 +1218,32 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
   
   # Modify and write Circuitscape.ini file
   #############################################################################################  
-  BATCH<-paste0(EXPORT.dir,File.name,".ini")        
-  OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
-  HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
-  LOCATION.FILE <- paste0("point_file = ", CS.inputs$CS_Point.File)
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
-  CONNECTION=paste0("connect_four_neighbors_only=",connect)
-  
-  # if(CS.version=='3.5.8'){
-  #   write.CS_3.5.8(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,VERSION=VERSION)
-  # } else {
-  write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
-  # }
+
+  write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
+               OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
+               HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
+               LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
+               CONNECTION=paste0("connect_four_neighbors_only=",connect))
   ##########################################################################################
-  # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
+ # Run CIRCUITSCAPE
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
   } else {
-    CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
-    CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
-  }
-  
+    CS.Run.output<-system(paste(python, CS.inputs$CS.program
+, CS.ini), hidden)
+  }  
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
-  
-  CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
-  
-  # Get AIC statistic for transformed-scaled resistance surface
-  cs.matrix<-scale(read.matrix(CS.results),center=TRUE,scale=TRUE)
-  
-  data<-cbind(ID,cs.matrix,response)
-  
-  # Assign value to layer
-  LAYER<-assign("LAYER",value=data$cs.matrix)
-  
-  # Fit model
-  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
-  mod$reTrms$Zt <- ZZ
-  dfun <- do.call(mkLmerDevfun,mod)
-  opt <- optimizeLmer(dfun)
-  AIC.stat <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-  
+  AIC.stat <- AIC(MLPE.lmm(cs.resistance=paste0(EXPORT.dir,File.name,"_resistances.out"),
+                           pairwise.genetic=CS.inputs$response))
+
   k<-length(PARM)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-
   
   t2 <-Sys.time()
   if(quiet==FALSE){
@@ -1338,7 +1252,6 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs,GA.inputs, Min.Max='
     cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
     
   }
-  
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 }
 
@@ -1508,11 +1421,6 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
 ############ OPTIMIZATION FUNCTION USING GA STARTS: CONTINUOUS ############ 
 ############################################################################  
 Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS.inputs,Min.Max,quiet=FALSE) {
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  response<-CS.inputs$response
-  #   CS.version<-CS.inputs$CS.version
-  CS_Point.File<-CS.inputs$CS_Point.File
   CS.program<-CS.inputs$CS.program
   
   EXPORT.dir<-  if(get.best==FALSE){
@@ -1614,52 +1522,29 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   
   #Modify and write Circuitscape.ini file
   #############################################################################################  
-  BATCH<-paste0(EXPORT.dir,File.name,".ini")        
-  OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
-  HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
-  LOCATION.FILE <- paste0("point_file = ", CS.inputs$CS_Point.File)
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
-  CONNECTION=paste0("connect_four_neighbors_only=",connect)
-  
-  # if(CS.version=='3.5.8'){
-  #   write.CS_3.5.8(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,VERSION=VERSION)
-  # } else {
-  write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
-  # }
+
+  write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
+               OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
+               HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
+               LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
+               CONNECTION=paste0("connect_four_neighbors_only=",connect))
   ##########################################################################################
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
   hidden = TRUE  
   # Run Circuitscape
   if(CS.inputs$platform=="pc"){
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste(CS.program, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
   } else {
-    CS.py <- CS.program
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    #     CS.Run.output<-system(paste(CS.py2, CS.ini), hidden)
-    CS.Run.output<-system(paste(python, CS.py, CS.ini), hidden)
+    CS.Run.output<-system(paste(python, CS.inputs$CS.program, CS.ini), hidden)
   }
   
   ##########################################################################################
   # Run mixed effect model on each Circuitscape effective resistance
-  
-  CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
-  
-  # Get AIC statistic for transformed-scaled resistance surface
-  cs.matrix<-scale(read.matrix(CS.results),center=TRUE,scale=TRUE)
-  
-  data<-cbind(ID,cs.matrix,response)
-  
-  # Assign value to layer
-  LAYER<-assign("LAYER",value=data$cs.matrix)
-  
-  # Fit model
-  mod <- lFormula(response ~ LAYER + (1|pop1), data=data,REML=FALSE)
-  mod$reTrms$Zt <- ZZ
-  dfun <- do.call(mkLmerDevfun,mod)
-  opt <- optimizeLmer(dfun)
-  AIC.stat <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-  
+  AIC.stat <- AIC(MLPE.lmm(cs.resistance=paste0(EXPORT.dir,File.name,"_resistances.out"),
+                           pairwise.genetic=CS.inputs$response))
   k<-length(PARM)+2
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
     
@@ -1893,7 +1778,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program,Neighbor.Conn
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria
 #' @param seed Integer random number seed to replicate \code{ga} optimization
-#' @param quiet Logical. If TRUE, AICc and iteration time will not be printed to the screen after each iteration. Default = FALSE
+#' @param quiet Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE
 #' @return An R object that is a required input into optimization functions
 #' 
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.

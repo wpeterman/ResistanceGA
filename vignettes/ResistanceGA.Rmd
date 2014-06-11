@@ -164,7 +164,8 @@ GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 99) 
+                   seed = 99,
+                   parallel=4) 
 
 CS.inputs <- CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -183,9 +184,6 @@ Run the transformed resistance surface through CIRCUITSCAPE to get effective res
 ```{r eval=FALSE}
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
-
-# Write CS.response to file for use with optimization
-write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.names=F)
 ```
 
 Rerun `CS.prep` including the newly created `CS.response`

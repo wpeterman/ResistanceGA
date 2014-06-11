@@ -63,7 +63,7 @@ quiet = FALSE)
 
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
-\item{quiet}{Logical. If TRUE, AICc and iteration time will not be printed to the screen after each iteration. Default = FALSE}
+\item{quiet}{Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE}
 }
 \value{
 An R object that is a required input into optimization functions

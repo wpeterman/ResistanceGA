@@ -67,7 +67,7 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    max.cat=500,
                    max.cont=500,
                    seed = 99,
-                   run=1)
+                   parallel=FALSE)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -126,7 +126,6 @@ Grid.Results$AICc[match(interaction(3.2,125),interaction(Grid.Results$AICc[,c(1,
 # Single surface optimization
 system.time(SS_RESULTS<-SS_optim(CS.inputs=CS.inputs,
          GA.inputs=GA.inputs))
-
 
 #############################
 set.seed(321)

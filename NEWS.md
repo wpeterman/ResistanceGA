@@ -1,3 +1,7 @@
+### Version 1.0.1
+****
+* Cleaned and consolodated code
+
 ### Version 1.0.0
 ****
 * All functions are fully documented
