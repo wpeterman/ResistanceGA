@@ -2,6 +2,7 @@
 ****
 * Cleaned and consolodated code
 * Expanded vignette
+* Added an option to `Run_CS` to return a `raster` object if `CurrentMap=TRUE`
 
 ### Version 1.0.0
 ****

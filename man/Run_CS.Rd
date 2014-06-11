@@ -15,6 +15,8 @@ Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
 \item{CurrentMap}{Logical. If TRUE, the cumulative resistance map will be generated during the CS run (Default = FALSE)}
 
 \item{EXPORT.dir}{Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)}
+
+\item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the current map. The raster map can only be returned if \code{CurrentMap=TRUE}}
 }
 \value{
 Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out")

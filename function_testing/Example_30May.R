@@ -67,7 +67,8 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    max.cat=500,
                    max.cont=500,
                    seed = 99,
-                   parallel=FALSE)
+                   run=1,
+                   pop.mult=5)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -85,6 +86,7 @@ plot.t<-Plot.trans(PARM=c(3.2,125),Resistance="C:/ResistanceGA_Examples/SingleSu
 
 # Run CIRCUITSCAPE to generate pairwise matrix of effective resistance distance
 # Only continuous the surface will affect resistance in the first example
+CS.TEST<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist,EXPORT.dir=GA.inputs$Write.dir,CurrentMap=T,output="raster")
 CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist,EXPORT.dir=GA.inputs$Write.dir)
 
 # We add some random noise to the response (i.e. CS resistance output)
@@ -102,9 +104,10 @@ CS.inputs<-CS.prep(n.POPS=n,
 # Diagnostic.Plots(cs.resistance.mat=paste0(GA.inputs$Write.dir,"Resist_resistances.out"),genetic.dist=CS.inputs$RESPONSE,plot.dir=GA.inputs$Write.dir)
 
 # Grid search
+# Grid.Results <- Grid.Search(shape=seq(1,4,by=0.2),max=seq(50,350,by=75),transformation="Inverse-Reverse Ricker",Resistance=cont.rf, CS.inputs)
 Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Inverse-Reverse Ricker",Resistance=cont.rf, CS.inputs)
 
-filled.contour(Grid.Results$Plot.data,col=topo.colors(30),xlab="Shape parameter",ylab="Maximum value parameter")
+filled.contour(Grid.Results$Plot.data,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
 
 # Best from Grid.Search
 Grid.Results$AICc[match(min(Grid.Results$AICc$AICc),Grid.Results$AICc$AICc),]
@@ -180,7 +183,7 @@ write.table(coord.id,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,r
 #############################
 # Visualize transformation of continuous surface. The first term of the PARM function refers to the shape parameter, and the second term refers to the maximum value parameter.
 
-plot.t<-PLOT.trans(PARM=c(3.5,400),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Reverse Ricker") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
+plot.t<-Plot.trans(PARM=c(3.5,400),Resistance="C:/ResistanceGA_Examples/MultipleSurfaces/cont.asc",transformation="Reverse Ricker") #print.dir="C:/ResistanceGA_Example/Results/Plots/"
 
 # Combine raster surfaces, apply transformation to continuous surface and change values of categorical and feature surfaces
 PARM1=c(1,150,50,6,3.5,400,1,300)
@@ -197,7 +200,8 @@ GA.inputs<-GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 101)
+                   seed = 101,
+                   run=2)
 
 CS.inputs<-CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -231,7 +235,7 @@ write.table(CS.response,file=paste0(write.dir,"Combined_response.csv"),sep=",",r
 
 # Run prep functions
 CS.inputs<-CS.prep(n.POPS=n,
-                   RESPONSE=CS.response,
+                   response=CS.response,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
                    CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 

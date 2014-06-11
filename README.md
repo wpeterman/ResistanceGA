@@ -6,9 +6,10 @@ ResistanceGA
 To install this package, execute the following commands in R:
 
 ```
-if ("devtools" %in% rownames(installed.packages()) == FALSE) {
+# Install 'devtools' package, if needed
+if(!("devtools" %in% list.files(.libPaths()))) {
     install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
-} # Installs 'devtools' package, if needed
+} 
 
 library(devtools) # Loads devtools
 

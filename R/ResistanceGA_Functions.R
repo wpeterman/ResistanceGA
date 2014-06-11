@@ -603,16 +603,17 @@ Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE
 #' @param r Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object
 #' @param CurrentMap Logical. If TRUE, the cumulative resistance map will be generated during the CS run (Default = FALSE)
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)
+#' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out")
 #' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir){
+Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir, output="matrix"){
 if(class(r)[1]!='RasterLayer') {
   R<-raster(r)
   NAME <- basename(r)
-  NAME<-sub("^([^.]*).*", "\\1", NAME) 
+  NAME<-sub(".asc", "", NAME) 
   names(R)<-NAME
 }
   
@@ -665,9 +666,17 @@ if(CS.inputs$platform=="pc"){
   # Run mixed effect model on each Circuitscape effective resistance
   
   CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
+
+if(output=="raster" & CurrentMap==TRUE){
+  rast<-raster(paste0(EXPORT.dir, File.name,"_cum_curmap.asc"))
+  NAME <- basename(rast@file@name)
+  NAME<-sub("^([^.]*).*", "\\1", NAME) 
+  names(rast)<-NAME
+  (rast)
+} else {
+  (cs.matrix<-read.matrix(CS.results))  
+}
   
-  (cs.matrix<-read.matrix(CS.results))
-  #   cs.matrix<-scale(cs.matrix,center=TRUE,scale=TRUE)
 }
 
 Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.name){
