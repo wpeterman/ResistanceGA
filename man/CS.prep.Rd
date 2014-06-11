@@ -30,6 +30,7 @@ This function will prepare objects needed for running optimization functions
 '"C:/Program Files/Circuitscape/cs_run.exe"'
 
 ***NOTE: Double quotation used***
+This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

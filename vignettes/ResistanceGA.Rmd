@@ -169,7 +169,9 @@ GA.inputs <- GA.prep(ASCII.dir=write.dir,
 
 CS.inputs <- CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) 
+                   CS.program=paste('"C:/Program Files/Circuitscape/cs_run.exe"')) 
+
+# I believe that this is the default Windows installation directory for CIRCUITSCAPE
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet.
 
@@ -407,6 +409,12 @@ names(ms.stack) <- c("Truth", "Optimized")
 pairs(ms.stack)
 ```
 ![correlation.plots](figure/correlation_plot.png) 
+
+If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` in `Run_CS`.
+```{r CS.maps, eval=FALSE}
+
+```
+
 
 This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. While some may see this as a limitation/weakness, these methods still capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions and researcher bias.   
 

@@ -1,6 +1,7 @@
 ### Version 1.0.1
 ****
 * Cleaned and consolodated code
+* Expanded vignette
 
 ### Version 1.0.0
 ****
