@@ -62,20 +62,53 @@ scale_x_continuous(limits=c(min(original),max(original)),breaks=x.break) +
 TEST<-matrix(seq(from=0,to=10,length.out=100),nrow=10)
 test.rast<-raster(TEST)
 
-(g1 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Monomolecular"))
-(g2 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Reverse Monomolecular"))
-(g3 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Inverse Monomolecular"))
-(g4 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Inverse-Reverse Monomolecular"))
-(g5 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Ricker"))
-(g6 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Reverse Ricker"))
-(g7 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Inverse Ricker"))
-(g8 <- PLOT.trans(PARM=c(2,100),Resistance=test.rast,transformation="Inverse-Reverse Ricker"))
+(g1 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Monomolecular"))
+(g2 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Reverse Monomolecular"))
+(g3 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Inverse Monomolecular"))
+(g4 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Inverse-Reverse Monomolecular"))
+(g5 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Ricker"))
+(g6 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Reverse Ricker"))
+(g7 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Inverse Ricker"))
+(g8 <- Plot.trans(PARM=c(3,100),Resistance=test.rast,transformation="Inverse-Reverse Ricker"))
 
 
 # Arrange the 8 charts
-svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/vignettes//figure/Transformations.svg",width=10,height=13.333)
+# svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/vignettes//figure/Transformations.svg",width=10,height=13.333)
+# grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
+# dev.off()
+
+tiff("C:/Users/Bill/Box Sync/Research/Manuscripts/Manuscripts_in_Progress/ResistanceGA/Transformations.tif",
+     width=10,
+     height=13.333,
+     units="in",
+     compression="lzw",
+     res=300)
 grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
 dev.off()
+
+######################################
+(g1 <- Plot.trans(PARM=c(2,150),Resistance=test.rast,transformation="Ricker"))
+(g2 <- Plot.trans(PARM=c(2,150),Resistance=test.rast,transformation="Inverse Monomolecular"))
+(g3 <- Plot.trans(PARM=c(6,100),Resistance=test.rast,transformation="Inverse Ricker"))
+
+
+
+# Arrange the 8 charts
+# svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/vignettes//figure/Transformations.svg",width=10,height=13.333)
+# grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
+# dev.off()
+
+tiff("C:/Users/Bill/Box Sync/Research/Manuscripts/Manuscripts_in_Progress/ResistanceGA/Transformations.tif",
+     width=10,
+     height=13.333,
+     units="in",
+     compression="lzw",
+     res=300)
+grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
+dev.off()
+
+
+
 
 
 

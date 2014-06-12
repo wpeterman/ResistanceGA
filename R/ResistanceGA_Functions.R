@@ -354,23 +354,23 @@ MS_optim<-function(CS.inputs,GA.inputs){
 #                            GA.opt = multi.GA_nG@solution)
 # PARM<-Parm.multiplier$par
 # ###########################################
-Opt.parm <- GA.opt <- multi.GA_nG@solution
-for(i in 1:GA.inputs$n.layers){
-    if(GA.inputs$surface.type[i]=="cat"){
-      ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-      parm <- ((ga.p-min(ga.p)))#*PARM[1])+1
-      parm <- parm/min(parm)
-      Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-      
-    } else {
-      parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-      mx<-parm[3]#*PARM[1]
-      parm[3]<-mx
-      Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-    }
-}
-# ####
-multi.GA_nG@solution <- Opt.parm
+# Opt.parm <- GA.opt <- multi.GA_nG@solution
+# for(i in 1:GA.inputs$n.layers){
+#     if(GA.inputs$surface.type[i]=="cat"){
+#       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+#       parm <- ((ga.p-min(ga.p)))#*PARM[1])+1
+#       parm <- parm/min(parm)
+#       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+#       
+#     } else {
+#       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+#       mx<-parm[3]#*PARM[1]
+#       parm[3]<-mx
+#       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+#     }
+# }
+# # ####
+# multi.GA_nG@solution <- Opt.parm
 # multi.GA_nG@fitnessValue <- Parm.multiplier$value
 # ##################################
   

@@ -45,7 +45,7 @@ First, install `ResistanceGA` from GitHub. This will require the `devtools` pack
 
 ```r
 # Install 'devtools' package, if needed
-if ("devtools" %in% rownames(installed.packages()) == FALSE) {
+if(!("devtools" %in% list.files(.libPaths()))) {
     install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
 }
 
@@ -54,11 +54,12 @@ library(devtools) # Loads devtools
 install_github("wpeterman/ResistanceGA") # Download package
 ```
 
-Load the required R packages, clear your workspace, and set a random number seed.
+Load the required R packages and clear your workspace.
 
 ```r
 require(RandomFields)
 require(ResistanceGA)
+require(raster)
 
 rm(list = ls())
 ```
@@ -180,11 +181,14 @@ GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    min.cat=0,
                    max.cat=500,
                    max.cont=500,
-                   seed = 99) 
+                   seed = 99,
+                   parallel=4) 
 
 CS.inputs <- CS.prep(n.POPS=n,
                    CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')) 
+                   CS.program=paste('"C:/Program Files/Circuitscape/cs_run.exe"')) 
+
+# I believe that this is the default Windows installation directory for CIRCUITSCAPE
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet.
 
@@ -203,9 +207,6 @@ Run the transformed resistance surface through CIRCUITSCAPE to get effective res
 ```r
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
-
-# Write CS.response to file for use with optimization
-write.table(CS.response,paste0(write.dir,"CS.response.txt"),col.names=F,row.names=F)
 ```
 
 Rerun `CS.prep` including the newly created `CS.response`
@@ -257,7 +258,7 @@ SS_RESULTS$ContinuousResults
 To view the AICc response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relevant for single continuous surfaces.
 
 ```r
-Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
+Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs, write.dir=GA.inputs$Write.dir)
 ```
 ![GRID.Surface](figure/grid_topo.png)      
 
@@ -405,7 +406,7 @@ CS.inputs<-CS.prep(n.POPS=n,
                       CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
-Run `MS_optim`. Running this multisurface example with the default settings took 89 iterations and ~1.5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
+Run `MS_optim`. Running this multisurface example with the default settings took 80 iterations and ~1.5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
 
 ```r
 Multi.Surface_optim <- MS_optim(CS.inputs=CS.inputs,
@@ -455,13 +456,27 @@ pairs(ms.stack)
 ```
 ![correlation.plots](figure/correlation_plot.png) 
 
-This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. While some may see this as a limitation/weakness, these methods still capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions and researcher bias.   
+If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` in `Run_CS`.
+
+```r
+Resist.true <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist, CurrentMap=TRUE, output="raster")
+Resist.opt <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=optim.resist, CurrentMap=TRUE, output="raster")
+
+# We can confirm that, like the resistance surfaces above, the CIRCUITSCAPE current maps are also correlated
+cs.stack <- stack(Resist.true, Resist.opt)
+names(cs.stack) <- c("Truth", "Optimized")
+pairs(cs.stack)
+```
+(ADD FIGURE)
+
+This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. These methods capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions or researcher bias.   
 
 **Comments on multiple surface optimization:**
 * If the optimized resistance values are near the maximum value specified in `GA.prep`, it is recommended that you increase the maximum value and rerun the optimization.  
-* If the optimization seems to end very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (mutation = 0.10, crossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data.
-* Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.   
-* As mentioned abover concerning single surface optimization: this is stichastic optimization process and optimized value will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates.       
+* If the optimization seems to end very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (pmutation = 0.10, pcrossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data.
+* Any and all settings of the `ga` function can be adjusted or customized (but see next point below). The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.
+* If you read the [documentation](http://cran.r-project.org/web/packages/GA/GA.pdf "GA documentation") and/or the [associated paper](http://www.jstatsoft.org/v53/i04/paper "GA paper") for the `GA` package, you may notice that there is an option to run in parallel. Unfortunately, I have not been able to successfully complete a parallel run with the functions in `ResistanceGA`.
+* As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates.       
 
 
 ### Summary   
