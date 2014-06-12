@@ -3,7 +3,7 @@
 \alias{Run_CS}
 \title{Run CIRCUITSCAPE in R}
 \usage{
-Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
+Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir, output)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
@@ -12,14 +12,14 @@ Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir)
 
 \item{r}{Accepts two types of inputs. Provide either the path to the raw, untransformed resistance surface file or specify an R raster object}
 
-\item{CurrentMap}{Logical. If TRUE, the cumulative resistance map will be generated during the CS run (Default = FALSE)}
+\item{CurrentMap}{Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)}
 
 \item{EXPORT.dir}{Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)}
 
-\item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the current map. The raster map can only be returned if \code{CurrentMap=TRUE}}
+\item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}}
 }
 \value{
-Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out")
+Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
 }
 \description{
 Execute CS from R

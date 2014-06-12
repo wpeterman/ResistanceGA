@@ -13,7 +13,7 @@ MLPE.lmm(cs.resistance, pairwise.genetic, REML)
 \item{REML}{Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE}
 }
 \value{
-A glmer object from the fitted model
+A lmer object from the fitted model
 }
 \description{
 Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object

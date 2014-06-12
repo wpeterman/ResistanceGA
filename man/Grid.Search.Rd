@@ -3,7 +3,7 @@
 \alias{Grid.Search}
 \title{Conduct grid search of response surface}
 \usage{
-Grid.Search(shape, max, transformation, Resistance, CS.inputs)
+Grid.Search(shape, max, transformation, Resistance, CS.inputs, write.dir)
 }
 \arguments{
 \item{shape}{A vector of values for the shape parameter}
@@ -15,6 +15,8 @@ Grid.Search(shape, max, transformation, Resistance, CS.inputs)
 \item{Resistance}{An R Raster object, or path to a .asc file}
 
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
+
+\item{write.dir}{Directory for writing intermeidate CIRCUITSCAPE files}
 }
 \value{
 This function will return a \code{filled.contour} plot. Additionally, an object with values that can be plotted with \code{filled.contour} to visualize the response surface
@@ -28,7 +30,7 @@ This function will perform a full factorial grid search of the values provided i
    \tab 1 = "Inverse-Reverse Monomolecular"\cr
    \tab 2 = "Inverse-Reverse Ricker"\cr
    \tab 3 = "Monomolecular"\cr
-   \tab 4 = "Ricker"\cr"
+   \tab 4 = "Ricker"\cr
    \tab 5 = "Reverse Monomolecular"\cr
    \tab 6 = "Reverse Ricker"\cr
    \tab 7 = "Inverse Monomolecular"\cr

@@ -17,7 +17,7 @@ SS_optim(CS.inputs, GA.inputs, nlm, dist_mod, null_mod)
 \item{null_mod}{Logical, if TRUE, a Null model will be calculated and added to the AICc output table (default = TRUE)}
 }
 \value{
-This function optimizes multiple resistance surfaces. Following optimization, several summary objects are created.\cr
+This function optimizes resistance surfaces in isolation. Following optimization of all surfaces, several summary objects are created.\cr
 \enumerate{
 \item Diagnostic plots of model fit are output to the "Results/Plots" directory that is automatically generated within the folder containing the optimized ASCII files.
 \item A .csv file with the Maximum Likelihood Population Effects mixed effects model coefficient estimates (MLPE_coeff_Table.csv)

@@ -60,10 +60,11 @@ library(devtools) # Loads devtools
 install_github("wpeterman/ResistanceGA") # Download package
 ```
 
-Load the required R packages, clear your workspace, and set a random number seed.
+Load the required R packages and clear your workspace.
 ```{r results='hide',message=FALSE, warning=FALSE}
 require(RandomFields)
 require(ResistanceGA)
+require(raster)
 
 rm(list = ls())
 ```
@@ -234,7 +235,7 @@ SS_RESULTS$ContinuousResults
 
 To view the AICc response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relevant for single continuous surfaces.
 ```{r eval=FALSE}
-Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs)
+Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=cont.rf, CS.inputs, write.dir=GA.inputs$Write.dir)
 ```
 ![GRID.Surface](figure/grid_topo.png)      
 
@@ -364,7 +365,7 @@ CS.inputs<-CS.prep(n.POPS=n,
                       CS.program=paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"'))
 ```
 
-Run `MS_optim`. Running this multisurface example with the default settings took 89 iterations and ~1.5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
+Run `MS_optim`. Running this multisurface example with the default settings took 80 iterations and ~1.5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
 ```{r eval=FALSE}
 Multi.Surface_optim <- MS_optim(CS.inputs=CS.inputs,
                                GA.inputs=GA.inputs)
@@ -412,15 +413,15 @@ pairs(ms.stack)
 
 If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` in `Run_CS`.
 ```{r CS.maps, eval=FALSE}
-Resist.true <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist, CurrentMap=TRUE)
-Resist.opt <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=optim.resist, CurrentMap=TRUE)
+Resist.true <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist, CurrentMap=TRUE, output="raster")
+Resist.opt <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=optim.resist, CurrentMap=TRUE, output="raster")
 
 # We can confirm that, like the resistance surfaces above, the CIRCUITSCAPE current maps are also correlated
-cs.stack <- stack(Resist, optim.resist)
+cs.stack <- stack(Resist.true, Resist.opt)
 names(cs.stack) <- c("Truth", "Optimized")
 pairs(cs.stack)
 ```
-
+(ADD FIGURE)
 
 This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. These methods capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions or researcher bias.   
 

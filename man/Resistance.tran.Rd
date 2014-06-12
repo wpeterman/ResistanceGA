@@ -20,7 +20,7 @@ Resistance.tran(transformation, shape, max, r, out)
 R raster object
 }
 \description{
-Apply on the six resistance transformations to a continuous resistance surface
+Apply on the eight resistance transformations to a continuous resistance surface
 }
 \details{
 Valid arguements for \code{transformation} are:\cr
@@ -28,13 +28,15 @@ Valid arguements for \code{transformation} are:\cr
    \tab 1 = "Inverse-Reverse Monomolecular"\cr
    \tab 2 = "Inverse-Reverse Ricker"\cr
    \tab 3 = "Monomolecular"\cr
-   \tab 4 = "Ricker"\cr"
+   \tab 4 = "Ricker"\cr
    \tab 5 = "Reverse Monomolecular"\cr
    \tab 6 = "Reverse Ricker"\cr
    \tab 7 = "Inverse Monomolecular"\cr
    \tab 8 = "Inverse Ricker"\cr
    \tab 9 = "Distance"\cr
    }
+
+The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverasge of parameter space.
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

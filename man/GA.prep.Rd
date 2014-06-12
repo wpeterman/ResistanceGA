@@ -59,7 +59,7 @@ quiet = FALSE)
 
 \item{keepBest}{A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)}
 
-\item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria}
+\item{Min.Max}{Define whether the optimization function should be minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria}
 
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
