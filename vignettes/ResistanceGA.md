@@ -59,7 +59,6 @@ Load the required R packages and clear your workspace.
 ```r
 require(RandomFields)
 require(ResistanceGA)
-require(raster)
 
 rm(list = ls())
 ```
@@ -479,7 +478,7 @@ The fact that optimization often converges on a highly correlated solution, rath
 * As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates. 
 * While there is no established framework for how optimization of resistances surface can or should be done, below is a flowchart of how an analysis might proceed:   
 
-![flowchart](figure/FlowChart_Narrow2.tif) 
+![flowchart](figure/FlowChart_Narrow2.png) 
 
 
 ### Summary   

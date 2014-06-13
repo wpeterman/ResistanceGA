@@ -217,7 +217,7 @@ CS.Resist<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist)
 PARM2=c(1, 85.45554, 28.51652, 1.75012, 1.831599, 151.6633,  1 ,225.7778)
 PARM3=c(1, 151.2563, 50.47424, 1.75012, 1.831599, 268.444,  1 ,399.6267)
 
-Resist.opt<-Combine_Surfaces(PARM=PARM.opt,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=NULL) 
+Resist.opt<-Combine_Surfaces(PARM=PARM2,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=NULL) 
 names(Resist.opt)<-"r.opt"
 
 CS.response2<- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs,r=Resist.opt,EXPORT.dir=NULL)
