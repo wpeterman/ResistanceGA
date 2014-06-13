@@ -17,7 +17,7 @@ Imports:
     akima,
     plyr,
     GA,
-    lme4 (>= 1.0),   
+    lme4 (>= 1.0),
     Matrix
 Suggests:
     RandomFields,
