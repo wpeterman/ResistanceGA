@@ -25,3 +25,34 @@
 #' @author Bill Peterman \email{bill.peterman@@gmail.com}
 #' 
 NULL
+
+#' Simulated resistance surfaces
+#' 
+#' A raster stack containing four raster surfaces
+#' 
+#' \itemize{
+#'    \item continuous1. Continuous resistance surface
+#'    \item continuous2. Continuous resistance surface
+#'    \item categorical. 3-class categorical resistance surface
+#'    \item feature. 2-class categorical (feature) resistance surface
+#'    }
+#' 
+#' @docType data
+#' @name resistance_surfaces
+#' @format Raster stack object of length 4
+#' @usage data(resistance_surfaces)
+#' @keywords datasets
+#' 
+NULL
+
+#' Example sample location file to run CIRCUITSCAPE
+#' 
+#' A data frame that can be saved as a .txt file for running examples in the vignette 
+#' 
+#' @docType data
+#' @name samples
+#' @format A 25 x 3 data frame
+#' @usage data(samples)
+#' @description  Sample file to be used with examples in the vignette
+#' @keywords datasets
+NULL

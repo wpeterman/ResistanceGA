@@ -2,13 +2,16 @@
 \docType{data}
 \name{samples}
 \alias{samples}
-\title{ID and spatial location of samples}
+\title{Example sample location file to run CIRCUITSCAPE}
 \format{A 25 x 3 data frame}
 \usage{
-samples
+data(samples)
 }
 \description{
 Sample file to be used with examples in the vignette
+}
+\details{
+A data frame that can be saved as a .txt file for running examples in the vignette
 }
 \keyword{datasets}
 

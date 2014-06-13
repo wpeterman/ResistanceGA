@@ -2,13 +2,21 @@
 \docType{data}
 \name{resistance_surfaces}
 \alias{resistance_surfaces}
-\title{Raster stack of resistance surfaces}
+\title{Simulated resistance surfaces}
 \format{Raster stack object of length 4}
 \usage{
-resistance_surfaces
+data(resistance_surfaces)
 }
 \description{
-There are four raster surfaces contained in the \code{resistance_surfaces} raster stack: two continuous surfaces, one 3-class categorical surface, and one 2-class feature surface
+A raster stack containing four raster surfaces
+}
+\details{
+\itemize{
+   \item continuous1. Continuous resistance surface
+   \item continuous2. Continuous resistance surface
+   \item categorical. 3-class categorical resistance surface
+   \item feature. 2-class categorical (feature) resistance surface
+   }
 }
 \keyword{datasets}
 
