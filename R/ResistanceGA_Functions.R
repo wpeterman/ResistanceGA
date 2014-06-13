@@ -2302,7 +2302,7 @@ get.EQ <-function(equation){   # Apply specified transformation
 
 Result.txt <- function(GA.results, GA.inputs, CS.inputs){
   summary.file<-paste0(GA.inputs$Results.dir,"Multisurface_Optim_Summary.txt")
-  AICc<-GA.results@fitnessValue
+  AICc<--GA.results@fitnessValue*-1
   AICc<-round(AICc,digits=4)
   ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
 #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)

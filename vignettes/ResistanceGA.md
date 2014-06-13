@@ -430,13 +430,13 @@ The multisurface optimization procedure has done a pretty good job of recovering
 Multi.Surface_optim@solution # Optimized values
 
 # Optimized values for each surface: 
- 1 44.97949 15.44869 6.487836 3.54321 109.9903  1 85.59366
+[1]  1 44.97949 15.44869 6.487836 3.54321 109.9903  1 85.59366
 
 # Simulated values
 PARM
 [1]   1.0 150.0  50.0   6.0   3.5 400.0   1.0 300.0
 ```
-The optimized values appear to be ~3.5 times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (6 = Reverse Ricker). Visually, the resistance values of the two surfaces are nearly identical:
+The optimized values are ~3.5 times lower than the data generating values. The values for the 3-class categorical surface are the first three values listed, continuous surface values = 4--6, and the categorical surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (6 = Reverse Ricker). Visually, the patern of resistances of the two surfaces are nearly identical:
 
 ```r
 # Make combined, optimized resistance surface.
@@ -447,7 +447,7 @@ plot(ms.stack, main=c("True Resistance", "Optimized Resistance")) # Optimized
 ```
 ![combined.plots](figure/combined_plots.png) 
 
-We can look at the correlation between 'Truth' and 'Optimized' resistance surfaces, and can see that they are perfectly correlated.  
+We can look at the correlation between 'Truth' and 'Optimized' resistance surfaces, and see that they are perfectly correlated.  
 
 ```r
 # Correlation between the two surfaces
@@ -456,7 +456,7 @@ pairs(ms.stack)
 ```
 ![correlation.plots](figure/correlation_plot.png) 
 
-If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` in `Run_CS`.
+If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` and `output="raster"` in `Run_CS`.
 
 ```r
 Resist.true <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist, CurrentMap=TRUE, output="raster")
@@ -467,20 +467,23 @@ cs.stack <- stack(Resist.true, Resist.opt)
 names(cs.stack) <- c("Truth", "Optimized")
 pairs(cs.stack)
 ```
-(ADD FIGURE)
+![CS_corr.plot](figure/CS_corr.png) 
 
-This is an important point to realize, and I do not know if there is a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. These methods capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions or researcher bias.   
+The fact that optimization often converges on a highly correlated solution, rather than the true solution, is an important point/caveat. I do not currently know of a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. Nonetheless, these methods capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions or researcher bias.   
 
 **Comments on multiple surface optimization:**
 * If the optimized resistance values are near the maximum value specified in `GA.prep`, it is recommended that you increase the maximum value and rerun the optimization.  
 * If the optimization seems to end very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (pmutation = 0.10, pcrossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data.
 * Any and all settings of the `ga` function can be adjusted or customized (but see next point below). The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.
-* If you read the [documentation](http://cran.r-project.org/web/packages/GA/GA.pdf "GA documentation") and/or the [associated paper](http://www.jstatsoft.org/v53/i04/paper "GA paper") for the `GA` package, you may notice that there is an option to run in parallel. Unfortunately, I have not been able to successfully complete a parallel run with the functions in `ResistanceGA`.
-* As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates.       
+* If you read the [documentation](http://cran.r-project.org/web/packages/GA/GA.pdf "GA documentation") and/or the [associated paper](http://www.jstatsoft.org/v53/i04/paper "GA paper") for the `GA` package, you may notice that there is an option to run in parallel. Unfortunately, I have not been able to successfully complete a parallel run with the functions in `ResistanceGA`. I will continue to look into a solution for this in the future.
+* As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates. 
+* While there is no established framework for how optimization of resistances surface can or should be done, below is a flowchart of how an analysis might proceed:   
+
+![flowchart](figure/FlowChart_Narrow2.tif) 
 
 
 ### Summary   
-Hopefully this simple vignette/tutorial has adequately demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of surfaces. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided.  The goal of this package is to make these methods accessible and useful to others. Development and advancement will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
+Hopefully this simple vignette/tutorial has demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. To some degree, it remains a challenge to accurately determine the absolute maximum resistance value of surfaces. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided.  The goal of this package is to make these methods accessible and useful to others. Development and advancement will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
 
 
 ### Acknowledgements
