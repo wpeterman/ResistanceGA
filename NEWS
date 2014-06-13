@@ -1,3 +1,8 @@
+ResistanceGA 1.0.3
+---------
+* Added data objects to run vignette
+* Updated vignette to use the provided data
+
 ResistanceGA 1.0.2
 ---------
 * Fixed error in `MS_optim`
