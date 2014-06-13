@@ -64,7 +64,6 @@ Load the required R packages and clear your workspace.
 ```{r results='hide',message=FALSE, warning=FALSE}
 require(RandomFields)
 require(ResistanceGA)
-require(raster)
 
 rm(list = ls())
 ```
