@@ -1,7 +1,7 @@
 ResistanceGA
 ============
 
-### An R package to optimize resistance surfaces using Genetic Algorithms. Both continuous and categorical surfaces can be optimized using these functions. Additionally, it is possible to simultaneously optimize multiple resistance surfaces at the same time to generate novel resistance surfaces.    
+### An R package to optimize resistance surfaces using Genetic Algorithms. Both continuous and categorical surfaces can be optimized using these functions. Additionally, it is possible to simultaneously optimize multiple resistance surfaces at the same time to generate novel resistance surfaces. Resistance distances can be calculated as cost distances (least cost path) between points, or as circuit-based resistance distances calculated using CIRCUITSCAPE    
 
 To install this package, execute the following commands in R:
 
@@ -24,11 +24,11 @@ vignette('ResistanceGA')  # Opens tutorial in web browser
 
 ### Other notes
 
-In order to use this package, you must have CIRCUITSCAPE installed.
+If you wish to optimize using CIRCUITSCAPE, you must have CIRCUITSCAPE installed.
 Version 4.0 or higher is required.
 Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
 
-This package will only work on Windows machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I can work to incorporate that capability in future releases.
+At this point in time, CIRCUITSCAPE can only be executed through `ResistanceGA` on **_Windows_** machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I can work to incorporate that capability in future releases.
 
 
 This approach has been developed from the methods first utilized in Peterman et al. (2014). **_Please cite this paper if you use these methods!_**

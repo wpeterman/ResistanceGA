@@ -3,16 +3,20 @@
 \alias{Combine_Surfaces}
 \title{Combine multiple resistance surfaces together}
 \usage{
-Combine_Surfaces(PARM, CS.inputs, GA.inputs, out = GA.inputs$Results.dir)
+Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces}
 
-\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
 
-\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
+\item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.inputs}} function. Defined if optimizing using gdistance}
 
-\item{out}{Directory to write combined .asc file. Default is GA.inputs$Results.dir}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function.}
+
+\item{out}{Directory to write combined .asc file. Default = NULL and no files are exported}
+
+\item{File.name}{Name of output .asc file. Default is the combination of all surfaces combined, separated by "."}
 }
 \value{
 R raster object that is the sum all transformed and/or reclassified resistance surfaces provided

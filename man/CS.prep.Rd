@@ -3,7 +3,7 @@
 \alias{CS.prep}
 \title{Prepare and bundle input CIRCUITSCAPE model parameters}
 \usage{
-CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, platform)
+CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect)
 }
 \arguments{
 \item{n.POPS}{The number of populations that are being assessed}
@@ -15,8 +15,6 @@ CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, platform)
 \item{CS.program}{The path to the CIRCUITSCAPE executable file (cs_run.exe) if using a Windows PC. If using Linux or Mac, this should be the directory to the CIRCUITSCAPE python file (cs_run.py). See details below.}
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
-
-\item{platform}{What computing platform are you using ("pc", "other"). This code has only been tested on Windows PC!!!}
 }
 \value{
 An R object that is a required input into optimization functions

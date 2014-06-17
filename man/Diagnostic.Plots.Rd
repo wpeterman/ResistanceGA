@@ -3,10 +3,10 @@
 \alias{Diagnostic.Plots}
 \title{Create diagnostic plots}
 \usage{
-Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type)
+Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name)
 }
 \arguments{
-\item{cs.resistance.mat}{Path to CIRCUITSCAPE "_resistances.out" file}
+\item{resistance.mat}{Path to CIRCUITSCAPE "_resistances.out" file, or costDistance object created from running gdistance}
 
 \item{genetic.dist}{Vector of pairwise genetic distances (lower half of pairwise matrix). Can be input as CS.inputs$response}
 
@@ -17,6 +17,8 @@ Diagnostic.Plots(cs.resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type)
 \item{plot.dir}{Directory to output TIFF of diagnostic plots}
 
 \item{type}{Specify whether the optimized surface is "continuous" or "categorical"}
+
+\item{name}{The name to be attached to the output file. Must be specified when getting diagnostic plots for gdistance models}
 }
 \value{
 A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model

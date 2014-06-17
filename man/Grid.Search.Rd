@@ -14,7 +14,9 @@ Grid.Search(shape, max, transformation, Resistance, CS.inputs, write.dir)
 
 \item{Resistance}{An R Raster object, or path to a .asc file}
 
-\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
+
+\item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
 \item{write.dir}{Directory for writing intermeidate CIRCUITSCAPE files}
 }

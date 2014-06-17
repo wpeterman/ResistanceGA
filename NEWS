@@ -1,3 +1,8 @@
+ResistanceGA 2.0.0
+---------
+* Added option to optimize using cost distance (least cost paths), implemented using `gdistance`
+ * `gdist.prep` and `Run_gdistance` functions
+
 ResistanceGA 1.0.3
 ---------
 * Added data objects to run vignette

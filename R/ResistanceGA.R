@@ -16,7 +16,7 @@
 #'   
 #'   Official release: \url{http://www.circuitscape.org/downloads}
 #' 
-#' @import ggplot2 raster GA lme4
+#' @import ggplot2 raster GA lme4 gdistance
 #' @importFrom Matrix fac2sparse
 #' @importFrom akima interp
 #' @importFrom plyr arrange rbind.fill

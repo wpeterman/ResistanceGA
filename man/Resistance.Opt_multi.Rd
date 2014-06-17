@@ -3,12 +3,15 @@
 \alias{Resistance.Opt_multi}
 \title{Optimize multiple resistance surfaces simultaneously}
 \usage{
-Resistance.Opt_multi(PARM, CS.inputs, GA.inputs, Min.Max, quiet = FALSE)
+Resistance.Opt_multi(PARM, CS.inputs = NULL, gdist.inputs = NULL, GA.inputs,
+  Min.Max, quiet = FALSE)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.}
 
-\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
+
+\item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 

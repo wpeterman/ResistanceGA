@@ -3,15 +3,17 @@
 \alias{Resistance.Opt_single}
 \title{Optimize resistance surfaces individually}
 \usage{
-Resistance.Opt_single(PARM, Resistance, CS.inputs, GA.inputs, Min.Max = "max",
-  iter, quiet = FALSE)
+Resistance.Opt_single(PARM, Resistance, CS.inputs = NULL,
+  gdist.inputs = NULL, GA.inputs, Min.Max = "max", iter, quiet = FALSE)
 }
 \arguments{
-\item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.}
+\item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.}
 
 \item{Resistance}{Resistance surface to be optimized. This should be an R raster object. If not specified, the function will attempt to find the a resistance surface from \code{GA.inputs}}
 
-\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
+\item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
+
+\item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
