@@ -2,6 +2,7 @@ ResistanceGA 2.0-0
 ---------
 * Added option to optimize using cost distance (least cost paths), implemented using `gdistance`
  * `gdist.prep` and `Run_gdistance` functions
+* Fixed error in `Run_CS`
 
 ResistanceGA 1.0-3
 ---------

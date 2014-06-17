@@ -864,24 +864,25 @@ return(multi.GA_nG)
 Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir, output="matrix"){
 if(class(r)[1]!='RasterLayer') {
   R<-raster(r)
-  NAME <- basename(r)
-  NAME<-sub(".asc", "", NAME) 
-  names(R)<-NAME
+  File.name <- basename(r)
+  File.name<-sub(".asc", "", File.name) 
+  names(R)<-File.name
+} else {
+  R=r
+  
 }
   
-if(class(r)[1]=='RasterLayer') {
-  R=r
   if (CurrentMap==FALSE){
-    File.name <- r@data@names
+    File.name <- R@data@names
     MAP="write_cum_cur_map_only = False"
     CURRENT.MAP="write_cur_maps = False"
     
    } else {
-    File.name <- r@data@names
+    File.name <- R@data@names
     MAP="write_cum_cur_map_only = True"
     CURRENT.MAP="write_cur_maps = 1"
   }
-}
+
   ######
   
   if(cellStats(R,"max")>1e6)  R<-SCALE(R,1,1e6) # Rescale surface in case resistances are too high
