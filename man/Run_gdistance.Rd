@@ -10,7 +10,7 @@ Run_gdistance(gdist.inputs, GA.inputs, r)
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
-\item{r}{Accepts two types of inputs. Provide either the path to the resistance surface file or specify an R raster object}
+\item{r}{Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object}
 }
 \value{
 A costDistance matrix object from gdistance

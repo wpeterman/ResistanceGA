@@ -94,6 +94,7 @@ return(Results.mat)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
 SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, dist_mod=TRUE, null_mod=TRUE){
+  t1<-proc.time()[3]
   RESULTS.cat <- list() # List to store categorical results within
   RESULTS.cont <-list() # List to store continuous results within
   cnt1<-0
@@ -471,16 +472,16 @@ if(!is.null(CS.inputs)){
   MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,genetic.dist=gdist.inputs$response,out.dir=GA.inputs$Results.dir,method="gd")  
 }
 
-  
+  rt<-proc.time()[3]-t1
   # Full Results
   if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
-    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results)
+    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
   } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
-    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results)
+    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
   } else if(nrow(Results.cat)>0 & nrow(Results.cont)<1){
-    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results)
+    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
   } else {    
-    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results)
+    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
   }
 
 file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
@@ -851,7 +852,7 @@ return(multi.GA_nG)
 #' 
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
-#' @param r Accepts two types of inputs. Provide either the path to the resistance surface file or specify an R raster object
+#' @param r Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object
 #' @param CurrentMap Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
@@ -869,6 +870,7 @@ if(class(r)[1]!='RasterLayer') {
 }
   
 if(class(r)[1]=='RasterLayer') {
+  R=r
   if (CurrentMap==FALSE){
     File.name <- r@data@names
     MAP="write_cum_cur_map_only = False"
@@ -881,7 +883,6 @@ if(class(r)[1]=='RasterLayer') {
   }
 }
   ######
-  R=r
   
   if(cellStats(R,"max")>1e6)  R<-SCALE(R,1,1e6) # Rescale surface in case resistances are too high
   R <- reclassify(R, c(-Inf,0, 1))
@@ -929,6 +930,7 @@ if(output=="raster" & CurrentMap==TRUE){
   (cs.matrix<-read.matrix(CS.results))  
 }
 }
+################################
 
 Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.name){
     File.name <- File.name
@@ -968,13 +970,19 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
 #' 
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
-#' @param r Accepts two types of inputs. Provide either the path to the resistance surface file or specify an R raster object
+#' @param r Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object
 #' @return A costDistance matrix object from gdistance
 #' @usage Run_gdistance(gdist.inputs, GA.inputs, r)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Run_gdistance <- function(gdist.inputs,GA.inputs,r){
+  if(class(r)[1]!='RasterLayer') {
+    r<-raster(r)
+    NAME <- basename(r)
+    NAME<-sub(".asc", "", NAME) 
+    names(R)<-NAME
+  }  
   tr <- transition(x=r, transitionFunction=gdist.inputs$transitionFunction,directions=gdist.inputs$directions)
   if(gdist.inputs$longlat==TRUE|gdist.inputs$directions>=8){
     tr <- geoCorrection(tr, "c")
