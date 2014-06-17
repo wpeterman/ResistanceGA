@@ -12,7 +12,7 @@
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param write.dir Directory for writing intermeidate CIRCUITSCAPE files
-#' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs, write.dir)
+#' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs, gdist.inputs, write.dir)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @return This function will return a \code{filled.contour} plot. Additionally, an object with values that can be plotted with \code{filled.contour} to visualize the response surface
@@ -500,7 +500,7 @@ return(RESULTS)
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @return This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.
-#' @usage MS_optim(CS.inputs, gdist.input, GA.inputs)
+#' @usage MS_optim(CS.inputs, gdist.inputs, GA.inputs)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -969,8 +969,6 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param r Accepts two types of inputs. Provide either the path to the resistance surface file or specify an R raster object
-#' @param CurrentMap Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)
-#' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)
 #' @return A costDistance matrix object from gdistance
 #' @usage Run_gdistance(gdist.inputs, GA.inputs, r)
 
@@ -994,7 +992,7 @@ Run_gdistance <- function(gdist.inputs,GA.inputs,r){
 #' 
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
-#' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.inputs}} function. Defined if optimizing using gdistance
+#' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. 
 #' @param out Directory to write combined .asc file. Default = NULL and no files are exported
 #' @param File.name Name of output .asc file. Default is the combination of all surfaces combined, separated by "."
@@ -2154,7 +2152,9 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' ***NOTE: Double quotation used***
 #' This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
 
-CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8, platform="pc"){# Make to-from population list
+CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8){
+  platform="pc"
+  # Make to-from population list
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
   list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform)

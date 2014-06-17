@@ -11,10 +11,6 @@ Run_gdistance(gdist.inputs, GA.inputs, r)
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{r}{Accepts two types of inputs. Provide either the path to the resistance surface file or specify an R raster object}
-
-\item{CurrentMap}{Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)}
-
-\item{EXPORT.dir}{Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)}
 }
 \value{
 A costDistance matrix object from gdistance

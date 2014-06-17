@@ -3,7 +3,7 @@
 \alias{gdist.prep}
 \title{Prepare data for optimization using \code{gdistance}}
 \usage{
-CS.prep(n.POPS, response, samples, transitionFunction, directions, longlat)
+gdist.prep(n.POPS, response, samples, transitionFunction, directions, longlat)
 }
 \arguments{
 \item{n.POPS}{The number of populations that are being assessed}
@@ -16,7 +16,7 @@ CS.prep(n.POPS, response, samples, transitionFunction, directions, longlat)
 
 \item{directions}{Directions in which cells are connected (4, 8, 16, or other). Default = 8}
 
-\item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorection}} ill be applied to the transition  matrix. Defaault = FALSE}
+\item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorrection}} ill be applied to the transition  matrix. Defaault = FALSE}
 }
 \value{
 An R object that is a required input into optimization functions
