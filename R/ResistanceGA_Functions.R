@@ -979,10 +979,7 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Run_gdistance <- function(gdist.inputs,GA.inputs,r){
   if(class(r)[1]!='RasterLayer') {
-    r<-raster(r)
-    NAME <- basename(r)
-    NAME<-sub(".asc", "", NAME) 
-    names(R)<-NAME
+    r<-raster(r)   
   }  
   tr <- transition(x=r, transitionFunction=gdist.inputs$transitionFunction,directions=gdist.inputs$directions)
   if(gdist.inputs$longlat==TRUE|gdist.inputs$directions>=8){
