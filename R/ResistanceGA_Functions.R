@@ -529,6 +529,20 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                    suggestions=GA.inputs$SUGGESTS,
                    quiet = GA.inputs$quiet) 
       rt<-proc.time()[3]-t1
+   
+    Opt.parm <- GA.opt <- multi.GA_nG@solution
+    for(i in 1:GA.inputs$n.layers){
+      if(GA.inputs$surface.type[i]=="cat"){
+        ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+        parm <- ga.p/min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+        
+      } else {
+        parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]        
+        Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+      }
+    }
+    multi.GA_nG@solution <- Opt.parm
     
   
   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
@@ -572,6 +586,20 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                      quiet = GA.inputs$quiet) 
        rt<-proc.time()[3]-t1
       
+      Opt.parm <- GA.opt <- multi.GA_nG@solution
+      for(i in 1:GA.inputs$n.layers){
+        if(GA.inputs$surface.type[i]=="cat"){
+          ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+          parm <- ga.p/min(ga.p)
+          Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+          
+        } else {
+          parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]          
+          Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+        }
+      }
+      multi.GA_nG@solution <- Opt.parm
+      
     RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs)
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
@@ -609,14 +637,12 @@ return(multi.GA_nG)
 # for(i in 1:GA.inputs$n.layers){
 #     if(GA.inputs$surface.type[i]=="cat"){
 #       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       parm <- ((ga.p-min(ga.p)))#*PARM[1])+1
-#       parm <- parm/min(parm)
+#       parm <- ga.p/min(ga.p)#*PARM[1])+1
+# #       parm <- parm/min(parm)
 #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
 #       
 #     } else {
-#       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       mx<-parm[3]#*PARM[1]
-#       parm[3]<-mx
+#       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]     
 #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
 #     }
 # }
@@ -2226,7 +2252,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 
 GA.prep<-function(ASCII.dir,
                   Min.Max ='max',
-                  min.cat = 0,
+                  min.cat = 0.0001,
                   max.cat = 2500, 
                   max.cont = 2500,
                   cont.shape = NULL,

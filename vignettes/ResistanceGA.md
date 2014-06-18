@@ -203,7 +203,7 @@ What the `SS_optim` function does:
 * Read each .asc file that is in the specified ASCII.dir and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.   
 * Optimize each resistance surface   
  * Categorical surfaces: Each optimized value represents the resistance of that category to current flow   
- * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that the relative differences are preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
+ * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that relative spacing is preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
 * Several summary outputs are generated   
  * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).   
  * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)   
@@ -460,7 +460,8 @@ pairs(cs.stack)
 
 The fact that optimization often converges on a highly correlated solution, rather than the true solution, is an important point/caveat. I do not currently know of a solution to avoid it. In developing this code, it seems about 50/50 as to whether the exact resistance values are recovered, or whether a correlated equivalent is recovered. The surfaces have been optimized to *match* truth, but the absolute values have not been recovered. Nonetheless, these methods capture the important relationships between surfaces, as well as categorical levels within surfaces. Importantly, all of this is done without *a priori* assumptions or researcher bias.   
 
-# Multisurface optimization using least cost paths
+# Multisurface optimization using least cost paths   
+This optimization too 76 iterations and completed in 50 minutes, and correctly recovered the relative relationship among the surfaces
 
 ```r
 # Create the true resistance/response surface
@@ -479,6 +480,8 @@ gdist.inputs<-gdist.prep(n.POPS=length(sample.locales),
 # Run `MS_optim`
 Multi.Surface_optim.gd <- MS_optim(gdist.inputs=gdist.inputs,
                                    GA.inputs=GA.inputs)
+
+summary(Multi.Surface_optim.gd)
 ```
 
 
