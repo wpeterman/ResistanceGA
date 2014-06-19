@@ -10,7 +10,7 @@ gdist.prep(n.POPS, response, samples, transitionFunction, directions, longlat)
 
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 
-\item{samples}{Either provide the path to a .txt file containing the xy coordinates, or provide a matrix with x values in column 1 and y values in column 2.}
+\item{samples}{Either provide the path to a .txt file containing the xy coordinates, or provide a matrix with x values in column 1 and y values in column 2. Alternatively, you can provide a \code{\link[sp]{SpatialPoints}} object}
 
 \item{transitionFunction}{The function to calculate the gdistance TransitionLayer object. See \code{\link[gdistance]{transition}}. Default = function(x) 1/mean(x)}
 

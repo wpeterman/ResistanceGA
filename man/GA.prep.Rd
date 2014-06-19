@@ -21,6 +21,7 @@ population = gaControl(type)$population,
 selection = gaControl(type)$selection,
 crossover="gareal_blxCrossover",
 mutation = gaControl(type)$mutation,
+parallel = FALSE,
 seed = NULL,
 quiet = FALSE)
 }
@@ -54,6 +55,8 @@ quiet = FALSE)
 \item{crossover}{Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing}
 
 \item{maxiter}{Maximum number of iterations to run before the GA search is halted (Default = 1000)}
+
+\item{parallel}{A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specifiy the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.}
 
 \item{run}{Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)}
 

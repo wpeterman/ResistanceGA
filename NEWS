@@ -1,7 +1,13 @@
+ResistanceGA 2.0-2
+---------
+* Have tested and added the option to run optimization in parallel when using least cost paths. Set `parallel= TRUE` of `parallel = #cores` in `GA.prep`   
+ * *PARALLEL DOES NOT CURRENTLY WORK WHEN OPTIMIZING WITH CIRCUITSCAPE!!!*
+
+
 ResistanceGA 2.0-1
 ---------
 * Updated how categorical resistance values are reported
-* Updated examples in vignette to show how to optimize using cost distances
+* Updated examples in vignette to show how to optimize using cost distances and `gdistance`
 
 ResistanceGA 2.0-0
 ---------

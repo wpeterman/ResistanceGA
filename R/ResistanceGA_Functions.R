@@ -267,6 +267,7 @@ if(!is.null(gdist.inputs)){
                      gdist.inputs=gdist.inputs, 
                      min=GA.inputs$min.list[[i]],
                      max=GA.inputs$max.list[[i]],
+                     parallel = GA.inputs$parallel,
                      popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
                      maxiter=GA.inputs$maxiter,
                      run=GA.inputs$run,
@@ -318,6 +319,7 @@ if(!is.null(gdist.inputs)){
                      gdist.inputs=gdist.inputs, 
                      min=GA.inputs$min.list[[i]],
                      max=GA.inputs$max.list[[i]],
+                     parallel = GA.inputs$parallel,
                      popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
                      maxiter=GA.inputs$maxiter,
                      run=GA.inputs$run,
@@ -345,8 +347,8 @@ if(!is.null(gdist.inputs)){
         save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
         writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)  
         
-        Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME)
-        
+        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME)
+                
         Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
         
         RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
@@ -524,6 +526,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                    popSize=GA.inputs$pop.size,
                    maxiter=GA.inputs$maxiter,
                    run=GA.inputs$run,
+                   parallel = FALSE,
                    keepBest=GA.inputs$keepBest,
                    seed = GA.inputs$seed,
                    suggestions=GA.inputs$SUGGESTS,
@@ -579,6 +582,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                      max=GA.inputs$ga.max,
                      popSize=GA.inputs$pop.size,
                      maxiter=GA.inputs$maxiter,
+                     parallel = GA.inputs$parallel,
                      run=GA.inputs$run,
                      keepBest=GA.inputs$keepBest,
                      seed = GA.inputs$seed,
@@ -2104,7 +2108,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
   if(length(resistance.mat)>1){
     response=genetic.dist
     if(is.null(name)){
-      stop("Ouput file 'name' must be specified!!!")
+      stop("Output file 'name' must be specified!!!")
     }
     NAME<-name
     mm<-lower(as.matrix(resistance.mat))
@@ -2214,6 +2218,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param pmutation Probability of mutation. Default = 0.1
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
 #' @param maxiter Maximum number of iterations to run before the GA search is halted (Default = 1000)
+#' @param parallel A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specifiy the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.
 #' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param Min.Max Define whether the optimization function should be minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria
@@ -2247,6 +2252,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' selection = gaControl(type)$selection,
 #' crossover="gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
+#' parallel = FALSE,
 #' seed = NULL,
 #' quiet = FALSE)
 
@@ -2268,6 +2274,7 @@ GA.prep<-function(ASCII.dir,
                   selection = gaControl(type)$selection,
                   crossover="gareal_blxCrossover",
                   mutation = gaControl(type)$mutation,
+                  parallel = FALSE,
                   seed = NULL,
                   quiet = FALSE) {   
   
@@ -2337,7 +2344,7 @@ GA.prep<-function(ASCII.dir,
   }
   SUGGESTS <-matrix(unlist(SUGGESTS), nrow=nrow(SUGGESTS[[1]]), byrow=F)
   
-  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.dir, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
+  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.dir, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation, parallel=parallel,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
   
 }
 #####################################
