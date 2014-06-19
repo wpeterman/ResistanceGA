@@ -5,7 +5,7 @@
 \usage{
 GA.prep(ASCII.dir,
 Min.Max="max",
-min.cat=0,
+min.cat=1e-04,
 max.cat=2500,
 max.cont=2500,
 cont.shape=NULL,
@@ -28,7 +28,7 @@ quiet = FALSE)
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized.}
 
-\item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 0)}
+\item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)}
 
 \item{max.cat}{The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)}
 

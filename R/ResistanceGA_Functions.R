@@ -2204,7 +2204,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' This function prepares and compiles objects and commands for optimization with the GA package
 #' 
 #' @param ASCII.dir Directory containing all raster objects to optimized.
-#' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 0)
+#' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)
@@ -2236,7 +2236,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
 #' Min.Max="max",
-#' min.cat=0,
+#' min.cat=1e-04,
 #' max.cat=2500,
 #' max.cont=2500,
 #' cont.shape=NULL,
