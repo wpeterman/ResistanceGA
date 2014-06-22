@@ -1032,6 +1032,7 @@ Run_gdistance <- function(gdist.inputs,GA.inputs,r){
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. 
 #' @param out Directory to write combined .asc file. Default = NULL and no files are exported
 #' @param File.name Name of output .asc file. Default is the combination of all surfaces combined, separated by "."
+#' @param rescale Locical. If TRUE (default), the values of the combined raster surface will be divided by the minimum value to create a resistance surface with a minimum value = 1.
 #' @details \code{PARM} is designed to accept the output of \code{MS_optim}. For continuous surfaces, there are three terms: 1) Transformation, 2) shape, and 3) maximum value. Transformation must be provided as a numeric value:\cr
 #' \tabular{ll}{
 #'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
@@ -1047,10 +1048,10 @@ Run_gdistance <- function(gdist.inputs,GA.inputs,r){
 #' 
 #' The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverasge of parameter space.
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
-#' @usage Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name)
+#' @usage Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, out=NULL, File.name=paste(GA.inputs$parm.type$name,collapse=".")){
+Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, out=NULL, File.name=paste(GA.inputs$parm.type$name,collapse="."), rescale = TRUE){
   if(!is.null(CS.inputs)){
   ID<-CS.inputs$ID
   ZZ<-CS.inputs$ZZ
@@ -1161,6 +1162,9 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   File.name <- File.name
   
   multi_surface <- sum(r) # Add all surfaces together
+  
+  if(rescale==TRUE) multi_surface <- multi_surface/cellStats(multi_surface,"min") # Rescale to min of 1
+  
   if(cellStats(multi_surface,"max")>1e6)  multi_surface<-SCALE(multi_surface,1,1e6) # Rescale surface in case resistance are too high
   #       plot(multi_surface)
   
