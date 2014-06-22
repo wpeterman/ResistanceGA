@@ -1097,7 +1097,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       # Apply specified transformation
       if(equation==1){
         SIGN=-1 # Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -1106,7 +1106,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if(equation==5){
         SIGN=1
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -1114,29 +1114,29 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if(equation==3){
         SIGN=1
-        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular    
+        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular    
         EQ <- "Monomolecular"
         
       } else if (equation==7) {
         SIGN=-1 #Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==8) {
         SIGN=-1 #Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         EQ <- "Inverse Ricker"  
         
       } else if (equation==8) {
         SIGN=1
-        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
+        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
         EQ <- "Ricker"
         
       } else if (equation==6) {
         SIGN=1
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
         R.vec <- rev(R)
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -1144,7 +1144,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if (equation==2) {
         SIGN=-1 # Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -1152,7 +1152,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
-        r[[i]] <- (rast*0) #  Cancel layer...set to zero
+        r[[i]] <- (rast*0)+1 #  Cancel layer...set to zero
       } # End if-else  
     } # Close parameter type if-else  
   } # Close layer loop
@@ -1160,7 +1160,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   
   File.name <- File.name
   
-  multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
+  multi_surface <- sum(r) # Add all surfaces together
   if(cellStats(multi_surface,"max")>1e6)  multi_surface<-SCALE(multi_surface,1,1e6) # Rescale surface in case resistance are too high
   #       plot(multi_surface)
   
