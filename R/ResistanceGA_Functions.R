@@ -2207,7 +2207,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' 
 #' This function prepares and compiles objects and commands for optimization with the GA package
 #' 
-#' @param ASCII.dir Directory containing all raster objects to optimized.
+#' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack object can be specified.
+#' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified.
 #' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
@@ -2239,6 +2240,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
+#' Results.dir,
 #' Min.Max="max",
 #' min.cat=1e-04,
 #' max.cat=2500,
@@ -2261,6 +2263,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' quiet = FALSE)
 
 GA.prep<-function(ASCII.dir,
+                  Results.dir = NULL,
                   Min.Max ='max',
                   min.cat = 0.0001,
                   max.cat = 2500, 
@@ -2280,7 +2283,9 @@ GA.prep<-function(ASCII.dir,
                   mutation = gaControl(type)$mutation,
                   parallel = FALSE,
                   seed = NULL,
-                  quiet = FALSE) {   
+                  quiet = FALSE) { 
+  
+  if(class(ASCII.dir)[1]=='RasterStack' & )
   
   ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
   
