@@ -133,7 +133,8 @@ Run the `GA.prep` and `CS.prep` functions
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    max.cat=500,
                    max.cont=500,
-                   seed = 321) 
+                   seed = 321,
+                   quiet = TRUE) 
 
 CS.inputs <- CS.prep(n.POPS=length(sample.locales),
                    CS_Point.File=paste0(write.dir,"samples.txt"),
@@ -299,7 +300,8 @@ Run `GA.prep`
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
                    max.cat=500,
                    max.cont=500,
-                   seed = 123) 
+                   seed = 123,
+                   quiet = TRUE) 
 ```
 
 Transform, reclassify, and combine the three resistance surfaces together. Use an "Inverse-Reverse Monomolecular" transformation of the continuous surface. Visualize this transformation using `Plot.trans`. The first value of `PARM` refers to the shape parameter, and the second value refers to the maximum value parameter. Look in the help file for `Plot.trans` for transformation names/numbers.
