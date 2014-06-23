@@ -2285,24 +2285,35 @@ GA.prep<-function(ASCII.dir,
                   seed = NULL,
                   quiet = FALSE) { 
   
-  if(class(ASCII.dir)[1]=='RasterStack' & )
+  if(class(ASCII.dir)[1]=='RasterStack' & is.null(Results.dir)){
+    warning(paste0("Results.dir was not specified. Setting directory is being set to ", getwd()))
+    Results.dir<-getwd()
+  }
   
-  ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
+  if(class(ASCII.dir)[1]!='RasterStack' & is.null(Results.dir)){
+    Results.dir<-ASCII.dir
+  }
   
-  r <- stack(lapply(ASCII.list,raster))
+  if(class(ASCII.dir)[1]=='RasterStack'){
+     r<-ASCII.dir
+     names <- names(r)
+     n.layers <-length(names) 
+  } else{
+     ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
+     r <- stack(lapply(ASCII.list,raster))
+     names <- gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
+     n.layers <-length(ASCII.list) 
+  }
   
-  names <- gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
-  n.layers <-length(ASCII.list) 
-  
-  if("Results"%in%dir(ASCII.dir)==FALSE) dir.create(file.path(ASCII.dir, "Results")) 
+  if("Results"%in%dir(Results.dir)==FALSE) dir.create(file.path(Results.dir, "Results")) 
   #   dir.create(file.path(ASCII.dir, "Results"),showWarnings = FALSE)
-  Results.dir<-paste0(ASCII.dir, "Results/")
-  if("tmp"%in%dir(ASCII.dir)==FALSE) dir.create(file.path(ASCII.dir, "tmp")) 
+  Results.DIR<-paste0(Results.dir, "Results/")
+  if("tmp"%in%dir(Results.dir)==FALSE) dir.create(file.path(Results.dir, "tmp")) 
   #   dir.create(file.path(Results.dir, "tmp"),showWarnings = FALSE)
-  Write.dir <-paste0(ASCII.dir,"tmp/") 
-  if("Plots"%in%dir(Results.dir)==FALSE) dir.create(file.path(Results.dir, "Plots")) 
+  Write.dir <-paste0(Results.dir,"tmp/") 
+  if("Plots"%in%dir(Results.DIR)==FALSE) dir.create(file.path(Results.DIR, "Plots")) 
   #   dir.create(file.path(Results.dir, "tmp"),showWarnings = FALSE)
-  Plots.dir <-paste0(Results.dir,"Plots/") 
+  Plots.dir <-paste0(Results.DIR,"Plots/") 
   
   # Determine total number of parameters and types of surfaces included
   parm.type<-data.frame()
@@ -2353,7 +2364,7 @@ GA.prep<-function(ASCII.dir,
   }
   SUGGESTS <-matrix(unlist(SUGGESTS), nrow=nrow(SUGGESTS[[1]]), byrow=F)
   
-  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.dir, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation, parallel=parallel,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
+  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.DIR, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation, parallel=parallel,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
   
 }
 #####################################
