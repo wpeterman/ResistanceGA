@@ -4,6 +4,7 @@
 \title{Create R object with genetic algorithm optimization settings}
 \usage{
 GA.prep(ASCII.dir,
+Results.dir,
 Min.Max="max",
 min.cat=1e-04,
 max.cat=2500,
@@ -26,7 +27,9 @@ seed = NULL,
 quiet = FALSE)
 }
 \arguments{
-\item{ASCII.dir}{Directory containing all raster objects to optimized.}
+\item{ASCII.dir}{Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.}
+
+\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified.}
 
 \item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)}
 

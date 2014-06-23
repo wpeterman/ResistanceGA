@@ -2207,7 +2207,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' 
 #' This function prepares and compiles objects and commands for optimization with the GA package
 #' 
-#' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack object can be specified.
+#' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.
 #' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified.
 #' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
@@ -2285,8 +2285,8 @@ GA.prep<-function(ASCII.dir,
                   seed = NULL,
                   quiet = FALSE) { 
   
-  if(class(ASCII.dir)[1]=='RasterStack' & is.null(Results.dir)){
-    warning(paste0("Results.dir was not specified. Setting directory is being set to ", getwd()))
+  if((class(ASCII.dir)[1]=='RasterStack' | class(ASCII.dir)[1]=='RasterLayer') & is.null(Results.dir)){
+    warning(paste0("'Results.dir' was not specified. Results will be exported to ", getwd()))
     Results.dir<-getwd()
   }
   
@@ -2294,11 +2294,11 @@ GA.prep<-function(ASCII.dir,
     Results.dir<-ASCII.dir
   }
   
-  if(class(ASCII.dir)[1]=='RasterStack'){
+  if(class(ASCII.dir)[1]=='RasterStack' | class(ASCII.dir)[1]=='RasterLayer'){
      r<-ASCII.dir
      names <- names(r)
-     n.layers <-length(names) 
-  } else{
+     n.layers <-length(names)     
+  } else {
      ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
      r <- stack(lapply(ASCII.list,raster))
      names <- gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))

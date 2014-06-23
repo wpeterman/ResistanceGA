@@ -21,11 +21,12 @@ A few words of caution. I have made every effort to run and test each function w
 
 
 **References**   
-* Graves, T. A., P. Beier, and J. A. Royle. 2013. Current approaches using genetic distances produce poor estimates of landscape resistance to           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interindividual dispersal. Molecular Ecology 22:3888--3903.
-* McRae, B. H., B. G. Dickson, T. H. Keitt, and V. B. Shah. 2008. Using circuit theory to model connectivity in ecology, evolution, and &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conservation. Ecology 89:2712--2724.
-* Peterman, W. E., G. M. Connette, R. D. Semlitsch, and L. S. Eggert. in press. Ecological resistance surfaces predict fine scale genetic     
+* Graves, T. A., P. Beier, and J. A. Royle. 2013. Current approaches using genetic distances produce poor estimates of landscape resistance to               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interindividual dispersal. Molecular Ecology 22:3888--3903.
+* McRae, B. H., B. G. Dickson, T. H. Keitt, and V. B. Shah. 2008. Using circuit theory to model connectivity in ecology, evolution, and     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conservation. Ecology 89:2712--2724.
+* Peterman, W. E., G. M. Connette, R. D. Semlitsch, and L. S. Eggert. in press. Ecological resistance surfaces predict fine scale genetic          
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413.    
-* Spear, S. F., N. Balkenhol, M. J. Fortin, B. H. McRae, and K. Scribner. 2010. Use of resistance surfaces for landscape genetic studies:     
+* Spear, S. F., N. Balkenhol, M. J. Fortin, B. H. McRae, and K. Scribner. 2010. Use of resistance surfaces for landscape genetic studies:          
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;considerations for parameterization and analysis. Molecular Ecology 19:3576--3591.
 
 
@@ -98,9 +99,6 @@ CS.program <- paste('"C:/Program Files/Circuitscape/4.0/cs_run.exe"')
 ```{r load.data, echo = FALSE, message = FALSE, warning=FALSE}
 data(resistance_surfaces)
 continuous <- resistance_surfaces[[1]]
-continuous2 <- resistance_surfaces[[2]]
-categorical <- resistance_surfaces[[3]]
-feature <- resistance_surfaces[[4]]
 data(samples)
 sample.locales <- SpatialPoints(samples[,c(2,3)])
 ```
@@ -133,7 +131,6 @@ Run the `GA.prep` and `CS.prep` functions
 ```{r eval=FALSE}
 # Set the random number seed to reproduce the results presented
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
-                   min.cat=0,
                    max.cat=500,
                    max.cont=500,
                    seed = 321) 
@@ -228,12 +225,12 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 
 # Set the random number seed to reproduce the results presented
 # Run in parallel on 4 cores
-GA.inputs <- GA.prep(ASCII.dir=write.dir,
-                   min.cat=0,
-                   max.cat=500,
-                   max.cont=500,
-                   seed = 321,
-                   parallel = 4) 
+GA.inputs <- GA.prep(ASCII.dir=continuous,
+                     Results.dir=write.dir
+                     max.cat=500,
+                     max.cont=500,
+                     seed = 321,
+                     parallel = 4) 
 
 gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
                            samples=sample.locales)
@@ -273,18 +270,18 @@ write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to wr
 
 Extract other resistance surfaces from the 'resistance_surfaces' raster stack
 ```{r multi_surface.sim, warning=FALSE, message=FALSE,results='hide'}
-continuous2 <- resistance_surfaces[[2]]
-categorical <- resistance_surfaces[[3]]
-feature <- resistance_surfaces[[4]]
+data(resistance_surfaces)
+data(samples)
+sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 ```
 
 Visualize each surface:
 ```{r feature.sim, warning=FALSE,message=FALSE}
-plot(continuous2)
+plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
-plot(categorical)
+plot(categorical,main = resistance_surfaces[[2]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
-plot(feature)
+plot(feature,main = resistance_surfaces[[3]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
 ```
 
@@ -300,7 +297,6 @@ write.table(samples,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,ro
 Run `GA.prep`
 ```{r eval=FALSE}
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
-                   min.cat=0,
                    max.cat=500,
                    max.cont=500,
                    seed = 123) 
