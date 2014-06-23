@@ -14,7 +14,7 @@ pop.mult = 15,
 percent.elite = 0.05,
 type= "real-valued",
 pcrossover=0.85,
-pmutation=0.1,
+pmutation=0.125,
 maxiter=1000,
 run=25,
 keepBest=TRUE,
@@ -53,7 +53,7 @@ quiet = FALSE)
 
 \item{pcrossover}{Probability of crossover. Default = 0.85}
 
-\item{pmutation}{Probability of mutation. Default = 0.1}
+\item{pmutation}{Probability of mutation. Default = 0.125}
 
 \item{crossover}{Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing}
 

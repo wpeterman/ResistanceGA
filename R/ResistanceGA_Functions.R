@@ -1098,7 +1098,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       # Apply specified transformation
       if(equation==1){
         SIGN=-1 # Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -1107,7 +1107,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if(equation==5){
         SIGN=1
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -1115,29 +1115,29 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if(equation==3){
         SIGN=1
-        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular    
+        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular    
         EQ <- "Monomolecular"
         
       } else if (equation==7) {
         SIGN=-1 #Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE))+SIGN # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==8) {
         SIGN=-1 #Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         EQ <- "Inverse Ricker"  
         
       } else if (equation==8) {
         SIGN=1
-        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
         EQ <- "Ricker"
         
       } else if (equation==6) {
         SIGN=1
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN #  Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
         R.vec <- rev(R)
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -1145,7 +1145,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if (equation==2) {
         SIGN=-1 # Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE))+SIGN # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -1153,7 +1153,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
-        r[[i]] <- (rast*0)+1 #  Cancel layer...set to zero
+        r[[i]] <- (rast*0) #  Cancel layer...set to zero
       } # End if-else  
     } # Close parameter type if-else  
   } # Close layer loop
@@ -1161,7 +1161,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   
   File.name <- File.name
   
-  multi_surface <- sum(r) # Add all surfaces together
+  multi_surface <- sum(r)+1 # Add all surfaces together
   
   if(rescale==TRUE) multi_surface <- multi_surface/cellStats(multi_surface,"min") # Rescale to min of 1
   
@@ -1335,108 +1335,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs=NULL, gdist.inputs=NULL, GA.inpu
 #   r <- GA.inputs$Resistance.stack
   File.name="resist_surface"
 if(!is.null(CS.inputs)){  
-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs$Write.dir,File.name=File.name)
-  
-#   for(i in 1:GA.inputs$n.layers){
-#     if(GA.inputs$surface.type[i]=="cat"){
-#       parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       parm <- parm/min(parm)
-#       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
-#       r[[i]] <-subs(r[[i]],df)
-#       
-#       r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))
-#       
-#     } else {
-#       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
-#       parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       
-#       
-#       # Set equation for continuous surface
-#       equation <- floor(parm[1]) # Parameter can range from 1-9.99
-#       
-#       # Read in resistance surface to be optimized
-#       SHAPE <-  (parm[2])
-#       Max.SCALE <- (parm[3])
-#       
-#       rick.eq<-(equation==2||equation==4||equation==6||equation==8)
-#       if(rick.eq==TRUE & SHAPE>6){
-#         equation<-9
-#       }
-#       
-#       # Apply specified transformation
-#       if(equation==1){
-#         SIGN=-1 # Inverse
-#         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
-#         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-#         R.vec <- rev(R) # Reverse
-#         rast.R <- setValues(R,values=R.vec)
-#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Inverse-Reverse Monomolecular"
-#         
-#       } else if(equation==5){
-#         SIGN=1
-#         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
-#         R.vec <- rev(R) # Reverse
-#         rast.R <- setValues(R,values=R.vec)
-#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Reverse Monomolecular"        
-#         
-#       } else if(equation==3){
-#         SIGN=1
-#         r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular    
-#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Monomolecular"
-#         
-#       } else if (equation==7) {
-#         SIGN=-1 #Inverse
-#         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
-#         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Inverse Monomolecular"        
-#         
-#       } else if (equation==8) {
-#         SIGN=-1 #Inverse
-#         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
-#         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Inverse Ricker"  
-#         
-#       } else if (equation==4) {
-#         SIGN=1
-#         r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
-#         r[[i]] <- reclassify(r[[i]], c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Ricker"
-#         
-#       } else if (equation==6) {
-#         SIGN=1
-#         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
-#         R.vec <- rev(R)
-#         rast.R <- setValues(R,values=R.vec)
-#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Reverse Ricker"        
-#         
-#       } else if (equation==2) {
-#         SIGN=-1 # Inverse
-#         R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
-#         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-#         R.vec <- rev(R) # Reverse
-#         rast.R <- setValues(R,values=R.vec)
-#         r[[i]] <- reclassify(rast.R, c(-Inf,1e-05, 1e-05,1e6,Inf,1e6))
-#         EQ <- "Inverse-Reverse Ricker"
-#         
-#       } else {
-#         r[[i]] <- (rast*0) #  Cancel layer...set to zero
-#       } # End if-else  
-#     } # Close parameter type if-else  
-#   } # Close layer loop
-#   
-#   
-#   File.name <- "resist_surface"
-#   
-#   multi_surface <- sum(r)+1 # Add all surfaces together (+1 for distance)
-# #   if(cellStats(multi_surface,"max")>5e5)  multi_surface<-SCALE(multi_surface,1,5e5) # Rescale surface in case resistance are too high
-#   
-#   writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs$Write.dir,File.name=File.name,rescale = FALSE)  
   
   CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=multi_surface,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
   
@@ -1450,7 +1349,7 @@ Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs
 }
 
 if(!is.null(gdist.inputs)){
-  r <- Combine_Surfaces(PARM=PARM,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs,out=NULL,File.name=File.name)
+  r <- Combine_Surfaces(PARM=PARM,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs,out=NULL,File.name=File.name,rescale = FALSE)
   cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
    
   AIC.stat <- AIC(MLPE.lmm2(resistance=cd,
@@ -2012,7 +1911,7 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method){
 #' 
 #' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
 #' 
-#' @param resistance Pairwise resistance distance matrix (resistances.out) from CS results
+#' @param resistance Path to pairwise resistance distance matrix (resistances.out) from CS results. Alternatively, provide the pairwise resistances created from optimizing with `gdistance` (result of Run_gdistance).
 #' @param pairwise.genetic Lower half of pairwise genetic distance matrix
 #' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE
 #' @return A lmer object from the fitted model
@@ -2026,12 +1925,20 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method){
 MLPE.lmm <- function(resistance, pairwise.genetic, REML=FALSE){ 
   response=pairwise.genetic
 
+  if(class(resistance)[[1]]=='dist'){
+    mm<-lower(as.matrix(resistance))
+    m<-attr(resistance,"Size")
+    ID<-To.From.ID(POPS=m)
+    ZZ<-ZZ.mat(ID=ID)
+    cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+  } else {
     mm<-(read.table(resistance)[-1,-1])
     m<-nrow(mm)
     ID<-To.From.ID(POPS=m)
     ZZ<-ZZ.mat(ID=ID)
     cs.matrix<-scale(lower(mm),center=TRUE,scale=TRUE)
-    
+  }
+  
     dat<-cbind(ID,cs.matrix,response)
     
     # Assign value to layer
@@ -2220,7 +2127,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param selection Default is gareal_lsSelection from GA
 #' @param mutation Default is gareal_raMutation from GA
 #' @param pcrossover Probability of crossover. Default = 0.85
-#' @param pmutation Probability of mutation. Default = 0.1
+#' @param pmutation Probability of mutation. Default = 0.125
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
 #' @param maxiter Maximum number of iterations to run before the GA search is halted (Default = 1000)
 #' @param parallel A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specifiy the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.
@@ -2250,7 +2157,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' percent.elite = 0.05,
 #' type= "real-valued",
 #' pcrossover=0.85,
-#' pmutation=0.1,
+#' pmutation=0.125,
 #' maxiter=1000,
 #' run=25,
 #' keepBest=TRUE,
@@ -2273,7 +2180,7 @@ GA.prep<-function(ASCII.dir,
                   percent.elite = 0.05,
                   type = "real-valued",
                   pcrossover = 0.85,
-                  pmutation = 0.1,
+                  pmutation = 0.125,
                   maxiter = 1000,
                   run = 25,
                   keepBest = TRUE,
