@@ -1,3 +1,8 @@
+ResistanceGA 2.0-3
+---------
+* GA.prep can now handle RasterLayer and RasterStack objects for optimization using least cost paths
+* Added `rescale` feature to `Combine_Surfaces`. The default is TRUE, which will rescale the combined resistance surface so that the minimum resistance value is 1. This is accomplished by dividing by the minimum value in the resistance surface. This Make the comparison of optimized resistance surfaces easier since they often optimize to different solutions that are perfectly correlated in terms of relative resistance.
+
 ResistanceGA 2.0-2
 ---------
 * Have tested and added the option to run optimization in parallel when using least cost paths. Set `parallel= TRUE` of `parallel = #cores` in `GA.prep`   
