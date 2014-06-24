@@ -1080,7 +1080,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
-      r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))   
+#       r[[i]]<-r[[i]]-1 # Set minimum to 0  
 
       
     } else {
@@ -1098,7 +1098,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       # Apply specified transformation
       if(equation==1){
         SIGN=-1 # Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -1107,7 +1107,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if(equation==5){
         SIGN=1
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -1115,29 +1115,29 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if(equation==3){
         SIGN=1
-        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular    
+        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular    
         EQ <- "Monomolecular"
         
       } else if (equation==7) {
         SIGN=-1 #Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) # Monomolecular
+        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==8) {
         SIGN=-1 #Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN # Ricker
         r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         EQ <- "Inverse Ricker"  
         
       } else if (equation==8) {
         SIGN=1
-        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
+        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN #  Ricker
         EQ <- "Ricker"
         
       } else if (equation==6) {
         SIGN=1
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) #  Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN #  Ricker
         R.vec <- rev(R)
         rast.R <- setValues(R,values=R.vec)
         r[[i]] <- rast.R
@@ -1145,7 +1145,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         
       } else if (equation==2) {
         SIGN=-1 # Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) # Ricker
+        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN # Ricker
         R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
         R.vec <- rev(R) # Reverse
         rast.R <- setValues(R,values=R.vec)
@@ -1153,7 +1153,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
-        r[[i]] <- (rast*0) #  Cancel layer...set to zero
+        r[[i]] <- (rast*0) + 1 #  Cancel layer...set to zero
       } # End if-else  
     } # Close parameter type if-else  
   } # Close layer loop
@@ -1161,7 +1161,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   
   File.name <- File.name
   
-  multi_surface <- sum(r)+1 # Add all surfaces together
+  multi_surface <- sum(r)# + 1 # Add all surfaces together
   
   if(rescale==TRUE) multi_surface <- multi_surface/cellStats(multi_surface,"min") # Rescale to min of 1
   
@@ -2105,7 +2105,9 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     CS_Point.txt <- rasterToPoints(x = CS_grid)
     site<-CS_Point.txt[ , 3]
     CS_Point.txt<-data.frame(site,CS_Point.txt[,c(1,2)])
-    write.table()
+    CS_Point.txt <- CS_Point.txt[order(site),]
+    CS_Point.File <- sub(".asc",".txt", x = CS_Point.File)
+    write.table(CS_Point.txt,file = cs.txt,col.names = F,row.names = F)
   }
   platform="pc"
   # Make to-from population list
