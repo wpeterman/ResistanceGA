@@ -2100,6 +2100,13 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
 
 CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8){
+  if(grep(".asc", x = CS_Point.File)==1){
+    CS_grid<-raster<-raster(CS_Point.File)
+    CS_Point.txt <- rasterToPoints(x = CS_grid)
+    site<-CS_Point.txt[ , 3]
+    CS_Point.txt<-data.frame(site,CS_Point.txt[,c(1,2)])
+    write.table()
+  }
   platform="pc"
   # Make to-from population list
   ID<-To.From.ID(n.POPS)
