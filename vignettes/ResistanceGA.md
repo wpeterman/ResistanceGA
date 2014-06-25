@@ -393,7 +393,7 @@ CS.inputs<-CS.prep(n.POPS=length(sample.locales),
                       CS.program=CS.program)
 ```
 
-Run `MS_optim`. Running this multisurface example with the default settings took 85 iterations and ~1.65 hours to complete on a computer with an Intel i7 3.4 GHz processor.
+Run `MS_optim`. Running this multisurface example with the default settings took 257 iterations and ~5 hours to complete on a computer with an Intel i7 3.4 GHz processor.
 
 ```r
 Multi.Surface_optim <- MS_optim(CS.inputs=CS.inputs,
@@ -414,20 +414,28 @@ What the `MS_optim` function does:
 The multisurface optimization procedure has done a pretty good job of recovering the relative data generating values. You'll notice that we have not exactly recovered the values, but that the relative relationship among surfaces is preserved (see below).
 
 ```r
-Multi.Surface_optim@solution # Optimized values
-
-# Optimized values for each surface: 
-[1]  1 33.21036 10.97899 6.037946 3.541326 84.52423  1 61.30668
-
-# Simulated values
-PARM
-[1]   1.0 250.0 75.0 6.0 3.5 150.0 1.0 350
+Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim@solution),2))
+colnames(Summary.table)<-c("Truth", "Optimized")
+row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2") 
 ```
-The optimized values are ~4.89 times lower than the data generating values. However, if we rescale both the true and optimized resistance surfaces to have a minimum value of 1, we see that the surfaces are identical. The values for the 3-class categorical surface are the first three values listed, the continuous surface values = 4--6 , and the feature surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (6 = Reverse Ricker). Visualize and test the equivalence of simulated and optimized resistance surfaces:   
+```
+Summary.table
+               Truth Optimized
+Category1        1.0      1.00
+Category2      250.0    304.31
+Category3       75.0     91.15
+Transformation   6.0      6.28
+Shape            3.5      3.50
+Max            150.0    183.12
+Feature1         1.0      1.00
+Feature2       350.0    426.14
+```     
+
+The optimized values are ~1.22 times greater than the data generating values. However, if we rescale both the true and optimized resistance surfaces to have a minimum value of 1, we see that the surfaces are identical. The values for the 3-class categorical surface are the first three values listed, the continuous surface values = 4--6 , and the feature surface values = 7--8. Note that the first value for continuous surfaces identifies the transformation used (the fourth value, here), and is always rounded down (6 = Reverse Ricker). Visualize and test the equivalence of simulated and optimized resistance surfaces:   
 
 ```r
 # Make combined, optimized resistance surface.
-optim.resist <- Combine_Surfaces(PARM=Multi.Surface_optim@solution, CS.inputs, GA.inputs, rescale = TRUE)
+optim.resist <- Combine_Surfaces(PARM=Multi.Surface_optim@solution, CS.inputs =  CS.inputs,GA.inputs =  GA.inputs, rescale = TRUE)
 ms.stack <- stack(Resist, optim.resist)
 names(ms.stack) <- c("Truth", "Optimized")
 plot(ms.stack) 
