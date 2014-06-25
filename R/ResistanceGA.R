@@ -30,9 +30,9 @@ NULL
 #' 
 #' A raster stack containing three raster surfaces
 #' 
-#' \itemize{
-#'    \item continuous. Continuous resistance surface
+#' \itemize{#'    
 #'    \item categorical. 3-class categorical resistance surface
+#'    \item continuous. Continuous resistance surface
 #'    \item feature. 2-class categorical (feature) resistance surface
 #'    }
 #' 

@@ -73,12 +73,13 @@ test.rast<-raster(TEST)
 
 
 # Arrange the 8 charts
-# svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/vignettes//figure/Transformations.svg",width=10,height=13.333)
-# grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
-# dev.off()
+svg("C:/Users/Bill/Dropbox/R_Functions/Git/Packages/ResistanceGA/vignettes//figure/Transformations.svg",width=10,height=13.333)
+grid.arrange(g1, g2, g3, g4, g5,g6,g7,g8, nrow=4)
+dev.off()
 
-tiff("C:/Users/Bill/Box Sync/Research/Manuscripts/Manuscripts_in_Progress/ResistanceGA/Transformations.tif",
-     width=10,
+# tiff("C:/Users/Bill/Box Sync/Research/Manuscripts/Manuscripts_in_Progress/ResistanceGA/Transformations.tif",
+tiff("C:/Users/Bill/Dropbox//Transformations.tif",
+    width=10,
      height=13.333,
      units="in",
      compression="lzw",

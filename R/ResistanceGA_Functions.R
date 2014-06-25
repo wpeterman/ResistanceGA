@@ -384,11 +384,11 @@ if(!is.null(gdist.inputs)){
       names(r)<-"dist"  
       cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
       
-      Dist.AIC <- AIC(MLPE.lmm2(resistance=cd,
-                                response=gdist.inputs$response,
-                                ID=gdist.inputs$ID,
-                                ZZ=gdist.inputs$ZZ,
-                                REML=FALSE))
+      Dist.AIC <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                                  response=gdist.inputs$response,
+                                  ID=gdist.inputs$ID,
+                                  ZZ=gdist.inputs$ZZ,
+                                  REML=FALSE)))
       ROW <- nrow(gdist.inputs$ID)
       k<-2
       AICc <- (Dist.AIC)+(((2*k)*(k+1))/(ROW-k-1))
@@ -548,7 +548,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     multi.GA_nG@solution <- Opt.parm
     
   
-  RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
+  RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs, rescale = TRUE)
   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
   names(RAST)<-NAME
   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
@@ -604,7 +604,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
       }
       multi.GA_nG@solution <- Opt.parm
       
-    RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs)
+    RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs, rescale = TRUE)
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
     cd <- Run_gdistance(gdist.inputs,GA.inputs,RAST)
@@ -1080,7 +1080,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
-#       r[[i]]<-r[[i]]-1 # Set minimum to 0  
+      r[[i]]<-r[[i]]#-1 # Set minimum to 0  
 
       
     } else {
@@ -1153,7 +1153,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
-        r[[i]] <- (rast*0) + 1 #  Cancel layer...set to zero
+        r[[i]] <- (rast*0) #+ 1 #  Cancel layer...set to zero
       } # End if-else  
     } # Close parameter type if-else  
   } # Close layer loop
@@ -1161,7 +1161,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   
   File.name <- File.name
   
-  multi_surface <- sum(r)# + 1 # Add all surfaces together
+  multi_surface <- sum(r) #+ 1 # Add all surfaces together
   
   if(rescale==TRUE) multi_surface <- multi_surface/cellStats(multi_surface,"min") # Rescale to min of 1
   
@@ -1340,11 +1340,11 @@ Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs
   CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=multi_surface,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
   
   # Run mixed effect model on each Circuitscape effective resistance
-  AIC.stat <- AIC(MLPE.lmm2(resistance=CS.resist,
-                            response=CS.inputs$response,
-                            ID=CS.inputs$ID,
-                            ZZ=CS.inputs$ZZ,
-                            REML=FALSE))
+  AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
+                              response=CS.inputs$response,
+                              ID=CS.inputs$ID,
+                              ZZ=CS.inputs$ZZ,
+                              REML=FALSE)))
   ROW <- nrow(CS.inputs$ID)
 }
 
@@ -1352,11 +1352,11 @@ if(!is.null(gdist.inputs)){
   r <- Combine_Surfaces(PARM=PARM,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs,out=NULL,File.name=File.name,rescale = FALSE)
   cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
    
-  AIC.stat <- AIC(MLPE.lmm2(resistance=cd,
-                            response=gdist.inputs$response,
-                            ID=gdist.inputs$ID,
-                            ZZ=gdist.inputs$ZZ,
-                            REML=FALSE))
+  AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                              response=gdist.inputs$response,
+                              ID=gdist.inputs$ID,
+                              ZZ=gdist.inputs$ZZ,
+                              REML=FALSE)))
   ROW <- nrow(gdist.inputs$ID)
 }
 
@@ -1492,11 +1492,11 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=r,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
     
     # Run mixed effect model on each Circuitscape effective resistance
-    AIC.stat <- AIC(MLPE.lmm2(resistance=CS.resist,
-                              response=CS.inputs$response,
-                              ID=CS.inputs$ID,
-                              ZZ=CS.inputs$ZZ,
-                              REML=FALSE))
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
+                                response=CS.inputs$response,
+                                ID=CS.inputs$ID,
+                                ZZ=CS.inputs$ZZ,
+                                REML=FALSE)))
     ROW <- nrow(CS.inputs$ID)
     
   }  
@@ -1504,11 +1504,11 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
   if(!is.null(gdist.inputs)){
     cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
     
-    AIC.stat <- AIC(MLPE.lmm2(resistance=cd,
-                              response=gdist.inputs$response,
-                              ID=gdist.inputs$ID,
-                              ZZ=gdist.inputs$ZZ,
-                              REML=FALSE))
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                                response=gdist.inputs$response,
+                                ID=gdist.inputs$ID,
+                                ZZ=gdist.inputs$ZZ,
+                                REML=FALSE)))
     ROW <- nrow(gdist.inputs$ID)
   } 
 
@@ -1623,7 +1623,7 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
   } else if(equation=="Reverse Monomolecular") {
     SIGN<- 1
     Trans.vec <-  SIGN*PARM[[2]]*(1-exp(-1*dat.t/PARM[[1]]))+SIGN # Monomolecular
-    Trans.vec <- rev(SCALE.vector(Trans.vec,MIN=abs(max(Trans.vec)),MAX=abs(min(Trans.vec)))) # Reverse
+    Trans.vec <- rev(Trans.vec) # Reverse
     TITLE <- "Reverse Monomolecular"  
     
   } else if (equation=="Inverse Ricker") {
@@ -1791,11 +1791,11 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=r,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
     
     # Run mixed effect model on each Circuitscape effective resistance
-    AIC.stat <- AIC(MLPE.lmm2(resistance=CS.resist,
-                              response=CS.inputs$response,
-                              ID=CS.inputs$ID,
-                              ZZ=CS.inputs$ZZ,
-                              REML=FALSE))
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
+                                response=CS.inputs$response,
+                                ID=CS.inputs$ID,
+                                ZZ=CS.inputs$ZZ,
+                                REML=FALSE)))
     ROW <- nrow(CS.inputs$ID)
     
   }  
@@ -1803,11 +1803,11 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   if(!is.null(gdist.inputs)){
     cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
     
-    AIC.stat <- AIC(MLPE.lmm2(resistance=cd,
-                              response=gdist.inputs$response,
-                              ID=gdist.inputs$ID,
-                              ZZ=gdist.inputs$ZZ,
-                              REML=FALSE))
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                                response=gdist.inputs$response,
+                                ID=gdist.inputs$ID,
+                                ZZ=gdist.inputs$ZZ,
+                                REML=FALSE)))
     ROW <- nrow(gdist.inputs$ID)
   }   
  
@@ -2100,7 +2100,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
 
 CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8){
-  if(grep(".asc", x = CS_Point.File)==1){
+  if(grepl(".asc", x = CS_Point.File)){
     CS_grid<-raster<-raster(CS_Point.File)
     CS_Point.txt <- rasterToPoints(x = CS_grid)
     site<-CS_Point.txt[ , 3]
@@ -2269,13 +2269,13 @@ GA.prep<-function(ASCII.dir,
   
   for(i in 1:length(surface.type)){
     if (surface.type[i]=="cat"){
-      SUGGESTS[[i]] <- sv.cat(levels=parm.type[i,2],pop.size=pop.size)
+      SUGGESTS[[i]] <- sv.cat(levels=parm.type[i,2],pop.size=pop.size,min.cat,max.cat)
       
     } else if (exists("cont.shape") && length(cont.shape>0)){
-      SUGGESTS[[i]] <- sv.cont.nG(cont.shape[1],pop.size=pop.size)
+      SUGGESTS[[i]] <- sv.cont.nG(cont.shape[1],pop.size=pop.size,max.cont)
       cont.shape<-cont.shape[-1]
     } else {
-      SUGGESTS[[i]] <- sv.cont.nG("NA",pop.size=pop.size)
+      SUGGESTS[[i]] <- sv.cont.nG("NA",pop.size=pop.size,max.cont)
     }
   }
   SUGGESTS <-matrix(unlist(SUGGESTS), nrow=nrow(SUGGESTS[[1]]), byrow=F)
@@ -2531,7 +2531,7 @@ sink()
 
 #############################################################
 # Sample values for suggests
-sv.cat <-function(levels,pop.size){
+sv.cat <-function(levels,pop.size,min,max){
   cat.starts<-matrix(nrow=pop.size,ncol=levels)
   for(r in 1:pop.size){
     L<-list()
@@ -2539,7 +2539,7 @@ sv.cat <-function(levels,pop.size){
       if(runif(1)<.5){
         z<-runif(1)
       } else {
-        z<-runif(1,10,250)
+        z<-runif(1,min,max)
       }
       L[[i]]<-z
     } 
@@ -2551,7 +2551,7 @@ sv.cat <-function(levels,pop.size){
 }
 ############################
 # No Gaussian distribution
-sv.cont.nG <-function(direction,pop.size){
+sv.cont.nG <-function(direction,pop.size,max){
   inc<-c(1,3)
   dec<-c(7,5)
   peak<-c(2,4,6,8)
@@ -2562,11 +2562,11 @@ sv.cont.nG <-function(direction,pop.size){
       #       z1<-c(sample(inc,1)
       z<-Increase.starts.nG(sample(inc,1))
     } else if(runif(1)<.5 && direction=="Decrease") {
-      z<-c(sample(dec,1),runif(1,.01,10),runif(1,1,100))
+      z<-c(sample(dec,1),runif(1,.01,10),runif(1,1,max))
     } else if (runif(1)<.5 && direction=="Peaked") {
-      z<-c(sample(peak,1),runif(1,.01,10),runif(1,1,100))
+      z<-c(sample(peak,1),runif(1,.01,10),runif(1,1,max))
     } else {
-      z<-c(runif(1,1,9.99),runif(1,.01,10),runif(1,1,100))
+      z<-c(runif(1,1,9.99),runif(1,.01,10),runif(1,1,max))
     }
     cont.starts[r,]<-z
   } 
