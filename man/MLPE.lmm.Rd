@@ -6,7 +6,7 @@
 MLPE.lmm(resistance, pairwise.genetic, REML)
 }
 \arguments{
-\item{resistance}{Pairwise resistance distance matrix (resistances.out) from CS results}
+\item{resistance}{Path to pairwise resistance distance matrix (resistances.out) from CS results. Alternatively, provide the pairwise resistances created from optimizing with `gdistance` (result of Run_gdistance).}
 
 \item{pairwise.genetic}{Lower half of pairwise genetic distance matrix}
 

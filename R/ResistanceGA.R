@@ -28,18 +28,17 @@ NULL
 
 #' Simulated resistance surfaces
 #' 
-#' A raster stack containing four raster surfaces
+#' A raster stack containing three raster surfaces
 #' 
-#' \itemize{
-#'    \item continuous1. Continuous resistance surface
-#'    \item continuous2. Continuous resistance surface
+#' \itemize{#'    
 #'    \item categorical. 3-class categorical resistance surface
+#'    \item continuous. Continuous resistance surface
 #'    \item feature. 2-class categorical (feature) resistance surface
 #'    }
 #' 
 #' @docType data
 #' @name resistance_surfaces
-#' @format Raster stack object of length 4
+#' @format RasterStack object of length 3
 #' @usage data(resistance_surfaces)
 #' @keywords datasets
 #' 
