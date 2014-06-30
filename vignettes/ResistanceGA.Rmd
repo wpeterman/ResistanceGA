@@ -245,7 +245,7 @@ gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
 r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=continuous) 
 
 # Create the true resistance/response surface
-gdist.response <- Run_gdistance(gdist.inputs=gdist.inputs,GA.inputs=GA.inputs, r=r.tran)
+gdist.response <- Run_gdistance(gdist.inputs=gdist.inputs, r=r.tran)
 
 # Rerun `gdist.prep` to include response
 gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
@@ -434,8 +434,7 @@ Resist <- Combine_Surfaces(PARM=PARM,
                            rescale=TRUE)
 
 # Create the true resistance/response surface
-gd.response <- Run_gdistance(gdist.inputs=gdist.inputs,
-                             GA.inputs=GA.inputs,
+gd.response <- Run_gdistance(gdist.inputs=gdist.inputs,                             
                              r=Resist)
 
 # Run `CS.prep` functions
