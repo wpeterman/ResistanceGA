@@ -2144,7 +2144,6 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param Min.Max Define whether the optimization function should be minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria
 #' @param seed Integer random number seed to replicate \code{ga} optimization
 #' @param quiet Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE
-#' @param make.dir Logical. If TRUE (default), Results and temporary directories will be created to write and results and intermediate files
 #' @return An R object that is a required input into optimization functions
 #' 
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
@@ -2176,8 +2175,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' mutation = gaControl(type)$mutation,
 #' parallel = FALSE,
 #' seed = NULL,
-#' quiet = FALSE,
-#' make.dir = TRUE)
+#' quiet = FALSE)
 
 GA.prep<-function(ASCII.dir,
                   Results.dir = NULL,                  
@@ -2200,8 +2198,7 @@ GA.prep<-function(ASCII.dir,
                   mutation = gaControl(type)$mutation,
                   parallel = FALSE,
                   seed = NULL,
-                  quiet = FALSE,
-                  make.dir = TRUE) { 
+                  quiet = FALSE) { 
   
  
   if((class(ASCII.dir)[1]=='RasterStack' | class(ASCII.dir)[1]=='RasterLayer') & is.null(Results.dir)){
@@ -2223,7 +2220,7 @@ GA.prep<-function(ASCII.dir,
      names <- gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
      n.layers <-length(ASCII.list) 
  
-     if(make.dir==TRUE){
+   
   if("Results"%in%dir(Results.dir)==FALSE) dir.create(file.path(Results.dir, "Results")) 
   #   dir.create(file.path(ASCII.dir, "Results"),showWarnings = FALSE)
   Results.DIR<-paste0(Results.dir, "Results/")
@@ -2233,10 +2230,7 @@ GA.prep<-function(ASCII.dir,
   if("Plots"%in%dir(Results.DIR)==FALSE) dir.create(file.path(Results.DIR, "Plots")) 
   #   dir.create(file.path(Results.dir, "tmp"),showWarnings = FALSE)
   Plots.dir <-paste0(Results.DIR,"Plots/") 
-     } else {
-       Results.DIR <- Write.dir <- Plots.dir <- getwd()
-     }
-  }
+      }
   # Determine total number of parameters and types of surfaces included
   parm.type<-data.frame()
   min.list <- list()
