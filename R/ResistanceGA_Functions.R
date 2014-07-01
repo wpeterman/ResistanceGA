@@ -2219,7 +2219,7 @@ GA.prep<-function(ASCII.dir,
      r <- stack(lapply(ASCII.list,raster))
      names <- gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
      n.layers <-length(ASCII.list) 
- 
+  }
    
   if("Results"%in%dir(Results.dir)==FALSE) dir.create(file.path(Results.dir, "Results")) 
   #   dir.create(file.path(ASCII.dir, "Results"),showWarnings = FALSE)
@@ -2230,7 +2230,7 @@ GA.prep<-function(ASCII.dir,
   if("Plots"%in%dir(Results.DIR)==FALSE) dir.create(file.path(Results.DIR, "Plots")) 
   #   dir.create(file.path(Results.dir, "tmp"),showWarnings = FALSE)
   Plots.dir <-paste0(Results.DIR,"Plots/") 
-      }
+      
   # Determine total number of parameters and types of surfaces included
   parm.type<-data.frame()
   min.list <- list()
