@@ -5,11 +5,11 @@
 \usage{
 GA.prep(ASCII.dir,
 Results.dir,
-Min.Max="max",
 min.cat=1e-04,
 max.cat=2500,
 max.cont=2500,
 cont.shape=NULL,
+Min.Max="max",
 pop.mult = 15,
 percent.elite = 0.05,
 type= "real-valued",
@@ -24,7 +24,8 @@ crossover="gareal_blxCrossover",
 mutation = gaControl(type)$mutation,
 parallel = FALSE,
 seed = NULL,
-quiet = FALSE)
+quiet = FALSE,
+make.dir = TRUE)
 }
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.}
@@ -70,6 +71,8 @@ quiet = FALSE)
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
 \item{quiet}{Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE}
+
+\item{make.dir}{Logical. If TRUE (default), Results and temporary directories will be created to write and results and intermediate files}
 }
 \value{
 An R object that is a required input into optimization functions
