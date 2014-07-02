@@ -284,7 +284,7 @@ if(!is.null(gdist.inputs)){
       NAME<-GA.inputs$layer.names[i]
       names(r)<-NAME
       
-      cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+      cd <- Run_gdistance(gdist.inputs,r)
       save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
       writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
       Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical", name=NAME)
@@ -343,7 +343,7 @@ if(!is.null(gdist.inputs)){
         names(r)<-GA.inputs$layer.names[i]        
         NAME<-GA.inputs$layer.names[i]        
         
-        cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+        cd <- Run_gdistance(gdist.inputs,r)
         save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
         writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)  
         
@@ -361,7 +361,7 @@ if(!is.null(gdist.inputs)){
         names(r)<-GA.inputs$layer.names[i]        
         NAME<-GA.inputs$layer.names[i]        
         
-        cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+        cd <- Run_gdistance(gdist.inputs,r)
         save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
         writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
   
@@ -382,7 +382,7 @@ if(!is.null(gdist.inputs)){
     if (dist_mod==TRUE){
       r <- reclassify(r, c(-Inf,Inf, 1))
       names(r)<-"dist"  
-      cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+      cd <- Run_gdistance(gdist.inputs,r)
       
       Dist.AIC <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
                                   response=gdist.inputs$response,
@@ -607,7 +607,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs, rescale = TRUE)
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
-    cd <- Run_gdistance(gdist.inputs,GA.inputs,RAST)
+    cd <- Run_gdistance(gdist.inputs,RAST)
     save(cd,file=paste0(GA.inputs$Results.dir,NAME,".rda"))
     writeRaster(RAST,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)
     
@@ -1349,7 +1349,7 @@ Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs
 
 if(!is.null(gdist.inputs)){
   r <- Combine_Surfaces(PARM=PARM,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs,out=NULL,File.name=File.name,rescale = FALSE)
-  cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+  cd <- Run_gdistance(gdist.inputs,r)
    
   AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
                               response=gdist.inputs$response,
@@ -1501,7 +1501,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
   }  
   
   if(!is.null(gdist.inputs)){
-    cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+    cd <- Run_gdistance(gdist.inputs,r)
     
     AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
                                 response=gdist.inputs$response,
@@ -1800,7 +1800,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   }  
   
   if(!is.null(gdist.inputs)){
-    cd <- Run_gdistance(gdist.inputs,GA.inputs,r)
+    cd <- Run_gdistance(gdist.inputs,r)
     
     AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
                                 response=gdist.inputs$response,
