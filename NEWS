@@ -1,3 +1,7 @@
+ResistanceGA 2.0-4
+---------
+* Fixed an error in Combine_Surfaces
+
 ResistanceGA 2.0-3
 ---------
 * GA.prep can now handle RasterLayer and RasterStack objects for optimization using least cost paths

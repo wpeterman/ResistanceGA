@@ -1095,6 +1095,12 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       Max.SCALE <- (parm[3])
       
       # Apply specified transformation
+      rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+      if(rick.eq==TRUE & SHAPE>5){
+        equation<-9
+      }
+      
+      # Apply specified transformation
       if(equation==1){
         SIGN=-1 # Inverse
         R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
@@ -1415,7 +1421,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     
     # Apply specified transformation
     rick.eq<-(equation==2||equation==4||equation==6||equation==8)
-    if(rick.eq==TRUE & SHAPE>6){
+    if(rick.eq==TRUE & SHAPE>5){
       equation<-9
     }
     
