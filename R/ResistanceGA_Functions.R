@@ -442,11 +442,13 @@ if(!is.null(gdist.inputs)){
     Features[i]<-feature
   }
   colnames(Results.cat)<-c("Surface","AICc", Features)
+  Results.cat <-  Results.cat[order(Results.cat$AICc),]
   write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
   }
   
   if(ncol(Results.cont)>0){    
     colnames(Results.cont)<-c("Surface","AICc","Equation","shape","max")
+    Results.cont <- Results.cont[order(Results.cont$AICc),]
     write.table(Results.cont,paste0(GA.inputs$Results.dir,"ContinuousResults.csv"),sep=",",col.names=T,row.names=F)
   }
   
@@ -461,7 +463,9 @@ if(!is.null(gdist.inputs)){
   
   if(dist_mod==TRUE) Results.All<-rbind(Results.All,Dist.AICc)
   if(null_mod==TRUE) Results.All<-rbind(Results.All,Null.AICc)
- 
+
+  Results.All <- Results.All[order(Results.All$AICc),]
+
   cat("\n")
   cat("\n")
   write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
