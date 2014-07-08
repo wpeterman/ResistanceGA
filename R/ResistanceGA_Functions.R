@@ -2116,7 +2116,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     CS_Point.txt<-data.frame(site,CS_Point.txt[,c(1,2)])
     CS_Point.txt <- CS_Point.txt[order(site),]
     CS_Point.File <- sub(".asc",".txt", x = CS_Point.File)
-    write.table(CS_Point.txt,file = cs.txt,col.names = F,row.names = F)
+    write.table(CS_Point.txt,file = CS_Point.File,col.names = F,row.names = F)
   }
   platform="pc"
   # Make to-from population list
