@@ -31,7 +31,7 @@ Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p
 At this point in time, CIRCUITSCAPE can only be executed through `ResistanceGA` on **_Windows_** machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I can work to incorporate that capability in future releases.
 
 
-This approach has been developed from the methods first utilized in Peterman et al. (2014). I have also written a preprint manuscript further describing this `R` package. **_Please cite this paper if you use these methods!_**
+This approach has been developed from the methods first utilized in Peterman et al. (2014). I have also written a preprint manuscript further describing this `R` package. **_Please cite these papers if you use these methods!_**
 
 Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. [**PDF**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/peterman_et_al._2014--mec.pdf "Peterman et al.")
 
