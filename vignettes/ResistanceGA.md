@@ -58,7 +58,7 @@ install_github("wpeterman/ResistanceGA") # Download package
 Load `ResistancaGA` and clear your workspace.
 
 ```r
-require(ResistanceGA)
+library(ResistanceGA)
 rm(list = ls())
 ```
 

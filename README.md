@@ -14,7 +14,7 @@ if(!("devtools" %in% list.files(.libPaths()))) {
 library(devtools) # Loads devtools
 
 install_github("wpeterman/ResistanceGA") # Download package
-require(ResistanceGA) # Installs package and the other required packages needed
+library(ResistanceGA) # Installs package and the other required packages needed
 ```
 Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' using the code below, or you can view the vignette directly [**here**](https://dl.dropboxusercontent.com/u/23513016/ResistanceGA.html "Vignette")
 ```
@@ -31,6 +31,8 @@ Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p
 At this point in time, CIRCUITSCAPE can only be executed through `ResistanceGA` on **_Windows_** machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I can work to incorporate that capability in future releases.
 
 
-This approach has been developed from the methods first utilized in Peterman et al. (2014). **_Please cite this paper if you use these methods!_**
+This approach has been developed from the methods first utilized in Peterman et al. (2014). I have also written a preprint manuscript further describing this `R` package. **_Please cite this paper if you use these methods!_**
 
-Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. [**PDF**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/peterman_et_al._2014--mec.pdf "Peterman et al.").
+Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. [**PDF**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/peterman_et_al._2014--mec.pdf "Peterman et al.")
+
+Peterman, W.E. 2014. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. bioRxiv doi: 10.1101/007575. [**PDF**](http://biorxiv.org/content/early/2014/07/29/007575 "Peterman bioRxiv")

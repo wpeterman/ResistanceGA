@@ -15,3 +15,19 @@ citEntry(entry = "Article",
         "Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander.",
         "Molecular Ecology, 23:2402-2414.")
 )
+
+citEntry(entry = "Article",
+         title = "ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms",
+         author = "William E. Peterman",
+         journal = "bioRxiv",
+         year   = "2014",
+         volume = "",
+         number = "",
+         pages = "",
+         doi = "10.1101/007575"
+         url    = "http://biorxiv.org/content/early/2014/07/29/007575",
+         textVersion  =
+paste("Peterman, W.E. 2014.",
+      "ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms.",
+      "bioRxiv doi: 10.1101/007575.")
+)
