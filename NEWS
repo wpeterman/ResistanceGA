@@ -1,3 +1,7 @@
+ResistanceGA 2.0-5
+--------
+* Updated `gdist.prep` to accept .txt, a matrix object, or a SpatialPoints object for sample locations
+
 ResistanceGA 2.0-4
 ---------
 * Fixed an error in Combine_Surfaces

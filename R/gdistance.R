@@ -16,6 +16,14 @@
 #' 
 
 gdist.prep <- function(n.POPS, response=NULL, samples, transitionFunction=function(x) 1/mean(x), directions=8, longlat=FALSE){
+  if(grepl(".txt", x = samples)){
+    samples <-SpatialPoints(read.delim(gdist.inputs$samples,header = F)[,-1])   
+  }
+  
+  if(class(samples)[1]=='matrix') {
+    samples <-SpatialPoints(samples)   
+  }
+  
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
   
