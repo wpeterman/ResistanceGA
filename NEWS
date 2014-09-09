@@ -1,3 +1,7 @@
+ResistanceGA 2.0-6
+--------
+* Added more informative error messages to aid in troubleshooting and debugging
+
 ResistanceGA 2.0-5
 --------
 * Updated `gdist.prep` to accept .txt, a matrix object, or a SpatialPoints object for sample locations

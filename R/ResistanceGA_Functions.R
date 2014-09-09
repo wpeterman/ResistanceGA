@@ -2109,6 +2109,11 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
 
 CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8){
+  CS.exe_Test <- gsub("\"", "", CS.program)
+  # Error messages
+  if(!file.exists(CS_Point.File)) { stop( "The specified CS_Point.File does not exist" ) }
+  if(!file.exists(gsub("\"", "", CS.program))) { stop( "The specified path to 'cs_run.exe' is incorrect" ) }
+  
   if(grepl(".asc", x = CS_Point.File)){
     CS_grid<-raster<-raster(CS_Point.File)
     CS_Point.txt <- rasterToPoints(x = CS_grid)
@@ -2210,7 +2215,8 @@ GA.prep<-function(ASCII.dir,
                   seed = NULL,
                   quiet = FALSE) { 
   
- 
+  if(!file_test("-d",Results.dir)) {stop("The specified 'Results.dir' does not exist")}
+   
   if((class(ASCII.dir)[1]=='RasterStack' | class(ASCII.dir)[1]=='RasterLayer') & is.null(Results.dir)){
     warning(paste0("'Results.dir' was not specified. Results will be exported to ", getwd()))
     Results.dir<-getwd()
@@ -2226,6 +2232,7 @@ GA.prep<-function(ASCII.dir,
      n.layers <-length(names)     
   } else {
      ASCII.list <-list.files(ASCII.dir,pattern="*.asc", full.names=TRUE) # Get all .asc files from directory
+     if(length(ASCII.list)==0) {stop("There are no .asc files in the specified 'ASCII.dir")}
      r <- stack(lapply(ASCII.list,raster))
      names <- gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
      n.layers <-length(ASCII.list) 
