@@ -2123,6 +2123,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     CS_Point.File <- sub(".asc",".txt", x = CS_Point.File)
     write.table(CS_Point.txt,file = CS_Point.File,col.names = F,row.names = F)
   }
+  if(!is.null(response)) {TEST.response <- is.vector(response)
+                             if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
   platform="pc"
   # Make to-from population list
   ID<-To.From.ID(n.POPS)
@@ -2215,7 +2217,8 @@ GA.prep<-function(ASCII.dir,
                   seed = NULL,
                   quiet = FALSE) { 
   
-  if(!file_test("-d",Results.dir)) {stop("The specified 'Results.dir' does not exist")}
+  if(!is.null(Results.dir)) {TEST.dir <- !file_test("-d",Results.dir)
+                             if(TEST.dir==TRUE) {stop("The specified 'Results.dir' does not exist")}}
    
   if((class(ASCII.dir)[1]=='RasterStack' | class(ASCII.dir)[1]=='RasterLayer') & is.null(Results.dir)){
     warning(paste0("'Results.dir' was not specified. Results will be exported to ", getwd()))
