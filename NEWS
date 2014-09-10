@@ -1,3 +1,8 @@
+ResistanceGA 2.0-7
+--------
+* Fixed bug in `gdist_prep`
+* Added more error messages to functions
+
 ResistanceGA 2.0-6
 --------
 * Added more informative error messages to aid in troubleshooting and debugging

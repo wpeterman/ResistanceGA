@@ -16,13 +16,21 @@
 #' 
 
 gdist.prep <- function(n.POPS, response=NULL, samples, transitionFunction=function(x) 1/mean(x), directions=8, longlat=FALSE){
-  if(grepl(".txt", x = samples)){
-    sp <- SpatialPoints(read.delim(samples,header = F)[,-1])   
-  }
-  
+  if(!is.null(response)) {TEST.response <- is.vector(response)
+                          if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
+   
   if(class(samples)[1]=='matrix') {
+    if(ncol(samples)>2) {stop("The specified matrix with xy coordinates has too many columns")}
     sp <- SpatialPoints(samples)   
-  }
+  } else if(class(samples)[1]=='SpatialPoints') { 
+    sp <- samples
+  } else {
+#   grepl(".txt", x = samples)){
+    if(!file.exists(samples)) {stop("The path to the specified samples.txt file is incorrect")}
+    sp <- SpatialPoints(read.delim(samples,header = F)[,-1])   
+  } 
+  
+  if(n.POPS!=length(sp)) {stop("n.Pops does not equal the number of sample locations")}
   
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
