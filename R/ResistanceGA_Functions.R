@@ -890,12 +890,13 @@ return(multi.GA_nG)
 #' @param CurrentMap Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results)
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
+#' @param hidden Logical. If TRUE (Default), then no out put from CIRCUITSCAPE will be out put to the console. Only set to FALSE when trying to troubleshoot/debug code.
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
 #' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir, output)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir, output="matrix"){
+Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir, output="matrix", hidden = TRUE){
 if(class(r)[1]!='RasterLayer') {
   R<-raster(r)
   File.name <- basename(r)
@@ -939,7 +940,7 @@ if(class(r)[1]!='RasterLayer') {
                CURRENT.MAP=CURRENT.MAP)
   ##########################################################################################
 # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-hidden = TRUE  
+# hidden = TRUE  
 # Run Circuitscape
 if(CS.inputs$platform=="pc"){
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
@@ -2342,8 +2343,11 @@ Cont.Param <- function(PARM){
   return(df) 
 }
 
-read.matrix<-function(cs.matrix){  m<-read.table(cs.matrix)[-1,-1]
-                                   m[lower.tri(m)]}
+# read.matrix<-function(cs.matrix){  m<-read.table(cs.matrix)[-1,-1]
+#                                    m[lower.tri(m)]}
+
+read.matrix<-function(cs.matrix){  lower(read.table(cs.matrix)[-1,-1])
+                                   }
 
 read.matrix2<-function(cs.matrix){  m<-read.table(cs.matrix)[-1,-1]
 }
