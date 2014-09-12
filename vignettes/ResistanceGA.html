@@ -269,7 +269,7 @@ Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$da
 
 <h3>Single surface optimization</h3>
 
-<p>Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. </p>
+<p>Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. It is critical that there are <strong>NO SPACES</strong> in the specified directory as this will cause functions that interact with CIRCUITSCAPE to fail.  </p>
 
 <pre><code class="r">if(&quot;ResistanceGA_Examples&quot;%in%dir(&quot;C:/&quot;)==FALSE) 
   dir.create(file.path(&quot;C:/&quot;, &quot;ResistanceGA_Examples&quot;)) 

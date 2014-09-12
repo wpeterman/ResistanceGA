@@ -95,7 +95,7 @@ Example Function Use
 ------
 ### Single surface optimization
 
-Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. 
+Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. It is critical that there are **NO SPACES** in the specified directory as this will cause functions that interact with CIRCUITSCAPE to fail.  
 
 ```r
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
