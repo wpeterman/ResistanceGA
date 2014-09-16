@@ -930,7 +930,7 @@ if(class(r)[1]!='RasterLayer') {
   # Modify and write Circuitscape.ini file
   #############################################################################################  
  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
- if(CS.inputs$pairs_to_include==NULL){
+ if(is.null(CS.inputs$pairs_to_include)){
    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
    PAIRS <- paste0("use_included_pairs = False")   
  } else {
@@ -984,7 +984,7 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
   #############################################################################################  
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
   
-   if(CS.inputs$pairs_to_include==NULL){
+   if(is.null(CS.inputs$pairs_to_include)){
    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
    PAIRS <- paste0("use_included_pairs = False")   
  } else {
@@ -997,8 +997,8 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
                HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
                LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
                CONNECTION=paste0("connect_four_neighbors_only=",connect),
-               MAP=MAP,
-               CURRENT.MAP=CURRENT.MAP,
+               MAP="write_cum_cur_map_only = False",
+               CURRENT.MAP="write_cur_maps = False",
                PAIRS_TO_INCLUDE=PAIRS_TO_INCLUDE,
                PAIRS=PAIRS)
   ##########################################################################################
@@ -1115,8 +1115,8 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       equation <- floor(parm[1]) # Parameter can range from 1-9.99
       
       # Read in resistance surface to be optimized
-      SHAPE <-  (parm[2])
-      Max.SCALE <- (parm[3])
+#       SHAPE <-  (parm[2])
+#       Max.SCALE <- (parm[3])
       
       # Apply specified transformation
       rick.eq<-(equation==2||equation==4||equation==6||equation==8)
@@ -1126,59 +1126,35 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       
       # Apply specified transformation
       if(equation==1){
-        SIGN=-1 # Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
-        R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-        R.vec <- rev(R) # Reverse
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- Inv.Rev.Monomolecular(rast,parm)
         EQ <- "Inverse-Reverse Monomolecular"
         
       } else if(equation==5){
-        SIGN=1
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
-        R.vec <- rev(R) # Reverse
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- Rev.Monomolecular(rast,parm)
         EQ <- "Reverse Monomolecular"        
         
       } else if(equation==3){
-        SIGN=1
-        r[[i]] <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular    
+        r[[i]] <- Monomolecular(rast,parm)   
         EQ <- "Monomolecular"
         
       } else if (equation==7) {
-        SIGN=-1 #Inverse
-        R <- SIGN*Max.SCALE*(1-exp(-1*rast/SHAPE)) + SIGN # Monomolecular
-        r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
+        r[[i]] <- Inv.Monomolecular(rast,parm)
         EQ <- "Inverse Monomolecular"        
         
       } else if (equation==8) {
-        SIGN=-1 #Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN # Ricker
-        r[[i]] <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+        r[[i]] <- Inv.Ricker(rast,parm)
         EQ <- "Inverse Ricker"  
         
       } else if (equation==8) {
-        SIGN=1
-        r[[i]] <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN #  Ricker
+        r[[i]] <- Ricker(rast,parm)
         EQ <- "Ricker"
         
       } else if (equation==6) {
-        SIGN=1
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN #  Ricker
-        R.vec <- rev(R)
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- Rev.Ricker(rast,parm)
         EQ <- "Reverse Ricker"        
         
       } else if (equation==2) {
-        SIGN=-1 # Inverse
-        R <- SIGN*(Max.SCALE*rast*exp(-1*rast/SHAPE)) + SIGN # Ricker
-        R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-        R.vec <- rev(R) # Reverse
-        rast.R <- setValues(R,values=R.vec)
-        r[[i]] <- rast.R
+        r[[i]] <- Inv.Rev.Ricker(rast,parm)
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
@@ -1271,62 +1247,35 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
       
 # Apply specified transformation
     if(equation==1){
-      SIGN=-1 # Inverse
-      
-      R <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Monomolecular
-      
-      R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
-      R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-      R.vec <- rev(R) # Reverse
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Inv.Rev.Monomolecular(r,parm)
       EQ <- "Inverse-Reverse Monomolecular"
       
     } else if(equation==5){
-      SIGN=1
-      R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
-      R.vec <- rev(R) # Reverse
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Rev.Monomolecular(r,parm)      
       EQ <- "Reverse Monomolecular"        
       
     } else if(equation==3){
-      SIGN=1
-      r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular    
+      r <- Monomolecular(r,parm)      
       EQ <- "Monomolecular"
       
     } else if (equation==7) {
-      SIGN=-1 #Inverse
-      R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
-      r <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
+      r <- Inv.Monomolecular(r,parm)      
       EQ <- "Inverse Monomolecular"  	    
       
     } else if (equation==8) {
-      SIGN=-1 #Inverse
-      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Ricker
-      r <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+      r <- Inv.Ricker(r,parm)
       EQ <- "Inverse Ricker"  
       
     } else if (equation==4) {
-      SIGN=1
-      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+      r <- Ricker(r,parm)
       EQ <- "Ricker"
       
     } else if (equation==6) {
-      SIGN=1
-      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
-      R.vec <- rev(R)
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Rev.Ricker(r,parm)
       EQ <- "Reverse Ricker"        
       
     } else if (equation==2) {
-      SIGN=-1 # Inverse
-      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Ricker
-      R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-      R.vec <- rev(R) # Reverse
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Inv.Rev.Ricker(r,parm)
       EQ <- "Inverse-Reverse Ricker"
    
     } else {
@@ -2155,18 +2104,34 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
   platform="pc"
   
   if(!is.null(pairs_to_include)){
-    !file.exists(pairs_to_include)) { stop( "The specified pairs_to_include file does not exist") }
-    toMatch <- c("min", "max")
-
-        if(grep(PTI <- read.table(file = pairs_to_include,header = F,sep = "\t")[1,1],pattern = paste(toMatch,collapse = "|"))){
+    if(!file.exists(pairs_to_include)) { stop( "The specified pairs_to_include file does not exist") }
+        toMatch <- c("min", "max")
+        if(grep(read.table(file = pairs_to_include,header = F,sep = "\t")[1,1],pattern = paste(toMatch,collapse = "|"))){
           # Function to make list of observations to include
-        } 
-                
-  }
+          Min.MAX <- read.table(file = pairs_to_include,header = F,sep = "\t")[c(1,2),c(1,2)]
+          MIN <- Min.MAX[which(Min.MAX[,1]=="min"),2]
+          MAX <- Min.MAX[which(Min.MAX[,1]=="max"),2]
+          PTI <- as.matrix(read.table(file = pairs_to_include,header = F,sep = "\t"))[-c(1:3),]
+          site <- PTI[,1]
+          PTI <- PTI[,-1]
+          
+          p_t_i <- list()
+          count <- 0
+          for(i in 1:ncol(PTI-1)){
+            for(j in (i+1):ncol(PTI)){
+                if(PTI[j,i]>=MIN && PTI[j,i]<=MAX){
+                count <- count +1                  
+                p_t_i[[count]] <- data.frame(site[i],site[j],1)                  
+              } # close if statement
+            } # close j loop           
+          } # close i loop
+        } # close function                
+  } # close pairs to include statement
+  
   # Make to-from population list
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
-  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform)
+  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include)
 }
 
 ##########################################################################################
