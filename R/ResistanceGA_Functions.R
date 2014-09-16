@@ -930,6 +930,13 @@ if(class(r)[1]!='RasterLayer') {
   # Modify and write Circuitscape.ini file
   #############################################################################################  
  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
+ if(CS.inputs$pairs_to_include==NULL){
+   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
+   PAIRS <- paste0("use_included_pairs = False")   
+ } else {
+   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
+   PAIRS <- paste0("use_included_pairs = True") 
+ }
 
   write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
                OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
@@ -937,7 +944,9 @@ if(class(r)[1]!='RasterLayer') {
                LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
                CONNECTION=paste0("connect_four_neighbors_only=",connect),
                MAP=MAP,
-               CURRENT.MAP=CURRENT.MAP)
+               CURRENT.MAP=CURRENT.MAP,
+               PAIRS_TO_INCLUDE=PAIRS_TO_INCLUDE,
+               PAIRS=PAIRS)
   ##########################################################################################
 # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
 # hidden = TRUE  
@@ -975,13 +984,23 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
   #############################################################################################  
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
   
+   if(CS.inputs$pairs_to_include==NULL){
+   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
+   PAIRS <- paste0("use_included_pairs = False")   
+ } else {
+   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
+   PAIRS <- paste0("use_included_pairs = True") 
+ }
+
   write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
                OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
                HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
                LOCATION.FILE=paste0("point_file = ", CS.inputs$CS_Point.File),
                CONNECTION=paste0("connect_four_neighbors_only=",connect),
-               MAP="write_cum_cur_map_only = False",
-               CURRENT.MAP="write_cur_maps = False")
+               MAP=MAP,
+               CURRENT.MAP=CURRENT.MAP,
+               PAIRS_TO_INCLUDE=PAIRS_TO_INCLUDE,
+               PAIRS=PAIRS)
   ##########################################################################################
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
   hidden = TRUE  
@@ -1243,13 +1262,19 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
   # Set equation for continuous surface
       equation <- floor(parm[1]) # Parameter can range from 1-9.99
       
-      # Read in resistance surface to be optimized
-      SHAPE <-  (parm[2])
-      Max.SCALE <- (parm[3])
+#       # Read in resistance surface to be optimized
+#       SHAPE <-  (parm[2])
+#       Max.SCALE <- (parm[3])
+  
+  
+  ##################
       
 # Apply specified transformation
     if(equation==1){
       SIGN=-1 # Inverse
+      
+      R <- SIGN*Max.SCALE*(1-exp(r/SHAPE))+SIGN # Monomolecular
+      
       R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
       R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
       R.vec <- rev(R) # Reverse
@@ -2096,6 +2121,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) if using a Windows PC. If using Linux or Mac, this should be the directory to the CIRCUITSCAPE python file (cs_run.py). See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
+#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. 
 # @param platform What computing platform are you using ("pc", "other"). This code has only been tested on Windows PC!!!
 #' @return An R object that is a required input into optimization functions
 
@@ -2109,7 +2135,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' ***NOTE: Double quotation used***
 #' This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
 
-CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8){
+CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8, pairs_to_include=NULL){
   CS.exe_Test <- gsub("\"", "", CS.program)
   # Error messages
   if(!file.exists(CS_Point.File)) { stop( "The specified CS_Point.File does not exist" ) }
@@ -2127,6 +2153,16 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
   if(!is.null(response)) {TEST.response <- is.vector(response)
                              if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
   platform="pc"
+  
+  if(!is.null(pairs_to_include)){
+    !file.exists(pairs_to_include)) { stop( "The specified pairs_to_include file does not exist") }
+    toMatch <- c("min", "max")
+
+        if(grep(PTI <- read.table(file = pairs_to_include,header = F,sep = "\t")[1,1],pattern = paste(toMatch,collapse = "|"))){
+          # Function to make list of observations to include
+        } 
+                
+  }
   # Make to-from population list
   ID<-To.From.ID(n.POPS)
   ZZ<-ZZ.mat(ID)
@@ -2335,8 +2371,6 @@ OPTIM.DIRECTION <- function(x){
 }
 
 
-
-
 Cont.Param <- function(PARM){
   df<-data.frame(PARM[1],PARM[2])
   colnames(df)<-c("shape_opt","max");row.names(df)<-NULL
@@ -2386,82 +2420,83 @@ SCALE.vector <-function(data,MIN,MAX){Mn=min(data)
 SCALE <-function(data,MIN,MAX){Mn=cellStats(data,stat='min')
                                Mx=cellStats(data,stat='max')
                                (MAX-MIN)/(Mx-Mn)*(data-Mx)+MAX}
-# Function to write .ini file for Circuitscape 
-write.CS_3.5.8 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,MAP="write_cum_cur_map_only=False"){
-sink(BATCH)
-cat("[Options for advanced mode]
-ground_file_is_resistances=True
-source_file=(Browseforacurrentsourcefile)
-remove_src_or_gnd=keepall
-ground_file=(Browseforagroundpointfile)
-use_unit_currents=False
-use_direct_grounds=False
 
-[Calculation options]
-low_memory_mode=False
-solver=cg+amg
-print_timings=True
+# # Function to write .ini file for Circuitscape 
+# write.CS_3.5.8 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,MAP="write_cum_cur_map_only=False"){
+# sink(BATCH)
+# cat("[Options for advanced mode]
+# ground_file_is_resistances=True
+# source_file=(Browseforacurrentsourcefile)
+# remove_src_or_gnd=keepall
+# ground_file=(Browseforagroundpointfile)
+# use_unit_currents=False
+# use_direct_grounds=False
+# 
+# [Calculation options]
+# low_memory_mode=False
+# solver=cg+amg
+# print_timings=True
+# 
+# [Options for pairwise and one-to-all and all-to-one modes]
+# included_pairs_file=None
+# point_file_contains_polygons=False
+# use_included_pairs=False")
+# cat("\n")
+# cat(LOCATION.FILE)
+# cat("\n")
+# 
+# cat("
+# [Output options]")
+# cat("\n")
+# cat(MAP)
+# cat("\n")
+# cat("log_transform_maps=False
+# set_focal_node_currents_to_zero=False
+# write_max_cur_maps=False
+# write_volt_maps=False
+# set_null_currents_to_nodata=True
+# set_null_voltages_to_nodata=True
+# compress_grids=False
+# write_cur_maps=False")
+# cat("\n")
+# cat(OUT)
+# cat("\n")
+# cat("\n")
+# cat("[Shortcircuit regions(aka polygons)]
+# use_polygons=False
+# polygon_file=(Browse for a short-circuit region file)
+# 
+# [Connection scheme for raster habitat data]")
+# cat("\n")
+# cat(CONNECTION)
+# cat("\n")
+# cat("connect_using_avg_resistances=True
+# 
+# [Habitat raster or graph]
+# habitat_map_is_resistances=True")
+# cat("\n")
+# cat(HABITAT)
+# cat("\n")
+# cat("\n")
+# cat("[Options for one-to-all and all-to-one modes]
+# use_variable_source_strengths=False
+# variable_source_file=None
+# 
+# [Version]
+# version = 3.5.8
+# 
+# [Maskfile]
+# use_mask=False
+# mask_file=None
+# 
+# [Circuitscape mode]
+# data_type=raster
+# scenario=pairwise")
+# sink()
+# }
 
-[Options for pairwise and one-to-all and all-to-one modes]
-included_pairs_file=None
-point_file_contains_polygons=False
-use_included_pairs=False")
-cat("\n")
-cat(LOCATION.FILE)
-cat("\n")
 
-cat("
-[Output options]")
-cat("\n")
-cat(MAP)
-cat("\n")
-cat("log_transform_maps=False
-set_focal_node_currents_to_zero=False
-write_max_cur_maps=False
-write_volt_maps=False
-set_null_currents_to_nodata=True
-set_null_voltages_to_nodata=True
-compress_grids=False
-write_cur_maps=False")
-cat("\n")
-cat(OUT)
-cat("\n")
-cat("\n")
-cat("[Shortcircuit regions(aka polygons)]
-use_polygons=False
-polygon_file=(Browse for a short-circuit region file)
-
-[Connection scheme for raster habitat data]")
-cat("\n")
-cat(CONNECTION)
-cat("\n")
-cat("connect_using_avg_resistances=True
-
-[Habitat raster or graph]
-habitat_map_is_resistances=True")
-cat("\n")
-cat(HABITAT)
-cat("\n")
-cat("\n")
-cat("[Options for one-to-all and all-to-one modes]
-use_variable_source_strengths=False
-variable_source_file=None
-
-[Version]
-version = 3.5.8
-
-[Maskfile]
-use_mask=False
-mask_file=None
-
-[Circuitscape mode]
-data_type=raster
-scenario=pairwise")
-sink()
-}
-
-
-write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0"){
+write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0", PAIRS_TO_INCLUDE, PAIRS){
 sink(BATCH)
 cat("[Options for advanced mode]
 ground_file_is_resistances = True
@@ -2514,7 +2549,7 @@ log_transform_maps = False
 write_max_cur_maps = False
 
 [Version]
-version = 4.0-beta
+version = 4.0.5
 
 [Options for reclassification of habitat data]
 reclass_file = (Browse for file with reclassification data)
@@ -2526,9 +2561,10 @@ log_file = None
 profiler_log_file = None
 screenprint_log = False
 
-[Options for pairwise and one-to-all and all-to-one modes]
-included_pairs_file = (Browse for a file with pairs to include or exclude)
-use_included_pairs = False")
+[Options for pairwise and one-to-all and all-to-one modes]")
+cat(PAIRS_TO_INCLUDE)
+cat("\n")
+cat(PAIRS)
 cat("\n")
 cat(LOCATION.FILE)
 cat("\n")
@@ -2717,40 +2753,93 @@ cat("\n")
 cat(paste0("Optimization took ",Run.Time," seconds to complete"),"\n")
 sink()
 }
-# Optimization preparation
-# Optim.input<-function(Response,n.Pops,ASCII.dir,CS_Point.File,CS.exe,Neighbor.Connect=8,Constrained.Max=100,Initial.shape=c(seq(0.2,1,by=0.2),seq(1.25,10.75,by=0.75)),Bootstrap=FALSE,boot.iters=10000,Sample_Proportion=0.75){
-#   # Install necessary packages
-#   libs=c("raster", "lme4", "plyr")
-#   CheckInstallPackage(packages=libs)
-#   
-#   #####################
-#   if(is.vector(Response)==TRUE || dim(Response)[1]!=dim(Response)[2]) {warning("Must provide square distance matrix with no column or row names")}
-#   Response.vec<-Response[lower.tri(Response)]
-#   ID <- To.From.ID(n.Pops)
-#   ZZ<-ZZ.mat(ID)
-#   ASCII.files<-list.files(ASCII.dir,pattern="*.asc",full.names=TRUE)
-#   ASCII.names<-gsub(pattern="*.asc","",x=(list.files(ASCII.dir,pattern="*.asc")))
-#   dir.create(file.path(ASCII.dir, "Results"))
-#   Results.dir<-paste0(ASCII.dir, "/Results/")
-#   dir.create(file.path(Results.dir, "tmp"))
-#   Write.dir <-paste0(Results.dir,"/tmp/")  
-#   
-#   list(Response.vec=Response.vec,Response.mat=Response,n.Pops=n.Pops,ID=ID,ZZ=ZZ,ASCII.files=ASCII.files,ASCII.names=ASCII.names,ASCII.dir=ASCII.dir,Write.dir=Write.dir,Results.dir=Results.dir,CS_Point.File=CS_Point.File,CS.exe=CS.exe,Neighbor.Connect=Neighbor.Connect,Constrained.Max=Constrained.Max,Initial.shape=Initial.shape,Bootstrap=Bootstrap,boot.iters=boot.iters,Sample_Proportion=Sample_Proportion)
-# }
-
-#########################################
-# Install necessary packages
-CheckInstallPackage <- function(packages, repos="http://cran.r-project.org") {
-  installed=as.data.frame(installed.packages())
-  for(p in packages) {
-    if(is.na(charmatch(p, installed[,1]))) { 
-      install.packages(p, repos=repos) 
-    }
-  }
-} 
+ 
 ##########################################################################################
 
 get.name<-function(x){
    nm <-deparse(substitute(x))
    return(nm)
    }
+###########################
+Monomolecular <- function(r, parm){
+  parm[3]*(1-exp(-1*r/parm[2]))+1 # Monomolecular
+}
+
+Inv.Monomolecular <- function(r, parm){
+  if(class(r)=="RasterLayer") {
+    R <- parm[3]*(exp(-1*r/parm[2])) 
+    (R <- (R-cellStats(R,stat = "min"))+1)  
+  } else {
+    R <- parm[3]*(exp(-1*r/parm[2])) 
+    (R <- (R-min(R))+1)
+     }
+}
+
+Inv.Rev.Monomolecular <- function(r, parm){
+  if(class(r)=="RasterLayer") {
+    rev.rast <- SCALE((-1*r),0,10)
+    Inv.Monomolecular(rev.rast,parm)
+  } else {
+    rev.rast <- SCALE.vector((-1*r),0,10)
+    Inv.Monomolecular(rev.rast,parm)
+  }
+}
+
+Rev.Monomolecular <- function(r, parm){
+  if(class(r)=="RasterLayer") {
+    rev.rast <- SCALE((-1*r),0,10)
+    Monomolecular(rev.rast,parm)
+  } else {
+    rev.rast <- SCALE.vector((-1*r),0,10)
+    Monomolecular(rev.rast,parm)
+  }
+}
+
+
+Ricker <- function(r,parm){
+  parm[3]*r*exp(-1*r/parm[2])+1 # Ricker
+  }
+
+Inv.Ricker <- function(r,parm){
+  if(class(r)=="RasterLayer") {
+    R <- (-1*parm[3])*r*exp(-1*r/parm[2])-1 # Ricker
+    R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+  } else {    
+    R <- (-1*parm[3])*r*exp(-1*r/parm[2])-1 # Ricker
+    R <- SCALE.vector(R,MIN=abs(max(R)),MAX=abs(min(R))) # Rescale
+  }
+}
+
+Inv.Rev.Ricker <- function(r,parm){
+  if(class(r)=="RasterLayer") {
+    rev.rast <- SCALE((-1*r),0,10)
+    Inv.Ricker(rev.rast,parm)
+  } else {
+    rev.rast <- SCALE.vector((-1*r),0,10)
+    Inv.Ricker(rev.rast,parm)
+  }
+}
+
+Rev.Ricker <- function(r,parm){
+  if(class(r)=="RasterLayer") {
+    rev.rast <- SCALE((-1*r),0,10)
+    Ricker(rev.rast,parm)
+  } else {
+    rev.rast <- SCALE.vector((-1*r),0,10)
+    Ricker(rev.rast,parm)
+  }
+}
+
+##############
+# TEST
+# plot(r)
+# Mono <- Monomolecular(r = r,parm = parm); plot(Mono)
+# Rev.Mono <- Rev.Monomolecular(r,parm); plot(Rev.Mono)
+# Inv.Rev.Mono <- Inv.Rev.Monomolecular(r,parm); plot(Inv.Rev.Mono)
+# Inv.Mono <- Inv.Monomolecular(r,parm); plot(Inv.Mono)
+# 
+# Rick <- Ricker(r = r,parm = parm); plot(Rick)
+# Rev.Rick <- Rev.Ricker(r,parm); plot(Rev.Rick)
+# Inv.Rev.Rick <- Inv.Rev.Ricker(r,parm); plot(Inv.Rev.Rick)
+# Inv.Rick <- Inv.Ricker(r,parm); plot(Inv.Rick)
+
