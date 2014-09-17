@@ -2111,25 +2111,35 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
           Min.MAX <- read.table(file = pairs_to_include,header = F,sep = "\t")[c(1,2),c(1,2)]
           MIN <- Min.MAX[which(Min.MAX[,1]=="min"),2]
           MAX <- Min.MAX[which(Min.MAX[,1]=="max"),2]
-          PTI <- as.matrix(read.table(file = pairs_to_include,header = F,sep = "\t"))[-c(1:3),]
+          PTI <- read.table(file = pairs_to_include,header = F,sep = "\t")[-c(1:3),]
           site <- PTI[,1]
-          PTI <- PTI[,-1]
+          PTI <- as.matrix(PTI[,-1])
           
           p_t_i <- list()
           count <- 0
-          for(i in 1:ncol(PTI-1)){
+          for(i in 1:(ncol(PTI)-1)){
             for(j in (i+1):ncol(PTI)){
                 if(PTI[j,i]>=MIN && PTI[j,i]<=MAX){
                 count <- count +1                  
-                p_t_i[[count]] <- data.frame(site[i],site[j],1)                  
+                p_t_i[[count]] <- data.frame(i,j)                 
               } # close if statement
             } # close j loop           
           } # close i loop
+          ID <- ldply(p_t_i,.fun = identity)
+          colnames(ID) <- c("pop1","pop2")
+#           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
+          n1 <- table(ID$pop1)[[1]]
+          p1<-ID[n1-1,1]; p2<-ID[n1-1,2]
+          ID[n1-1,1]<-p2; ID[n1-1,2]<-p1
+          ID$pop1 <- factor(ID$pop1)
+          ID$pop2 <- factor(ID$pop2)
         } # close function                
   } # close pairs to include statement
   
   # Make to-from population list
+  if(!exists(x = "ID")){
   ID<-To.From.ID(n.POPS)
+  }
   ZZ<-ZZ.mat(ID)
   list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include)
 }
