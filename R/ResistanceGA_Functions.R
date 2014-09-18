@@ -224,7 +224,11 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
       r <- reclassify(r, c(-Inf,Inf, 1))
       names(r)<-"dist"
       Run_CS(CS.inputs,GA.inputs,r)
-      Dist.AIC <- AIC(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"), pairwise.genetic=CS.inputs$response,REML=FALSE))
+      Dist.AIC <- AIC(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
+                               pairwise.genetic=CS.inputs$response,
+                               REML=FALSE,
+                               ID=CS.inputs$ID,
+                               ZZ=CS.inputs$ZZ))
       k<-2
   AICc <- (Dist.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
   Dist.AICc<-data.frame("Distance", AICc); colnames(Dist.AICc)<-c("Surface","AICc")      
@@ -472,10 +476,20 @@ if(!is.null(gdist.inputs)){
   
   # Get parameter estimates
 if(!is.null(CS.inputs)){  
-  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir,method="cs")
+  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
+                              genetic.dist=CS.inputs$response,
+                              out.dir=GA.inputs$Results.dir,
+                              method="cs",
+                              ID=CS.inputs$ID,
+                              ZZ=CS.inputs$ZZ)
   
 } else {  
-  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,genetic.dist=gdist.inputs$response,out.dir=GA.inputs$Results.dir,method="gd")  
+  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,
+                              genetic.dist=gdist.inputs$response,
+                              out.dir=GA.inputs$Results.dir,
+                              method="gd",
+                              ID=gdist.inputs$ID,
+                              ZZ=gdist.inputs$ZZ)  
 }
 
   rt<-proc.time()[3]-t1
@@ -562,7 +576,11 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type)
   
   # Get parameter estimates
-  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir,method="cs")  
+  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
+                              genetic.dist=CS.inputs$response,
+                              out.dir=GA.inputs$Results.dir,
+                              method="cs",
+                              )  
   
   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, method="CIRCUITSCAPE", Run.Time=rt) 
   file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
@@ -622,7 +640,12 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type, name=NAME)
     
     # Get parameter estimates
-    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,genetic.dist=gdist.inputs$response, out.dir=GA.inputs$Results.dir, method="gd")  
+    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
+                                genetic.dist=gdist.inputs$response, 
+                                out.dir=GA.inputs$Results.dir, 
+                                method="gd",
+                                ID=gdist.inputs$ID,
+                                ZZ=gdist.inputs$ZZ)  
     
     Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs,method="cost distance", Run.Time=rt) 
 file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
@@ -985,11 +1008,11 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
   
    if(is.null(CS.inputs$pairs_to_include)){
-   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
-   PAIRS <- paste0("use_included_pairs = False")   
+    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
+    PAIRS <- paste0("use_included_pairs = False")   
  } else {
-   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
-   PAIRS <- paste0("use_included_pairs = True") 
+    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
+    PAIRS <- paste0("use_included_pairs = True") 
  }
 
   write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
@@ -1385,6 +1408,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
    
   if(GA.inputs$surface.type[iter]=="cat"){
     PARM<-PARM/min(PARM)
+    parm <-PARM
     df <- data.frame(id=unique.rast(r),PARM) # Data frame with original raster values and replacement values
     r <-subs(r,df)    
        
@@ -1405,65 +1429,41 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     }
     
     if(equation==1){
-      SIGN=-1 # Inverse
-      R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
-      R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
-      R.vec <- rev(R) # Reverse
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Inv.Rev.Monomolecular(r,parm=PARM)
       EQ <- "Inverse-Reverse Monomolecular"
       
     } else if(equation==5){
-      SIGN=1
-      R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
-      R.vec <- rev(R) # Reverse
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Rev.Monomolecular(r,parm=PARM)      
       EQ <- "Reverse Monomolecular"        
       
     } else if(equation==3){
-      SIGN=1
-      r <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular    
+      r <- Monomolecular(r,parm=PARM)      
       EQ <- "Monomolecular"
       
     } else if (equation==7) {
-      SIGN=-1 #Inverse
-      R <- SIGN*Max.SCALE*(1-exp(-1*r/SHAPE))+SIGN # Monomolecular
-      r <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min')))# Rescale
+      r <- Inv.Monomolecular(r,parm=PARM)      
       EQ <- "Inverse Monomolecular"        
       
     } else if (equation==8) {
-      SIGN=-1 #Inverse
-      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Ricker
-      r <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+      r <- Inv.Ricker(r,parm=PARM)
       EQ <- "Inverse Ricker"  
       
     } else if (equation==4) {
-      SIGN=1
-      r <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
+      r <- Ricker(r,parm=PARM)
       EQ <- "Ricker"
       
     } else if (equation==6) {
-      SIGN=1
-      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN #  Ricker
-      R.vec <- rev(R)
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Rev.Ricker(r,parm=PARM)
       EQ <- "Reverse Ricker"        
       
     } else if (equation==2) {
-      SIGN=-1 # Inverse
-      R <- SIGN*(Max.SCALE*r*exp(-1*r/SHAPE))+SIGN # Ricker
-      R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
-      R.vec <- rev(R) # Reverse
-      rast.R <- setValues(R,values=R.vec)
-      r <- rast.R
+      r <- Inv.Rev.Ricker(r,parm=PARM)
       EQ <- "Inverse-Reverse Ricker"
       
     } else {
       r <- (r*0)+1 #  Distance
       EQ <- "Distance"    
-    } # End if-else  
+    } # End if-else     
   } # Close parameter type if-else 
   
   File.name <- "resist_surface"
@@ -1821,7 +1821,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 # ' @usage MLPE.lmm_coef(resistance, genetic.dist, out.dir)
 # ' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
-MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method){ 
+MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL, ZZ=NULL){ 
   if(method=="cs"){
   response=genetic.dist
   resist.mat<-list.files(resistance,pattern="*_resistances.out",full.names=TRUE)
@@ -1830,16 +1830,27 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method){
   for(i in 1:length(resist.mat)){
     m<-length(read.table(resist.mat[i])[-1,-1])
     mm<-read.table(resist.mat[i])[-1,-1]
+    mm <- lower(mm)
+    mm <- mm[which(mm!=-1)]
+  if(is.null(ID)){
     ID<-To.From.ID(POPS=m)
+    
+  }
+  
+  if(is.null(ZZ)){
     ZZ<-ZZ.mat(ID=ID)
-    cs.matrix<-scale(mm[lower.tri(mm)],center=TRUE,scale=TRUE)    
-    dat<-cbind(ID,cs.matrix,response)
+    
+  }
+    
+    resistance<-scale(mm,center=TRUE,scale=TRUE)
+    dat<-data.frame(ID,resistance=resistance,response=response)
+    colnames(dat)<-c("pop1","pop2","resistance","response")
     
     # Assign value to layer
     LAYER<-assign(resist.names[i],value=dat$cs.matrix)
     
     # Fit model
-    mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+    mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=TRUE)
     mod$reTrms$Zt <- ZZ
     dfun <- do.call(mkLmerDevfun,mod)
     opt <- optimizeLmer(dfun)
@@ -1898,38 +1909,55 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method){
 #' @param resistance Path to pairwise resistance distance matrix (resistances.out) from CS results. Alternatively, provide the pairwise resistances created from optimizing with `gdistance` (result of Run_gdistance).
 #' @param pairwise.genetic Lower half of pairwise genetic distance matrix
 #' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE
+#' @param ID The to_from ID list for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
+#' @param ZZ The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
 #' @return A lmer object from the fitted model
 #' @details An AIC value will only be returned if \code{REML = FALSE}
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage MLPE.lmm(resistance, pairwise.genetic, REML)
+#' @usage MLPE.lmm(resistance, pairwise.genetic, REML, ID, ZZ)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
-MLPE.lmm <- function(resistance, pairwise.genetic, REML=FALSE){ 
+MLPE.lmm <- function(resistance, pairwise.genetic, REML=FALSE, ID=NULL, ZZ=NULL){ 
   response=pairwise.genetic
 
   if(class(resistance)[[1]]=='dist'){
     mm<-lower(as.matrix(resistance))
     m<-attr(resistance,"Size")
+    mm <- mm[which(mm!=-1)]
+    
+    if(is.null(ID)){
     ID<-To.From.ID(POPS=m)
+    }
+    if(is.null(ZZ)){
     ZZ<-ZZ.mat(ID=ID)
+    }
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+    
   } else {
     mm<-(read.table(resistance)[-1,-1])
     m<-nrow(mm)
-    ID<-To.From.ID(POPS=m)
-    ZZ<-ZZ.mat(ID=ID)
-    cs.matrix<-scale(lower(mm),center=TRUE,scale=TRUE)
+    mm <- lower(mm)
+    mm <- mm[which(mm!=-1)]
+    
+    if(is.null(ID)){
+      ID<-To.From.ID(POPS=m)
+    }
+    if(is.null(ZZ)){
+      ZZ<-ZZ.mat(ID=ID)
+    }
+    cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
   }
   
-    dat<-cbind(ID,cs.matrix,response)
-    
+    dat<-data.frame(ID,resistance=cs.matrix,response=response)
+    colnames(dat)<-c("pop1","pop2","resistance","response")
+  
     # Assign value to layer
-    LAYER<-assign("Resist",value=dat$cs.matrix)
+#     LAYER<-assign("Resist",value=dat$cs.matrix)
     
     # Fit model
-    mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=REML)
+    mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=REML)
     mod$reTrms$Zt <- ZZ
     dfun <- do.call(mkLmerDevfun,mod)
     opt <- optimizeLmer(dfun)
@@ -1940,17 +1968,21 @@ MLPE.lmm <- function(resistance, pairwise.genetic, REML=FALSE){
 
 MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){ 
   if(class(resistance)[1]!='dist'){
-  dat<-cbind(ID,resistance,response)
-  } else {
+    resistance <- resistance[which(resistance!=-1)]    
+    dat<-data.frame(ID,resistance=resistance,response=response)
+    colnames(dat)<-c("pop1","pop2","resistance","response")
+    } else {
     resistance <-lower(as.matrix(resistance))
-    dat<-cbind(ID,resistance,response)
+    resistance <- resistance[which(resistance!=-1)]
+    dat<-data.frame(ID,resistance=resistance,response=response)
+    colnames(dat)<-c("pop1","pop2","resistance","response")
     
   }
   # Assign value to layer
-  LAYER<-assign("Resist",value=dat$resistance)
+#   LAYER<-assign("Resist",value=dat$resistance)
   
   # Fit model
-  mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=REML)
+  mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=REML)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
@@ -2068,15 +2100,15 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' @param n.POPS The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
-#' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) if using a Windows PC. If using Linux or Mac, this should be the directory to the CIRCUITSCAPE python file (cs_run.py). See details below. 
+#' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
-#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. 
+#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.
 # @param platform What computing platform are you using ("pc", "other"). This code has only been tested on Windows PC!!!
 #' @return An R object that is a required input into optimization functions
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect)
+#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
 #' @details \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows: 
 #' 
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
@@ -2129,8 +2161,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
           colnames(ID) <- c("pop1","pop2")
 #           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
           n1 <- table(ID$pop1)[[1]]
-          p1<-ID[n1-1,1]; p2<-ID[n1-1,2]
-          ID[n1-1,1]<-p2; ID[n1-1,2]<-p1
+          p1<-ID[n1,1]; p2<-ID[n1,2]
+          ID[n1,1]<-p2; ID[n1,2]<-p1
           ID$pop1 <- factor(ID$pop1)
           ID$pop2 <- factor(ID$pop2)
         } # close function                
@@ -2140,7 +2172,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
   if(!exists(x = "ID")){
   ID<-To.From.ID(n.POPS)
   }
-  ZZ<-ZZ.mat(ID)
+  suppressWarnings(ZZ<-ZZ.mat(ID))
   list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include)
 }
 
@@ -2537,6 +2569,7 @@ profiler_log_file = None
 screenprint_log = False
 
 [Options for pairwise and one-to-all and all-to-one modes]")
+cat("\n")
 cat(PAIRS_TO_INCLUDE)
 cat("\n")
 cat(PAIRS)
