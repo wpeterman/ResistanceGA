@@ -140,7 +140,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
       
       Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
       
-      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical")
+      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ )
   
    
       RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
@@ -193,7 +193,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
       
       OPTIM <- Resistance.Optimization_cont.nlm(PARM=(Optim.nlm$estimate),Resistance=r, equation=single.GA@solution[1],get.best=TRUE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Results.dir)
       
-      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous")
+      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
       
       Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
       
@@ -208,7 +208,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
       
         Run_CS(CS.inputs,GA.inputs,r.tran,EXPORT.dir=GA.inputs$Results.dir)
       
-        Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous")
+        Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
         
         Plot.trans(PARM=single.GA@solution[-1], 
                    Resistance=GA.inputs$Resistance.stack[[i]], 
@@ -291,7 +291,7 @@ if(!is.null(gdist.inputs)){
       cd <- Run_gdistance(gdist.inputs,r)
       save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
       writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
-      Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical", name=NAME)
+      Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical", name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
       
       RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
       k=GA.inputs$parm.type$n.parm[i]
@@ -351,7 +351,7 @@ if(!is.null(gdist.inputs)){
         save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
         writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)  
         
-        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME)
+        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
                 
         Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
         
@@ -370,7 +370,7 @@ if(!is.null(gdist.inputs)){
         writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
   
         
-        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME)
+        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
         
         Plot.trans(PARM=single.GA@solution[-1], 
                    Resistance=GA.inputs$Resistance.stack[[i]], 
@@ -573,14 +573,15 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   
   ifelse(length(unique.rast(RAST))>15,type<-"continuous", type<-"categorical")
   
-  Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type)
+  Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type,ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
   
   # Get parameter estimates
   MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
                               genetic.dist=CS.inputs$response,
                               out.dir=GA.inputs$Results.dir,
                               method="cs",
-                              )  
+                              ID = CS.inputs$ID, 
+                              ZZ = CS.inputs$ZZ)  
   
   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, method="CIRCUITSCAPE", Run.Time=rt) 
   file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
@@ -637,7 +638,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
 
 #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
     
-    Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type, name=NAME)
+    Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type, name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
     
     # Get parameter estimates
     MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
@@ -1138,8 +1139,8 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       equation <- floor(parm[1]) # Parameter can range from 1-9.99
       
       # Read in resistance surface to be optimized
-#       SHAPE <-  (parm[2])
-#       Max.SCALE <- (parm[3])
+      SHAPE <-  (parm[2])
+      Max.SCALE <- (parm[3])
       
       # Apply specified transformation
       rick.eq<-(equation==2||equation==4||equation==6||equation==8)
@@ -2001,13 +2002,15 @@ MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){
 #' @param plot.dir Directory to output TIFF of diagnostic plots
 #' @param type Specify whether the optimized surface is "continuous" or "categorical"
 #' @param name The name to be attached to the output file. Must be specified when getting diagnostic plots for gdistance models
+#' @param ID The to_from ID list for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
+#' @param ZZ The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
 #' @return A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model 
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name)
+#' @usage Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, ID, ZZ)
 
-Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir, type="categorical", name=NULL){
+Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir, type="categorical", name=NULL, ID=NULL, ZZ=NULL){
   if(length(resistance.mat)==1){
     response=genetic.dist
     if(is.null(name)){
@@ -2015,10 +2018,18 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     }
     mm<-read.table(resistance.mat)[-1,-1]
     m<-length(mm)
-    ID<-To.From.ID(POPS=m)
-    ZZ<-ZZ.mat(ID=ID)
-    cs.matrix<-scale(lower(mm),center=TRUE,scale=TRUE)
-    cs.unscale<-lower(mm)
+    mm <-lower(mm)
+    mm <- mm[which(mm!=-1)]
+    
+    if(is.null(ID)){
+      ID<-To.From.ID(POPS=m)
+    }
+    if(is.null(ZZ)){
+      ZZ<-ZZ.mat(ID=ID)
+    }
+    
+    cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+    cs.unscale<-mm
     dat<-cbind(ID,cs.matrix,response)
   
     # Assign value to layer
@@ -2032,6 +2043,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     Mod <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
   }
   
+  
+  
   if(length(resistance.mat)>1){
     response=genetic.dist
     if(is.null(name)){
@@ -2040,8 +2053,14 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     NAME<-name
     mm<-lower(as.matrix(resistance.mat))
     m<-attr(resistance.mat,"Size")
-    ID<-To.From.ID(POPS=m)
-    ZZ<-ZZ.mat(ID=ID)
+    mm <- mm[which(mm!=-1)]
+    
+    if(is.null(ID)){
+      ID<-To.From.ID(POPS=m)
+    }
+    if(is.null(ZZ)){
+      ZZ<-ZZ.mat(ID=ID)
+    }
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
     cs.unscale<-mm
     dat<-cbind(ID,cs.matrix,response)
@@ -2131,7 +2150,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     CS_Point.File <- sub(".asc",".txt", x = CS_Point.File)
     write.table(CS_Point.txt,file = CS_Point.File,col.names = F,row.names = F)
   }
-  if(!is.null(response)) {TEST.response <- is.vector(response)
+  if(!is.null(response)) {TEST.response <- (is.vector(response) | ncol(response)==1)
                              if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
   platform="pc"
   
@@ -2157,7 +2176,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
               } # close if statement
             } # close j loop           
           } # close i loop
-          ID <- ldply(p_t_i,.fun = identity)
+          ID <- plyr::ldply(p_t_i,.fun = identity)
           colnames(ID) <- c("pop1","pop2")
 #           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
           n1 <- table(ID$pop1)[[1]]
@@ -2199,6 +2218,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param pmutation Probability of mutation. Default = 0.125
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
 #' @param maxiter Maximum number of iterations to run before the GA search is halted (Default = 1000)
+#' @param pop.size Number of individuals to create each generation
 #' @param parallel A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specifiy the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.
 #' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
@@ -2235,6 +2255,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' crossover="gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
 #' parallel = FALSE,
+#' pop.size = NULL
 #' seed = NULL,
 #' quiet = FALSE)
 
@@ -2257,6 +2278,7 @@ GA.prep<-function(ASCII.dir,
                   selection = gaControl(type)$selection,
                   crossover="gareal_blxCrossover",
                   mutation = gaControl(type)$mutation,
+                  pop.size = NULL,
                   parallel = FALSE,
                   seed = NULL,
                   quiet = FALSE) { 
@@ -2325,10 +2347,12 @@ GA.prep<-function(ASCII.dir,
   ga.max <- unlist(max.list)
   surface.type <- parm.type$type
   
+  if(is.null(pop.size)){
   if (length(ga.min)<10){
     pop.size <- min(c(15*length(ga.min),100))
   } else {
     pop.size <- 10*length(ga.min)
+  }
   }
   
   for(i in 1:length(surface.type)){
