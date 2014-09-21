@@ -2150,7 +2150,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     CS_Point.File <- sub(".asc",".txt", x = CS_Point.File)
     write.table(CS_Point.txt,file = CS_Point.File,col.names = F,row.names = F)
   }
-  if(!is.null(response)) {TEST.response <- (is.vector(response) | ncol(response)==1)
+  if(!is.null(response)) {TEST.response <- (is.vector(response) || ncol(response)==1)
                              if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
   platform="pc"
   
