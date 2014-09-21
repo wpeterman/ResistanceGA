@@ -1,8 +1,12 @@
+ResistanceGA 2.0-10
+--------
+* Updated CS.prep error message 
+
 ResistanceGA 2.0-9
 --------
-* Fixed eror in Diagnostic.Plot 
+* Fixed error in Diagnostic.Plot 
 * Cleaned and consolodated code for conducting raster transformations
-* Have added functionality to use the advanced CIRCUITSCAPE feature of "pairs_to_include". This is not yet well documented, so contact me directly if you have interest in using this feature.
+* Added functionality to use the advanced CIRCUITSCAPE feature of "pairs_to_include". This is not yet well documented, so contact me directly if you have interest in using this feature.
 
 ResistanceGA 2.0-8
 --------
