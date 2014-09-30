@@ -1,3 +1,7 @@
+ResistanceGA 2.0-11
+--------
+* Fixed bug in 'Combine_Surfaces' function.
+
 ResistanceGA 2.0-10
 --------
 * Updated CS.prep error message 

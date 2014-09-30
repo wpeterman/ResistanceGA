@@ -1169,7 +1169,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         r[[i]] <- Inv.Ricker(rast,parm)
         EQ <- "Inverse Ricker"  
         
-      } else if (equation==8) {
+      } else if (equation==4) {
         r[[i]] <- Ricker(rast,parm)
         EQ <- "Ricker"
         
