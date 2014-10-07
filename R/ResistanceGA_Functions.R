@@ -106,6 +106,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
     
     # Processing of categorical surfaces  
     if(!is.null(CS.inputs)){
+      if(!is.null(GA.inputs$parallel)) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.")}
     if (GA.inputs$surface.type[i]=='cat'){
       cnt1 <- cnt1+1    
       names(r)<-GA.inputs$layer.names[i]
@@ -140,7 +141,12 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
       
       Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
       
-      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ )
+      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
+                       genetic.dist=CS.inputs$response,
+                       plot.dir=GA.inputs$Plots.dir,
+                       type="categorical",
+                       ID = CS.inputs$ID, 
+                       ZZ = CS.inputs$ZZ )
   
    
       RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
@@ -527,6 +533,7 @@ return(RESULTS)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   if(!is.null(CS.inputs)){
+    if(!is.null(GA.inputs$parallel)) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.")}
     t1<-proc.time()[3]
     multi.GA_nG <-ga(type= "real-valued",
                    fitness=Resistance.Opt_multi,
@@ -914,7 +921,7 @@ return(multi.GA_nG)
 #' @param CurrentMap Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results). It is critical that there are NO SPACES in the directory, as this will cause the function to fail.
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
-#' @param hidden Logical. If TRUE (Default), then no out put from CIRCUITSCAPE will be out put to the console. Only set to FALSE when trying to troubleshoot/debug code.
+#' @param hidden Logical. If TRUE (Default), then no output from CIRCUITSCAPE will be printed to the console. Only set to FALSE when trying to troubleshoot/debug code.
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
 #' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir, output)
 
@@ -2030,8 +2037,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
     cs.unscale<-mm
-    dat<-cbind(ID,cs.matrix,response)
-  
+    dat<-data.frame(pop1=ID[,1],pop2=ID[,2],cs.matrix=cs.matrix,response=response[,1])
+    
     # Assign value to layer
     LAYER<-assign("LAYER",value=dat$cs.matrix)
   
@@ -2063,7 +2070,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     }
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
     cs.unscale<-mm
-    dat<-cbind(ID,cs.matrix,response)
+    dat<-data.frame(pop1=ID[,1],pop2=ID[,2],cs.matrix=cs.matrix,response=response[,1])
     
     # Assign value to layer
     LAYER<-assign("LAYER",value=dat$cs.matrix)
@@ -2211,9 +2218,9 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param pop.mult Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.
 #' @param percent.elite Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.
 #' @param type Default is "real-valued"
-#' @param population Default is gareal_Population from GA
-#' @param selection Default is gareal_lsSelection from GA
-#' @param mutation Default is gareal_raMutation from GA
+#' @param population Default is "gareal_Population" from GA
+#' @param selection Default is "gareal_lsSelection" from GA
+#' @param mutation Default is "gareal_raMutation" from GA
 #' @param pcrossover Probability of crossover. Default = 0.85
 #' @param pmutation Probability of mutation. Default = 0.125
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
@@ -2255,7 +2262,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' crossover="gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
 #' parallel = FALSE,
-#' pop.size = NULL
+#' pop.size = NULL,
 #' seed = NULL,
 #' quiet = FALSE)
 
