@@ -2107,8 +2107,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     par(mfrow=c(2,2),
         oma = c(0,4,0,0) + 0.1,
         mar = c(4,4,1,1) + 0.1)
-    plot(response~cs.unscale,xlab=XLAB,ylab=YLAB)
-    abline(lm(response~cs.unscale))
+    plot(dat$response~cs.unscale,xlab=XLAB,ylab=YLAB)
+    abline(lm(dat$response~cs.unscale))
     plot(residuals(Mod)~cs.unscale,xlab=XLAB,ylab="Residuals")
     abline(lm(residuals(Mod)~cs.unscale))
     hist(residuals(Mod),xlab="Residuals",main="")
