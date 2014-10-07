@@ -923,7 +923,7 @@ return(multi.GA_nG)
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' @param hidden Logical. If TRUE (Default), then no output from CIRCUITSCAPE will be printed to the console. Only set to FALSE when trying to troubleshoot/debug code.
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
-#' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap, EXPORT.dir, output)
+#' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap = FALSE, EXPORT.dir = GA.inputs$Write.dir, output = "matrix", hidden = TRUE)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -2054,7 +2054,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
   
   
   if(length(resistance.mat)>1){
-    response=genetic.dist[,1]
+    response=genetic.dist
     if(is.null(name)){
       stop("Output file 'name' must be specified!!!")
     }
@@ -2245,7 +2245,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
-#' Results.dir,
+#' Results.dir=NULL,
 #' min.cat=1e-04,
 #' max.cat=2500,
 #' max.cont=2500,
@@ -2263,8 +2263,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' selection = gaControl(type)$selection,
 #' crossover="gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
-#' parallel = FALSE,
 #' pop.size = NULL,
+#' parallel = FALSE,
 #' seed = NULL,
 #' quiet = FALSE)
 
