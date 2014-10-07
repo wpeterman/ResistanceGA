@@ -106,7 +106,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
     
     # Processing of categorical surfaces  
     if(!is.null(CS.inputs)){
-      if(!is.null(GA.inputs$parallel)) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.")}
+      if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
     if (GA.inputs$surface.type[i]=='cat'){
       cnt1 <- cnt1+1    
       names(r)<-GA.inputs$layer.names[i]
@@ -243,7 +243,8 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
   if(null_mod==TRUE){
     response=CS.inputs$response
         
-    dat<-cbind(CS.inputs$ID,response)
+    dat<-data.frame(CS.inputs$ID,response=CS.inputs$response)
+    colnames(dat) <- c("pop1", "pop2","response")
         
     # Fit model
     mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
@@ -405,10 +406,9 @@ if(!is.null(gdist.inputs)){
       Dist.AICc<-data.frame("Distance", AICc); colnames(Dist.AICc)<-c("Surface","AICc")      
     }
     
-    if(null_mod==TRUE){
-      response=gdist.inputs$response
-      
-      dat<-cbind(gdist.inputs$ID,response)
+    if(null_mod==TRUE){          
+      dat<-data.frame(gdist.inputs$ID,response=gdist.inputs$response)
+      colnames(dat) <- c("pop1", "pop2","response")
       
       # Fit model
       mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
@@ -533,7 +533,7 @@ return(RESULTS)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   if(!is.null(CS.inputs)){
-    if(!is.null(GA.inputs$parallel)) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.")}
+    if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
     t1<-proc.time()[3]
     multi.GA_nG <-ga(type= "real-valued",
                    fitness=Resistance.Opt_multi,
@@ -2037,7 +2037,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
     cs.unscale<-mm
-    dat<-data.frame(pop1=ID[,1],pop2=ID[,2],cs.matrix=cs.matrix,response=response[,1])
+    dat<-data.frame(ID,cs.matrix=cs.matrix,response=response)
+    colnames(dat) <- c("pop1","pop2","cs.matrix","response")
     
     # Assign value to layer
     LAYER<-assign("LAYER",value=dat$cs.matrix)
@@ -2053,7 +2054,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
   
   
   if(length(resistance.mat)>1){
-    response=genetic.dist
+    response=genetic.dist[,1]
     if(is.null(name)){
       stop("Output file 'name' must be specified!!!")
     }
@@ -2070,7 +2071,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     }
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
     cs.unscale<-mm
-    dat<-data.frame(pop1=ID[,1],pop2=ID[,2],cs.matrix=cs.matrix,response=response[,1])
+    dat<-data.frame(ID,cs.matrix=cs.matrix,response=response)
+    colnames(dat) <- c("pop1","pop2","cs.matrix","response")
     
     # Assign value to layer
     LAYER<-assign("LAYER",value=dat$cs.matrix)
@@ -2105,8 +2107,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     par(mfrow=c(2,2),
         oma = c(0,4,0,0) + 0.1,
         mar = c(4,4,1,1) + 0.1)
-    plot(genetic.dist~cs.unscale,xlab=XLAB,ylab=YLAB)
-    abline(lm(genetic.dist~cs.unscale))
+    plot(response~cs.unscale,xlab=XLAB,ylab=YLAB)
+    abline(lm(response~cs.unscale))
     plot(residuals(Mod)~cs.unscale,xlab=XLAB,ylab="Residuals")
     abline(lm(residuals(Mod)~cs.unscale))
     hist(residuals(Mod),xlab="Residuals",main="")

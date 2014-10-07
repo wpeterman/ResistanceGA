@@ -6,7 +6,7 @@
 #' @details  \tabular{ll}{
 #'    Package: \tab ResistanceOptimization\cr
 #'    Type: \tab Package\cr
-#'    License: \tab GPL-3\cr
+#'    License: \tab >=GPL-2\cr
 #'  }
 #'  This package provides functions to prepare data and execute a number of functions to optimize continuous and categorical resistance surfaces using CIRCUITSCAPE and Genetic Algorithms within R. You must have CIRCUITSCAPE (4.0-Beta or higher) installed to run these functions. Output from functions in this package include: an AICc model rank table comparing all optimized surfaces, parameters that optimized each of the top models, coefficients from the fitted mixed effects models, plots of the fitted response curves, diagnostic plots of model fit, and Circuitscape outputs for each of the optimized resistance surfaces.
 #'   
