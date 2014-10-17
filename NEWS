@@ -1,3 +1,7 @@
+ResistanceGA 2.0-13
+--------
+* More detail is now printed at each iteration, providing the transformation, shape, and max parameters, in addition to AICc.
+
 ResistanceGA 2.0-12
 --------
 * Fixed bug in 'Diagnostic.Plots' function.
