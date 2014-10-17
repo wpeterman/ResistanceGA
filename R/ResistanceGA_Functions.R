@@ -1989,12 +1989,35 @@ MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){
     dat<-data.frame(ID,resistance=resistance,response=response)
     colnames(dat)<-c("pop1","pop2","resistance","response")
     
-  }
+  }  
+ 
   # Assign value to layer
 #   LAYER<-assign("Resist",value=dat$resistance)
   
   # Fit model
   mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=REML)
+  mod$reTrms$Zt <- ZZ
+  dfun <- do.call(mkLmerDevfun,mod)
+  opt <- optimizeLmer(dfun)
+  MOD <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))   
+  return(MOD)
+}
+
+#!#!#!#!#!#!#!#!#!#!#!
+
+MLPE.lmm.sub <- function(resistance, response, REML=FALSE, ID, ZZ, sub){ 
+  if(class(resistance)[1]!='dist'){
+    resistance <- resistance[which(resistance!=-1)]    
+    dat<-data.frame(ID,resistance=resistance,response=response, sub=sub)
+    colnames(dat)<-c("pop1","pop2","resistance","response", "sub")
+  } else {
+    resistance <-lower(as.matrix(resistance))
+    resistance <- resistance[which(resistance!=-1)]
+    dat<-data.frame(ID,resistance=resistance,response=response, sub=sub)
+    colnames(dat)<-c("pop1","pop2","resistance","response","sub")    
+  }
+  # Fit model
+  mod <- lFormula(response ~ resistance + sub + (1|pop1), data=dat,REML=REML)
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun,mod)
   opt <- optimizeLmer(dfun)
