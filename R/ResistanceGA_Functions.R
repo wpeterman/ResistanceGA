@@ -2163,13 +2163,15 @@ MLPE.lmm.sub <- function(resistance, response, REML=FALSE, ID, ZZ, sub){
 #' @param name The name to be attached to the output file. Must be specified when getting diagnostic plots for gdistance models
 #' @param ID The to_from ID list for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
 #' @param ZZ The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
+#' @param sublandscape Default is NULL. If using the "pairs_to_include" advanced option in CIRCUITSCAPE, then this  must be included. Should be in the form of a single-column data frame of the same length as the number of pairwise comparisons, with values indicating the sublandscape within which pairs reside. 
 #' @return A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model 
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, ID, ZZ)
 
-Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir, type="categorical", name=NULL, ID=NULL, ZZ=NULL){
+Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir, type="categorical", name=NULL, ID=NULL, ZZ=NULL, sublandscape=NULL){
+  if(is.null(sublandscape)){
   if(length(resistance.mat)==1){
     response=genetic.dist
     if(is.null(name)){
@@ -2236,6 +2238,91 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     opt <- optimizeLmer(dfun)
     Mod <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
   }
+  } # End sublandscapes not used
+  
+  #!#!#!#!#!#!
+  if(!is.null(sublandscape)){
+    if(length(resistance.mat)==1){
+      response=genetic.dist
+      if(is.null(name)){
+        NAME<-gsub(pattern="*_resistances.out","",x=(basename(resistance.mat)))
+      }
+      mm<-read.table(resistance.mat)[-1,-1]
+      m<-length(mm)
+      mm <-lower(mm)
+      mm <- mm[which(mm!=-1)]
+      
+      if(is.null(ID)){
+        ID<-To.From.ID(POPS=m)
+      }
+      if(is.null(ZZ)){
+        ZZ<-ZZ.mat(ID=ID)
+      }
+      
+      cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+      cs.unscale<-mm
+#       dat<-data.frame(ID,cs.matrix=cs.matrix,response=response,sub=sublandscape)
+#       colnames(dat) <- c("pop1","pop2","cs.matrix","response","sub")
+#       
+#       # Assign value to layer
+#       LAYER<-assign("LAYER",value=dat$cs.matrix)
+      
+      Mod <- MLPE.lmm.sub(resistance = cs.matrix,
+                          response = response,
+                          REML = ,
+                          ID = ID,
+                          ZZ = ZZ,
+                          sub = sublandscape)
+      
+#       # Fit model
+#       mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+#       mod$reTrms$Zt <- ZZ
+#       dfun <- do.call(mkLmerDevfun,mod)
+#       opt <- optimizeLmer(dfun)
+#       Mod <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+    }
+    
+    
+    
+    if(length(resistance.mat)>1){
+      response=genetic.dist
+      if(is.null(name)){
+        stop("Output file 'name' must be specified!!!")
+      }
+      NAME<-name
+      mm<-lower(as.matrix(resistance.mat))
+      m<-attr(resistance.mat,"Size")
+      mm <- mm[which(mm!=-1)]
+      
+      if(is.null(ID)){
+        ID<-To.From.ID(POPS=m)
+      }
+      if(is.null(ZZ)){
+        ZZ<-ZZ.mat(ID=ID)
+      }
+      cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+      cs.unscale<-mm
+#       dat<-data.frame(ID,cs.matrix=cs.matrix,response=response)
+#       colnames(dat) <- c("pop1","pop2","cs.matrix","response")
+#       
+#       # Assign value to layer
+#       LAYER<-assign("LAYER",value=dat$cs.matrix)
+#       
+#       # Fit model
+#       mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+#       mod$reTrms$Zt <- ZZ
+#       dfun <- do.call(mkLmerDevfun,mod)
+#       opt <- optimizeLmer(dfun)
+#       Mod <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+       
+      Mod <- MLPE.lmm.sub(resistance = cs.matrix,
+                          response = response,
+                          REML = ,
+                          ID = ID,
+                          ZZ = ZZ,
+                          sub = sublandscape)
+    }
+  } # End sublandscapes used
   #!##!##
   # Make diagnostic plots
   if(type=="categorical"){
@@ -2259,8 +2346,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     par(mfrow=c(2,2),
         oma = c(0,4,0,0) + 0.1,
         mar = c(4,4,1,1) + 0.1)
-    plot(dat$response~cs.unscale,xlab=XLAB,ylab=YLAB)
-    abline(lm(dat$response~cs.unscale))
+    plot(response~cs.unscale,xlab=XLAB,ylab=YLAB)
+    abline(lm(response~cs.unscale))
     plot(residuals(Mod)~cs.unscale,xlab=XLAB,ylab="Residuals")
     abline(lm(residuals(Mod)~cs.unscale))
     hist(residuals(Mod),xlab="Residuals",main="")
