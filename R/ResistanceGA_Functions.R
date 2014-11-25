@@ -1,6 +1,6 @@
-########################################################################################  
-############ CONDUCT GRID SEARCH OF PARAMETER SPACE TO VIEW response SURFACE ########### 
-########################################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# CONDUCT GRID SEARCH OF PARAMETER SPACE TO VIEW response SURFACE #!##!##!### 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Conduct grid search of response surface 
 #' 
 #' Visualize the AICc response surface
@@ -70,9 +70,9 @@ Results.mat<-list(Plot.data=Results.mat,AICc=AICc)
 
 return(Results.mat)
 }
-########################################################################################  
-############ Single command function to execute single surface optimization ############ 
-########################################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# Single command function to execute single surface optimization #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Single surface optimization
 #' 
 #' Optimize all surfaces contained in a directory using a genetic algorithm executed with the \code{\link[GA]{ga}} function in the Genetic Algorithms package \pkg{GA}
@@ -259,7 +259,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
   
     }
   
-###############################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!###
 if(!is.null(gdist.inputs)){
     if (GA.inputs$surface.type[i]=='cat'){
       cnt1 <- cnt1+1    
@@ -424,7 +424,7 @@ if(!is.null(gdist.inputs)){
   }
 } # Close ascii loop
   
-  ####################################################
+  #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##
   # Make results data frame
   Results.cat<-data.frame()
   Results.cont<-data.frame()
@@ -441,7 +441,7 @@ if(!is.null(gdist.inputs)){
       Results.cont <- do.call(rbind,RESULTS.cont)
     }
   }
-  ##################################
+  #!##!##!##!##!##!##!##!##!##!##!##
   # Compile results into tables
   cat("\n")
   cat("\n")
@@ -512,458 +512,13 @@ if(!is.null(CS.inputs)){
 
 file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
 return(RESULTS)
-  ###############################################################################################################
+  #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
 }
 
 
-########################################################################################  
-############ Single command function to execute single surface optimization ############ 
-########################################################################################  
-#' Single surface optimization
-#' 
-#' Optimize all surfaces contained in a directory using a genetic algorithm executed with the \code{\link[GA]{ga}} function in the Genetic Algorithms package \pkg{GA}
-#' 
-#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
-#' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
-#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
-#' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.
-#' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the AICc output table (default = TRUE)
-#' @param null_mod Logical, if TRUE, a Null model will be calculated and added to the AICc output table (default = TRUE)
-#' @return This function optimizes resistance surfaces in isolation. Following optimization of all surfaces, several summary objects are created.\cr
-#' \enumerate{
-#' \item Diagnostic plots of model fit are output to the "Results/Plots" directory that is automatically generated within the folder containing the optimized ASCII files.
-#' \item A .csv file with the Maximum Likelihood Population Effects mixed effects model coefficient estimates (MLPE_coeff_Table.csv)
-#' \item Three summary .csv files are generated: CategoricalResults.csv, ContinuousResults.csv, & All_Results_AICc.csv. These tables contain AICc values and optimization summaries for each surface.
-#' }
-#' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
-#' @usage SS_optim(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @export
-SS_optim_subplot <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, dist_mod=TRUE, null_mod=TRUE){
-  t1<-proc.time()[3]
-  RESULTS.cat <- list() # List to store categorical results within
-  RESULTS.cont <-list() # List to store continuous results within
-  cnt1<-0
-  cnt2<-0
-  # Optimize each surface in turn
-  for (i in 1:GA.inputs$n.layers){
-    r<-GA.inputs$Resistance.stack[[i]]
-    names(r)<-GA.inputs$layer.names[i]
-    
-    # Processing of categorical surfaces  
-    if(!is.null(CS.inputs)){
-      if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
-      if (GA.inputs$surface.type[i]=='cat'){
-        cnt1 <- cnt1+1    
-        names(r)<-GA.inputs$layer.names[i]
-        
-        single.GA <-ga(type= "real-valued",
-                       fitness=Resistance.Opt_single,
-                       Resistance=r, 
-                       population = GA.inputs$population,
-                       selection = GA.inputs$selection,
-                       pcrossover=GA.inputs$pcrossover,
-                       pmutation=GA.inputs$pmutation,
-                       crossover=GA.inputs$crossover,
-                       Min.Max=GA.inputs$Min.Max,
-                       GA.inputs=GA.inputs,
-                       CS.inputs=CS.inputs, 
-                       min=GA.inputs$min.list[[i]],
-                       max=GA.inputs$max.list[[i]],
-                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                       maxiter=GA.inputs$maxiter,
-                       run=GA.inputs$run,
-                       keepBest=GA.inputs$keepBest,
-                       elitism=GA.inputs$percent.elite, 
-                       mutation = GA.inputs$mutation,
-                       seed = GA.inputs$seed,
-                       iter=i,
-                       quiet = GA.inputs$quiet)
-        
-        single.GA@solution <- single.GA@solution/min(single.GA@solution)
-        df <- data.frame(id=unique.rast(r),single.GA@solution) 
-        r <-subs(r,df)
-        names(r)<-GA.inputs$layer.names[i]
-        
-        Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
-        
-        Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
-                         genetic.dist=CS.inputs$response,
-                         plot.dir=GA.inputs$Plots.dir,
-                         type="categorical",
-                         ID = CS.inputs$ID, 
-                         ZZ = CS.inputs$ZZ )
-        
-        
-        RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
-        k=GA.inputs$parm.type$n.parm[i]
-        Features <- matrix()
-        for(z in 1:(k)){
-          feature <- paste0("Feature",z)
-          Features[z]<-feature
-        }
-        
-        colnames(RS)<-c("Surface","AICc", Features)
-        
-        RESULTS.cat[[cnt1]]<-RS
-        
-      } else {   # Processing of continuous surfaces   
-        cnt2 <- cnt2+1    
-        r<-SCALE(r,0,10)
-        names(r)<-GA.inputs$layer.names[i]
-        
-        single.GA <-ga(type= "real-valued",
-                       fitness=Resistance.Opt_single,
-                       Resistance=r, 
-                       population = GA.inputs$population,
-                       selection = GA.inputs$selection,
-                       pcrossover=GA.inputs$pcrossover,
-                       pmutation=GA.inputs$pmutation,
-                       crossover=GA.inputs$crossover,
-                       Min.Max=GA.inputs$Min.Max,
-                       GA.inputs=GA.inputs,
-                       CS.inputs=CS.inputs, 
-                       min=GA.inputs$min.list[[i]],
-                       max=GA.inputs$max.list[[i]],
-                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                       maxiter=GA.inputs$maxiter,
-                       run=GA.inputs$run,
-                       keepBest=GA.inputs$keepBest,
-                       elitism=GA.inputs$percent.elite, 
-                       mutation = GA.inputs$mutation,
-                       seed = GA.inputs$seed,
-                       iter=i,
-                       quiet = GA.inputs$quiet) 
-        
-        # Using GA results, optimize with nlm  
-        start.vals <- single.GA@solution[-1]
-        
-        if(nlm==TRUE){
-          # Informed start values; these are the optimized values from the single parameter optimization
-          EQ <-get.EQ(single.GA@solution[1])
-          Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Write.dir)
-          
-          OPTIM <- Resistance.Optimization_cont.nlm(PARM=(Optim.nlm$estimate),Resistance=r, equation=single.GA@solution[1],get.best=TRUE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Results.dir)
-          
-          Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
-          
-          Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
-          
-          RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
-          colnames(RS) <- c("Surface","AICc","Equation","shape","max")
-          RESULTS.cont[[cnt2]] <- RS
-          
-        } else {
-          EQ <-get.EQ(single.GA@solution[1])
-          r.tran <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
-          names(r.tran)<-GA.inputs$layer.names[i]
-          
-          Run_CS(CS.inputs,GA.inputs,r.tran,EXPORT.dir=GA.inputs$Results.dir)
-          
-          Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
-          
-          Plot.trans(PARM=single.GA@solution[-1], 
-                     Resistance=GA.inputs$Resistance.stack[[i]], 
-                     transformation=EQ, 
-                     print.dir=GA.inputs$Plots.dir)
-          
-          RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,get.EQ(single.GA@solution[1]),single.GA@solution[2],single.GA@solution[3])
-          colnames(RS) <- c("Surface","AICc","Equation","shape","max")
-          RESULTS.cont[[cnt2]] <- RS
-        }     
-      } # Close if-else  
-      if (dist_mod==TRUE){
-        r <- reclassify(r, c(-Inf,Inf, 1))
-        names(r)<-"dist"
-        Run_CS(CS.inputs,GA.inputs,r)
-        Dist.AIC <- AIC(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
-                                 pairwise.genetic=CS.inputs$response,
-                                 REML=FALSE,
-                                 ID=CS.inputs$ID,
-                                 ZZ=CS.inputs$ZZ))
-        k<-2
-        AICc <- (Dist.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-        Dist.AICc<-data.frame("Distance", AICc); colnames(Dist.AICc)<-c("Surface","AICc")      
-      }
-      
-      if(null_mod==TRUE){
-        response=CS.inputs$response
-        
-        dat<-data.frame(CS.inputs$ID,response=CS.inputs$response)
-        colnames(dat) <- c("pop1", "pop2","response")
-        
-        # Fit model
-        mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
-        mod$reTrms$Zt <- CS.inputs$ZZ
-        dfun <- do.call(mkLmerDevfun,mod)
-        opt <- optimizeLmer(dfun)
-        Null.AIC <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr)) 
-        k<-1
-        AICc <- (Null.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-        Null.AICc<-data.frame("Null", AICc); colnames(Null.AICc)<-c("Surface","AICc")  
-      }
-      
-    }
-    
-    ###############################################
-    if(!is.null(gdist.inputs)){
-      if (GA.inputs$surface.type[i]=='cat'){
-        cnt1 <- cnt1+1    
-        names(r)<-GA.inputs$layer.names[i]
-        
-        single.GA <-ga(type= "real-valued",
-                       fitness=Resistance.Opt_single,
-                       Resistance=r, 
-                       population = GA.inputs$population,
-                       selection = GA.inputs$selection,
-                       pcrossover=GA.inputs$pcrossover,
-                       pmutation=GA.inputs$pmutation,
-                       crossover=GA.inputs$crossover,
-                       Min.Max=GA.inputs$Min.Max,
-                       GA.inputs=GA.inputs,
-                       gdist.inputs=gdist.inputs, 
-                       min=GA.inputs$min.list[[i]],
-                       max=GA.inputs$max.list[[i]],
-                       parallel = GA.inputs$parallel,
-                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                       maxiter=GA.inputs$maxiter,
-                       run=GA.inputs$run,
-                       keepBest=GA.inputs$keepBest,
-                       elitism=GA.inputs$percent.elite, 
-                       mutation = GA.inputs$mutation,
-                       seed = GA.inputs$seed,
-                       iter=i,
-                       quiet = GA.inputs$quiet)
-        
-        single.GA@solution <- single.GA@solution/min(single.GA@solution)
-        df <- data.frame(id=unique.rast(r),single.GA@solution) 
-        r <-subs(r,df)
-        NAME<-GA.inputs$layer.names[i]
-        names(r)<-NAME
-        
-        cd <- Run_gdistance(gdist.inputs,r)
-        save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
-        writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
-        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical", name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
-        
-        RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,single.GA@solution)
-        k=GA.inputs$parm.type$n.parm[i]
-        Features <- matrix()
-        for(z in 1:(k)){
-          feature <- paste0("Feature",z)
-          Features[z]<-feature
-        }
-        
-        colnames(RS)<-c("Surface","AICc", Features)
-        
-        RESULTS.cat[[cnt1]]<-RS
-        
-      } else {   # Processing of continuous surfaces   
-        cnt2 <- cnt2+1    
-        r<-SCALE(r,0,10)
-        names(r)<-GA.inputs$layer.names[i]
-        
-        single.GA <-ga(type= "real-valued",
-                       fitness=Resistance.Opt_single,
-                       Resistance=r, 
-                       population = GA.inputs$population,
-                       selection = GA.inputs$selection,
-                       pcrossover=GA.inputs$pcrossover,
-                       pmutation=GA.inputs$pmutation,
-                       crossover=GA.inputs$crossover,
-                       Min.Max=GA.inputs$Min.Max,
-                       GA.inputs=GA.inputs,
-                       gdist.inputs=gdist.inputs, 
-                       min=GA.inputs$min.list[[i]],
-                       max=GA.inputs$max.list[[i]],
-                       parallel = GA.inputs$parallel,
-                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                       maxiter=GA.inputs$maxiter,
-                       run=GA.inputs$run,
-                       keepBest=GA.inputs$keepBest,
-                       elitism=GA.inputs$percent.elite, 
-                       mutation = GA.inputs$mutation,
-                       seed = GA.inputs$seed,
-                       iter=i,
-                       quiet = GA.inputs$quiet) 
-        
-        # Using GA results, optimize with nlm  
-        start.vals <- single.GA@solution[-1]
-        
-        if(nlm==TRUE){
-          # Informed start values; these are the optimized values from the single parameter optimization
-          EQ <-get.EQ(single.GA@solution[1])
-          Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,gdist.inputs=gdist.inputs,Min.Max='min',write.dir=GA.inputs$Write.dir)
-          
-          r<-Resistance.tran(transformation=EQ,shape=Optim.nlm$estimate[1],max=Optim.nlm$estimate[2],r=r,out=GA.inputs$Results.dir)
-          
-          names(r)<-GA.inputs$layer.names[i]        
-          NAME<-GA.inputs$layer.names[i]        
-          
-          cd <- Run_gdistance(gdist.inputs,r)
-          save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
-          writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)  
-          
-          Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
-          
-          Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
-          
-          RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
-          colnames(RS) <- c("Surface","AICc","Equation","shape","max")
-          RESULTS.cont[[cnt2]] <- RS
-          
-        } else {
-          EQ <-get.EQ(single.GA@solution[1])
-          r <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
-          names(r)<-GA.inputs$layer.names[i]        
-          NAME<-GA.inputs$layer.names[i]        
-          
-          cd <- Run_gdistance(gdist.inputs,r)
-          save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
-          writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
-          
-          
-          Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
-          
-          Plot.trans(PARM=single.GA@solution[-1], 
-                     Resistance=GA.inputs$Resistance.stack[[i]], 
-                     transformation=EQ, 
-                     print.dir=GA.inputs$Plots.dir)
-          
-          RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue,get.EQ(single.GA@solution[1]),single.GA@solution[2],single.GA@solution[3])
-          colnames(RS) <- c("Surface","AICc","Equation","shape","max")
-          RESULTS.cont[[cnt2]] <- RS
-        }     
-      } # Close if-else  
-      
-      if (dist_mod==TRUE){
-        r <- reclassify(r, c(-Inf,Inf, 1))
-        names(r)<-"dist"  
-        cd <- Run_gdistance(gdist.inputs,r)
-        
-        Dist.AIC <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-                                                   response=gdist.inputs$response,
-                                                   ID=gdist.inputs$ID,
-                                                   ZZ=gdist.inputs$ZZ,
-                                                   REML=FALSE)))
-        ROW <- nrow(gdist.inputs$ID)
-        k<-2
-        AICc <- (Dist.AIC)+(((2*k)*(k+1))/(ROW-k-1))
-        Dist.AICc<-data.frame("Distance", AICc); colnames(Dist.AICc)<-c("Surface","AICc")      
-      }
-      
-      if(null_mod==TRUE){          
-        dat<-data.frame(gdist.inputs$ID,response=gdist.inputs$response)
-        colnames(dat) <- c("pop1", "pop2","response")
-        
-        # Fit model
-        mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
-        mod$reTrms$Zt <- gdist.inputs$ZZ
-        dfun <- do.call(mkLmerDevfun,mod)
-        opt <- optimizeLmer(dfun)
-        Null.AIC <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr)) 
-        ROW <- nrow(gdist.inputs$ID)
-        k<-1
-        AICc <- (Null.AIC)+(((2*k)*(k+1))/(ROW-k-1))
-        Null.AICc<-data.frame("Null", AICc); colnames(Null.AICc)<-c("Surface","AICc")  
-      }
-    }
-  } # Close ascii loop
-  
-  ####################################################
-  # Make results data frame
-  Results.cat<-data.frame()
-  Results.cont<-data.frame()
-  # cnt1<-0
-  # cnt2<-0
-  for (i in 1:GA.inputs$n.layers){
-    if(GA.inputs$surface.type[i]=='cat'){
-      #     cnt1 <- cnt1+1
-      #     RS <- data.frame(GA.inputs$layer.names[i], -(RESULTS.cat[[i]]@fitnessValue),RESULTS[[i]]@solution)
-      Results.cat <- do.call(rbind.fill,RESULTS.cat)
-    } else {
-      #   cnt2 <-cnt2+1
-      #   RS <- data.frame(GA.inputs$layer.names[i], -(RESULTS.cont[[i]]@fitnessValue), Cont.Param(RESULTS[[i]]@solution))
-      Results.cont <- do.call(rbind,RESULTS.cont)
-    }
-  }
-  ##################################
-  # Compile results into tables
-  cat("\n")
-  cat("\n")
-  if(nrow(Results.cat)>0){
-    Features <- array()
-    for(i in 1:ncol(Results.cat)-2){
-      feature <- paste0("Feature",i)
-      Features[i]<-feature
-    }
-    colnames(Results.cat)<-c("Surface","AICc", Features)
-    Results.cat <-  Results.cat[order(Results.cat$AICc),]
-    write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
-  }
-  
-  if(ncol(Results.cont)>0){    
-    colnames(Results.cont)<-c("Surface","AICc","Equation","shape","max")
-    Results.cont <- Results.cont[order(Results.cont$AICc),]
-    write.table(Results.cont,paste0(GA.inputs$Results.dir,"ContinuousResults.csv"),sep=",",col.names=T,row.names=F)
-  }
-  
-  # Full Results
-  if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
-    Results.All<-rbind(Results.cat[,c(1,2)],Results.cont[,c(1,2)])
-  } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
-    Results.All<-(Results.cont[,c(1,2)])  
-  } else {
-    Results.All<-(Results.cat[,c(1,2)])    
-  }
-  
-  if(dist_mod==TRUE) Results.All<-rbind(Results.All,Dist.AICc)
-  if(null_mod==TRUE) Results.All<-rbind(Results.All,Null.AICc)
-  
-  Results.All <- Results.All[order(Results.All$AICc),]
-  
-  cat("\n")
-  cat("\n")
-  write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
-  
-  # Get parameter estimates
-  if(!is.null(CS.inputs)){  
-    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
-                                genetic.dist=CS.inputs$response,
-                                out.dir=GA.inputs$Results.dir,
-                                method="cs",
-                                ID=CS.inputs$ID,
-                                ZZ=CS.inputs$ZZ)
-    
-  } else {  
-    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,
-                                genetic.dist=gdist.inputs$response,
-                                out.dir=GA.inputs$Results.dir,
-                                method="gd",
-                                ID=gdist.inputs$ID,
-                                ZZ=gdist.inputs$ZZ)  
-  }
-  
-  rt<-proc.time()[3]-t1
-  # Full Results
-  if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
-    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
-  } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
-    RESULTS<-list(ContinuousResults=Results.cont, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
-  } else if(nrow(Results.cat)>0 & nrow(Results.cont)<1){
-    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=Results.cat,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
-  } else {    
-    RESULTS<-list(ContinuousResults=NULL, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
-  }
-  
-  file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
-  return(RESULTS)
-  ###############################################################################################################
-}
-
-########################################################################################  
-############ Single command function to execute mulit surface optimization ############ 
-########################################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# Single command function to execute mulit surface optimization #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Simultaneous optimization of multiple resistance surfaces
 #' 
 #' Optimize multiple resistance surfaces simultaneously using genetic algorithms
@@ -1105,7 +660,7 @@ file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
 return(multi.GA_nG)
   }
 
-  #####  RUN BRENT OPTIMIZATION ####
+  #!###  RUN BRENT OPTIMIZATION #!##
 # ##  Run second optimization to determine if maximum resistance values should be adjusted
 #   Parm.multiplier <- optim(par=1,
 #                            fn = Max.optim_Brent,
@@ -1116,7 +671,7 @@ return(multi.GA_nG)
 #                            CS.inputs = CS.inputs,
 #                            GA.opt = multi.GA_nG@solution)
 # PARM<-Parm.multiplier$par
-# ###########################################
+# #!##!##!##!##!##!##!##!##!##!##!##!##!##!##
 # Opt.parm <- GA.opt <- multi.GA_nG@solution
 # for(i in 1:GA.inputs$n.layers){
 #     if(GA.inputs$surface.type[i]=="cat"){
@@ -1130,10 +685,10 @@ return(multi.GA_nG)
 #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
 #     }
 # }
-# # ####
+# # #!##
 # multi.GA_nG@solution <- Opt.parm
 # multi.GA_nG@fitnessValue <- Parm.multiplier$value
-# ##################################
+# #!##!##!##!##!##!##!##!##!##!##!##
   
 #   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
 #   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
@@ -1149,7 +704,7 @@ return(multi.GA_nG)
 #   return(multi.GA_nG)
 }
 
-###############################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 # Max.optim_Brent <- function(PARM,CS.inputs,GA.inputs, Min.Max='min', quiet=FALSE, GA.opt){
 #   t1<-Sys.time()
 #   
@@ -1161,7 +716,7 @@ return(multi.GA_nG)
 #   CS_Point.File<-CS.inputs$CS_Point.File
 #   CS.program<-CS.inputs$CS.program
 #   EXPORT.dir<-GA.inputs$Write.dir
-#   ######
+#   #!##!#
 #   r <- GA.inputs$Resistance.stack
 #   
 #   for(i in 1:GA.inputs$n.layers){
@@ -1270,7 +825,7 @@ return(multi.GA_nG)
 #   writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
 #   
 #   # Modify and write Circuitscape.ini file
-#   #############################################################################################  
+#   #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#  
 #   BATCH<-paste0(EXPORT.dir,File.name,".ini")        
 #   OUT<-paste0(paste0("output_file = ",EXPORT.dir), File.name,".out")
 #   HABITAT<-paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc"))
@@ -1284,7 +839,7 @@ return(multi.GA_nG)
 #   write.CS_4.0(BATCH=BATCH,OUT=OUT,HABITAT=HABITAT,LOCATION.FILE=LOCATION.FILE,CONNECTION=CONNECTION)    
 #   #   }
 #   
-#   ##########################################################################################
+#   #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
 #   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
 #   hidden = TRUE  
 #   # Run Circuitscape
@@ -1297,7 +852,7 @@ return(multi.GA_nG)
 #   }
 #   
 #   
-#   #########################################
+#   #!##!##!##!##!##!##!##!##!##!##!##!##!###
 #   # Run mixed effect model on each Circuitscape effective resistance
 #   
 #   CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
@@ -1334,9 +889,9 @@ return(multi.GA_nG)
 #   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 # }
 
-###############################################################################  
-############ Create continuous surface response figures ############ 
-############################################################################### 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# Create continuous surface response figures #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!## 
 # Response.Figs<- function(Optim.input){
 #   Top.params <- read.csv(file=paste0(Optim.input$Results.dir,"/TopModel_Optimization_Parameters.csv"),header=T)
 #   dir.create(file.path(Optim.input$Results.dir, "Plots"))
@@ -1353,9 +908,9 @@ return(multi.GA_nG)
 #   }
 # }
 
-###############################################################################  
-############ RUN CIRCUITSCAPE ############ 
-###############################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# RUN CIRCUITSCAPE #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Run CIRCUITSCAPE in R
 #' 
 #' Execute CS from R
@@ -1394,7 +949,7 @@ if(class(r)[1]!='RasterLayer') {
     CURRENT.MAP="write_cur_maps = 1"
   }
 
-  ######
+  #!##!#
   
   if(cellStats(R,"max")>1e6)  R<-SCALE(R,1,1e6) # Rescale surface in case resistances are too high
   R <- reclassify(R, c(-Inf,0, 1))
@@ -1404,7 +959,7 @@ if(class(r)[1]!='RasterLayer') {
   writeRaster(x=R,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
   
   # Modify and write Circuitscape.ini file
-  #############################################################################################  
+  #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#  
  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
  if(is.null(CS.inputs$pairs_to_include)){
    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
@@ -1423,7 +978,7 @@ if(class(r)[1]!='RasterLayer') {
                CURRENT.MAP=CURRENT.MAP,
                PAIRS_TO_INCLUDE=PAIRS_TO_INCLUDE,
                PAIRS=PAIRS)
-  ##########################################################################################
+  #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
 # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
 # hidden = TRUE  
 # Run Circuitscape
@@ -1436,7 +991,7 @@ if(CS.inputs$platform=="pc"){
 }
  
   
-  #########################################
+  #!##!##!##!##!##!##!##!##!##!##!##!##!###
   # Run mixed effect model on each Circuitscape effective resistance
   
   CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
@@ -1451,13 +1006,13 @@ if(output=="raster" & CurrentMap==TRUE){
   (cs.matrix<-read.matrix(CS.results))  
 }
 }
-################################
+#!##!##!##!##!##!##!##!##!##!###
 
 Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.name){
     File.name <- File.name
   
   # Modify and write Circuitscape.ini file
-  #############################################################################################  
+  #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#  
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
   
    if(is.null(CS.inputs$pairs_to_include)){
@@ -1477,7 +1032,7 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
                CURRENT.MAP="write_cur_maps = False",
                PAIRS_TO_INCLUDE=PAIRS_TO_INCLUDE,
                PAIRS=PAIRS)
-  ##########################################################################################
+  #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
   hidden = TRUE  
   # Run Circuitscape
@@ -1493,7 +1048,7 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
   
   (cs.matrix<-read.matrix(CS.results))
 }
-####################################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!###
 
 #' Get cost distance using gdistance
 #' 
@@ -1518,9 +1073,9 @@ Run_gdistance <- function(gdist.inputs, r){
   return(ret)
 }
 
-###############################################################################  
-############ COMBINE RESISTANCE SURFACES--No GAUSSIAN ############ 
-###############################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# COMBINE RESISTANCE SURFACES--No GAUSSIAN #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Combine multiple resistance surfaces together
 #' 
 #' Combine multiple resistance surfaces into new composite surface based on specified parameters
@@ -1569,7 +1124,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   }
 
   
-  ######
+  #!##!#
   r <- GA.inputs$Resistance.stack
   
   for(i in 1:GA.inputs$n.layers){
@@ -1656,11 +1211,11 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   (multi_surface)
   }
 }
-###################################################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!###
 
-###############################################################################  
-############ TRANSFORM RESISTANCE SURFACES ############ 
-###############################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# TRANSFORM RESISTANCE SURFACES #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Apply transformation to continuous resistance surface
 #' 
 #' Apply on the eight resistance transformations to a continuous resistance surface
@@ -1707,7 +1262,7 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
   
   EXPORT.dir<-out
   
-  ######
+  #!##!#
   
       r <-SCALE(data=R,MIN=0,MAX=10)
 
@@ -1719,7 +1274,7 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
 #       Max.SCALE <- (parm[3])
   
   
-  ##################
+  #!##!##!##!##!##!#
       
 # Apply specified transformation
     if(equation==1){
@@ -1769,11 +1324,11 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
     return(r)
   }
 }
-###################################################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!###
 
-###############################################################################  
-############ MULTISURFACE OPTIMIZATION FUNCTION WITH GA--NO GAUSSIAN ############ 
-###############################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# MULTISURFACE OPTIMIZATION FUNCTION WITH GA--NO GAUSSIAN #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 #' Optimize multiple resistance surfaces simultaneously
 #' 
 #' Create composite resistance surface by simultaneously optimizing multiple categoricla and continuous surfaces. This optimization function is designed to be called from GA
@@ -1791,7 +1346,7 @@ Resistance.Opt_multi <- function(PARM,CS.inputs=NULL, gdist.inputs=NULL, GA.inpu
   t1<-proc.time()[3]
  
   EXPORT.dir<-GA.inputs$Write.dir
-  ######
+  #!##!#
 #   r <- GA.inputs$Resistance.stack
   File.name="resist_surface"
 if(!is.null(CS.inputs)){  
@@ -1833,9 +1388,9 @@ rt<-proc.time()[3]-t1
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 }
 
-################################################################### 
-############ ITERATIVE SINGLE OPTIMIZATION FUNCTION WITH GA---No Gaussian ############ 
-################################################################### 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!## 
+#!##!##!##!# ITERATIVE SINGLE OPTIMIZATION FUNCTION WITH GA---No Gaussian #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!## 
 #' Optimize resistance surfaces individually
 #' 
 #' Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA
@@ -1856,7 +1411,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
 
   
   EXPORT.dir<-GA.inputs$Write.dir
-  ######
+  #!##!#
   r <- Resistance
    
   if(GA.inputs$surface.type[iter]=="cat"){
@@ -1964,9 +1519,130 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 }
 
-################################################### 
-############ PLOT response CURVES ############ 
-################################################### 
+
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!## 
+#!##!##!##!# SUBPLOT Single Surface OPTIMIZATION FUNCTION #!##!##!##!# 
+#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
+
+Resistance.Opt_single_sub <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, Min.Max='max',iter, quiet=FALSE){
+  t1<-proc.time()[3]
+  
+  
+  EXPORT.dir<-GA.inputs$Write.dir
+  #!##!#
+  r <- Resistance
+  
+  if(GA.inputs$surface.type[iter]=="cat"){
+    PARM<-PARM/min(PARM)
+    parm <-PARM
+    df <- data.frame(id=unique.rast(r),PARM) # Data frame with original raster values and replacement values
+    r <-subs(r,df)    
+    
+  } else {
+    r<-SCALE(r,0,10)
+    
+    # Set equation for continuous surface
+    equation <- floor(PARM[1]) # Parameter can range from 1-9.99
+    
+    # Read in resistance surface to be optimized
+    SHAPE <- (PARM[2])
+    Max.SCALE <- (PARM[3])
+    
+    # Apply specified transformation
+    rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+    if(rick.eq==TRUE & SHAPE>5){
+      equation<-9
+    }
+    
+    if(equation==1){
+      r <- Inv.Rev.Monomolecular(r,parm=PARM)
+      EQ <- "Inverse-Reverse Monomolecular"
+      
+    } else if(equation==5){
+      r <- Rev.Monomolecular(r,parm=PARM)      
+      EQ <- "Reverse Monomolecular"        
+      
+    } else if(equation==3){
+      r <- Monomolecular(r,parm=PARM)      
+      EQ <- "Monomolecular"
+      
+    } else if (equation==7) {
+      r <- Inv.Monomolecular(r,parm=PARM)      
+      EQ <- "Inverse Monomolecular"        
+      
+    } else if (equation==8) {
+      r <- Inv.Ricker(r,parm=PARM)
+      EQ <- "Inverse Ricker"  
+      
+    } else if (equation==4) {
+      r <- Ricker(r,parm=PARM)
+      EQ <- "Ricker"
+      
+    } else if (equation==6) {
+      r <- Rev.Ricker(r,parm=PARM)
+      EQ <- "Reverse Ricker"        
+      
+    } else if (equation==2) {
+      r <- Inv.Rev.Ricker(r,parm=PARM)
+      EQ <- "Inverse-Reverse Ricker"
+      
+    } else {
+      r <- (r*0)+1 #  Distance
+      EQ <- "Distance"    
+    } # End if-else     
+  } # Close parameter type if-else 
+  
+  File.name <- "resist_surface"
+  if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
+  r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
+  
+  
+  if(!is.null(CS.inputs)){
+    writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+    CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=r,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
+    
+    # Run mixed effect model on each Circuitscape effective resistance
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm.sub(resistance=CS.resist,
+                                                  response=CS.inputs$response,
+                                                  ID=CS.inputs$ID,
+                                                  ZZ=CS.inputs$ZZ,
+                                                  REML=FALSE,
+                                                  sub=CS.inputs$sub)
+                                     ))
+    ROW <- nrow(CS.inputs$ID)
+    
+  }  
+  
+  if(!is.null(gdist.inputs)){
+    cd <- Run_gdistance(gdist.inputs,r)
+    
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm.sub(resistance=cd,
+                                               response=gdist.inputs$response,
+                                               ID=gdist.inputs$ID,
+                                               ZZ=gdist.inputs$ZZ,
+                                               REML=FALSE,
+                                               sub=CS.inputs$sub)))
+    ROW <- nrow(gdist.inputs$ID)
+  } 
+  
+  k<-length(PARM)+1
+  AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
+  
+  rt<-proc.time()[3]-t1  
+  if(quiet==FALSE){
+    cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
+    #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
+    cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
+    cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
+    
+    
+  }
+  OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
+}
+
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!# 
+#!##!##!##!# PLOT response CURVES #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!# 
 #' Plot continuous surface transformation
 #' 
 #' Plots a transformed continuous resistance surface against the original resistance values
@@ -2127,9 +1803,9 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
 }
 
 
-############################################################################  
-############ OPTIMIZATION FUNCTION USING GA STARTS: CONTINUOUS ############ 
-############################################################################  
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
+#!##!##!##!# OPTIMIZATION FUNCTION USING GA STARTS: CONTINUOUS #!##!##!##!# 
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##  
 Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS.inputs=NULL, gdist.inputs=NULL,Min.Max,quiet=FALSE, write.dir) {
   CS.program<-CS.inputs$CS.program
   
@@ -2263,7 +1939,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized    
   
 }
-############################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!###
 
 # Run Mixed effects models, recovery parameter estimates
 # ' Obtain coefficients from maximum likelihood population effects mixed effects model (MLPE)
@@ -2473,7 +2149,7 @@ MLPE.lmm.sub <- function(resistance, response, REML=FALSE, ID, ZZ, sub){
   MOD <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))   
   return(MOD)
 }
-##################################
+#!##!##!##!##!##!##!##!##!##!##!##
 #' Create diagnostic plots 
 #' 
 #' This function will generate mixed effect model diagnostic plots following optimization
@@ -2560,7 +2236,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     opt <- optimizeLmer(dfun)
     Mod <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
   }
-  #######
+  #!##!##
   # Make diagnostic plots
   if(type=="categorical"){
     tiff(filename = paste0(plot.dir,NAME,"_DiagnosticPlots.tif"), 
@@ -2594,7 +2270,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     par(mfrow=c(1,1))   
   }  
 }
-##########################################################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
 # Function to bundle input parameters
 
 #' Prepare and bundle input CIRCUITSCAPE model parameters
@@ -2613,7 +2289,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
+#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include, sublandscape)
 #' @details \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows: 
 #' 
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
@@ -2681,10 +2357,10 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
   ID<-To.From.ID(n.POPS)
   suppressWarnings(ZZ<-ZZ.mat(ID))  
   }
-  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include)
+  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include,sub=sublandscape)
 }
 
-##########################################################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
 # Data processing for analyzing multiple layers simultaneously
 
 #' Create R object with genetic algorithm optimization settings
@@ -2860,7 +2536,7 @@ GA.prep<-function(ASCII.dir,
   list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.DIR, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation, parallel=parallel,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
   
 }
-#####################################
+#!##!##!##!##!##!##!##!##!##!##!##!##
 #' Make a vector of the lower half of a square distance matrix
 #' 
 #' This function will prepare and compile objects and commands for optimization with the GA package
@@ -2878,11 +2554,11 @@ lower<-function(matrix){
   lm<-matrix[lower.tri(matrix)]
   return(lm)
 }
-###########################
+#!##!##!##!##!##!##!##!##!#
 
-##############################################################
-############ OTHER NECESSARY FUNCTIONS  #####################
-#############################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!###
+#!##!##!##!# OTHER NECESSARY FUNCTIONS  #!##!##!##!##!##!##!#
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##
 
 # FUNCTIONS
 OPTIM.DIRECTION <- function(x){
@@ -3122,7 +2798,7 @@ scenario = pairwise")
 sink()
 }
 
-#############################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##
 # Sample values for suggests
 sv.cat <-function(levels,pop.size,min,max){
   cat.starts<-matrix(nrow=pop.size,ncol=levels)
@@ -3142,7 +2818,7 @@ sv.cat <-function(levels,pop.size,min,max){
   cat.starts[,1]<-1
   return(cat.starts)
 }
-############################
+#!##!##!##!##!##!##!##!##!##
 # No Gaussian distribution
 sv.cont.nG <-function(direction,pop.size,max){
   inc<-c(1,3)
@@ -3166,7 +2842,7 @@ sv.cont.nG <-function(direction,pop.size,max){
   cont.starts
 }
 
-############################
+#!##!##!##!##!##!##!##!##!##
 Increase.starts<-function(x){
   if(x==1){
     z<-c(x,runif(1,.01,10),runif(1,1,10),1)
@@ -3182,7 +2858,7 @@ Increase.starts.nG<-function(x){
     z<-c(x,runif(1,.01,10),runif(1,1,100))
   }
 }
-###########################
+#!##!##!##!##!##!##!##!##!#
 unique.rast<-raster::unique
 
 get.EQ <-function(equation){   # Apply specified transformation
@@ -3285,13 +2961,13 @@ cat(paste0("Optimization took ",Run.Time," seconds to complete"),"\n")
 sink()
 }
  
-##########################################################################################
+#!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
 
 get.name<-function(x){
    nm <-deparse(substitute(x))
    return(nm)
    }
-###########################
+#!##!##!##!##!##!##!##!##!#
 Monomolecular <- function(r, parm){
   parm[3]*(1-exp(-1*r/parm[2]))+1 # Monomolecular
 }
@@ -3361,7 +3037,7 @@ Rev.Ricker <- function(r,parm){
   }
 }
 
-##############
+#!##!##!##!###
 # TEST
 # plot(r)
 # Mono <- Monomolecular(r = r,parm = parm); plot(Mono)
