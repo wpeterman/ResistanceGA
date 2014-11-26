@@ -3,7 +3,7 @@
 \alias{Diagnostic.Plots}
 \title{Create diagnostic plots}
 \usage{
-Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, ID, ZZ)
+Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, ID, ZZ, sublandscape)
 }
 \arguments{
 \item{resistance.mat}{Path to CIRCUITSCAPE "_resistances.out" file, or costDistance object created from running gdistance}
@@ -23,6 +23,8 @@ Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, 
 \item{ID}{The to_from ID list for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)}
 
 \item{ZZ}{The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)}
+
+\item{sublandscape}{Default is NULL. If using the "pairs_to_include" advanced option in CIRCUITSCAPE, then this  must be included. Should be in the form of a single-column data frame of the same length as the number of pairwise comparisons, with values indicating the sublandscape within which pairs reside.}
 }
 \value{
 A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model

@@ -3,7 +3,7 @@
 \alias{CS.prep}
 \title{Prepare and bundle input CIRCUITSCAPE model parameters}
 \usage{
-CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
+CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include, sublandscape)
 }
 \arguments{
 \item{n.POPS}{The number of populations that are being assessed}
@@ -17,6 +17,8 @@ CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
 \item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.}
+
+\item{sublandscape}{Default is NULL. If using the "pairs_to_include" advanced option in CIRCUITSCAPE, then this  must be included. This should be a vector of values specifying the number of individuals included in each sublandscape.}
 }
 \value{
 An R object that is a required input into optimization functions
