@@ -378,9 +378,12 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
     if (dist_mod==TRUE){
       r <- reclassify(r, c(-Inf,Inf, 1))
       names(r)<-"dist"
-      Run_CS(CS.inputs,GA.inputs,r)
-      Dist.AIC <- AIC(MLPE.lmm.sub(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
-                               pairwise.genetic=CS.inputs$response,
+      
+      dist.resist <- Run_CS(CS.inputs,GA.inputs,r)
+      
+      
+      Dist.AIC <- AIC(MLPE.lmm.sub(resistance=dist.resist,
+                               response=CS.inputs$response,
                                REML=FALSE,
                                ID=CS.inputs$ID,
                                ZZ=CS.inputs$ZZ,
@@ -408,8 +411,6 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
     }
     
   } # Close sublandscape
-  
-    } 
   
 #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!###
 if(!is.null(gdist.inputs)){
@@ -639,7 +640,9 @@ if(!is.null(CS.inputs)){
                               out.dir=GA.inputs$Results.dir,
                               method="cs",
                               ID=CS.inputs$ID,
-                              ZZ=CS.inputs$ZZ)
+                              ZZ=CS.inputs$ZZ,
+                              sub=CS.inputs$sub)
+
   
 } else {  
   MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,
@@ -2339,6 +2342,126 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL
   }
 }
 
+#!#!#!#!#!#!#! SUB-LANDSCAPE MLPE COEFFICIENTS
+
+# MLPE.lmm_coef.sub <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL, ZZ=NULL, sub=NULL){ 
+#   if(method=="cs"){
+#     if(is.null(sub)){
+#       response=genetic.dist
+#       resist.mat<-list.files(resistance,pattern="*_resistances.out",full.names=TRUE)
+#       resist.names<-gsub(pattern="_resistances.out","",x=list.files(resistance,pattern="*_resistances.out"))
+#       COEF.Table<-array()
+#       for(i in 1:length(resist.mat)){
+#         m<-length(read.table(resist.mat[i])[-1,-1])
+#         mm<-read.table(resist.mat[i])[-1,-1]
+#         mm <- lower(mm)
+#         mm <- mm[which(mm!=-1)]
+#         if(is.null(ID)){
+#           ID<-To.From.ID(POPS=m)                   
+#         }
+#         if(is.null(ZZ)){
+#           ZZ<-ZZ.mat(ID=ID)                         
+#         }
+#         
+#         resistance<-scale(mm,center=TRUE,scale=TRUE)
+#         dat<-data.frame(ID,resistance=resistance,response=response)
+#         colnames(dat)<-c("pop1","pop2","resistance","response")
+#         
+#         # Assign value to layer
+#         LAYER<-assign(resist.names[i],value=dat$cs.matrix)
+#         
+#         # Fit model
+#         mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=TRUE)
+#         mod$reTrms$Zt <- ZZ
+#         dfun <- do.call(mkLmerDevfun,mod)
+#         opt <- optimizeLmer(dfun)
+#         Mod.Summary <- summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+#         COEF<-Mod.Summary$coefficients
+#         row.names(COEF)<-c("Intercept",resist.names[i])
+#         COEF.Table<-rbind(COEF.Table, COEF)
+#       }
+#     } else { # Get sub-landscape coefficients
+#       response=genetic.dist
+#       resist.mat<-list.files(resistance,pattern="*_resistances.out",full.names=TRUE)
+#       resist.names<-gsub(pattern="_resistances.out","",x=list.files(resistance,pattern="*_resistances.out"))
+#       COEF.Table<-array()
+#       for(i in 1:length(resist.mat)){
+#         m<-length(read.table(resist.mat[i])[-1,-1])
+#         mm<-read.table(resist.mat[i])[-1,-1]
+#         mm <- lower(mm)
+#         mm <- mm[which(mm!=-1)]
+#         if(is.null(ID)){
+#           ID<-To.From.ID(POPS=m)
+#           
+#         }
+#         
+#         if(is.null(ZZ)){
+#           ZZ<-ZZ.mat(ID=ID)
+#           
+#         }
+#         
+#         resistance<-scale(mm,center=TRUE,scale=TRUE)
+#         dat<-data.frame(ID,resistance=resistance,response=response, sub=sub)
+#         colnames(dat)<-c("pop1","pop2","resistance","response","sub")
+#         
+#         # Assign value to layer
+#         LAYER<-assign(resist.names[i],value=dat$cs.matrix)
+#         
+#         # Fit model
+#         mod <- MLPE.lmm.sub(resistance = resistance,
+#                             response = response,
+#                             REML = TRUE,
+#                             ID = ID,
+#                             ZZ = ZZ,
+#                             sub = sub)
+#         
+#         Mod.Summary <- summary(mod)
+#         COEF<-Mod.Summary$coefficients
+#         row.names(COEF)<-c("Intercept",resist.names[i])
+#         COEF.Table<-rbind(COEF.Table, COEF)
+#       }   
+#     }
+#     
+#   } else {   # Use Gdist    
+#     response=genetic.dist
+#     resist.mat<-list.files(resistance,pattern="*.rda",full.names=TRUE)
+#     resist.names<-gsub(pattern=".rda","",x=list.files(resistance,pattern=".rda"))
+#     COEF.Table<-array()
+#     for(i in 1:length(resist.mat)){
+#       load(resist.mat[i])
+#       mm <-lower(as.matrix(cd))
+#       m<-attr(cd,"Size")
+#       ID<-To.From.ID(POPS=m)
+#       ZZ<-ZZ.mat(ID=ID)
+#       cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+#       cs.unscale<-mm
+#       dat<-cbind(ID,cs.matrix,response)  
+#       
+#       # Assign value to layer
+#       LAYER<-assign(resist.names[i],value=dat$cs.matrix)
+#       
+#       # Fit model
+#       mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+#       mod$reTrms$Zt <- ZZ
+#       dfun <- do.call(mkLmerDevfun,mod)
+#       opt <- optimizeLmer(dfun)
+#       Mod.Summary <- summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+#       COEF<-Mod.Summary$coefficients
+#       row.names(COEF)<-c("Intercept",resist.names[i])
+#       COEF.Table<-rbind(COEF.Table, COEF)
+#     }
+#   }
+#   
+#   
+#   if(is.null(out.dir)){
+#     COEF.Table<-(COEF.Table[-1,])
+#   } else {
+#     COEF.Table<-COEF.Table[-1,]
+#     write.table(COEF.Table,file=paste0(out.dir,"MLPE_coeff_Table.csv"),sep=",",row.names=T,col.names=NA)
+#     return(COEF.Table)
+#   }
+# }
+
 
 
 # Run Mixed effects models, recovery parameter estimates
@@ -2576,7 +2699,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
       
       Mod <- MLPE.lmm.sub(resistance = cs.matrix,
                           response = response,
-                          REML = ,
+                          REML = TRUE,
                           ID = ID,
                           ZZ = ZZ,
                           sub = sublandscape)
@@ -2624,7 +2747,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
        
       Mod <- MLPE.lmm.sub(resistance = cs.matrix,
                           response = response,
-                          REML = ,
+                          REML = TRUE,
                           ID = ID,
                           ZZ = ZZ,
                           sub = sublandscape)
@@ -2677,7 +2800,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.
-#' @param sublandscape Default is NULL. If using the "pairs_to_include" advanced option in CIRCUITSCAPE, then this  must be included. Should be in the form of a single-column data frame of the same length as the number of pairwise comparisons, with values indicating the sublandscape within which pairs reside. 
+#' @param sublandscape Default is NULL. If using the "pairs_to_include" advanced option in CIRCUITSCAPE, then this  must be included. This should be a vector of values specifying the number of individuals included in each sublandscape. 
 # @param platform What computing platform are you using ("pc", "other"). This code has only been tested on Windows PC!!!
 #' @return An R object that is a required input into optimization functions
 
@@ -2707,7 +2830,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     write.table(CS_Point.txt,file = CS_Point.File,col.names = F,row.names = F)
   }
   if(!is.null(response)) {TEST.response <- (is.vector(response) || ncol(response)==1)
-                             if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
+                             if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}
+  }
   platform="pc"
   
   if(!is.null(pairs_to_include)){
@@ -2740,8 +2864,9 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
           ID[n1,1]<-p2; ID[n1,2]<-p1
           ID$pop1 <- factor(ID$pop1)
           ID$pop2 <- factor(ID$pop2)
-          stop(nrow(ID)!=length(sublandscape)) {"The 'sub-landscape' vector is not equal to the number of pairwise comparisons"}
-          suppressWarnings(ZZ<-ZZ.mat_sub(ID,sublandscape))
+          sub <-  sub.pair(sublandscape)
+          if(nrow(ID)!=nrow(sub)) warning("The 'sub-landscape' vector is not equal to the number of pairwise comparisons. Please confirm that the number of individuals included in each sublandscape is correct.")
+          suppressWarnings(ZZ<-ZZ.mat_sub(ID,sub))
 
         } # close function                
   } # close pairs to include statement
@@ -2751,7 +2876,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
   ID<-To.From.ID(n.POPS)
   suppressWarnings(ZZ<-ZZ.mat(ID))  
   }
-  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include,sub=sublandscape)
+  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include,sub=sub)
 }
 
 #!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!##!#
@@ -3004,9 +3129,10 @@ ZZ.mat_sub <- function(ID,sub) {
 #   sub[,1] <- factor(sub[,1])
   ID <- cbind(ID,sub)
   names(ID)<- c("pop1",'pop2',"sub")
-  Zl <- lapply(c("pop1","pop2","sub"), function(nm) Matrix::fac2sparse(ID[[nm]],"d", drop=FALSE))
+  Zl <- lapply(c("pop1","pop2"), function(nm) Matrix::fac2sparse(ID[[nm]],"d", drop=FALSE))
+  Zl2 <- lapply(c("sub"), function(nm) Matrix::fac2sparse(ID[[nm]],"d", drop=FALSE))
   ZZ <- Reduce("+", Zl[-1], Zl[[1]])
-  ZZ.sub <- rBind(ZZ,Zl[[3]],deparse.level = 1)
+  ZZ.sub <- Matrix::rBind(ZZ,Zl2[[1]],deparse.level = 1)
   return(ZZ.sub)
 }
 
@@ -3361,6 +3487,19 @@ get.name<-function(x){
    nm <-deparse(substitute(x))
    return(nm)
    }
+
+# Function to determine identity of pairwise sublandscape elements
+sub.pair <- function(x){
+  sub <- data.frame()
+ for(i in seq_along(x)){
+    m <- matrix(0,x[i],x[i])
+    N <- length(lower(m))   
+    N.out <- as.data.frame(rep(i,times = N))
+    sub <- rbind(sub,N.out)    
+ }
+ colnames(sub) <- "sub"
+ return(sub)
+}
 #!##!##!##!##!##!##!##!##!#
 Monomolecular <- function(r, parm){
   parm[3]*(1-exp(-1*r/parm[2]))+1 # Monomolecular
