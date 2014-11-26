@@ -1,3 +1,7 @@
+ResistanceGA 3.0-0
+--------
+* Development version that includes capability to use the "pairs to include" feature of CIRCUITSCAPE, and to treat each 'sub-landscape' as a random effect in the mixed effects model.
+
 ResistanceGA 2.0-13
 --------
 * More detail is now printed at each iteration, providing the transformation, shape, and max parameters, in addition to AICc.
