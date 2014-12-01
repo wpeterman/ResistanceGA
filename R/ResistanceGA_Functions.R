@@ -322,6 +322,11 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
       r<-SCALE(r,0,10)
       names(r)<-GA.inputs$layer.names[i]
       
+      # Cannot optimize with nlm  
+      start.vals <- single.GA@solution[-1]
+      
+      if(nlm==TRUE)stop("nlm optimization cannot be used with sub-landscape analysis at this time. Please set nlm=FALSE and re-run anallysis.")
+      
       single.GA <-ga(type= "real-valued",
                      fitness=Resistance.Opt_single_sub,
                      Resistance=r, 
@@ -345,11 +350,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
                      iter=i,
                      quiet = GA.inputs$quiet) 
       
-      # Using GA results, optimize with nlm  
-      start.vals <- single.GA@solution[-1]
-      
-      if(nlm==TRUE)stop("nlm optimization cannot be used with sub-landscape analysis at this time. Please set nlm=FALSE and re-run anallysis.")
-      
+         
         EQ <-get.EQ(single.GA@solution[1])
         r.tran <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
         names(r.tran)<-GA.inputs$layer.names[i]
