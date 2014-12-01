@@ -2602,7 +2602,11 @@ MLPE.lmm.sub <- function(resistance, response, REML=FALSE, ID, ZZ, sub){
 Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resistance",YLAB ="Genetic distance",plot.dir, type="categorical", name=NULL, ID=NULL, ZZ=NULL, sublandscape=NULL){
   if(is.null(sublandscape)){
   if(length(resistance.mat)==1){
-    response=genetic.dist
+    if(is.data.frame(genetic.dist)){
+      response=genetic.dist[[1]]      
+    } else {
+      response=genetic.dist      
+    }
     if(is.null(name)){
     NAME<-gsub(pattern="*_resistances.out","",x=(basename(resistance.mat)))
     }
@@ -2637,7 +2641,11 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
   
   
   if(length(resistance.mat)>1){
-    response=genetic.dist
+    if(is.data.frame(genetic.dist)){
+      response=genetic.dist[[1]]      
+    } else {
+      response=genetic.dist      
+    }
     if(is.null(name)){
       stop("Output file 'name' must be specified!!!")
     }
@@ -2672,7 +2680,11 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
   #!#!#!#!#!#!
   if(!is.null(sublandscape)){
     if(length(resistance.mat)==1){
-      response=genetic.dist
+      if(is.data.frame(genetic.dist)){
+        response=genetic.dist[[1]]      
+      } else {
+        response=genetic.dist      
+      }
       if(is.null(name)){
         NAME<-gsub(pattern="*_resistances.out","",x=(basename(resistance.mat)))
       }
@@ -2714,7 +2726,11 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     
     
     if(length(resistance.mat)>1){
-      response=genetic.dist
+      if(is.data.frame(genetic.dist)){
+        response=genetic.dist[[1]]      
+      } else {
+        response=genetic.dist      
+      }
       if(is.null(name)){
         stop("Output file 'name' must be specified!!!")
       }
