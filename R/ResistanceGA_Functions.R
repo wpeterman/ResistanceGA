@@ -2463,10 +2463,10 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL
 
 
 
-# Run Mixed effects models, recovery parameter estimates
+# Run Mixed effects models, recover parameter estimates
 #' Run maximum likelihood population effects mixed effects model (MLPE)
 #' 
-#' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
+#' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return a lmer object
 #' 
 #' @param resistance Path to pairwise resistance distance matrix (resistances.out) from CS results. Alternatively, provide the pairwise resistances created from optimizing with `gdistance` (result of Run_gdistance).
 #' @param pairwise.genetic Lower half of pairwise genetic distance matrix
@@ -2554,7 +2554,23 @@ MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){
 }
 
 #!#!#!#!#!#!#!#!#!#!#!
+# Run Mixed effects models with sub-landscape, recover parameter estimates
+#' Run maximum likelihood population effects mixed effects model (MLPE) with sub-plots. Only valid when calculating resistnaces with CIRCUITSCAPE.
+#' 
+#' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return a lmer object
+#' 
+#' @param resistance Path to pairwise resistance distance matrix (resistances.out) from CS results.
+#' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE
+#' @param ID The to_from ID list for the MLPE model. Can be specified directly from the output of CS.prep.
+#' @param ZZ The sparse matrix object for the MLPE model. Can be specified directly from the output of CS.prep.
+#' @param sub A vector indicating the sub-plot identity of each observation. Can be specified directly from the output of CS.prep.
+#' @return A lmer object from the fitted model
+#' @details An AIC value will only be returned if \code{REML = FALSE}
 
+#' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @usage MLPE.lmm.sub(resistance, response, REML, ID, ZZ, sub)
+#' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 MLPE.lmm.sub <- function(resistance, response, REML=FALSE, ID, ZZ, sub){ 
   if(class(resistance)[1]!='dist'){
     resistance <- resistance[which(resistance!=-1)]    
