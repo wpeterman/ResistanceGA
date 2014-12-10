@@ -20,7 +20,7 @@ MLPE.lmm(resistance, pairwise.genetic, REML, ID, ZZ)
 A lmer object from the fitted model
 }
 \description{
-Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
+Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return a lmer object
 }
 \details{
 An AIC value will only be returned if \code{REML = FALSE}
