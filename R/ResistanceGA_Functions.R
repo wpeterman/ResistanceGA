@@ -2559,7 +2559,7 @@ MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){
 #' 
 #' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return a lmer object
 #' 
-#' @param resistance Path to pairwise resistance distance matrix (resistances.out) from CS results.
+#' @param resistance Pairwise resistance distance matrix (resistances.out) from CS results.
 #' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE
 #' @param ID The to_from ID list for the MLPE model. Can be specified directly from the output of CS.prep.
 #' @param ZZ The sparse matrix object for the MLPE model. Can be specified directly from the output of CS.prep.
