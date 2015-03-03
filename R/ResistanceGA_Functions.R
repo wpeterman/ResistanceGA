@@ -3161,9 +3161,26 @@ ZZ.mat_sub <- function(ID,sub) {
   ID <- cbind(ID,sub)
   names(ID)<- c("pop1",'pop2',"sub")
   Zl <- lapply(c("pop1","pop2"), function(nm) Matrix::fac2sparse(ID[[nm]],"d", drop=FALSE))
+  m1 <- Zl[[-1]] 
+  m2 <- Zl[[1]] 
+  
   Zl2 <- lapply(c("sub"), function(nm) Matrix::fac2sparse(ID[[nm]],"d", drop=FALSE))
-  ZZ <- Reduce("+", Zl[-1], Zl[[1]])
-  ZZ.sub <- Matrix::rBind(ZZ,Zl2[[1]],deparse.level = 1)
+  
+  a <- jMatrix(rownames(m1), rownames(m2),collation.locale="C")
+  X2 <- a$M1 %*% m1
+  X2 <- as(as(X2,"ngCMatrix"),"dgCMatrix")
+  rownames(X2) <- a$rownames
+  X2 <- X2[order(as.numeric(rownames(X2))),]
+  Y2 <- a$M2 %*% m2
+  Y2 <- as(as(Y2,"ngCMatrix"),"dgCMatrix")
+  rownames(Y2) <- a$rownames
+  Y2 <- Y2[order(as.numeric(rownames(Y2))),]
+  ZZ <- X2+Y2
+  
+  ZZ2 <- ZZ[dimnames(Zl[[1]])[[1]],]
+  
+#   ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+  ZZ.sub <- Matrix::rBind(ZZ2,Zl2[[1]],deparse.level = 1)
   return(ZZ.sub)
 }
 
