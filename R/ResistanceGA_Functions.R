@@ -1512,10 +1512,10 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
 #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
     cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
-    cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
-
-    
-  }
+      if(GA.inputs$surface.type[iter]!="cat"){    
+        cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
+        }
+      }
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 }
 

@@ -1,3 +1,7 @@
+ResistanceGA 2.0-14
+--------
+* Fixed error when running SS_optim with categorical surfaces
+
 ResistanceGA 2.0-13
 --------
 * More detail is now printed at each iteration, providing the transformation, shape, and max parameters, in addition to AICc.
