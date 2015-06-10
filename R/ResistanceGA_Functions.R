@@ -135,7 +135,7 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
                      quiet = GA.inputs$quiet)
       
       single.GA@solution <- single.GA@solution/min(single.GA@solution)
-      df <- data.frame(id=unique.rast(r),single.GA@solution) 
+      df <- data.frame(id=unique(r),t(single.GA@solution) )
       r <-subs(r,df)
       names(r)<-GA.inputs$layer.names[i]
       
@@ -290,7 +290,7 @@ if(!is.null(gdist.inputs)){
                      quiet = GA.inputs$quiet)
       
       single.GA@solution <- single.GA@solution/min(single.GA@solution)
-      df <- data.frame(id=unique.rast(r),single.GA@solution) 
+      df <- data.frame(id=unique(r),t(single.GA@solution) )
       r <-subs(r,df)
       NAME<-GA.inputs$layer.names[i]
       names(r)<-NAME
@@ -578,7 +578,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   names(RAST)<-NAME
   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
   
-  ifelse(length(unique.rast(RAST))>15,type<-"continuous", type<-"categorical")
+  ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
   
   Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type,ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
   
@@ -641,7 +641,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     save(cd,file=paste0(GA.inputs$Results.dir,NAME,".rda"))
     writeRaster(RAST,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)
     
-    ifelse(length(unique.rast(RAST))>15,type<-"continuous", type<-"categorical")
+    ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
 
 #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
     
@@ -725,7 +725,7 @@ return(multi.GA_nG)
 #       parm <- ((ga.p-min(ga.p))*PARM[1])+1
 #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
 #       parm<-parm/min(parm)
-#       df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
+#       df <- data.frame(id=unique(r[[i]]),parm) # Data frame with original raster values and replacement values
 #       r[[i]] <-subs(r[[i]],df)
 #       
 #       r[[i]]<-r[[i]]-(cellStats(x=r[[i]],stat="min"))
@@ -1131,7 +1131,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
     if(GA.inputs$surface.type[i]=="cat"){
       parm <- PARM[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
       parm <- parm/min(parm)
-      df <- data.frame(id=unique.rast(r[[i]]),parm) # Data frame with original raster values and replacement values
+      df <- data.frame(id=unique(r[[i]]),parm) # Data frame with original raster values and replacement values
       r[[i]] <-subs(r[[i]],df)
       
       r[[i]]<-r[[i]]#-1 # Set minimum to 0  
@@ -1417,7 +1417,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
   if(GA.inputs$surface.type[iter]=="cat"){
     PARM<-PARM/min(PARM)
     parm <-PARM
-    df <- data.frame(id=unique.rast(r),PARM) # Data frame with original raster values and replacement values
+    df <- data.frame(id=unique(r),PARM) # Data frame with original raster values and replacement values
     r <-subs(r,df)    
        
   } else {
@@ -2336,9 +2336,9 @@ GA.prep<-function(ASCII.dir,
   max.list <-list()
   SUGGESTS <- list()
   for(i in 1:n.layers){
-    n.levels<-length(unique.rast(r[[i]]))
+    n.levels<-length(unique(r[[i]]))
     if (n.levels <=15){
-      Level.val <- unique.rast(r[[i]])      
+      Level.val <- unique(r[[i]])      
       parm.type[i,1]<-"cat"
       parm.type[i,2]<-n.levels 
       parm.type[i,3]<-names[i]
@@ -2697,7 +2697,7 @@ Increase.starts.nG<-function(x){
   }
 }
 ###########################
-unique.rast<-raster::unique
+unique<-raster::unique
 
 get.EQ <-function(equation){   # Apply specified transformation
   if(is.numeric(equation)){

@@ -1,3 +1,7 @@
+ResistanceGA 2.0-15
+--------
+* Optimized categorical raster is now correctly saved to results file
+
 ResistanceGA 2.0-14
 --------
 * Fixed error when running SS_optim with categorical surfaces
