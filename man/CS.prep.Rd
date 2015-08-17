@@ -13,7 +13,7 @@ CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_
 
 \item{CS_Point.File}{The path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 
-\item{CS.program}{The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. See details below.}
+\item{CS.program}{The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. If using a Linux or Mac system, provide the full path to the "csrun.py" file. See details below.}
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
@@ -32,6 +32,8 @@ This function will prepare objects needed for running optimization functions
 
 ***NOTE: Double quotation used***
 This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
+
+The Linux and Mac versions are in development. Please let me know if you encounter errors.
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

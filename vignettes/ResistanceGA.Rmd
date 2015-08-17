@@ -33,7 +33,7 @@ A few words of caution. I have made every effort to run and test each function w
 Setup
 ------
 ### Install necessary software and packages
-If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` can only execute CIRCUITSCAPE on *WINDOWS* operating systems. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.
+If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` has only been tested on *WINDOWS* operating systems. Ability to run on Mac or Linux systems is in testing. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.
 
 *R Packages*    
 This package consists of several wrapper functions for implementing functions from other packages, and these will all be imported when `ResistanceGA` is installed.   
@@ -78,7 +78,7 @@ Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$da
 
 Example Function Use
 ------
-### Single surface optimization
+### Single surface optimization (with simulated data)
 
 Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. It is critical that there are **NO SPACES** in the specified directory as this will cause functions that interact with CIRCUITSCAPE to fail.  
 ```{r warning=FALSE, results='hide',message=FALSE, eval=FALSE}
@@ -216,8 +216,22 @@ filled.contour(Grid.Results$Plot.data,col=rainbow(30),xlab="Shape parameter",yla
 ```
 ![GRID.Surface.update](figure/Raindow_Surface.png)    
 
-Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates.       
+Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates.   
 
+
+### Minimum code for running ResistanceGA
+The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to to use the `r.tran` or `Run_CS` functions. You should only have to use the following functions (although you may want to change settings from defaults).
+```{r eval=FALSE}
+GA.inputs <- GA.prep(ASCII.dir=write.dir) 
+
+CS.inputs <- CS.prep(n.POPS=length(sample.locales),
+                     response=CS.response,
+                     CS_Point.File=paste0(write.dir,"samples.txt"),
+                     CS.program=CS.program)
+
+SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
+                       GA.inputs=GA.inputs)
+```
 
 # Optimzation using least cost paths   
 The above optimization can also be done using cost distances calculated in `gdistance`. This approach uses least cost paths between points, so it is a simpler representation of connectivity. However, optimization using `gdistance` is ~3x faster than optimization with CIRCUITSCAPE. This optimization took 86 iterations and 7 minutes to complete when run in parallel on 4 cores (`parallel = 4` in `GA.prep`)

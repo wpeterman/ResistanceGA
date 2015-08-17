@@ -982,12 +982,12 @@ if(class(r)[1]!='RasterLayer') {
 # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
 # hidden = TRUE  
 # Run Circuitscape
-if(CS.inputs$platform=="pc"){
+if(grepl("cs_run.exe",CS.inputs$CS.program)){
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
     CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
 } else {
   CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste("python", CS.inputs$CS.program, CS.ini), hidden)
+  CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
 }
  
   
@@ -1043,12 +1043,12 @@ Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.n
   # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
   hidden = TRUE  
   # Run Circuitscape
-  if(CS.inputs$platform=="pc"){
+  if(grepl("cs_run.exe",CS.inputs$CS.program)){
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
     CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
   } else {
     CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-    CS.Run.output<-system(paste("python", CS.inputs$CS.program, CS.ini), hidden)
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
   }
   
   CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
@@ -2155,7 +2155,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' @param n.POPS The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
-#' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. See details below. 
+#' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. If using a Linux or Mac system, provide the full path to the "csrun.py" file. See details below. 
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.
 # @param platform What computing platform are you using ("pc", "other"). This code has only been tested on Windows PC!!!
@@ -2170,6 +2170,8 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #'
 #' ***NOTE: Double quotation used***
 #' This is the current default for \code{CS.program}, but the directory may need to be changed depending upon your installation of CIRCUITSCAPE
+#' 
+#' The Linux and Mac versions are in development. Please let me know if you encounter errors.
 
 CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8, pairs_to_include=NULL){
   CS.exe_Test <- gsub("\"", "", CS.program)

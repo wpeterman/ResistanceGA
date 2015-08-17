@@ -33,7 +33,7 @@ A few words of caution. I have made every effort to run and test each function w
 Setup
 ------
 ### Install necessary software and packages
-If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` can only execute CIRCUITSCAPE on *WINDOWS* operating systems. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.
+If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` has only been tested on *WINDOWS* operating systems. Ability to run on Mac or Linux systems is in testing. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.
 
 *R Packages*    
 This package consists of several wrapper functions for implementing functions from other packages, and these will all be imported when `ResistanceGA` is installed.   
@@ -71,7 +71,7 @@ All of these figures were made with the `Plot.trans` function. This function ret
 Ricker.plot <- Plot.trans(PARM=c(1.5, 200),Resistance=c(1,10),transformation="Ricker")
 ```
 
-![plot of chunk Plot.trans.demo](figure/Plot.trans.demo1.png) 
+![plot of chunk Plot.trans.demo](figure/Plot.trans.demo-1.png) 
 
 ```r
 # Change title of plot
@@ -79,7 +79,7 @@ Ricker.plot$labels$title<-"Ricker Tansformation"
 Ricker.plot
 ```
 
-![plot of chunk Plot.trans.demo](figure/Plot.trans.demo2.png) 
+![plot of chunk Plot.trans.demo](figure/Plot.trans.demo-2.png) 
 
 ```r
 # Find original data value that now has maximum resistance
@@ -87,13 +87,13 @@ Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$da
 ```
 
 ```
-## [1] 2.357
+## [1] 2.356784
 ```
 
 
 Example Function Use
 ------
-### Single surface optimization
+### Single surface optimization (with simulated data)
 
 Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. It is critical that there are **NO SPACES** in the specified directory as this will cause functions that interact with CIRCUITSCAPE to fail.  
 
@@ -138,7 +138,7 @@ plot(continuous)
 plot(sample.locales, pch=16, col="blue", add=TRUE) # Add points
 ```
 
-![plot of chunk single.surface.plot](figure/single.surface.plot.png) 
+![plot of chunk single.surface.plot](figure/single.surface.plot-1.png) 
 
 
 ## Prepare data for optimization   
@@ -165,7 +165,7 @@ r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=co
 plot.t <- Plot.trans(PARM=c(2,275), Resistance=continuous, transformation="Monomolecular") 
 ```
 
-![plot of chunk monomolec.plot](figure/monomolec.plot.png) 
+![plot of chunk monomolec.plot](figure/monomolec.plot-1.png) 
 
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. `Run.CS` returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. This will be our response that we optimize on.
 
@@ -240,8 +240,23 @@ filled.contour(Grid.Results$Plot.data,col=rainbow(30),xlab="Shape parameter",yla
 ```
 ![GRID.Surface.update](figure/Raindow_Surface.png)    
 
-Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates.       
+Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates.   
 
+
+### Minimum code for running ResistanceGA
+The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to to use the `r.tran` or `Run_CS` functions. You should only have to use the following functions (although you may want to change settings from defaults).
+
+```r
+GA.inputs <- GA.prep(ASCII.dir=write.dir) 
+
+CS.inputs <- CS.prep(n.POPS=length(sample.locales),
+                     response=CS.response,
+                     CS_Point.File=paste0(write.dir,"samples.txt"),
+                     CS.program=CS.program)
+
+SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
+                       GA.inputs=GA.inputs)
+```
 
 # Optimzation using least cost paths   
 The above optimization can also be done using cost distances calculated in `gdistance`. This approach uses least cost paths between points, so it is a simpler representation of connectivity. However, optimization using `gdistance` is ~3x faster than optimization with CIRCUITSCAPE. This optimization took 86 iterations and 7 minutes to complete when run in parallel on 4 cores (`parallel = 4` in `GA.prep`)
@@ -315,21 +330,21 @@ plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
 ```
 
-![plot of chunk feature.sim](figure/feature.sim1.png) 
+![plot of chunk feature.sim](figure/feature.sim-1.png) 
 
 ```r
 plot(resistance_surfaces[[2]],main = resistance_surfaces[[2]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
 ```
 
-![plot of chunk feature.sim](figure/feature.sim2.png) 
+![plot of chunk feature.sim](figure/feature.sim-2.png) 
 
 ```r
 plot(resistance_surfaces[[3]],main = resistance_surfaces[[3]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
 ```
 
-![plot of chunk feature.sim](figure/feature.sim3.png) 
+![plot of chunk feature.sim](figure/feature.sim-3.png) 
 
 Write all three surfaces to a directory for use with CIRCUITSCAPE and run the `GA.prep` function (needed to combine surfaces). Also write the sample location file to the "MultipleSurfaces" directory.
 
@@ -357,7 +372,7 @@ Transform, reclassify, and combine the three resistance surfaces together. Use a
 plot.t <- Plot.trans(PARM=c(3.5,400),Resistance=continuous,transformation="Reverse Ricker") 
 ```
 
-![plot of chunk reverse.ricker](figure/reverse.ricker.png) 
+![plot of chunk reverse.ricker](figure/reverse.ricker-1.png) 
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`.   
 
