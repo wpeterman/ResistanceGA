@@ -1,9 +1,8 @@
 <!-- rmarkdown v1 -->
 <!--
-%\VignetteEngine{knitr::knitr}
+%\VignetteEngine{knitr::markdown}
 %\VignetteIndexEntry{A Vignette/Tutorial to use ResistanceGA}
 -->
-
 
 ResistanceGA
 =====
@@ -63,7 +62,7 @@ rm(list = ls())
 ```
 
 There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
-![Transformations](figure/Transformations.svg)
+![Transformations](figure/Transformations.png)
 
 All of these figures were made with the `Plot.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
 
@@ -229,14 +228,22 @@ What the `SS_optim` function does:
 To view the AICc response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relevant for single continuous surfaces.
 
 ```r
-Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=continuous, CS.inputs, write.dir=GA.inputs$Write.dir)
+Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),
+                            max=seq(50,500,by=75),
+                            transformation="Monomolecular",
+                            Resistance=continuous, 
+                            CS.inputs, 
+                            GA.inputs=GA.inputs)
 ```
 ![GRID.Surface](figure/grid_topo.png)      
 
 You can change the color scheme and color breaks by manually recreating the response surface from the generated data [default = topo.colors(20)]
 
 ```r
-filled.contour(Grid.Results$Plot.data,col=rainbow(30),xlab="Shape parameter",ylab="Maximum value parameter")
+filled.contour(Grid.Results$Plot.data,
+               col=rainbow(30),
+               xlab="Shape parameter",
+               ylab="Maximum value parameter")
 ```
 ![GRID.Surface.update](figure/Raindow_Surface.png)    
 
@@ -297,7 +304,12 @@ SS_RESULTS.gdist <- SS_optim(gdist.inputs=gdist.inputs,
                              GA.inputs=GA.inputs)
 
 # Grid search of response surface
-Grid.Results.gdist <- Grid.Search(shape=seq(1,4,by=0.1),max=seq(50,500,by=75),transformation="Monomolecular",Resistance=continuous, gdist.inputs=gdist.inputs, write.dir=GA.inputs$Write.dir)
+Grid.Results.gdist <- Grid.Search(shape=seq(1,4,by=0.1),
+                                  max=seq(50,500,by=75),
+                                  transformation="Monomolecular",
+                                  Resistance=continuous, 
+                                  gdist.inputs=gdist.inputs, 
+                                  GA.inputs=GA.inputs)
 ```
 
  ****
@@ -312,7 +324,8 @@ if("ResistanceGA_Examples"%in%dir("C:/")==FALSE)
 # Create a subdirectory for the second example
 dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces")) 
 
-write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
+# Directory to write .asc files and results
+write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      
 ```
 
 Extract other resistance surfaces from the 'resistance_surfaces' raster stack
@@ -389,7 +402,11 @@ PARM <- c(1, 250, 75, 6, 3.5, 150, 1, 350)
 #          350) # Second feature of feature surface   
 
 # Combine resistance surfaces
-Resist <- Combine_Surfaces(PARM=PARM, CS.inputs=CS.inputs, GA.inputs=GA.inputs, out=NULL, rescale = TRUE)
+Resist <- Combine_Surfaces(PARM=PARM, 
+                           CS.inputs=CS.inputs, 
+                           GA.inputs=GA.inputs, 
+                           out=NULL, 
+                           rescale = TRUE)
 
 # View combined surface
 plot(Resist,  main = "scaled composite resistance")
@@ -431,7 +448,14 @@ The multisurface optimization procedure has done a pretty good job of recovering
 ```r
 Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim@solution),2))
 colnames(Summary.table)<-c("Truth", "Optimized")
-row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2") 
+row.names(Summary.table)<-c("Category1", 
+                            "Category2", 
+                            "Category3", 
+                            "Transformation", 
+                            "Shape", 
+                            "Max", 
+                            "Feature1", 
+                            "Feature2") 
 ```
 ```
 Summary.table
@@ -466,8 +490,17 @@ pairs(ms.stack)
 If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` and `output="raster"` in `Run_CS`.
 
 ```r
-Resist.true <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist, CurrentMap=TRUE, output="raster")
-Resist.opt <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=optim.resist, CurrentMap=TRUE, output="raster")
+Resist.true <- Run_CS(CS.inputs=CS.inputs, 
+                      GA.inputs=GA.inputs, 
+                      r=Resist, 
+                      CurrentMap=TRUE, 
+                      output="raster")
+
+Resist.opt <- Run_CS(CS.inputs=CS.inputs, 
+                     GA.inputs=GA.inputs,
+                     r=optim.resist,
+                     CurrentMap=TRUE, 
+                     output="raster")
 
 # We can confirm that, like the resistance surfaces above, the CIRCUITSCAPE current maps are also correlated
 cs.stack <- stack(Resist.true, Resist.opt)

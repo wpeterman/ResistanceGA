@@ -11,8 +11,8 @@
 #' @param Resistance An R Raster object, or path to a .asc file
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
-#' @param write.dir Directory for writing intermeidate CIRCUITSCAPE files
-#' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs, gdist.inputs, write.dir)
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
+#' @usage Grid.Search(shape, max, transformation, Resistance, CS.inputs, gdist.inputs, GA.inputs)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @return This function will return a \code{filled.contour} plot. Additionally, an object with values that can be plotted with \code{filled.contour} to visualize the response surface
@@ -31,7 +31,7 @@
 
 
 
-Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, gdist.inputs=NULL, write.dir) {
+Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs) {
   if(class(Resistance)[1]!='RasterLayer') {  
     r <- raster(Resistance)
     r <- SCALE(r,0,10)
@@ -41,11 +41,23 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, 
    
   GRID <- expand.grid(shape,max)
   RESULTS <- matrix(nrow=nrow(GRID),ncol=3); colnames(RESULTS)<-c("shape","max","AICc")
-  EQ<-get.EQ(transformation)
+  if(!is.numeric(transformation)){
+    EQ<-get.EQ(transformation)
+  } else {
+    EQ <- transformation
+  }
 
 if(!is.null(CS.inputs)){
 for(i in 1:nrow(GRID)){
-  AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
+  # Modified 16 September 2015
+  AICc <- Resistance.Opt_single(PARM = c(EQ,t(GRID[i,])),
+                                Resistance = r,
+                                CS.inputs = CS.inputs, 
+                                Min.Max='min',
+                                GA.inputs = GA.inputs)
+                                
+  # Original function used
+  # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
   
   results<-as.matrix(cbind(GRID[i,],AICc))
   
@@ -53,7 +65,15 @@ for(i in 1:nrow(GRID)){
   }
 } else {
   for(i in 1:nrow(GRID)){
-    AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,gdist.inputs=gdist.inputs,Min.Max='min',write.dir=write.dir)
+    # Modified 16 September 2015
+    AICc <- Resistance.Opt_single(PARM = c(EQ,t(GRID[i,])),
+                                  Resistance = r,
+                                  CS.inputs = CS.inputs, 
+                                  Min.Max='min',
+                                  GA.inputs = GA.inputs)
+    
+    # Original function used
+    # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
     
     results<-as.matrix(cbind(GRID[i,],AICc))
     
@@ -1423,14 +1443,14 @@ rt<-proc.time()[3]-t1
 #' @return AIC value from mixed effect model
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, Min.Max='max',iter, quiet=FALSE){
+Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, Min.Max='max',iter=NULL, quiet=FALSE){
   t1<-proc.time()[3]
 
   
   EXPORT.dir<-GA.inputs$Write.dir
   ######
   r <- Resistance
-   
+  if(!is.null(iter)) {
   if(GA.inputs$surface.type[iter]=="cat"){
     PARM<-PARM/min(PARM)
     parm <-PARM
@@ -1490,7 +1510,60 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
       EQ <- "Distance"    
     } # End if-else     
   } # Close parameter type if-else 
-  
+  } else {
+    
+    r<-SCALE(r,0,10)
+    
+    # Set equation for continuous surface
+    equation <- floor(PARM[1]) # Parameter can range from 1-9.99
+    
+    # Read in resistance surface to be optimized
+    SHAPE <- (PARM[2])
+    Max.SCALE <- (PARM[3])
+    
+    # Apply specified transformation
+    rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+    if(rick.eq==TRUE & SHAPE>5){
+      equation<-9
+    }
+    
+    if(equation==1){
+      r <- Inv.Rev.Monomolecular(r,parm=PARM)
+      EQ <- "Inverse-Reverse Monomolecular"
+      
+    } else if(equation==5){
+      r <- Rev.Monomolecular(r,parm=PARM)      
+      EQ <- "Reverse Monomolecular"        
+      
+    } else if(equation==3){
+      r <- Monomolecular(r,parm=PARM)      
+      EQ <- "Monomolecular"
+      
+    } else if (equation==7) {
+      r <- Inv.Monomolecular(r,parm=PARM)      
+      EQ <- "Inverse Monomolecular"        
+      
+    } else if (equation==8) {
+      r <- Inv.Ricker(r,parm=PARM)
+      EQ <- "Inverse Ricker"  
+      
+    } else if (equation==4) {
+      r <- Ricker(r,parm=PARM)
+      EQ <- "Ricker"
+      
+    } else if (equation==6) {
+      r <- Rev.Ricker(r,parm=PARM)
+      EQ <- "Reverse Ricker"        
+      
+    } else if (equation==2) {
+      r <- Inv.Rev.Ricker(r,parm=PARM)
+      EQ <- "Inverse-Reverse Ricker"
+      
+    } else {
+      r <- (r*0)+1 #  Distance
+      EQ <- "Distance"    
+    } # End if-else     
+  } 
   File.name <- "resist_surface"
   if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
   r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
@@ -1532,8 +1605,10 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
 #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
     cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
-      if(GA.inputs$surface.type[iter]!="cat"){    
+    if(!is.null(iter)) {
+        if(GA.inputs$surface.type[iter]!="cat"){    
         cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
+          }
         }
       }
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      

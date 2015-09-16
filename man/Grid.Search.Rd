@@ -4,7 +4,7 @@
 \alias{Grid.Search}
 \title{Conduct grid search of response surface}
 \usage{
-Grid.Search(shape, max, transformation, Resistance, CS.inputs, gdist.inputs, write.dir)
+Grid.Search(shape, max, transformation, Resistance, CS.inputs, gdist.inputs, GA.inputs)
 }
 \arguments{
 \item{shape}{A vector of values for the shape parameter}
@@ -19,7 +19,7 @@ Grid.Search(shape, max, transformation, Resistance, CS.inputs, gdist.inputs, wri
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
-\item{write.dir}{Directory for writing intermeidate CIRCUITSCAPE files}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 }
 \value{
 This function will return a \code{filled.contour} plot. Additionally, an object with values that can be plotted with \code{filled.contour} to visualize the response surface

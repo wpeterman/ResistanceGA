@@ -1,3 +1,7 @@
+ResistanceGA 2.0-18
+--------
+* Updated Grid.Search function to use 'Resistance.Opt_single' function
+
 ResistanceGA 2.0-17
 --------
 * Beta version with capability to run on Mac or Linux systems

@@ -5,7 +5,8 @@
 \title{Optimize resistance surfaces individually}
 \usage{
 Resistance.Opt_single(PARM, Resistance, CS.inputs = NULL,
-  gdist.inputs = NULL, GA.inputs, Min.Max = "max", iter, quiet = FALSE)
+  gdist.inputs = NULL, GA.inputs, Min.Max = "max", iter = NULL,
+  quiet = FALSE)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.}
