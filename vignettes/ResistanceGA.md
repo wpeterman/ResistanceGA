@@ -103,7 +103,8 @@ if("ResistanceGA_Examples"%in%dir("C:/")==FALSE)
 # Create a subdirectory for the first example
 dir.create(file.path("C:/ResistanceGA_Examples/","SingleSurface")) 
 
-write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      # Directory to write .asc files and results
+# Directory to write .asc files and results
+write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      
 
 # Give path to CIRCUITSCAPE .exe file
 # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
