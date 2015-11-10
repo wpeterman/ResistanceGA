@@ -21,7 +21,7 @@ Resistance.tran(transformation, shape, max, r, out)
 R raster object
 }
 \description{
-Apply on the eight resistance transformations to a continuous resistance surface
+Apply one the eight resistance transformations to a continuous resistance surface
 }
 \details{
 Valid arguements for \code{transformation} are:\cr

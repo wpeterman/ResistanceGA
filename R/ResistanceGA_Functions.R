@@ -50,7 +50,7 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, 
 if(!is.null(CS.inputs)){
 for(i in 1:nrow(GRID)){
   # Modified 16 September 2015
-  AICc <- Resistance.Opt_single(PARM = c(EQ,t(GRID[i,])),
+  AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
                                 Resistance = r,
                                 CS.inputs = CS.inputs, 
                                 Min.Max='min',
@@ -66,7 +66,7 @@ for(i in 1:nrow(GRID)){
 } else {
   for(i in 1:nrow(GRID)){
     # Modified 16 September 2015
-    AICc <- Resistance.Opt_single(PARM = c(EQ,t(GRID[i,])),
+    AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
                                   Resistance = r,
                                   CS.inputs = CS.inputs, 
                                   Min.Max='min',
@@ -1159,6 +1159,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
 
   
   ######
+  select.trans <- GA.inputs$select.trans
   r <- GA.inputs$Resistance.stack
   
   for(i in 1:GA.inputs$n.layers){
@@ -1189,6 +1190,12 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         equation<-9
       }
       
+      if(equation %in% select.trans[[i]]) {
+        equation <- equation
+      } else {
+        equation <- 9
+      }
+    
       # Apply specified transformation
       if(equation==1){
         r[[i]] <- Inv.Rev.Monomolecular(rast,parm)
@@ -1252,7 +1259,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
 ###############################################################################  
 #' Apply transformation to continuous resistance surface
 #' 
-#' Apply on the eight resistance transformations to a continuous resistance surface
+#' Apply one the eight resistance transformations to a continuous resistance surface
 #' 
 #' @param transformation Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)
 #' @param shape Value of the shape parameter
@@ -1448,16 +1455,16 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
 
   
   EXPORT.dir<-GA.inputs$Write.dir
+  select.trans <- GA.inputs$select.trans
   ######
   r <- Resistance
-  if(!is.null(iter)) {
   if(GA.inputs$surface.type[iter]=="cat"){
     PARM<-PARM/min(PARM)
     parm <-PARM
     df <- data.frame(id=unique(r),PARM) # Data frame with original raster values and replacement values
     r <-subs(r,df)    
        
-  } else {
+  } else { ## Else continuous surface
     r<-SCALE(r,0,10)
     
     # Set equation for continuous surface
@@ -1466,6 +1473,11 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     # Read in resistance surface to be optimized
     SHAPE <- (PARM[2])
     Max.SCALE <- (PARM[3])
+    
+    ## If selected transformation is not in list, assign very large AIC
+    ## Use 99999 as 'ga' maximizes and the inverse of of the calculated AIC is used
+
+    if(equation %in% select.trans[[iter]]) {
     
     # Apply specified transformation
     rick.eq<-(equation==2||equation==4||equation==6||equation==8)
@@ -1509,7 +1521,145 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
       r <- (r*0)+1 #  Distance
       EQ <- "Distance"    
     } # End if-else     
-  } # Close parameter type if-else 
+  } # Close select transformation 
+ } # Close surface type if-else
+ 
+  ## If a surface was reclassified or transformed, apply the following
+  if((GA.inputs$surface.type[iter]=="cat") || (equation %in% select.trans[[iter]])){
+    File.name <- "resist_surface"
+    if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
+    r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
+    
+    
+    if(!is.null(CS.inputs)){
+      writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+      CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=r,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
+      
+      # Replace NA with 0...a workaround for errors when two points fall within the same cell.
+      # CS.resist[is.na(CS.resist)] <- 0
+      
+      # Run mixed effect model on each Circuitscape effective resistance
+      AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
+                                                 response=CS.inputs$response,
+                                                 ID=CS.inputs$ID,
+                                                 ZZ=CS.inputs$ZZ,
+                                                 REML=FALSE)))
+      ROW <- nrow(CS.inputs$ID)
+      
+    }  
+    
+    if(!is.null(gdist.inputs)){
+      cd <- Run_gdistance(gdist.inputs,r)
+      
+      AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                                                 response=gdist.inputs$response,
+                                                 ID=gdist.inputs$ID,
+                                                 ZZ=gdist.inputs$ZZ,
+                                                 REML=FALSE)))
+      ROW <- nrow(gdist.inputs$ID)
+    } 
+    
+    k<-length(PARM)+1
+    AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
+    
+    rt<-proc.time()[3]-t1  
+    if(quiet==FALSE){
+      cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
+      #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
+      cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
+      if(!is.null(iter)) {
+        if(GA.inputs$surface.type[iter]!="cat"){    
+          cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
+        }
+      }
+    }
+    AICc.out <- OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized
+  } else { 
+    ## Use -99999 as 'ga' maximizes
+    AICc.out <- -99999
+    
+    rt<-proc.time()[3]-t1  
+    if(quiet==FALSE){
+      cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
+      cat(paste0("\t", "AICc = ",AICc.out,"\n"))
+      if(!is.null(iter)) {
+        if(GA.inputs$surface.type[iter]!="cat"){    
+          cat(paste0("EXCLUDED TRANSFORMATION","\n","\n"))
+        }
+      }
+    }
+  }
+   return(AICc.out)
+}
+
+## FOR ASSESSING AICc of fitted models, not exported
+Resistance.Opt_AICc <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, Min.Max='max',iter=NULL, quiet=FALSE){
+  t1<-proc.time()[3]
+  
+  
+  EXPORT.dir<-GA.inputs$Write.dir
+  ######
+  r <- Resistance
+  if(!is.null(iter)) {
+    if(GA.inputs$surface.type[iter]=="cat"){
+      PARM<-PARM/min(PARM)
+      parm <-PARM
+      df <- data.frame(id=unique(r),PARM) # Data frame with original raster values and replacement values
+      r <-subs(r,df)    
+      
+    } else {
+      r<-SCALE(r,0,10)
+      
+      # Set equation for continuous surface
+      equation <- floor(PARM[1]) # Parameter can range from 1-9.99
+      
+      # Read in resistance surface to be optimized
+      SHAPE <- (PARM[2])
+      Max.SCALE <- (PARM[3])
+      
+      # Apply specified transformation
+      rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+      if(rick.eq==TRUE & SHAPE>5){
+        equation<-9
+      }
+      
+      if(equation==1){
+        r <- Inv.Rev.Monomolecular(r,parm=PARM)
+        EQ <- "Inverse-Reverse Monomolecular"
+        
+      } else if(equation==5){
+        r <- Rev.Monomolecular(r,parm=PARM)      
+        EQ <- "Reverse Monomolecular"        
+        
+      } else if(equation==3){
+        r <- Monomolecular(r,parm=PARM)      
+        EQ <- "Monomolecular"
+        
+      } else if (equation==7) {
+        r <- Inv.Monomolecular(r,parm=PARM)      
+        EQ <- "Inverse Monomolecular"        
+        
+      } else if (equation==8) {
+        r <- Inv.Ricker(r,parm=PARM)
+        EQ <- "Inverse Ricker"  
+        
+      } else if (equation==4) {
+        r <- Ricker(r,parm=PARM)
+        EQ <- "Ricker"
+        
+      } else if (equation==6) {
+        r <- Rev.Ricker(r,parm=PARM)
+        EQ <- "Reverse Ricker"        
+        
+      } else if (equation==2) {
+        r <- Inv.Rev.Ricker(r,parm=PARM)
+        EQ <- "Inverse-Reverse Ricker"
+        
+      } else {
+        r <- (r*0)+1 #  Distance
+        EQ <- "Distance"    
+      } # End if-else     
+    } # Close parameter type if-else 
   } else {
     
     r<-SCALE(r,0,10)
@@ -1568,7 +1718,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
   if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
   r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
   
-
+  
   if(!is.null(CS.inputs)){
     writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
     CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=r,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
@@ -1578,10 +1728,10 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     
     # Run mixed effect model on each Circuitscape effective resistance
     AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
-                                response=CS.inputs$response,
-                                ID=CS.inputs$ID,
-                                ZZ=CS.inputs$ZZ,
-                                REML=FALSE)))
+                                               response=CS.inputs$response,
+                                               ID=CS.inputs$ID,
+                                               ZZ=CS.inputs$ZZ,
+                                               REML=FALSE)))
     ROW <- nrow(CS.inputs$ID)
     
   }  
@@ -1590,27 +1740,27 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     cd <- Run_gdistance(gdist.inputs,r)
     
     AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-                                response=gdist.inputs$response,
-                                ID=gdist.inputs$ID,
-                                ZZ=gdist.inputs$ZZ,
-                                REML=FALSE)))
+                                               response=gdist.inputs$response,
+                                               ID=gdist.inputs$ID,
+                                               ZZ=gdist.inputs$ZZ,
+                                               REML=FALSE)))
     ROW <- nrow(gdist.inputs$ID)
   } 
-
+  
   k<-length(PARM)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
   
   rt<-proc.time()[3]-t1  
   if(quiet==FALSE){
     cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
-#     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
+    #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
     cat(paste0("\t", "AICc = ",round(AICc,4)),"\n")
     if(!is.null(iter)) {
-        if(GA.inputs$surface.type[iter]!="cat"){    
+      if(GA.inputs$surface.type[iter]!="cat"){    
         cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
-          }
-        }
       }
+    }
+  }
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized      
 }
 
@@ -2321,6 +2471,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)
+#' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.
 #' @param pop.mult Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.
 #' @param percent.elite Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.
 #' @param type Default is "real-valued"
@@ -2342,7 +2493,11 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' 
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
 #' 
-#' \code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your reposnse in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
+#' \code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
+#' 
+#' If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, all transformations are assessed. This must be specified as a list even if only a single surface is being optimized. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
+#' \code{select.trans = list("M", "A", "R", c(5,6))}\cr
+#' will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NULL} to accomodate this.
 #' 
 #' It is recommended to first run GA optimization with the default settings
 
@@ -2354,6 +2509,7 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' max.cat=2500,
 #' max.cont=2500,
 #' cont.shape=NULL,
+#' select.trans=NULL,
 #' Min.Max="max",
 #' pop.mult = 15,
 #' percent.elite = 0.05,
@@ -2378,6 +2534,7 @@ GA.prep<-function(ASCII.dir,
                   max.cat = 2500, 
                   max.cont = 2500,
                   cont.shape = NULL,
+                  select.trans = NULL,
                   Min.Max ='max',
                   pop.mult = 15,
                   percent.elite = 0.05,
@@ -2435,6 +2592,7 @@ GA.prep<-function(ASCII.dir,
   min.list <- list()
   max.list <-list()
   SUGGESTS <- list()
+  eqs <- list()
   for(i in 1:n.layers){
     n.levels<-length(unique(r[[i]]))
     if (n.levels <=15){
@@ -2444,14 +2602,25 @@ GA.prep<-function(ASCII.dir,
       parm.type[i,3]<-names[i]
       min.list[[i]]<-c(1,rep(min.cat,(n.levels-1))) 
       max.list[[i]]<-c(1,rep(max.cat,(n.levels-1)))
+      if(is.null(select.trans)){
+        eqs[[i]] <- NULL
+      } else {
+        eqs[[i]] <- eq.set(select.trans[[i]])
+      }
+      
       
     } else {
       parm.type[i,1]<-"cont"
       parm.type[i,2]<-3
       parm.type[i,3]<-names[i]
       min.list[[i]]<-c(1,.001,.001) # eq, shape/gaus.opt, max, gaus.sd
-      max.list[[i]]<-c(9.99,15,max.cont)     
-    }
+      max.list[[i]]<-c(9.99,15,max.cont)  
+      if(is.null(select.trans)){
+        eqs[[i]] <- NULL
+      } else {
+        eqs[[i]] <- eq.set(select.trans[[i]])
+      }
+      }
   }
   
   colnames(parm.type)<-c("type","n.parm","name")   
@@ -2481,7 +2650,7 @@ GA.prep<-function(ASCII.dir,
   }
   SUGGESTS <-matrix(unlist(SUGGESTS), nrow=nrow(SUGGESTS[[1]]), byrow=F)
   
-  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.DIR, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation, parallel=parallel,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
+  list(parm.index=parm.index,ga.min=ga.min,ga.max=ga.max,select.trans=eqs,surface.type=surface.type,parm.type=parm.type,Resistance.stack=r,n.layers=n.layers,layer.names=names,pop.size=pop.size, min.list=min.list,max.list=max.list, SUGGESTS=SUGGESTS,ASCII.dir=ASCII.dir, Results.dir=Results.DIR, Write.dir=Write.dir,Plots.dir=Plots.dir,type= type, pcrossover=pcrossover, pmutation=pmutation, crossover=crossover, maxiter=maxiter, run=run, keepBest=keepBest, population=population,selection=selection,mutation=mutation, parallel=parallel,pop.mult = pop.mult, percent.elite = percent.elite,Min.Max=Min.Max, seed=seed, quiet = quiet)  
   
 }
 #####################################
@@ -2798,6 +2967,28 @@ Increase.starts.nG<-function(x){
 }
 ###########################
 unique<-raster::unique
+
+eq.set <- function(include.list) {
+  out <- vector(mode = "list", length = length(include.list))
+  for(i in seq_along(include.list)){
+  if(include.list[[i]] == "A"){
+    out <- 1:9
+    return(out)
+  } else if(include.list[[i]] == "M") {
+    out <- c(1,3,5,7)
+    return(out)
+  } else if(include.list[[i]] == "R") {
+    out <- c(2,4,6,8)
+    return(out)
+  } else if(!is.na(match(include.list[[i]],1:9))){
+    out <- include.list
+    return(out)
+  } else {
+    cat("The specified transformations to assess are not valid. \n
+        Please see Details of the GA.prep.")
+  }
+  }
+}
 
 get.EQ <-function(equation){   # Apply specified transformation
   if(is.numeric(equation)){

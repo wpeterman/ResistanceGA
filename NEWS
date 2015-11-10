@@ -1,3 +1,7 @@
+ResistanceGA 2.1-0
+--------
+* Option to select specific transformations when optimizing
+
 ResistanceGA 2.0-18
 --------
 * Updated Grid.Search function to use 'Resistance.Opt_single' function

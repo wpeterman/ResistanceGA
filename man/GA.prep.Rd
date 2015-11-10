@@ -10,6 +10,7 @@ min.cat=1e-04,
 max.cat=2500,
 max.cont=2500,
 cont.shape=NULL,
+select.trans=NULL,
 Min.Max="max",
 pop.mult = 15,
 percent.elite = 0.05,
@@ -40,6 +41,8 @@ quiet = FALSE)
 \item{max.cont}{The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)}
 
 \item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)}
+
+\item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.}
 
 \item{Min.Max}{Define whether the optimization function should be minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria}
 
@@ -84,7 +87,11 @@ This function prepares and compiles objects and commands for optimization with t
 \details{
 Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
 
-\code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your reposnse in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
+\code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
+
+If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, all transformations are assessed. This must be specified as a list even if only a single surface is being optimized. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
+\code{select.trans = list("M", "A", "R", c(5,6))}\cr
+will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NULL} to accomodate this.
 
 It is recommended to first run GA optimization with the default settings
 }
