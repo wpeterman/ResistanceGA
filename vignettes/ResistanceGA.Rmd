@@ -1,8 +1,17 @@
-<!-- rmarkdown v1 -->
-<!--
-%\VignetteEngine{knitr::markdown}
-%\VignetteIndexEntry{A Vignette/Tutorial to use ResistanceGA}
--->
+---
+title: "A Vignette/Tutorial to use ResistanceGA"
+author: "Bill Peterman"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ResistanceGA User Guide}
+  \usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 ResistanceGA
 =====
