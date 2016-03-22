@@ -1,6 +1,6 @@
 Package: ResistanceGA
 Title: Optimize resistance surfaces using genetic algorithms
-Version: 2.1-0
+Version: 2.2-0
 Author: Bill Peterman <Bill.Peterman@gmail.com>
 Maintainer: Bill Peterman <bill.peterman@gmail.com>
 Description: This package contains functions to optimize
@@ -19,8 +19,10 @@ Imports:
     GA,
     lme4 (>= 1.0),
     gdistance,
-    Matrix
+    Matrix, 
+    MuMIn
 Suggests:
     knitr
 License: GPL (>= 2)
 LazyData: true
+RoxygenNote: 5.0.1

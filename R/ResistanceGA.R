@@ -19,6 +19,7 @@
 #' @import ggplot2 raster GA lme4 gdistance
 #' @importFrom Matrix fac2sparse
 #' @importFrom akima interp
+#' @importFrom MuMIn r.squaredGLMM
 #' @importFrom plyr arrange rbind.fill ldply
 #' @references Please cite: 
 #' Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413. \href{http://goo.gl/RJb6Go}{Peterman et al.}

@@ -1,3 +1,9 @@
+ResistanceGA 2.2-0
+--------
+* Updated default transformation plot output
+* Added pseudo R-squared measures to output tables of optimized surfaces
+* Updated function for specifying continuous surface transformations. It is no longer necessary to specify this if all transformations are to be assessed.
+
 ResistanceGA 2.1-0
 --------
 * Option to select specific transformations when optimizing

@@ -144,15 +144,18 @@ Run the `GA.prep` and `CS.prep` functions
 ```{r eval=FALSE}
 # Set the random number seed to reproduce the results presented
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
-                   max.cat=500,
-                   max.cont=500,
-                   seed = 555) 
+                     max.cat=500,
+                     max.cont=500,
+                     select.trans = "A",
+                     seed = 555) 
 
 CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                   CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.program=CS.program) 
+                     CS_Point.File=paste0(write.dir,"samples.txt"),
+                     CS.program=CS.program) 
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet.
+
+`select.trans` allows you to specify which transformations can be applied to a surface during optimization. "A" = All; "M" = Monomolecular only; "R" = Ricker only. By default, all transformations will be assessed when a continuous surface is optimized. See `GA.prep` documentation for more details.
 
 Transform raw continuous surface using the `Resistance.tran` function to apply one of the eight transformations, and then view the transformation using `Plot.trans`. Note that `Plot.trans` returns a `ggplot2` object as well as the plot. Therefore you can manipulate and modify the plot as desired.
 ```{r monomolec.plot, eval = FALSE}
@@ -170,9 +173,9 @@ CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 Rerun `CS.prep` including the newly created `CS.response`
 ```{r eval=FALSE}
 CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                   response=CS.response,
-                   CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.program=CS.program)
+                     response=CS.response,
+                     CS_Point.File=paste0(write.dir,"samples.txt"),
+                     CS.program=CS.program)
 ```
 
 Run the Single surface optimization function (`SS_optim`). Running this example with the default settings
