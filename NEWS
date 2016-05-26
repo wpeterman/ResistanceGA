@@ -1,3 +1,7 @@
+ResistanceGA 2.2-1
+--------
+* Fixed bug in multi-surface optimization function
+
 ResistanceGA 2.2-0
 --------
 * Updated default transformation plot output

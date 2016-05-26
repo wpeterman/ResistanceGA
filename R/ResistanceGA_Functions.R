@@ -670,6 +670,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   return(multi.GA_nG)
   } 
   
+  #### Optimize using gdistance ####
   if(!is.null(gdist.inputs)){
         t1<-proc.time()[3]
       multi.GA_nG <-ga(type= "real-valued",
@@ -1195,7 +1196,7 @@ Run_gdistance <- function(gdist.inputs, r){
 #'    \tab 9 = "Distance"\cr
 #'    }
 #' 
-#' The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverasge of parameter space.
+#' The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverage of parameter space.
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
 #' @usage Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale)
 #' @export
@@ -1291,7 +1292,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
         EQ <- "Inverse-Reverse Ricker"
         
       } else {
-        r[[i]] <- (rast*0) #+ 1 #  Cancel layer...set to zero
+        r[[i]] <- (rast*0) + 1 #  Cancel layer...set to zero
       } # End if-else  
     } # Close parameter type if-else  
   } # Close layer loop
