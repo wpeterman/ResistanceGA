@@ -38,7 +38,7 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, 
   } else {    
     r <-SCALE(Resistance,0,10)
   }
-   
+  
   GRID <- expand.grid(shape,max)
   RESULTS <- matrix(nrow=nrow(GRID),ncol=3); colnames(RESULTS)<-c("shape","max","AICc")
   if(!is.numeric(transformation)){
@@ -46,49 +46,49 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, 
   } else {
     EQ <- transformation
   }
-
-if(!is.null(CS.inputs)){
-for(i in 1:nrow(GRID)){
-  # Modified 16 September 2015
-  AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
-                                Resistance = r,
-                                CS.inputs = CS.inputs, 
-                                Min.Max='min',
-                                GA.inputs = GA.inputs)
-                                
-  # Original function used
-  # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
   
-  results<-as.matrix(cbind(GRID[i,],AICc))
-  
-  RESULTS[i,]<-results  
-  }
-} else {
-  for(i in 1:nrow(GRID)){
-    # Modified 16 September 2015
-    AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
+  if(!is.null(CS.inputs)){
+    for(i in 1:nrow(GRID)){
+      # Modified 16 September 2015
+      AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
                                   Resistance = r,
                                   CS.inputs = CS.inputs, 
                                   Min.Max='min',
                                   GA.inputs = GA.inputs)
-    
-    # Original function used
-    # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
-    
-    results<-as.matrix(cbind(GRID[i,],AICc))
-    
-    RESULTS[i,]<-results  
+      
+      # Original function used
+      # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
+      
+      results<-as.matrix(cbind(GRID[i,],AICc))
+      
+      RESULTS[i,]<-results  
+    }
+  } else {
+    for(i in 1:nrow(GRID)){
+      # Modified 16 September 2015
+      AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
+                                  Resistance = r,
+                                  CS.inputs = CS.inputs, 
+                                  Min.Max='min',
+                                  GA.inputs = GA.inputs)
+      
+      # Original function used
+      # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
+      
+      results<-as.matrix(cbind(GRID[i,],AICc))
+      
+      RESULTS[i,]<-results  
+    }
   }
-}
-RESULTS <- data.frame(RESULTS)
-Results.mat <- interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
-filled.contour(Results.mat,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
-
-AICc<-RESULTS
-colnames(AICc)<-c("shape","max","AICc")
-Results.mat<-list(Plot.data=Results.mat,AICc=AICc)
-
-return(Results.mat)
+  RESULTS <- data.frame(RESULTS)
+  Results.mat <- interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
+  filled.contour(Results.mat,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
+  
+  AICc<-RESULTS
+  colnames(AICc)<-c("shape","max","AICc")
+  Results.mat<-list(Plot.data=Results.mat,AICc=AICc)
+  
+  return(Results.mat)
 }
 ########################################################################################  
 ############ Single command function to execute single surface optimization ############ 
@@ -127,371 +127,375 @@ SS_optim <- function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, nlm=FALSE, di
     # Processing of categorical surfaces  
     if(!is.null(CS.inputs)){
       if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
-    if (GA.inputs$surface.type[i]=='cat'){
-      cnt1 <- cnt1+1    
-      names(r)<-GA.inputs$layer.names[i]
-      
-      single.GA <-ga(type= "real-valued",
-                     fitness=Resistance.Opt_single,
-                     Resistance=r, 
-                     population = GA.inputs$population,
-                     selection = GA.inputs$selection,
-                     pcrossover=GA.inputs$pcrossover,
-                     pmutation=GA.inputs$pmutation,
-                     crossover=GA.inputs$crossover,
-                     Min.Max=GA.inputs$Min.Max,
-                     GA.inputs=GA.inputs,
-                     CS.inputs=CS.inputs, 
-                     min=GA.inputs$min.list[[i]],
-                     max=GA.inputs$max.list[[i]],
-                     popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                     maxiter=GA.inputs$maxiter,
-                     run=GA.inputs$run,
-                     keepBest=GA.inputs$keepBest,
-                     elitism=GA.inputs$percent.elite, 
-                     mutation = GA.inputs$mutation,
-                     seed = GA.inputs$seed,
-                     iter=i,
-                     quiet = GA.inputs$quiet)
-      
-      single.GA@solution <- single.GA@solution/min(single.GA@solution)
-      df <- data.frame(id=unique(r),t(single.GA@solution) )
-      r <-subs(r,df)
-      names(r)<-GA.inputs$layer.names[i]
-      
-      Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
-      
-      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
-                       genetic.dist=CS.inputs$response,
-                       plot.dir=GA.inputs$Plots.dir,
-                       type="categorical",
-                       ID = CS.inputs$ID, 
-                       ZZ = CS.inputs$ZZ )
-      
-      fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
-                                          pairwise.genetic = CS.inputs$response, 
-                                          REML = F,
-                                          ID = CS.inputs$ID, 
-                                          ZZ = CS.inputs$ZZ ))
-  
-   
-      RS <- data.frame(GA.inputs$layer.names[i],
-                       -single.GA@fitnessValue,
-                       fit.stats[[1]],
-                       fit.stats[[2]],
-                       single.GA@solution)
-      
-      k <- GA.inputs$parm.type$n.parm[i]
-      Features <- matrix()
-      for(z in 1:(k)){
-        feature <- paste0("Feature",z)
-        Features[z]<-feature
-      }
-      
-      colnames(RS) <- c("Surface","AICc","R2m", "R2c", Features)
-      
-      RESULTS.cat[[cnt1]] <- RS
-     
-    } else {   # Processing of continuous surfaces   
-      cnt2 <- cnt2+1    
-      r<-SCALE(r,0,10)
-      names(r)<-GA.inputs$layer.names[i]
-      
-      single.GA <-ga(type= "real-valued",
-                     fitness=Resistance.Opt_single,
-                     Resistance=r, 
-                     population = GA.inputs$population,
-                     selection = GA.inputs$selection,
-                     pcrossover=GA.inputs$pcrossover,
-                     pmutation=GA.inputs$pmutation,
-                     crossover=GA.inputs$crossover,
-                     Min.Max=GA.inputs$Min.Max,
-                     GA.inputs=GA.inputs,
-                     CS.inputs=CS.inputs, 
-                     min=GA.inputs$min.list[[i]],
-                     max=GA.inputs$max.list[[i]],
-                     popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                     maxiter=GA.inputs$maxiter,
-                     run=GA.inputs$run,
-                     keepBest=GA.inputs$keepBest,
-                     elitism=GA.inputs$percent.elite, 
-                     mutation = GA.inputs$mutation,
-                     seed = GA.inputs$seed,
-                     iter=i,
-                     quiet = GA.inputs$quiet) 
-      
-      # Using GA results, optimize with nlm  
-      start.vals <- single.GA@solution[-1]
-      
-     if(nlm==TRUE){
-      # Informed start values; these are the optimized values from the single parameter optimization
-      EQ <-get.EQ(single.GA@solution[1])
-      Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Write.dir)
-      
-      OPTIM <- Resistance.Optimization_cont.nlm(PARM=(Optim.nlm$estimate),Resistance=r, equation=single.GA@solution[1],get.best=TRUE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Results.dir)
-      
-      Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
-      
-      Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
-      
-      RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
-      colnames(RS) <- c("Surface","AICc","R2m", "R2c","Equation","shape","max")
-      RESULTS.cont[[cnt2]] <- RS
-     
-      } else {
-        EQ <-get.EQ(single.GA@solution[1])
-        r.tran <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
-        names(r.tran)<-GA.inputs$layer.names[i]
-      
-        Run_CS(CS.inputs,GA.inputs,r.tran,EXPORT.dir=GA.inputs$Results.dir)
-      
-        Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
+      if (GA.inputs$surface.type[i]=='cat'){
+        cnt1 <- cnt1+1    
+        names(r)<-GA.inputs$layer.names[i]
         
-        Plot.trans(PARM=single.GA@solution[-1], 
-                   Resistance=GA.inputs$Resistance.stack[[i]], 
-                   transformation=EQ, 
-                   print.dir=GA.inputs$Plots.dir)
+        single.GA <-ga(type= "real-valued",
+                       fitness=Resistance.Opt_single,
+                       Resistance=r, 
+                       population = GA.inputs$population,
+                       selection = GA.inputs$selection,
+                       pcrossover=GA.inputs$pcrossover,
+                       pmutation=GA.inputs$pmutation,
+                       crossover=GA.inputs$crossover,
+                       Min.Max=GA.inputs$Min.Max,
+                       GA.inputs=GA.inputs,
+                       CS.inputs=CS.inputs, 
+                       min=GA.inputs$min.list[[i]],
+                       max=GA.inputs$max.list[[i]],
+                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
+                       maxiter=GA.inputs$maxiter,
+                       run=GA.inputs$run,
+                       keepBest=GA.inputs$keepBest,
+                       elitism=GA.inputs$percent.elite, 
+                       mutation = GA.inputs$mutation,
+                       seed = GA.inputs$seed,
+                       iter=i,
+                       quiet = GA.inputs$quiet)
         
-        fit.stats <- r.squaredGLMM(MLPE.lmm(REML = F,
-                                            resistance = paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
+        single.GA@solution <- single.GA@solution/min(single.GA@solution)
+        df <- data.frame(id=unique(r),t(single.GA@solution) )
+        r <-subs(r,df)
+        names(r)<-GA.inputs$layer.names[i]
+        
+        Run_CS(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Results.dir)
+        
+        Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
+                         genetic.dist=CS.inputs$response,
+                         plot.dir=GA.inputs$Plots.dir,
+                         type="categorical",
+                         ID = CS.inputs$ID, 
+                         ZZ = CS.inputs$ZZ )
+        
+        fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
                                             pairwise.genetic = CS.inputs$response, 
+                                            REML = F,
                                             ID = CS.inputs$ID, 
-                                            ZZ = CS.inputs$ZZ))
-          
+                                            ZZ = CS.inputs$ZZ ))
+        
+        
         RS <- data.frame(GA.inputs$layer.names[i],
                          -single.GA@fitnessValue,
                          fit.stats[[1]],
                          fit.stats[[2]],
-                         get.EQ(single.GA@solution[1]),
-                         single.GA@solution[2],
-                         single.GA@solution[3])
+                         single.GA@solution)
         
-      colnames(RS) <- c("Surface","AICc","R2m", "R2c","Equation","shape","max")
-      RESULTS.cont[[cnt2]] <- RS
-      }     
-    } # Close if-else  
-    if (dist_mod==TRUE){
-      r <- reclassify(r, c(-Inf,Inf, 1))
-      names(r)<-"dist"
-      Run_CS(CS.inputs,GA.inputs,r)
-      Dist.AIC <- AIC(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
-                               pairwise.genetic=CS.inputs$response,
-                               REML=FALSE,
-                               ID=CS.inputs$ID,
-                               ZZ=CS.inputs$ZZ))
-      
-      fit.stats <- r.squaredGLMM(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
-                               pairwise.genetic=CS.inputs$response,
-                               REML=FALSE,
-                               ID=CS.inputs$ID,
-                               ZZ=CS.inputs$ZZ))
-      k<-2
-  AICc <- (Dist.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-  Dist.AICc<-data.frame("Distance", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Dist.AICc)<-c("Surface","AICc","R2m", "R2c")      
-    }
-  
-  if(null_mod==TRUE){
-    response=CS.inputs$response
+        k <- GA.inputs$parm.type$n.parm[i]
+        Features <- matrix()
+        for(z in 1:(k)){
+          feature <- paste0("Feature",z)
+          Features[z]<-feature
+        }
         
-    dat<-data.frame(CS.inputs$ID,response=CS.inputs$response)
-    colnames(dat) <- c("pop1", "pop2","response")
+        colnames(RS) <- c("Surface","AICc","R2m", "R2c", Features)
         
-    # Fit model
-    mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
-    mod$reTrms$Zt <- CS.inputs$ZZ
-    dfun <- do.call(mkLmerDevfun,mod)
-    opt <- optimizeLmer(dfun)
-    Null.AIC <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr)) 
-    fit.stats <- r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-    k<-1
-    AICc <- (Null.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-    Null.AICc<-data.frame("Null", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Null.AICc)<-c("Surface","AICc","R2m", "R2c")  
-     }
-  
-    }
-  
-###############################################
-if(!is.null(gdist.inputs)){
-    if (GA.inputs$surface.type[i]=='cat'){
-      cnt1 <- cnt1+1    
-      names(r)<-GA.inputs$layer.names[i]
-      
-      single.GA <-ga(type= "real-valued",
-                     fitness=Resistance.Opt_single,
-                     Resistance=r, 
-                     population = GA.inputs$population,
-                     selection = GA.inputs$selection,
-                     pcrossover=GA.inputs$pcrossover,
-                     pmutation=GA.inputs$pmutation,
-                     crossover=GA.inputs$crossover,
-                     Min.Max=GA.inputs$Min.Max,
-                     GA.inputs=GA.inputs,
-                     gdist.inputs=gdist.inputs, 
-                     min=GA.inputs$min.list[[i]],
-                     max=GA.inputs$max.list[[i]],
-                     parallel = GA.inputs$parallel,
-                     popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                     maxiter=GA.inputs$maxiter,
-                     run=GA.inputs$run,
-                     keepBest=GA.inputs$keepBest,
-                     elitism=GA.inputs$percent.elite, 
-                     mutation = GA.inputs$mutation,
-                     seed = GA.inputs$seed,
-                     iter=i,
-                     quiet = GA.inputs$quiet)
-      
-      single.GA@solution <- single.GA@solution/min(single.GA@solution)
-      df <- data.frame(id=unique(r),t(single.GA@solution) )
-      r <-subs(r,df)
-      NAME<-GA.inputs$layer.names[i]
-      names(r)<-NAME
-      
-      cd <- Run_gdistance(gdist.inputs,r)
-      save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
-      writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
-      Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical", name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
-      fit.stats <- r.squaredGLMM(MLPE.lmm2(resistance = cd,pairwise.genetic = gdist.inputs$response,REML = F,  ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ))
-      
-      RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue, fit.stats[[1]], fit.stats[[2]], single.GA@solution)
-      k=GA.inputs$parm.type$n.parm[i]
-      Features <- matrix()
-      for(z in 1:(k)){
-        feature <- paste0("Feature",z)
-        Features[z]<-feature
+        RESULTS.cat[[cnt1]] <- RS
+        
+      } else {   # Processing of continuous surfaces   
+        cnt2 <- cnt2+1    
+        r<-SCALE(r,0,10)
+        names(r)<-GA.inputs$layer.names[i]
+        
+        single.GA <-ga(type= "real-valued",
+                       fitness=Resistance.Opt_single,
+                       Resistance=r, 
+                       population = GA.inputs$population,
+                       selection = GA.inputs$selection,
+                       pcrossover=GA.inputs$pcrossover,
+                       pmutation=GA.inputs$pmutation,
+                       crossover=GA.inputs$crossover,
+                       Min.Max=GA.inputs$Min.Max,
+                       GA.inputs=GA.inputs,
+                       CS.inputs=CS.inputs, 
+                       min=GA.inputs$min.list[[i]],
+                       max=GA.inputs$max.list[[i]],
+                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
+                       maxiter=GA.inputs$maxiter,
+                       run=GA.inputs$run,
+                       keepBest=GA.inputs$keepBest,
+                       elitism=GA.inputs$percent.elite, 
+                       mutation = GA.inputs$mutation,
+                       seed = GA.inputs$seed,
+                       iter=i,
+                       quiet = GA.inputs$quiet) 
+        
+        # Using GA results, optimize with nlm  
+        start.vals <- single.GA@solution[-1]
+        
+        if(nlm==TRUE){
+          # Informed start values; these are the optimized values from the single parameter optimization
+          EQ <-get.EQ(single.GA@solution[1])
+          Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Write.dir)
+          
+          OPTIM <- Resistance.Optimization_cont.nlm(PARM=(Optim.nlm$estimate),Resistance=r, equation=single.GA@solution[1],get.best=TRUE,CS.inputs=CS.inputs,Min.Max='min',write.dir=GA.inputs$Results.dir)
+          
+          Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
+          
+          Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
+          
+          RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
+          colnames(RS) <- c("Surface","AICc","R2m", "R2c","Equation","shape","max")
+          RESULTS.cont[[cnt2]] <- RS
+          
+        } else {
+          EQ <-get.EQ(single.GA@solution[1])
+          r.tran <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
+          names(r.tran)<-GA.inputs$layer.names[i]
+          
+          Run_CS(CS.inputs,GA.inputs,r.tran,EXPORT.dir=GA.inputs$Results.dir)
+          
+          Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
+          
+          Plot.trans(PARM=single.GA@solution[-1], 
+                     Resistance=GA.inputs$Resistance.stack[[i]], 
+                     transformation=EQ, 
+                     print.dir=GA.inputs$Plots.dir)
+          
+          fit.stats <- r.squaredGLMM(MLPE.lmm(REML = F,
+                                              resistance = paste0(GA.inputs$Results.dir,GA.inputs$layer.names[i],"_resistances.out"),
+                                              pairwise.genetic = CS.inputs$response, 
+                                              ID = CS.inputs$ID, 
+                                              ZZ = CS.inputs$ZZ))
+          
+          RS <- data.frame(GA.inputs$layer.names[i],
+                           -single.GA@fitnessValue,
+                           fit.stats[[1]],
+                           fit.stats[[2]],
+                           get.EQ(single.GA@solution[1]),
+                           single.GA@solution[2],
+                           single.GA@solution[3])
+          
+          colnames(RS) <- c("Surface","AICc","R2m", "R2c","Equation","shape","max")
+          RESULTS.cont[[cnt2]] <- RS
+        }     
+      } # Close if-else  
+      if (dist_mod==TRUE){
+        r <- reclassify(r, c(-Inf,Inf, 1))
+        names(r)<-"dist"
+        Run_CS(CS.inputs,GA.inputs,r)
+        Dist.AIC <- AIC(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
+                                 pairwise.genetic=CS.inputs$response,
+                                 REML=FALSE,
+                                 ID=CS.inputs$ID,
+                                 ZZ=CS.inputs$ZZ))
+        
+        fit.stats <- r.squaredGLMM(MLPE.lmm(resistance=paste0(GA.inputs$Write.dir,"dist_resistances.out"),
+                                            pairwise.genetic=CS.inputs$response,
+                                            REML=FALSE,
+                                            ID=CS.inputs$ID,
+                                            ZZ=CS.inputs$ZZ))
+        k<-2
+        AICc <- (Dist.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
+        Dist.AICc<-data.frame("Distance", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Dist.AICc)<-c("Surface","AICc","R2m", "R2c")      
       }
       
-      colnames(RS)<-c("Surface","AICc","R2m", "R2c", Features)
+      if(null_mod==TRUE){
+        response=CS.inputs$response
+        
+        dat<-data.frame(CS.inputs$ID,response=CS.inputs$response)
+        colnames(dat) <- c("pop1", "pop2","response")
+        
+        # Fit model
+        mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
+        mod$reTrms$Zt <- CS.inputs$ZZ
+        dfun <- do.call(mkLmerDevfun,mod)
+        opt <- optimizeLmer(dfun)
+        Null.AIC <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr)) 
+        fit.stats <- r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+        k<-1
+        AICc <- (Null.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
+        Null.AICc<-data.frame("Null", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Null.AICc)<-c("Surface","AICc","R2m", "R2c")  
+      }
       
-      RESULTS.cat[[cnt1]]<-RS
-      
-    } else {   # Processing of continuous surfaces   
-      cnt2 <- cnt2+1    
-      r<-SCALE(r,0,10)
-      names(r)<-GA.inputs$layer.names[i]
-      
-      single.GA <-ga(type= "real-valued",
-                     fitness=Resistance.Opt_single,
-                     Resistance=r, 
-                     population = GA.inputs$population,
-                     selection = GA.inputs$selection,
-                     pcrossover=GA.inputs$pcrossover,
-                     pmutation=GA.inputs$pmutation,
-                     crossover=GA.inputs$crossover,
-                     Min.Max=GA.inputs$Min.Max,
-                     GA.inputs=GA.inputs,
-                     gdist.inputs=gdist.inputs, 
-                     min=GA.inputs$min.list[[i]],
-                     max=GA.inputs$max.list[[i]],
-                     parallel = GA.inputs$parallel,
-                     popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
-                     maxiter=GA.inputs$maxiter,
-                     run=GA.inputs$run,
-                     keepBest=GA.inputs$keepBest,
-                     elitism=GA.inputs$percent.elite, 
-                     mutation = GA.inputs$mutation,
-                     seed = GA.inputs$seed,
-                     iter=i,
-                     quiet = GA.inputs$quiet) 
-      
-      # Using GA results, optimize with nlm  
-      start.vals <- single.GA@solution[-1]
-      
-      if(nlm==TRUE){
-        # Informed start values; these are the optimized values from the single parameter optimization
-        EQ <-get.EQ(single.GA@solution[1])
-        Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,gdist.inputs=gdist.inputs,Min.Max='min',write.dir=GA.inputs$Write.dir)
-        
-        r<-Resistance.tran(transformation=EQ,shape=Optim.nlm$estimate[1],max=Optim.nlm$estimate[2],r=r,out=GA.inputs$Results.dir)
-        
-        names(r)<-GA.inputs$layer.names[i]        
-        NAME<-GA.inputs$layer.names[i]        
-        
-        cd <- Run_gdistance(gdist.inputs,r)
-        save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
-        write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,"_lcp_dist",".csv"),sep = ",", row.names = F, col.names = F)
-        writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)  
-        
-        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
-                
-        Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
-        
-        fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = cd,pairwise.genetic = gdist.inputs$response,REML = F,  ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ))
-        
-        RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue, fit.stats[[1]], fit.stats[[2]], single.GA@solution)
-        
-        # RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
-        colnames(RS) <- c("Surface","AICc", "R2m", "R2c", "Equation","shape","max")
-        RESULTS.cont[[cnt2]] <- RS
-        
-      } else {
-        EQ <-get.EQ(single.GA@solution[1])
-        r <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
-        names(r)<-GA.inputs$layer.names[i]        
-        NAME<-GA.inputs$layer.names[i]        
-        
-        cd <- Run_gdistance(gdist.inputs,r)
-        save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
-        write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,"_lcp_dist",".csv"),sep = ",", row.names = F, col.names = F)
-        
-        writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
-  
-        
-        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
-        
-        Plot.trans(PARM=single.GA@solution[-1], 
-                   Resistance=GA.inputs$Resistance.stack[[i]], 
-                   transformation=EQ, 
-                   print.dir=GA.inputs$Plots.dir)
-        
-        fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = cd, pairwise.genetic = gdist.inputs$response,REML = F,  ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ))
-
-        RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue, fit.stats[[1]], fit.stats[[2]],get.EQ(single.GA@solution[1]),single.GA@solution[2],single.GA@solution[3])
-        colnames(RS) <- c("Surface","AICc", "R2m", "R2c", "Equation","shape","max")
-        RESULTS.cont[[cnt2]] <- RS
-      }     
-    } # Close if-else  
-
-    if (dist_mod==TRUE){
-      r <- reclassify(r, c(-Inf,Inf, 1))
-      names(r)<-"dist"  
-      cd <- Run_gdistance(gdist.inputs,r)
-      
-      Dist.AIC <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-                                  response=gdist.inputs$response,
-                                  ID=gdist.inputs$ID,
-                                  ZZ=gdist.inputs$ZZ,
-                                  REML=FALSE)))
-      
-      fit.stats <- r.squaredGLMM(MLPE.lmm2(resistance=cd,
-                                               response=gdist.inputs$response,
-                                               ID=gdist.inputs$ID,
-                                               ZZ=gdist.inputs$ZZ,
-                                               REML=FALSE))
-      
-      ROW <- nrow(gdist.inputs$ID)
-      k<-2
-      AICc <- (Dist.AIC)+(((2*k)*(k+1))/(ROW-k-1))
-      Dist.AICc<-data.frame("Distance", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Dist.AICc)<-c("Surface","AICc", "R2m", "R2c")      
     }
     
-    if(null_mod==TRUE){          
-      dat<-data.frame(gdist.inputs$ID,response=gdist.inputs$response)
-      colnames(dat) <- c("pop1", "pop2","response")
+    ###############################################
+    if(!is.null(gdist.inputs)){
+      if (GA.inputs$surface.type[i]=='cat'){
+        cnt1 <- cnt1+1    
+        names(r)<-GA.inputs$layer.names[i]
+        
+        single.GA <-ga(type= "real-valued",
+                       fitness=Resistance.Opt_single,
+                       Resistance=r, 
+                       population = GA.inputs$population,
+                       selection = GA.inputs$selection,
+                       pcrossover=GA.inputs$pcrossover,
+                       pmutation=GA.inputs$pmutation,
+                       crossover=GA.inputs$crossover,
+                       Min.Max=GA.inputs$Min.Max,
+                       GA.inputs=GA.inputs,
+                       gdist.inputs=gdist.inputs, 
+                       min=GA.inputs$min.list[[i]],
+                       max=GA.inputs$max.list[[i]],
+                       parallel = GA.inputs$parallel,
+                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
+                       maxiter=GA.inputs$maxiter,
+                       run=GA.inputs$run,
+                       keepBest=GA.inputs$keepBest,
+                       elitism=GA.inputs$percent.elite, 
+                       mutation = GA.inputs$mutation,
+                       seed = GA.inputs$seed,
+                       iter=i,
+                       quiet = GA.inputs$quiet)
+        
+        single.GA@solution <- single.GA@solution/min(single.GA@solution)
+        df <- data.frame(id=unique(r),t(single.GA@solution) )
+        r <-subs(r,df)
+        NAME<-GA.inputs$layer.names[i]
+        names(r)<-NAME
+        
+        cd <- Run_gdistance(gdist.inputs,r)
+        save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
+        writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
+        Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="categorical", name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
+        fit.stats <- r.squaredGLMM(MLPE.lmm2(resistance = cd,
+                                             response=gdist.inputs$response,
+                                             REML = F,  
+                                             ID = gdist.inputs$ID, 
+                                             ZZ = gdist.inputs$ZZ))
+        
+        RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue, fit.stats[[1]], fit.stats[[2]], single.GA@solution)
+        k=GA.inputs$parm.type$n.parm[i]
+        Features <- matrix()
+        for(z in 1:(k)){
+          feature <- paste0("Feature",z)
+          Features[z]<-feature
+        }
+        
+        colnames(RS)<-c("Surface","AICc","R2m", "R2c", Features)
+        
+        RESULTS.cat[[cnt1]]<-RS
+        
+      } else {   # Processing of continuous surfaces   
+        cnt2 <- cnt2+1    
+        r<-SCALE(r,0,10)
+        names(r)<-GA.inputs$layer.names[i]
+        
+        single.GA <-ga(type= "real-valued",
+                       fitness=Resistance.Opt_single,
+                       Resistance=r, 
+                       population = GA.inputs$population,
+                       selection = GA.inputs$selection,
+                       pcrossover=GA.inputs$pcrossover,
+                       pmutation=GA.inputs$pmutation,
+                       crossover=GA.inputs$crossover,
+                       Min.Max=GA.inputs$Min.Max,
+                       GA.inputs=GA.inputs,
+                       gdist.inputs=gdist.inputs, 
+                       min=GA.inputs$min.list[[i]],
+                       max=GA.inputs$max.list[[i]],
+                       parallel = GA.inputs$parallel,
+                       popSize=GA.inputs$pop.mult*length(GA.inputs$max.list[[i]]),
+                       maxiter=GA.inputs$maxiter,
+                       run=GA.inputs$run,
+                       keepBest=GA.inputs$keepBest,
+                       elitism=GA.inputs$percent.elite, 
+                       mutation = GA.inputs$mutation,
+                       seed = GA.inputs$seed,
+                       iter=i,
+                       quiet = GA.inputs$quiet) 
+        
+        # Using GA results, optimize with nlm  
+        start.vals <- single.GA@solution[-1]
+        
+        if(nlm==TRUE){
+          # Informed start values; these are the optimized values from the single parameter optimization
+          EQ <-get.EQ(single.GA@solution[1])
+          Optim.nlm <-nlm(Resistance.Optimization_cont.nlm, log(start.vals), Resistance=r, equation=single.GA@solution[1],get.best=FALSE,gdist.inputs=gdist.inputs,Min.Max='min',write.dir=GA.inputs$Write.dir)
+          
+          r<-Resistance.tran(transformation=EQ,shape=Optim.nlm$estimate[1],max=Optim.nlm$estimate[2],r=r,out=GA.inputs$Results.dir)
+          
+          names(r)<-GA.inputs$layer.names[i]        
+          NAME<-GA.inputs$layer.names[i]        
+          
+          cd <- Run_gdistance(gdist.inputs,r)
+          save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
+          write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,"_lcp_dist",".csv"),sep = ",", row.names = F, col.names = F)
+          writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)  
+          
+          Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
+          
+          Plot.trans(PARM=exp(Optim.nlm$estimate), Resistance=GA.inputs$Resistance.stack[[i]], transformation=EQ, print.dir=GA.inputs$Plots.dir,Name=GA.inputs$layer.names[i])
+          
+          fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = cd,pairwise.genetic = gdist.inputs$response,REML = F,  ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ))
+          
+          RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue, fit.stats[[1]], fit.stats[[2]], single.GA@solution)
+          
+          # RS<-data.frame(GA.inputs$layer.names[i],Optim.nlm$minimum,EQ,Cont.Param(exp(Optim.nlm$estimate)))
+          colnames(RS) <- c("Surface","AICc", "R2m", "R2c", "Equation","shape","max")
+          RESULTS.cont[[cnt2]] <- RS
+          
+        } else {
+          EQ <-get.EQ(single.GA@solution[1])
+          r <- Resistance.tran(transformation=single.GA@solution[1],shape=single.GA@solution[2],max=single.GA@solution[3],r=r) 
+          names(r)<-GA.inputs$layer.names[i]        
+          NAME<-GA.inputs$layer.names[i]        
+          
+          cd <- Run_gdistance(gdist.inputs,r)
+          save(cd,file=paste0(GA.inputs$Write.dir,NAME,".rda"))
+          write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,"_lcp_dist",".csv"),sep = ",", row.names = F, col.names = F)
+          
+          writeRaster(r,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)      
+          
+          
+          Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous",name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
+          
+          Plot.trans(PARM=single.GA@solution[-1], 
+                     Resistance=GA.inputs$Resistance.stack[[i]], 
+                     transformation=EQ, 
+                     print.dir=GA.inputs$Plots.dir)
+          
+          fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = cd, pairwise.genetic = gdist.inputs$response,REML = F,  ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ))
+          
+          RS <- data.frame(GA.inputs$layer.names[i], -single.GA@fitnessValue, fit.stats[[1]], fit.stats[[2]],get.EQ(single.GA@solution[1]),single.GA@solution[2],single.GA@solution[3])
+          colnames(RS) <- c("Surface","AICc", "R2m", "R2c", "Equation","shape","max")
+          RESULTS.cont[[cnt2]] <- RS
+        }     
+      } # Close if-else  
       
-      # Fit model
-      mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
-      mod$reTrms$Zt <- gdist.inputs$ZZ
-      dfun <- do.call(mkLmerDevfun,mod)
-      opt <- optimizeLmer(dfun)
-      Null.AIC <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr)) 
-      fit.stats <- r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-      ROW <- nrow(gdist.inputs$ID)
-      k<-1
-      AICc <- (Null.AIC)+(((2*k)*(k+1))/(ROW-k-1))
-      Null.AICc<-data.frame("Null", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Null.AICc)<-c("Surface","AICc", "R2m", "R2c")  
+      if (dist_mod==TRUE){
+        r <- reclassify(r, c(-Inf,Inf, 1))
+        names(r)<-"dist"  
+        cd <- Run_gdistance(gdist.inputs,r)
+        
+        Dist.AIC <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                                                   response=gdist.inputs$response,
+                                                   ID=gdist.inputs$ID,
+                                                   ZZ=gdist.inputs$ZZ,
+                                                   REML=FALSE)))
+        
+        fit.stats <- r.squaredGLMM(MLPE.lmm2(resistance=cd,
+                                             response=gdist.inputs$response,
+                                             ID=gdist.inputs$ID,
+                                             ZZ=gdist.inputs$ZZ,
+                                             REML=FALSE))
+        
+        ROW <- nrow(gdist.inputs$ID)
+        k<-2
+        AICc <- (Dist.AIC)+(((2*k)*(k+1))/(ROW-k-1))
+        Dist.AICc<-data.frame("Distance", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Dist.AICc)<-c("Surface","AICc", "R2m", "R2c")      
+      }
+      
+      if(null_mod==TRUE){          
+        dat<-data.frame(gdist.inputs$ID,response=gdist.inputs$response)
+        colnames(dat) <- c("pop1", "pop2","response")
+        
+        # Fit model
+        mod <- lFormula(response ~ 1 + (1|pop1), data=dat,REML=FALSE)
+        mod$reTrms$Zt <- gdist.inputs$ZZ
+        dfun <- do.call(mkLmerDevfun,mod)
+        opt <- optimizeLmer(dfun)
+        Null.AIC <- AIC(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr)) 
+        fit.stats <- r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+        ROW <- nrow(gdist.inputs$ID)
+        k<-1
+        AICc <- (Null.AIC)+(((2*k)*(k+1))/(ROW-k-1))
+        Null.AICc<-data.frame("Null", AICc, fit.stats[[1]], fit.stats[[2]]); colnames(Null.AICc)<-c("Surface","AICc", "R2m", "R2c")  
+      }
     }
-  }
-} # Close ascii loop
+  } # Close ascii loop
   
   ####################################################
   # Make results data frame
@@ -514,15 +518,15 @@ if(!is.null(gdist.inputs)){
   # Compile results into tables
   cat("\n")
   cat("\n")
-    if(nrow(Results.cat)>0){
-  Features <- array()
-  for(i in 1:ncol(Results.cat)-4){
-    feature <- paste0("Feature",i)
-    Features[i]<-feature
-  }
-  colnames(Results.cat)<-c("Surface","AICc","R2m", "R2c", Features)
-  Results.cat <-  Results.cat[order(Results.cat$AICc),]
-  write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
+  if(nrow(Results.cat)>0){
+    Features <- array()
+    for(i in 1:ncol(Results.cat)-4){
+      feature <- paste0("Feature",i)
+      Features[i]<-feature
+    }
+    colnames(Results.cat)<-c("Surface","AICc","R2m", "R2c", Features)
+    Results.cat <-  Results.cat[order(Results.cat$AICc),]
+    write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
   }
   
   if(ncol(Results.cont)>0){    
@@ -542,31 +546,31 @@ if(!is.null(gdist.inputs)){
   
   if(dist_mod==TRUE) Results.All<-rbind(Results.All,Dist.AICc)
   if(null_mod==TRUE) Results.All<-rbind(Results.All,Null.AICc)
-
+  
   Results.All <- Results.All[order(Results.All$AICc),]
-
+  
   cat("\n")
   cat("\n")
   write.table(Results.All,paste0(GA.inputs$Results.dir,"All_Results_AICc.csv"),sep=",",col.names=T,row.names=F)
   
   # Get parameter estimates
-if(!is.null(CS.inputs)){  
-  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
-                              genetic.dist=CS.inputs$response,
-                              out.dir=GA.inputs$Results.dir,
-                              method="cs",
-                              ID=CS.inputs$ID,
-                              ZZ=CS.inputs$ZZ)
+  if(!is.null(CS.inputs)){  
+    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
+                                genetic.dist=CS.inputs$response,
+                                out.dir=GA.inputs$Results.dir,
+                                method="cs",
+                                ID=CS.inputs$ID,
+                                ZZ=CS.inputs$ZZ)
+    
+  } else {  
+    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,
+                                genetic.dist=gdist.inputs$response,
+                                out.dir=GA.inputs$Results.dir,
+                                method="gd",
+                                ID=gdist.inputs$ID,
+                                ZZ=gdist.inputs$ZZ)  
+  }
   
-} else {  
-  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,
-                              genetic.dist=gdist.inputs$response,
-                              out.dir=GA.inputs$Results.dir,
-                              method="gd",
-                              ID=gdist.inputs$ID,
-                              ZZ=gdist.inputs$ZZ)  
-}
-
   rt<-proc.time()[3]-t1
   # Full Results
   if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
@@ -578,9 +582,9 @@ if(!is.null(CS.inputs)){
   } else {    
     RESULTS<-list(ContinuousResults=NULL, CategoricalResults=NULL,AICc=Results.All,MLPE=MLPE.results, Run.Time=rt)
   }
-
-file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
-return(RESULTS)
+  
+  file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
+  return(RESULTS)
   ###############################################################################################################
 }
 
@@ -605,28 +609,28 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
     t1<-proc.time()[3]
     multi.GA_nG <-ga(type= "real-valued",
-                   fitness=Resistance.Opt_multi,
-                   population=GA.inputs$population,
-                   selection=GA.inputs$selection,
-                   mutation=GA.inputs$mutation,
-                   pcrossover=GA.inputs$pcrossover,
-                   crossover=GA.inputs$crossover,
-                   pmutation=GA.inputs$pmutation,
-                   Min.Max=GA.inputs$Min.Max,
-                   GA.inputs=GA.inputs,
-                   CS.inputs=CS.inputs,
-                   min=GA.inputs$ga.min,
-                   max=GA.inputs$ga.max,
-                   popSize=GA.inputs$pop.size,
-                   maxiter=GA.inputs$maxiter,
-                   run=GA.inputs$run,
-                   parallel = FALSE,
-                   keepBest=GA.inputs$keepBest,
-                   seed = GA.inputs$seed,
-                   suggestions=GA.inputs$SUGGESTS,
-                   quiet = GA.inputs$quiet) 
-      rt<-proc.time()[3]-t1
-   
+                     fitness=Resistance.Opt_multi,
+                     population=GA.inputs$population,
+                     selection=GA.inputs$selection,
+                     mutation=GA.inputs$mutation,
+                     pcrossover=GA.inputs$pcrossover,
+                     crossover=GA.inputs$crossover,
+                     pmutation=GA.inputs$pmutation,
+                     Min.Max=GA.inputs$Min.Max,
+                     GA.inputs=GA.inputs,
+                     CS.inputs=CS.inputs,
+                     min=GA.inputs$ga.min,
+                     max=GA.inputs$ga.max,
+                     popSize=GA.inputs$pop.size,
+                     maxiter=GA.inputs$maxiter,
+                     run=GA.inputs$run,
+                     parallel = FALSE,
+                     keepBest=GA.inputs$keepBest,
+                     seed = GA.inputs$seed,
+                     suggestions=GA.inputs$SUGGESTS,
+                     quiet = GA.inputs$quiet) 
+    rt<-proc.time()[3]-t1
+    
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for(i in 1:GA.inputs$n.layers){
       if(GA.inputs$surface.type[i]=="cat"){
@@ -641,39 +645,39 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     }
     multi.GA_nG@solution <- Opt.parm
     
-  
-  RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs, rescale = TRUE)
-  NAME<-paste(GA.inputs$parm.type$name,collapse=".")
-  names(RAST)<-NAME
-  Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
-  
-  ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
-  
-  Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type,ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
-  
-  fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),
-                                      pairwise.genetic = CS.inputs$response, 
-                                      REML = F,
-                                      ID = CS.inputs$ID, 
-                                      ZZ = CS.inputs$ZZ ))
-  
-  # Get parameter estimates
-  MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
-                              genetic.dist=CS.inputs$response,
-                              out.dir=GA.inputs$Results.dir,
-                              method="cs",
-                              ID = CS.inputs$ID, 
-                              ZZ = CS.inputs$ZZ)  
-  
-  Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, method="CIRCUITSCAPE", Run.Time=rt, fit.stats = fit.stats) 
-  file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
-  return(multi.GA_nG)
+    
+    RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs, rescale = TRUE)
+    NAME<-paste(GA.inputs$parm.type$name,collapse=".")
+    names(RAST)<-NAME
+    Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
+    
+    ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
+    
+    Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type,ID = CS.inputs$ID, ZZ = CS.inputs$ZZ)
+    
+    fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),
+                                        pairwise.genetic = CS.inputs$response, 
+                                        REML = F,
+                                        ID = CS.inputs$ID, 
+                                        ZZ = CS.inputs$ZZ ))
+    
+    # Get parameter estimates
+    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
+                                genetic.dist=CS.inputs$response,
+                                out.dir=GA.inputs$Results.dir,
+                                method="cs",
+                                ID = CS.inputs$ID, 
+                                ZZ = CS.inputs$ZZ)  
+    
+    Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, method="CIRCUITSCAPE", Run.Time=rt, fit.stats = fit.stats) 
+    file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
+    return(multi.GA_nG)
   } 
   
   #### Optimize using gdistance ####
   if(!is.null(gdist.inputs)){
-        t1<-proc.time()[3]
-      multi.GA_nG <-ga(type= "real-valued",
+    t1<-proc.time()[3]
+    multi.GA_nG <-ga(type= "real-valued",
                      fitness=Resistance.Opt_multi,
                      population=GA.inputs$population,
                      selection=GA.inputs$selection,
@@ -694,22 +698,22 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                      seed = GA.inputs$seed,
                      suggestions=GA.inputs$SUGGESTS,
                      quiet = GA.inputs$quiet) 
-       rt<-proc.time()[3]-t1
-      
-      Opt.parm <- GA.opt <- multi.GA_nG@solution
-      for(i in 1:GA.inputs$n.layers){
-        if(GA.inputs$surface.type[i]=="cat"){
-          ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-          parm <- ga.p/min(ga.p)
-          Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-          
-        } else {
-          parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]          
-          Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-        }
+    rt<-proc.time()[3]-t1
+    
+    Opt.parm <- GA.opt <- multi.GA_nG@solution
+    for(i in 1:GA.inputs$n.layers){
+      if(GA.inputs$surface.type[i]=="cat"){
+        ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+        parm <- ga.p/min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+        
+      } else {
+        parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]          
+        Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
       }
-      multi.GA_nG@solution <- Opt.parm
-      
+    }
+    multi.GA_nG@solution <- Opt.parm
+    
     RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs, rescale = TRUE)
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
@@ -718,8 +722,8 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     writeRaster(RAST,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)
     
     ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
-
-#     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
+    
+    #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
     
     Diagnostic.Plots(resistance.mat=cd,genetic.dist=gdist.inputs$response,plot.dir=GA.inputs$Plots.dir,type=type, name=NAME,ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ)
     
@@ -737,53 +741,53 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                                         ID = gdist.inputs$ID, 
                                         ZZ = gdist.inputs$ZZ ))
     
-     Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs,method="cost distance", Run.Time=rt, fit.stats = fit.stats) 
-file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
-return(multi.GA_nG)
+    Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs,method="cost distance", Run.Time=rt, fit.stats = fit.stats) 
+    file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
+    return(multi.GA_nG)
   }
-
-  #####  RUN BRENT OPTIMIZATION ####
-# ##  Run second optimization to determine if maximum resistance values should be adjusted
-#   Parm.multiplier <- optim(par=1,
-#                            fn = Max.optim_Brent,
-#                            method = "Brent",
-#                            lower = 0,
-#                            upper = 25,
-#                            GA.inputs = GA.inputs,
-#                            CS.inputs = CS.inputs,
-#                            GA.opt = multi.GA_nG@solution)
-# PARM<-Parm.multiplier$par
-# ###########################################
-# Opt.parm <- GA.opt <- multi.GA_nG@solution
-# for(i in 1:GA.inputs$n.layers){
-#     if(GA.inputs$surface.type[i]=="cat"){
-#       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-#       parm <- ga.p/min(ga.p)#*PARM[1])+1
-# #       parm <- parm/min(parm)
-#       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-#       
-#     } else {
-#       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]     
-#       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-#     }
-# }
-# # ####
-# multi.GA_nG@solution <- Opt.parm
-# multi.GA_nG@fitnessValue <- Parm.multiplier$value
-# ##################################
   
-#   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
-#   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
-#   names(RAST)<-NAME
-#   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
-#   
-#   Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous")
-#   
-#   # Get parameter estimates
-#   MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir)  
-#   
-#   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, CS.inputs=CS.inputs) 
-#   return(multi.GA_nG)
+  #####  RUN BRENT OPTIMIZATION ####
+  # ##  Run second optimization to determine if maximum resistance values should be adjusted
+  #   Parm.multiplier <- optim(par=1,
+  #                            fn = Max.optim_Brent,
+  #                            method = "Brent",
+  #                            lower = 0,
+  #                            upper = 25,
+  #                            GA.inputs = GA.inputs,
+  #                            CS.inputs = CS.inputs,
+  #                            GA.opt = multi.GA_nG@solution)
+  # PARM<-Parm.multiplier$par
+  # ###########################################
+  # Opt.parm <- GA.opt <- multi.GA_nG@solution
+  # for(i in 1:GA.inputs$n.layers){
+  #     if(GA.inputs$surface.type[i]=="cat"){
+  #       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
+  #       parm <- ga.p/min(ga.p)#*PARM[1])+1
+  # #       parm <- parm/min(parm)
+  #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+  #       
+  #     } else {
+  #       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]     
+  #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
+  #     }
+  # }
+  # # ####
+  # multi.GA_nG@solution <- Opt.parm
+  # multi.GA_nG@fitnessValue <- Parm.multiplier$value
+  # ##################################
+  
+  #   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
+  #   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
+  #   names(RAST)<-NAME
+  #   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
+  #   
+  #   Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous")
+  #   
+  #   # Get parameter estimates
+  #   MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir)  
+  #   
+  #   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, CS.inputs=CS.inputs) 
+  #   return(multi.GA_nG)
 }
 
 ###############################################################################  
@@ -1010,27 +1014,27 @@ return(multi.GA_nG)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Run_CS <- function(CS.inputs,GA.inputs,r,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Write.dir, output="matrix", hidden = TRUE){
-if(class(r)[1]!='RasterLayer') {
-  R<-raster(r)
-  File.name <- basename(r)
-  File.name<-sub(".asc", "", File.name) 
-  names(R)<-File.name
-} else {
-  R=r
-  
-}
+  if(class(r)[1]!='RasterLayer') {
+    R<-raster(r)
+    File.name <- basename(r)
+    File.name<-sub(".asc", "", File.name) 
+    names(R)<-File.name
+  } else {
+    R=r
+    
+  }
   
   if (CurrentMap==FALSE){
     File.name <- R@data@names
     MAP="write_cum_cur_map_only = False"
     CURRENT.MAP="write_cur_maps = False"
     
-   } else {
+  } else {
     File.name <- R@data@names
     MAP="write_cum_cur_map_only = True"
     CURRENT.MAP="write_cur_maps = 1"
   }
-
+  
   ######
   
   if(cellStats(R,"max")>1e6)  R<-SCALE(R,1,1e6) # Rescale surface in case resistances are too high
@@ -1042,15 +1046,15 @@ if(class(r)[1]!='RasterLayer') {
   
   # Modify and write Circuitscape.ini file
   #############################################################################################  
- ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
- if(is.null(CS.inputs$pairs_to_include)){
-   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
-   PAIRS <- paste0("use_included_pairs = False")   
- } else {
-   PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
-   PAIRS <- paste0("use_included_pairs = True") 
- }
-
+  ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
+  if(is.null(CS.inputs$pairs_to_include)){
+    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
+    PAIRS <- paste0("use_included_pairs = False")   
+  } else {
+    PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
+    PAIRS <- paste0("use_included_pairs = True") 
+  }
+  
   write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
                OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
                HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
@@ -1061,57 +1065,57 @@ if(class(r)[1]!='RasterLayer') {
                PAIRS_TO_INCLUDE=PAIRS_TO_INCLUDE,
                PAIRS=PAIRS)
   ##########################################################################################
-# Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
-# hidden = TRUE  
-# Run Circuitscape
-if(grepl("cs_run.exe",CS.inputs$CS.program)){
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+  # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
+  # hidden = TRUE  
+  # Run Circuitscape
+  if(grepl("cs_run.exe",CS.inputs$CS.program)){
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
     CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
-} else {
-  CS.ini <- paste0(EXPORT.dir,File.name,".ini")
-  CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
-}
- 
+  } else {
+    CS.ini <- paste0(EXPORT.dir,File.name,".ini")
+    CS.Run.output<-system(paste(CS.inputs$CS.program, CS.ini), hidden)
+  }
+  
   
   #########################################
   # Run mixed effect model on each Circuitscape effective resistance
   
   CS.results<-paste0(EXPORT.dir,File.name,"_resistances.out")
-
-if(output=="raster" & CurrentMap==TRUE){
-  rast<-raster(paste0(EXPORT.dir, File.name,"_cum_curmap.asc"))
-  NAME <- basename(rast@file@name)
-  NAME<-sub("^([^.]*).*", "\\1", NAME) 
-  names(rast)<-NAME
-  (rast)
-} else {
-  cs.matrix<-read.matrix(CS.results)
   
-  # Replace NA with 0...a workaround for errors when two points fall within the same cell.
-  if(any(is.na(cs.matrix))){
-    cs.matrix[is.na(cs.matrix)] <- 0
-    message(" NA values generated by CIRCUITSCAPE \n Check point file to see if multiple points share the same raster cell!")
-  }
-  return(cs.matrix)
+  if(output=="raster" & CurrentMap==TRUE){
+    rast<-raster(paste0(EXPORT.dir, File.name,"_cum_curmap.asc"))
+    NAME <- basename(rast@file@name)
+    NAME<-sub("^([^.]*).*", "\\1", NAME) 
+    names(rast)<-NAME
+    (rast)
+  } else {
+    cs.matrix<-read.matrix(CS.results)
+    
+    # Replace NA with 0...a workaround for errors when two points fall within the same cell.
+    if(any(is.na(cs.matrix))){
+      cs.matrix[is.na(cs.matrix)] <- 0
+      message(" NA values generated by CIRCUITSCAPE \n Check point file to see if multiple points share the same raster cell!")
+    }
+    return(cs.matrix)
   }
 }
 ################################
 
 Run_CS2 <- function(CS.inputs,GA.inputs,r,EXPORT.dir=GA.inputs$Write.dir, File.name){
-    File.name <- File.name
+  File.name <- File.name
   
   # Modify and write Circuitscape.ini file
   #############################################################################################  
   ifelse(CS.inputs$Neighbor.Connect==4,connect<-"True",connect<-"False")
   
-   if(is.null(CS.inputs$pairs_to_include)){
+  if(is.null(CS.inputs$pairs_to_include)){
     PAIRS_TO_INCLUDE <- paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
     PAIRS <- paste0("use_included_pairs = False")   
- } else {
+  } else {
     PAIRS_TO_INCLUDE <- paste0("included_pairs_file = ", CS.inputs$pairs_to_include)
     PAIRS <- paste0("use_included_pairs = True") 
- }
-
+  }
+  
   write.CS_4.0(BATCH=paste0(EXPORT.dir,File.name,".ini"),
                OUT=paste0(paste0("output_file = ",EXPORT.dir), File.name,".out"),
                HABITAT=paste0("habitat_file = ",paste0(EXPORT.dir,File.name,".asc")),
@@ -1203,12 +1207,12 @@ Run_gdistance <- function(gdist.inputs, r){
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, out=NULL, File.name=paste(GA.inputs$parm.type$name,collapse="."), rescale = TRUE){
   if(!is.null(CS.inputs)){
-  ID<-CS.inputs$ID
-  ZZ<-CS.inputs$ZZ
-  response<-CS.inputs$response
-  CS_Point.File<-CS.inputs$CS_Point.File
-  CS.program<-CS.inputs$CS.program
-  EXPORT.dir<-out
+    ID<-CS.inputs$ID
+    ZZ<-CS.inputs$ZZ
+    response<-CS.inputs$response
+    CS_Point.File<-CS.inputs$CS_Point.File
+    CS.program<-CS.inputs$CS.program
+    EXPORT.dir<-out
   }
   
   if(!is.null(gdist.inputs)){
@@ -1218,7 +1222,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
     samples<-gdist.inputs$samples
     EXPORT.dir<-out
   }
-
+  
   
   ######
   select.trans <- GA.inputs$select.trans
@@ -1232,7 +1236,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       r[[i]] <-subs(r[[i]],df)
       
       r[[i]]<-r[[i]]#-1 # Set minimum to 0  
-
+      
       
     } else {
       rast <-SCALE(data=r[[i]],MIN=0,MAX=10)
@@ -1257,7 +1261,7 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
       } else {
         equation <- 9
       }
-    
+      
       # Apply specified transformation
       if(equation==1){
         r[[i]] <- Inv.Rev.Monomolecular(rast,parm)
@@ -1310,8 +1314,8 @@ Combine_Surfaces <- function(PARM, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs,
   if(is.null(out)){
     (multi_surface)
   } else {
-  writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
-  (multi_surface)
+    writeRaster(x=multi_surface,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
+    (multi_surface)
   }
 }
 ###################################################################################
@@ -1360,66 +1364,66 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
   if(is.numeric(transformation)){
     parm<-c(transformation,shape, max)    
   } else {
-     parm<-c(get.EQ(transformation),shape, max)
+    parm<-c(get.EQ(transformation),shape, max)
   }
   
   EXPORT.dir<-out
   
   ######
   
-      r <-SCALE(data=R,MIN=0,MAX=10)
-
+  r <-SCALE(data=R,MIN=0,MAX=10)
+  
   # Set equation for continuous surface
-      equation <- floor(parm[1]) # Parameter can range from 1-9.99
-      
-#       # Read in resistance surface to be optimized
-#       SHAPE <-  (parm[2])
-#       Max.SCALE <- (parm[3])
+  equation <- floor(parm[1]) # Parameter can range from 1-9.99
+  
+  #       # Read in resistance surface to be optimized
+  #       SHAPE <-  (parm[2])
+  #       Max.SCALE <- (parm[3])
   
   
   ##################
-      
-# Apply specified transformation
-    if(equation==1){
-      r <- Inv.Rev.Monomolecular(r,parm)
-      EQ <- "Inverse-Reverse Monomolecular"
-      
-    } else if(equation==5){
-      r <- Rev.Monomolecular(r,parm)      
-      EQ <- "Reverse Monomolecular"        
-      
-    } else if(equation==3){
-      r <- Monomolecular(r,parm)      
-      EQ <- "Monomolecular"
-      
-    } else if (equation==7) {
-      r <- Inv.Monomolecular(r,parm)      
-      EQ <- "Inverse Monomolecular"  	    
-      
-    } else if (equation==8) {
-      r <- Inv.Ricker(r,parm)
-      EQ <- "Inverse Ricker"  
-      
-    } else if (equation==4) {
-      r <- Ricker(r,parm)
-      EQ <- "Ricker"
-      
-    } else if (equation==6) {
-      r <- Rev.Ricker(r,parm)
-      EQ <- "Reverse Ricker"        
-      
-    } else if (equation==2) {
-      r <- Inv.Rev.Ricker(r,parm)
-      EQ <- "Inverse-Reverse Ricker"
-   
-    } else {
-      r <- (r*0)+1 #  Distance
-      EQ <- "Distance"    
-    } # End if-else  
+  
+  # Apply specified transformation
+  if(equation==1){
+    r <- Inv.Rev.Monomolecular(r,parm)
+    EQ <- "Inverse-Reverse Monomolecular"
+    
+  } else if(equation==5){
+    r <- Rev.Monomolecular(r,parm)      
+    EQ <- "Reverse Monomolecular"        
+    
+  } else if(equation==3){
+    r <- Monomolecular(r,parm)      
+    EQ <- "Monomolecular"
+    
+  } else if (equation==7) {
+    r <- Inv.Monomolecular(r,parm)      
+    EQ <- "Inverse Monomolecular"  	    
+    
+  } else if (equation==8) {
+    r <- Inv.Ricker(r,parm)
+    EQ <- "Inverse Ricker"  
+    
+  } else if (equation==4) {
+    r <- Ricker(r,parm)
+    EQ <- "Ricker"
+    
+  } else if (equation==6) {
+    r <- Rev.Ricker(r,parm)
+    EQ <- "Reverse Ricker"        
+    
+  } else if (equation==2) {
+    r <- Inv.Rev.Ricker(r,parm)
+    EQ <- "Inverse-Reverse Ricker"
+    
+  } else {
+    r <- (r*0)+1 #  Distance
+    EQ <- "Distance"    
+  } # End if-else  
   File.name <- NAME
   
   if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
-
+  
   if(!is.null(out)){
     writeRaster(x=r,filename=paste0(EXPORT.dir,File.name,".asc"), overwrite=TRUE)
     return(r)
@@ -1447,46 +1451,46 @@ Resistance.tran <- function(transformation, shape, max, r, out=NULL){
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_multi <- function(PARM,CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, Min.Max, quiet=FALSE){
   t1<-proc.time()[3]
- 
+  
   EXPORT.dir<-GA.inputs$Write.dir
   ######
-#   r <- GA.inputs$Resistance.stack
+  #   r <- GA.inputs$Resistance.stack
   File.name="resist_surface"
-if(!is.null(CS.inputs)){  
-Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs$Write.dir,File.name=File.name,rescale = FALSE)  
+  if(!is.null(CS.inputs)){  
+    Combine_Surfaces(PARM=PARM,CS.inputs=CS.inputs,GA.inputs=GA.inputs,out=GA.inputs$Write.dir,File.name=File.name,rescale = FALSE)  
+    
+    CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=multi_surface,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
+    
+    # Replace NA with 0...a workaround for errors when two points fall within the same cell.
+    # CS.resist[is.na(CS.resist)] <- 0
+    
+    # Run mixed effect model on each Circuitscape effective resistance
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
+                                               response=CS.inputs$response,
+                                               ID=CS.inputs$ID,
+                                               ZZ=CS.inputs$ZZ,
+                                               REML=FALSE)))
+    ROW <- nrow(CS.inputs$ID)
+  }
   
-  CS.resist <- Run_CS2(CS.inputs,GA.inputs,r=multi_surface,EXPORT.dir=GA.inputs$Write.dir,File.name=File.name)
+  if(!is.null(gdist.inputs)){
+    r <- Combine_Surfaces(PARM=PARM,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs,out=NULL,File.name=File.name,rescale = FALSE)
+    cd <- Run_gdistance(gdist.inputs,r)
+    
+    AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+                                               response=gdist.inputs$response,
+                                               ID=gdist.inputs$ID,
+                                               ZZ=gdist.inputs$ZZ,
+                                               REML=FALSE)))
+    ROW <- nrow(gdist.inputs$ID)
+  }
   
-  # Replace NA with 0...a workaround for errors when two points fall within the same cell.
-  # CS.resist[is.na(CS.resist)] <- 0
-  
-  # Run mixed effect model on each Circuitscape effective resistance
-  AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
-                              response=CS.inputs$response,
-                              ID=CS.inputs$ID,
-                              ZZ=CS.inputs$ZZ,
-                              REML=FALSE)))
-  ROW <- nrow(CS.inputs$ID)
-}
-
-if(!is.null(gdist.inputs)){
-  r <- Combine_Surfaces(PARM=PARM,gdist.inputs=gdist.inputs,GA.inputs=GA.inputs,out=NULL,File.name=File.name,rescale = FALSE)
-  cd <- Run_gdistance(gdist.inputs,r)
-   
-  AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-                              response=gdist.inputs$response,
-                              ID=gdist.inputs$ID,
-                              ZZ=gdist.inputs$ZZ,
-                              REML=FALSE)))
-  ROW <- nrow(gdist.inputs$ID)
-}
-
   k<-max(GA.inputs$parm.index)+1
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))  
- 
-rt<-proc.time()[3]-t1
+  
+  rt<-proc.time()[3]-t1
   if(quiet==FALSE){
-   cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
+    cat(paste0("\t", "Iteration took ", round(rt,digits=2), " seconds to complete"),"\n")
     cat(paste0("\t", "AICc = ",round(AICc,4)),"\n","\n")
   }
   
@@ -1514,7 +1518,7 @@ rt<-proc.time()[3]-t1
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=NULL, GA.inputs, Min.Max='max',iter=NULL, quiet=FALSE){
   t1<-proc.time()[3]
-
+  
   
   EXPORT.dir<-GA.inputs$Write.dir
   select.trans <- GA.inputs$select.trans
@@ -1525,7 +1529,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     parm <-PARM
     df <- data.frame(id=unique(r),PARM) # Data frame with original raster values and replacement values
     r <-subs(r,df)    
-       
+    
   } else { ## Else continuous surface
     r<-SCALE(r,0,10)
     
@@ -1538,54 +1542,54 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
     
     ## If selected transformation is not in list, assign very large AIC
     ## Use 99999 as 'ga' maximizes and the inverse of of the calculated AIC is used
-
+    
     if(equation %in% select.trans[[iter]]) {
-    
-    # Apply specified transformation
-    rick.eq<-(equation==2||equation==4||equation==6||equation==8)
-    if(rick.eq==TRUE & SHAPE>5){
-      equation<-9
-    }
-    
-    if(equation==1){
-      r <- Inv.Rev.Monomolecular(r,parm=PARM)
-      EQ <- "Inverse-Reverse Monomolecular"
       
-    } else if(equation==5){
-      r <- Rev.Monomolecular(r,parm=PARM)      
-      EQ <- "Reverse Monomolecular"        
+      # Apply specified transformation
+      rick.eq<-(equation==2||equation==4||equation==6||equation==8)
+      if(rick.eq==TRUE & SHAPE>5){
+        equation<-9
+      }
       
-    } else if(equation==3){
-      r <- Monomolecular(r,parm=PARM)      
-      EQ <- "Monomolecular"
-      
-    } else if (equation==7) {
-      r <- Inv.Monomolecular(r,parm=PARM)      
-      EQ <- "Inverse Monomolecular"        
-      
-    } else if (equation==8) {
-      r <- Inv.Ricker(r,parm=PARM)
-      EQ <- "Inverse Ricker"  
-      
-    } else if (equation==4) {
-      r <- Ricker(r,parm=PARM)
-      EQ <- "Ricker"
-      
-    } else if (equation==6) {
-      r <- Rev.Ricker(r,parm=PARM)
-      EQ <- "Reverse Ricker"        
-      
-    } else if (equation==2) {
-      r <- Inv.Rev.Ricker(r,parm=PARM)
-      EQ <- "Inverse-Reverse Ricker"
-      
-    } else {
-      r <- (r*0)+1 #  Distance
-      EQ <- "Distance"    
-    } # End if-else     
-  } # Close select transformation 
- } # Close surface type if-else
- 
+      if(equation==1){
+        r <- Inv.Rev.Monomolecular(r,parm=PARM)
+        EQ <- "Inverse-Reverse Monomolecular"
+        
+      } else if(equation==5){
+        r <- Rev.Monomolecular(r,parm=PARM)      
+        EQ <- "Reverse Monomolecular"        
+        
+      } else if(equation==3){
+        r <- Monomolecular(r,parm=PARM)      
+        EQ <- "Monomolecular"
+        
+      } else if (equation==7) {
+        r <- Inv.Monomolecular(r,parm=PARM)      
+        EQ <- "Inverse Monomolecular"        
+        
+      } else if (equation==8) {
+        r <- Inv.Ricker(r,parm=PARM)
+        EQ <- "Inverse Ricker"  
+        
+      } else if (equation==4) {
+        r <- Ricker(r,parm=PARM)
+        EQ <- "Ricker"
+        
+      } else if (equation==6) {
+        r <- Rev.Ricker(r,parm=PARM)
+        EQ <- "Reverse Ricker"        
+        
+      } else if (equation==2) {
+        r <- Inv.Rev.Ricker(r,parm=PARM)
+        EQ <- "Inverse-Reverse Ricker"
+        
+      } else {
+        r <- (r*0)+1 #  Distance
+        EQ <- "Distance"    
+      } # End if-else     
+    } # Close select transformation 
+  } # Close surface type if-else
+  
   ## If a surface was reclassified or transformed, apply the following
   if((GA.inputs$surface.type[iter]=="cat") || (equation %in% select.trans[[iter]])){
     File.name <- "resist_surface"
@@ -1651,7 +1655,7 @@ Resistance.Opt_single <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=N
       }
     }
   }
-   return(AICc.out)
+  return(AICc.out)
 }
 
 ## FOR ASSESSING AICc of fitted models, not exported
@@ -1860,26 +1864,26 @@ Resistance.Opt_AICc <- function(PARM,Resistance,CS.inputs=NULL, gdist.inputs=NUL
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
 Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="layer"){
-    if(length(Resistance)==2) {
-        r <- Resistance
-        Mn=min(r)
-        Mx=max(r) 
-        NAME <- Name
-    } else if(class(Resistance)[1]!='RasterLayer') {
-        r<-raster(Resistance)          
-        NAME <- basename(Resistance)
-        NAME<-sub("^([^.]*).*", "\\1", NAME) 
-        names(r)<-NAME
-        Mn=cellStats(r,stat='min')
-        Mx=cellStats(r,stat='max')   
-          
+  if(length(Resistance)==2) {
+    r <- Resistance
+    Mn=min(r)
+    Mx=max(r) 
+    NAME <- Name
+  } else if(class(Resistance)[1]!='RasterLayer') {
+    r<-raster(Resistance)          
+    NAME <- basename(Resistance)
+    NAME<-sub("^([^.]*).*", "\\1", NAME) 
+    names(r)<-NAME
+    Mn=cellStats(r,stat='min')
+    Mx=cellStats(r,stat='max')   
+    
   } else {
-        r <- Resistance
-        Mn=cellStats(r,stat='min')
-        Mx=cellStats(r,stat='max')
-        NAME <- basename(r@file@name)
-        NAME<-sub("^([^.]*).*", "\\1", NAME) 
-        names(r)<-NAME
+    r <- Resistance
+    Mn=cellStats(r,stat='min')
+    Mx=cellStats(r,stat='max')
+    NAME <- basename(r@file@name)
+    NAME<-sub("^([^.]*).*", "\\1", NAME) 
+    names(r)<-NAME
   }  
   
   if(Name!="layer"){
@@ -1894,10 +1898,10 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
   Max.SCALE <- PARM[[2]]
   
   if(is.numeric(transformation)){
-   equation<-get.EQ(transformation)
+    equation<-get.EQ(transformation)
     
   } else {
-  equation<-transformation
+    equation<-transformation
   }
   # Set equation/name combination
   if(equation=="Distance") {
@@ -1938,7 +1942,7 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
     Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN #  Ricker
     Trans.vec <- rev(Trans.vec) # Reverse
     TITLE <- "Reverse Ricker" 
-  
+    
   } else if (equation=="Inverse-Reverse Ricker") { 
     SIGN <- -1 # Inverse
     Trans.vec <- SIGN*(PARM[[2]]*dat.t*exp(-1*dat.t/PARM[[1]]))+SIGN #  Ricker
@@ -1955,28 +1959,28 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
   x.break<-pretty(original*1.07)
   y.break<-pretty(transformed*1.07)
   
- ( p<- ggplot(plot.data,aes(x=original,y=transformed)) +
-    ggtitle(equation) +
-    theme_bw() +
-    geom_line(size=1.5) +
-    xlab(expression(bold("Original data values"))) +
-    ylab(expression(bold("Transformed data values"))) +
-    theme(plot.title = element_text(lineheight=2, face="bold",size=20),
-          legend.title = element_blank(),
-          legend.key = element_blank(),
-          axis.text.x = element_text(size=14),
-          axis.text.y = element_text(size=14),  
-          axis.title.x = element_text(size=16),
-          axis.title.y = element_text(size=16)
-          # axis.line = element_line(colour = "black"),
-          # panel.grid.major = element_blank(),
-          # panel.grid.minor = element_blank(),
-          # panel.border = element_blank(),
-         # panel.background = element_blank()
-          ) +
-     scale_x_continuous(limits=c(min(original),max(original)),breaks=x.break) +
-     scale_y_continuous(limits=c(min(transformed),max(transformed)),breaks=y.break) 
- )
+  ( p<- ggplot(plot.data,aes(x=original,y=transformed)) +
+      ggtitle(equation) +
+      theme_bw() +
+      geom_line(size=1.5) +
+      xlab(expression(bold("Original data values"))) +
+      ylab(expression(bold("Transformed data values"))) +
+      theme(plot.title = element_text(lineheight=2, face="bold",size=20),
+            legend.title = element_blank(),
+            legend.key = element_blank(),
+            axis.text.x = element_text(size=14),
+            axis.text.y = element_text(size=14),  
+            axis.title.x = element_text(size=16),
+            axis.title.y = element_text(size=16)
+            # axis.line = element_line(colour = "black"),
+            # panel.grid.major = element_blank(),
+            # panel.grid.minor = element_blank(),
+            # panel.border = element_blank(),
+            # panel.background = element_blank()
+      ) +
+      scale_x_continuous(limits=c(min(original),max(original)),breaks=x.break) +
+      scale_y_continuous(limits=c(min(transformed),max(transformed)),breaks=y.break) 
+  )
   
   if(!is.null(print.dir)){
     tiff(filename=paste0(print.dir,equation,"_Transformation_",NAME ,".tif"),width=160,height=150,units="mm",res=300,compression="lzw")
@@ -1996,7 +2000,7 @@ Plot.trans <- function(PARM,Resistance,transformation, print.dir=NULL, Name="lay
 Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS.inputs=NULL, gdist.inputs=NULL,Min.Max,quiet=FALSE, write.dir) {
   CS.program<-CS.inputs$CS.program
   
-      EXPORT.dir<-write.dir  
+  EXPORT.dir<-write.dir  
   
   r <- Resistance
   r<-SCALE(r,0,10)
@@ -2010,7 +2014,7 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
   SHAPE<-ifelse(exp(PARM[1])>10000,10000,exp(PARM[1])) # Upper boundaries on parameters
   Max.SCALE<-ifelse(exp(PARM[2])>1e6,1e6,exp(PARM[2]))
   cat("\n", Name, as.character(EQ),paste0("| Shape = ",SHAPE,"; "),paste0("Maximum scale = ",Max.SCALE,"\n"))  
-   
+  
   # Apply specified transformation
   rick.eq<-(equation==2||equation==4||equation==6||equation==8)
   if(rick.eq==TRUE & SHAPE>6){
@@ -2097,10 +2101,10 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     
     # Run mixed effect model on each Circuitscape effective resistance
     AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=CS.resist,
-                                response=CS.inputs$response,
-                                ID=CS.inputs$ID,
-                                ZZ=CS.inputs$ZZ,
-                                REML=FALSE)))
+                                               response=CS.inputs$response,
+                                               ID=CS.inputs$ID,
+                                               ZZ=CS.inputs$ZZ,
+                                               REML=FALSE)))
     ROW <- nrow(CS.inputs$ID)
     
   }  
@@ -2109,22 +2113,22 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
     cd <- Run_gdistance(gdist.inputs,r)
     
     AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-                                response=gdist.inputs$response,
-                                ID=gdist.inputs$ID,
-                                ZZ=gdist.inputs$ZZ,
-                                REML=FALSE)))
+                                               response=gdist.inputs$response,
+                                               ID=gdist.inputs$ID,
+                                               ZZ=gdist.inputs$ZZ,
+                                               REML=FALSE)))
     ROW <- nrow(gdist.inputs$ID)
   }   
- 
+  
   k<-length(PARM)+2
   AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
-    
+  
   t2 <-Sys.time()
   if(quiet==FALSE){    
-  cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
-  cat(paste0("\t", "AICc = ",round(AICc,3)),"\n")
-  cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
-  
+    cat(paste0("\t", "Iteration took ", round(t2-t1,digits=2), " seconds to complete"),"\n")
+    cat(paste0("\t", "AICc = ",round(AICc,3)),"\n")
+    cat(paste0("\t", EQ, " | Shape = ",PARM[2]," | Max = ",PARM[3]),"\n","\n")
+    
   }
   OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized    
   
@@ -2146,72 +2150,72 @@ Resistance.Optimization_cont.nlm<-function(PARM,Resistance,equation, get.best,CS
 
 MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL, ZZ=NULL){ 
   if(method=="cs"){
-  response=genetic.dist
-  resist.mat<-list.files(resistance,pattern="*_resistances.out",full.names=TRUE)
-  resist.names<-gsub(pattern="_resistances.out","",x=list.files(resistance,pattern="*_resistances.out"))
-  COEF.Table<-array()
-  for(i in 1:length(resist.mat)){
-    m<-length(read.table(resist.mat[i])[-1,-1])
-    mm<-read.table(resist.mat[i])[-1,-1]
-    mm <- lower(mm)
-    mm <- mm[which(mm!=-1)]
-  if(is.null(ID)){
-    ID<-To.From.ID(POPS=m)
-    
-  }
-  
-  if(is.null(ZZ)){
-    ZZ<-ZZ.mat(ID=ID)
-    
-  }
-    
-    resistance<-scale(mm,center=TRUE,scale=TRUE)
-    dat<-data.frame(ID,resistance=resistance,response=response)
-    colnames(dat)<-c("pop1","pop2","resistance","response")
-    
-    # Assign value to layer
-    LAYER<-assign(resist.names[i],value=dat$cs.matrix)
-    
-    # Fit model
-    mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=TRUE)
-    mod$reTrms$Zt <- ZZ
-    dfun <- do.call(mkLmerDevfun,mod)
-    opt <- optimizeLmer(dfun)
-    Mod.Summary <- summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-    COEF<-Mod.Summary$coefficients
-    row.names(COEF)<-c("Intercept",resist.names[i])
-    COEF.Table<-rbind(COEF.Table, COEF)
+    response=genetic.dist
+    resist.mat<-list.files(resistance,pattern="*_resistances.out",full.names=TRUE)
+    resist.names<-gsub(pattern="_resistances.out","",x=list.files(resistance,pattern="*_resistances.out"))
+    COEF.Table<-array()
+    for(i in 1:length(resist.mat)){
+      m<-length(read.table(resist.mat[i])[-1,-1])
+      mm<-read.table(resist.mat[i])[-1,-1]
+      mm <- lower(mm)
+      mm <- mm[which(mm!=-1)]
+      if(is.null(ID)){
+        ID<-To.From.ID(POPS=m)
+        
+      }
+      
+      if(is.null(ZZ)){
+        ZZ<-ZZ.mat(ID=ID)
+        
+      }
+      
+      resistance<-scale(mm,center=TRUE,scale=TRUE)
+      dat<-data.frame(ID,resistance=resistance,response=response)
+      colnames(dat)<-c("pop1","pop2","resistance","response")
+      
+      # Assign value to layer
+      LAYER<-assign(resist.names[i],value=dat$cs.matrix)
+      
+      # Fit model
+      mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=TRUE)
+      mod$reTrms$Zt <- ZZ
+      dfun <- do.call(mkLmerDevfun,mod)
+      opt <- optimizeLmer(dfun)
+      Mod.Summary <- summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+      COEF<-Mod.Summary$coefficients
+      row.names(COEF)<-c("Intercept",resist.names[i])
+      COEF.Table<-rbind(COEF.Table, COEF)
     }
   } else {       
     response=genetic.dist
     resist.mat<-list.files(resistance,pattern="*.rda",full.names=TRUE)
     resist.names<-gsub(pattern=".rda","",x=list.files(resistance,pattern=".rda"))
     COEF.Table<-array()
-  for(i in 1:length(resist.mat)){
-    load(resist.mat[i])
-    mm <-lower(as.matrix(cd))
-    m<-attr(cd,"Size")
-    ID<-To.From.ID(POPS=m)
-    ZZ<-ZZ.mat(ID=ID)
-    cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
-    cs.unscale<-mm
-    dat<-cbind(ID,cs.matrix,response)  
-    
-    # Assign value to layer
-    LAYER<-assign(resist.names[i],value=dat$cs.matrix)
-    
-    # Fit model
-    mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
-    mod$reTrms$Zt <- ZZ
-    dfun <- do.call(mkLmerDevfun,mod)
-    opt <- optimizeLmer(dfun)
-    Mod.Summary <- summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
-    COEF<-Mod.Summary$coefficients
-    row.names(COEF)<-c("Intercept",resist.names[i])
-    COEF.Table<-rbind(COEF.Table, COEF)
+    for(i in 1:length(resist.mat)){
+      load(resist.mat[i])
+      mm <-lower(as.matrix(cd))
+      m<-attr(cd,"Size")
+      ID<-To.From.ID(POPS=m)
+      ZZ<-ZZ.mat(ID=ID)
+      cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
+      cs.unscale<-mm
+      dat<-cbind(ID,cs.matrix,response)  
+      
+      # Assign value to layer
+      LAYER<-assign(resist.names[i],value=dat$cs.matrix)
+      
+      # Fit model
+      mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
+      mod$reTrms$Zt <- ZZ
+      dfun <- do.call(mkLmerDevfun,mod)
+      opt <- optimizeLmer(dfun)
+      Mod.Summary <- summary(mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))
+      COEF<-Mod.Summary$coefficients
+      row.names(COEF)<-c("Intercept",resist.names[i])
+      COEF.Table<-rbind(COEF.Table, COEF)
+    }
   }
-}
-    
+  
   
   if(is.null(out.dir)){
     COEF.Table<-(COEF.Table[-1,])
@@ -2244,17 +2248,17 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL
 
 MLPE.lmm <- function(resistance, pairwise.genetic, REML=FALSE, ID=NULL, ZZ=NULL){ 
   response=pairwise.genetic
-
+  
   if(class(resistance)[[1]]=='dist'){
     mm<-lower(as.matrix(resistance))
     m<-attr(resistance,"Size")
     mm <- mm[which(mm!=-1)]
     
     if(is.null(ID)){
-    ID<-To.From.ID(POPS=m)
+      ID<-To.From.ID(POPS=m)
     }
     if(is.null(ZZ)){
-    ZZ<-ZZ.mat(ID=ID)
+      ZZ<-ZZ.mat(ID=ID)
     }
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
     
@@ -2273,18 +2277,18 @@ MLPE.lmm <- function(resistance, pairwise.genetic, REML=FALSE, ID=NULL, ZZ=NULL)
     cs.matrix<-scale(mm,center=TRUE,scale=TRUE)
   }
   
-    dat<-data.frame(ID,resistance=cs.matrix,response=response)
-    colnames(dat)<-c("pop1","pop2","resistance","response")
+  dat<-data.frame(ID,resistance=cs.matrix,response=response)
+  colnames(dat)<-c("pop1","pop2","resistance","response")
   
-    # Assign value to layer
-#     LAYER<-assign("Resist",value=dat$cs.matrix)
-    
-    # Fit model
-    mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=REML)
-    mod$reTrms$Zt <- ZZ
-    dfun <- do.call(mkLmerDevfun,mod)
-    opt <- optimizeLmer(dfun)
-    MOD <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))   
+  # Assign value to layer
+  #     LAYER<-assign("Resist",value=dat$cs.matrix)
+  
+  # Fit model
+  mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=REML)
+  mod$reTrms$Zt <- ZZ
+  dfun <- do.call(mkLmerDevfun,mod)
+  opt <- optimizeLmer(dfun)
+  MOD <- (mkMerMod(environment(dfun), opt, mod$reTrms,fr = mod$fr))   
   return(MOD)
 }
 
@@ -2294,7 +2298,7 @@ MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){
     resistance <- resistance[which(resistance!=-1)]    
     dat<-data.frame(ID,resistance=resistance,response=response)
     colnames(dat)<-c("pop1","pop2","resistance","response")
-    } else {
+  } else {
     resistance <-lower(as.matrix(resistance))
     resistance <- resistance[which(resistance!=-1)]
     dat<-data.frame(ID,resistance=resistance,response=response)
@@ -2302,7 +2306,7 @@ MLPE.lmm2 <- function(resistance, response, REML=FALSE, ID, ZZ){
     
   }
   # Assign value to layer
-#   LAYER<-assign("Resist",value=dat$resistance)
+  #   LAYER<-assign("Resist",value=dat$resistance)
   
   # Fit model
   mod <- lFormula(response ~ resistance + (1|pop1), data=dat,REML=REML)
@@ -2336,7 +2340,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
   if(length(resistance.mat)==1){
     response=genetic.dist
     if(is.null(name)){
-    NAME<-gsub(pattern="*_resistances.out","",x=(basename(resistance.mat)))
+      NAME<-gsub(pattern="*_resistances.out","",x=(basename(resistance.mat)))
     }
     mm<-read.table(resistance.mat)[-1,-1]
     m<-length(mm)
@@ -2357,7 +2361,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
     
     # Assign value to layer
     LAYER<-assign("LAYER",value=dat$cs.matrix)
-  
+    
     # Fit model
     mod <- lFormula(response ~ LAYER + (1|pop1), data=dat,REML=TRUE)
     mod$reTrms$Zt <- ZZ
@@ -2477,45 +2481,45 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
     write.table(CS_Point.txt,file = CS_Point.File,col.names = F,row.names = F)
   }
   if(!is.null(response)) {TEST.response <- (is.vector(response) || ncol(response)==1)
-                             if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
+  if(TEST.response==FALSE) {stop("The object 'response' is not in the form of a single column vector")}}
   platform="pc"
   
   if(!is.null(pairs_to_include)){
     if(!file.exists(pairs_to_include)) { stop( "The specified pairs_to_include file does not exist") }
-        toMatch <- c("min", "max")
-        if(grep(read.table(file = pairs_to_include,header = F,sep = "\t")[1,1],pattern = paste(toMatch,collapse = "|"))){
-          # Function to make list of observations to include
-          Min.MAX <- read.table(file = pairs_to_include,header = F,sep = "\t")[c(1,2),c(1,2)]
-          MIN <- Min.MAX[which(Min.MAX[,1]=="min"),2]
-          MAX <- Min.MAX[which(Min.MAX[,1]=="max"),2]
-          PTI <- read.table(file = pairs_to_include,header = F,sep = "\t")[-c(1:3),]
-          site <- PTI[,1]
-          PTI <- as.matrix(PTI[,-1])
-          
-          p_t_i <- list()
-          count <- 0
-          for(i in 1:(ncol(PTI)-1)){
-            for(j in (i+1):ncol(PTI)){
-                if(PTI[j,i]>=MIN && PTI[j,i]<=MAX){
-                count <- count +1                  
-                p_t_i[[count]] <- data.frame(i,j)                 
-              } # close if statement
-            } # close j loop           
-          } # close i loop
-          ID <- plyr::ldply(p_t_i,.fun = identity)
-          colnames(ID) <- c("pop1","pop2")
-#           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
-          n1 <- table(ID$pop1)[[1]]
-          p1<-ID[n1,1]; p2<-ID[n1,2]
-          ID[n1,1]<-p2; ID[n1,2]<-p1
-          ID$pop1 <- factor(ID$pop1)
-          ID$pop2 <- factor(ID$pop2)
-        } # close function                
+    toMatch <- c("min", "max")
+    if(grep(read.table(file = pairs_to_include,header = F,sep = "\t")[1,1],pattern = paste(toMatch,collapse = "|"))){
+      # Function to make list of observations to include
+      Min.MAX <- read.table(file = pairs_to_include,header = F,sep = "\t")[c(1,2),c(1,2)]
+      MIN <- Min.MAX[which(Min.MAX[,1]=="min"),2]
+      MAX <- Min.MAX[which(Min.MAX[,1]=="max"),2]
+      PTI <- read.table(file = pairs_to_include,header = F,sep = "\t")[-c(1:3),]
+      site <- PTI[,1]
+      PTI <- as.matrix(PTI[,-1])
+      
+      p_t_i <- list()
+      count <- 0
+      for(i in 1:(ncol(PTI)-1)){
+        for(j in (i+1):ncol(PTI)){
+          if(PTI[j,i]>=MIN && PTI[j,i]<=MAX){
+            count <- count +1                  
+            p_t_i[[count]] <- data.frame(i,j)                 
+          } # close if statement
+        } # close j loop           
+      } # close i loop
+      ID <- plyr::ldply(p_t_i,.fun = identity)
+      colnames(ID) <- c("pop1","pop2")
+      #           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
+      n1 <- table(ID$pop1)[[1]]
+      p1<-ID[n1,1]; p2<-ID[n1,2]
+      ID[n1,1]<-p2; ID[n1,2]<-p1
+      ID$pop1 <- factor(ID$pop1)
+      ID$pop2 <- factor(ID$pop2)
+    } # close function                
   } # close pairs to include statement
   
   # Make to-from population list
   if(!exists(x = "ID")){
-  ID<-To.From.ID(n.POPS)
+    ID<-To.From.ID(n.POPS)
   }
   suppressWarnings(ZZ<-ZZ.mat(ID))
   list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include)
@@ -2658,7 +2662,7 @@ GA.prep<-function(ASCII.dir,
   eqs <- list()
   for(i in 1:n.layers){
     n.levels<-length(unique(r[[i]]))
-    if (n.levels <=15){
+    if (n.levels <= 15){
       Level.val <- unique(r[[i]])      
       parm.type[i,1]<-"cat"
       parm.type[i,2]<-n.levels 
@@ -2758,7 +2762,7 @@ Cont.Param <- function(PARM){
 #                                    m[lower.tri(m)]}
 
 read.matrix<-function(cs.matrix){  lower(read.table(cs.matrix)[-1,-1])
-                                   }
+}
 
 read.matrix2<-function(cs.matrix){  m<-read.table(cs.matrix)[-1,-1]
 }
@@ -2789,14 +2793,14 @@ ZZ.mat <- function(ID) {
 
 # Rescale function
 SCALE.vector <-function(data,MIN,MAX){Mn=min(data)
-                                      Mx=max(data)
-                                      (MAX-MIN)/(Mx-Mn)*(data-Mx)+MAX}
+Mx=max(data)
+(MAX-MIN)/(Mx-Mn)*(data-Mx)+MAX}
 
 # Define scaling function
 # This will rescale from 1 to specified MAX
 SCALE <-function(data,MIN,MAX){Mn=cellStats(data,stat='min')
-                               Mx=cellStats(data,stat='max')
-                               (MAX-MIN)/(Mx-Mn)*(data-Mx)+MAX}
+Mx=cellStats(data,stat='max')
+(MAX-MIN)/(Mx-Mn)*(data-Mx)+MAX}
 
 # # Function to write .ini file for Circuitscape 
 # write.CS_3.5.8 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,MAP="write_cum_cur_map_only=False"){
@@ -2874,8 +2878,8 @@ SCALE <-function(data,MIN,MAX){Mn=cellStats(data,stat='min')
 
 
 write.CS_4.0 <- function(BATCH,OUT,HABITAT,LOCATION.FILE,CONNECTION,CURRENT.MAP="write_cur_maps = False", MAP="write_cum_cur_map_only = False",PARALLELIZE="parallelize = False",CORES="max_parallel = 0", PAIRS_TO_INCLUDE, PAIRS){
-sink(BATCH)
-cat("[Options for advanced mode]
+  sink(BATCH)
+  cat("[Options for advanced mode]
 ground_file_is_resistances = True
 remove_src_or_gnd = rmvsrc
 ground_file = (Browse for a raster mask file)
@@ -2889,12 +2893,12 @@ use_mask = False
 
 [Calculation options]
 low_memory_mode = False")
-cat("\n")
-cat(PARALLELIZE)
-cat("\n")
-cat(CORES)
-cat("\n")
-cat("
+  cat("\n")
+  cat(PARALLELIZE)
+  cat("\n")
+  cat(CORES)
+  cat("\n")
+  cat("
 solver = cg+amg
 print_timings = False
 preemptive_memory_release = False
@@ -2914,14 +2918,14 @@ set_focal_node_currents_to_zero = False
 set_null_voltages_to_nodata = True
 compress_grids = False
 write_volt_maps = False")
-cat("\n")
-cat(CURRENT.MAP)
-cat("\n")
-cat(OUT)
-cat("\n")
-cat(MAP)
-cat("\n")
-cat("
+  cat("\n")
+  cat(CURRENT.MAP)
+  cat("\n")
+  cat(OUT)
+  cat("\n")
+  cat(MAP)
+  cat("\n")
+  cat("
 log_transform_maps = False
 write_max_cur_maps = False
 
@@ -2939,34 +2943,34 @@ profiler_log_file = None
 screenprint_log = False
 
 [Options for pairwise and one-to-all and all-to-one modes]")
-cat("\n")
-cat(PAIRS_TO_INCLUDE)
-cat("\n")
-cat(PAIRS)
-cat("\n")
-cat(LOCATION.FILE)
-cat("\n")
-cat("\n")
-
-cat("
+  cat("\n")
+  cat(PAIRS_TO_INCLUDE)
+  cat("\n")
+  cat(PAIRS)
+  cat("\n")
+  cat(LOCATION.FILE)
+  cat("\n")
+  cat("\n")
+  
+  cat("
 [Connection scheme for raster habitat data]
 connect_using_avg_resistances = True")
-cat("\n")
-cat(CONNECTION)
-cat("\n")
-cat("\n")
-cat("
+  cat("\n")
+  cat(CONNECTION)
+  cat("\n")
+  cat("\n")
+  cat("
 [Habitat raster or graph]
 habitat_map_is_resistances = True")
-cat("\n")
-cat(HABITAT)
-cat("\n")
-cat("\n")
-cat("
+  cat("\n")
+  cat(HABITAT)
+  cat("\n")
+  cat("\n")
+  cat("
 [Circuitscape mode]
 data_type = raster
 scenario = pairwise")
-sink()
+  sink()
 }
 
 #############################################################
@@ -3056,66 +3060,66 @@ eq.set <- function(include.list) {
 
 get.EQ <-function(equation){   # Apply specified transformation
   if(is.numeric(equation)){
-  equation=floor(equation)
-  if(equation==1){
-    EQ <- "Inverse-Reverse Monomolecular"
+    equation=floor(equation)
+    if(equation==1){
+      EQ <- "Inverse-Reverse Monomolecular"
+      
+    } else if(equation==5){
+      EQ <- "Reverse Monomolecular"        
+      
+    } else if(equation==3){
+      EQ <- "Monomolecular"
+      
+    } else if (equation==7) {
+      EQ <- "Inverse Monomolecular"  	    
+      
+    } else if (equation==8) {
+      EQ <- "Inverse Ricker"  
+      
+    } else if (equation==4) {
+      EQ <- "Ricker"
+      
+    } else if (equation==6) {
+      EQ <- "Reverse Ricker"
+      
+    } else if (equation==2) {
+      EQ <- "Inverse-Reverse Ricker"
+      
+    } else {
+      EQ <- "Distance"  	
+    }
     
-  } else if(equation==5){
-    EQ <- "Reverse Monomolecular"        
-    
-  } else if(equation==3){
-    EQ <- "Monomolecular"
-    
-  } else if (equation==7) {
-    EQ <- "Inverse Monomolecular"  	    
-    
-  } else if (equation==8) {
-    EQ <- "Inverse Ricker"  
-    
-  } else if (equation==4) {
-    EQ <- "Ricker"
-    
-  } else if (equation==6) {
-    EQ <- "Reverse Ricker"
-  
-  } else if (equation==2) {
-    EQ <- "Inverse-Reverse Ricker"
-  
+    (EQ)
   } else {
-    EQ <- "Distance"  	
-  }
- 
-  (EQ)
-  } else {
-  if(equation=="Inverse-Reverse Monomolecular"){
-    EQ <- 1
+    if(equation=="Inverse-Reverse Monomolecular"){
+      EQ <- 1
+      
+    } else if(equation=="Reverse Monomolecular"){
+      EQ <- 5        
+      
+    } else if(equation=="Monomolecular"){
+      EQ <- 3
+      
+    } else if (equation=="Inverse Monomolecular") {
+      EQ <- 7
+      
+    } else if (equation=="Inverse Ricker") {
+      EQ <- 8
+      
+    } else if (equation=="Ricker") {
+      EQ <- 4
+      
+    } else if (equation=="Reverse Ricker") {
+      EQ <- 6
+      
+    } else if (equation=="Inverse-Reverse Ricker") {
+      EQ <- 2
+      
+    } else {
+      EQ <- 9  	
+    }
     
-  } else if(equation=="Reverse Monomolecular"){
-    EQ <- 5        
-    
-  } else if(equation=="Monomolecular"){
-    EQ <- 3
-    
-  } else if (equation=="Inverse Monomolecular") {
-    EQ <- 7
-    
-  } else if (equation=="Inverse Ricker") {
-    EQ <- 8
-    
-  } else if (equation=="Ricker") {
-    EQ <- 4
-    
-  } else if (equation=="Reverse Ricker") {
-    EQ <- 6
-  
-  } else if (equation=="Inverse-Reverse Ricker") {
-    EQ <- 2
-  
-  } else {
-    EQ <- 9  	
-  }
- 
-  (EQ)  
+    (EQ)  
   }
 }
 
@@ -3124,45 +3128,45 @@ Result.txt <- function(GA.results, GA.inputs, method, Run.Time, fit.stats, MLPE.
   AICc<-GA.results@fitnessValue
   AICc<-round(AICc,digits=4)
   ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
-#   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
+  #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
   
-sink(summary.file)
-cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
-cat("\n")
-cat(paste0("Optimized using:",method),"\n")
-cat("\n")
-cat(paste0("Surfaces included in optimization:"),"\n")
-cat(GA.inputs$parm.type$name,"\n")
-cat("\n")
-cat("Genetic Algorithm optimization settings:")
-cat("\n")
-cat(paste0("Type of genetic algorithm used: ", GA.results@type),"\n")
-cat(paste0("popSize at each iteration: ", GA.results@popSize),"\n")
-cat(paste0("Maximum number of iterations: ", GA.results@maxiter),"\n")
-cat(paste0("Number individuals retained each generation (elistism): ", ELITE),"\n")
-cat(paste0("Crossover probability: ", GA.results@pcrossover),"\n")
-cat(paste0("Mutation probability: ", GA.results@pmutation),"\n")
-cat("\n")
-cat(paste0("The Genetic Algorithm completed after ",GA.results@iter," iterations"),"\n")
-cat("\n")
-cat(paste0("Minimum AICc: ",-1*AICc),"\n")
-cat("\n")
-cat(paste0("Pseudo marginal R-square (R2m): ",fit.stats[[1]]),"\n")
-cat(paste0("Pseudo conditional R-square (R2c): ",fit.stats[[2]]),"\n")
-cat("\n")
-cat(paste0("Optimized values for each surface:"),"\n")
-cat(GA.results@solution,"\n")
-cat("\n")
-cat(paste0("Optimization took ",Run.Time," seconds to complete"),"\n")
-sink()
+  sink(summary.file)
+  cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
+  cat("\n")
+  cat(paste0("Optimized using:",method),"\n")
+  cat("\n")
+  cat(paste0("Surfaces included in optimization:"),"\n")
+  cat(GA.inputs$parm.type$name,"\n")
+  cat("\n")
+  cat("Genetic Algorithm optimization settings:")
+  cat("\n")
+  cat(paste0("Type of genetic algorithm used: ", GA.results@type),"\n")
+  cat(paste0("popSize at each iteration: ", GA.results@popSize),"\n")
+  cat(paste0("Maximum number of iterations: ", GA.results@maxiter),"\n")
+  cat(paste0("Number individuals retained each generation (elistism): ", ELITE),"\n")
+  cat(paste0("Crossover probability: ", GA.results@pcrossover),"\n")
+  cat(paste0("Mutation probability: ", GA.results@pmutation),"\n")
+  cat("\n")
+  cat(paste0("The Genetic Algorithm completed after ",GA.results@iter," iterations"),"\n")
+  cat("\n")
+  cat(paste0("Minimum AICc: ",-1*AICc),"\n")
+  cat("\n")
+  cat(paste0("Pseudo marginal R-square (R2m): ",fit.stats[[1]]),"\n")
+  cat(paste0("Pseudo conditional R-square (R2c): ",fit.stats[[2]]),"\n")
+  cat("\n")
+  cat(paste0("Optimized values for each surface:"),"\n")
+  cat(GA.results@solution,"\n")
+  cat("\n")
+  cat(paste0("Optimization took ",Run.Time," seconds to complete"),"\n")
+  sink()
 }
- 
+
 ##########################################################################################
 
 get.name<-function(x){
-   nm <-deparse(substitute(x))
-   return(nm)
-   }
+  nm <-deparse(substitute(x))
+  return(nm)
+}
 ###########################
 Monomolecular <- function(r, parm){
   parm[3]*(1-exp(-1*r/parm[2]))+1 # Monomolecular
@@ -3175,7 +3179,7 @@ Inv.Monomolecular <- function(r, parm){
   } else {
     R <- parm[3]*(exp(-1*r/parm[2])) 
     (R <- (R-min(R))+1)
-     }
+  }
 }
 
 Inv.Rev.Monomolecular <- function(r, parm){
@@ -3201,7 +3205,7 @@ Rev.Monomolecular <- function(r, parm){
 
 Ricker <- function(r,parm){
   parm[3]*r*exp(-1*r/parm[2])+1 # Ricker
-  }
+}
 
 Inv.Ricker <- function(r,parm){
   if(class(r)=="RasterLayer") {
