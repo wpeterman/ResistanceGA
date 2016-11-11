@@ -718,7 +718,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
     cd <- Run_gdistance(gdist.inputs,RAST)
-    save(cd,file=paste0(GA.inputs$Results.dir,NAME,".rda"))
+    write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,".csv"), sep = ",")
     writeRaster(RAST,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)
     
     ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
@@ -735,7 +735,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                                 ID=gdist.inputs$ID,
                                 ZZ=gdist.inputs$ZZ)  
     
-    fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),
+    fit.stats <- r.squaredGLMM(MLPE.lmm(resistance = cd,
                                         pairwise.genetic = gdist.inputs$response, 
                                         REML = F,
                                         ID = gdist.inputs$ID, 

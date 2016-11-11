@@ -1,3 +1,8 @@
+ResistanceGA 2.2-3
+--------
+* Fixed bug in multisurface least cost path optimization
+
+
 ResistanceGA 2.2-2
 --------
 * Fixed bug in single surface least cost path optimization
