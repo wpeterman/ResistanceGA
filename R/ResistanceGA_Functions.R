@@ -718,7 +718,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
     cd <- Run_gdistance(gdist.inputs,RAST)
-    write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,".csv"), sep = ",")
+    write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,".csv"), sep = ",", row.names = F, col.names = F)
     writeRaster(RAST,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)
     
     ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
