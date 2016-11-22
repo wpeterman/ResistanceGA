@@ -69,13 +69,14 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 ## ----eval=FALSE----------------------------------------------------------
 #  # Set the random number seed to reproduce the results presented
 #  GA.inputs <- GA.prep(ASCII.dir=write.dir,
-#                     max.cat=500,
-#                     max.cont=500,
-#                     seed = 555)
+#                       max.cat=500,
+#                       max.cont=500,
+#                       select.trans = "A",
+#                       seed = 555)
 #  
 #  CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-#                     CS_Point.File=paste0(write.dir,"samples.txt"),
-#                     CS.program=CS.program)
+#                       CS_Point.File=paste0(write.dir,"samples.txt"),
+#                       CS.program=CS.program)
 
 ## ----monomolec.plot, eval = FALSE----------------------------------------
 #  r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=continuous)
@@ -88,9 +89,9 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 
 ## ----eval=FALSE----------------------------------------------------------
 #  CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-#                     response=CS.response,
-#                     CS_Point.File=paste0(write.dir,"samples.txt"),
-#                     CS.program=CS.program)
+#                       response=CS.response,
+#                       CS_Point.File=paste0(write.dir,"samples.txt"),
+#                       CS.program=CS.program)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
@@ -196,10 +197,11 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 
 ## ----eval=FALSE----------------------------------------------------------
 #  GA.inputs <- GA.prep(ASCII.dir=write.dir,
-#                     max.cat=500,
-#                     max.cont=500,
-#                     seed = 555,
-#                     quiet = TRUE)
+#                       method = "R2"
+#                       max.cat=500,
+#                       max.cont=500,
+#                       seed = 555,
+#                       quiet = TRUE)
 
 ## ----reverse.ricker, eval=FALSE------------------------------------------
 #  plot.t <- Plot.trans(PARM=c(3.5,400),Resistance=continuous,transformation="Reverse Ricker")

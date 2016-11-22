@@ -15,9 +15,9 @@ SS_optim(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
 
 \item{nlm}{Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.}
 
-\item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the AICc output table (default = TRUE)}
+\item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)}
 
-\item{null_mod}{Logical, if TRUE, a Null model will be calculated and added to the AICc output table (default = TRUE)}
+\item{null_mod}{Logical, if TRUE, an intercept-only model will be calculated and added to the output table (default = TRUE)}
 }
 \value{
 This function optimizes resistance surfaces in isolation. Following optimization of all surfaces, several summary objects are created.\cr

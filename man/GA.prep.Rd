@@ -11,7 +11,7 @@ max.cat=2500,
 max.cont=2500,
 cont.shape=NULL,
 select.trans=NULL,
-Min.Max="max",
+method = "AIC",
 pop.mult = 15,
 percent.elite = 0.05,
 type= "real-valued",
@@ -44,7 +44,7 @@ quiet = FALSE)
 
 \item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.}
 
-\item{Min.Max}{Define whether the optimization function should be minimized ('min') or maximized ('max' = Default). Optimization with \code{ga} maximizes the objective criteria}
+\item{method}{Objective function to use to optimize surfaces. Select "AIC", "R2", or "LL" to optimize based on AIC, variance explained (R2), or log-likelihood. (Default = AIC)}
 
 \item{pop.mult}{Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.}
 

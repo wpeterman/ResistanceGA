@@ -1,3 +1,10 @@
+ResistanceGA 3.0-0
+--------
+* Minor updates to the vignette
+* It is now possible to choose whether to optimize using AIC, R2, or log likelihood (LL) by specifying 'method' in `GA.prep`. The default is still AIC.
+* Have also corrected a number of smaller errors
+* No longer calculates AICc
+
 ResistanceGA 2.2-3
 --------
 * Fixed bug in multisurface least cost path optimization
