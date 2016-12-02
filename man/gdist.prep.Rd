@@ -4,10 +4,10 @@
 \alias{gdist.prep}
 \title{Prepare data for optimization using \code{gdistance}}
 \usage{
-gdist.prep(n.POPS, response, samples, transitionFunction, directions, longlat)
+gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat)
 }
 \arguments{
-\item{n.POPS}{The number of populations that are being assessed}
+\item{n.Pops}{The number of populations that are being assessed}
 
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 

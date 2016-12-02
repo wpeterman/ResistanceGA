@@ -4,10 +4,10 @@
 \alias{CS.prep}
 \title{Prepare and bundle input CIRCUITSCAPE model parameters}
 \usage{
-CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
+CS.prep(n.Pops, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
 }
 \arguments{
-\item{n.POPS}{The number of populations that are being assessed}
+\item{n.Pops}{The number of populations that are being assessed}
 
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 

@@ -1,9 +1,12 @@
 ResistanceGA 3.0-0
 --------
-* Minor updates to the vignette
+* Updates to the vignette
 * It is now possible to choose whether to optimize using AIC, R2, or log likelihood (LL) by specifying 'method' in `GA.prep`. The default is still AIC.
-* Have also corrected a number of smaller errors
-* No longer calculates AICc
+* Is is now possible to specify how the number of parameters, k, is determined by setting `k.value` in `GA.prep`. The default is that k is equal to the number of parameters optimized, plus the the number of surfaces, plus the intercept.
+* The number of parameters, k, is now reported in the 'All_Results_Table.csv'
+* A number of smaller errors have been corrected
+* AICc is now calculated based upon the number of sampled populations in the analysis, rather than the number of pairwise comparisons between populations (as was the case in previous versions).
+* The syntax of the `CS.prep` and `gdist.prep` functions has been updated. Formerly `n.POPS` is now `n.Pops`
 
 ResistanceGA 2.2-3
 --------

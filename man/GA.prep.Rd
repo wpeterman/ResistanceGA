@@ -11,7 +11,8 @@ max.cat=2500,
 max.cont=2500,
 cont.shape=NULL,
 select.trans=NULL,
-method = "AIC",
+method = "R2",
+k.value = 3,
 pop.mult = 15,
 percent.elite = 0.05,
 type= "real-valued",
@@ -44,7 +45,15 @@ quiet = FALSE)
 
 \item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.}
 
-\item{method}{Objective function to use to optimize surfaces. Select "AIC", "R2", or "LL" to optimize based on AIC, variance explained (R2), or log-likelihood. (Default = AIC)}
+\item{method}{Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "R2")}
+
+\item{k.value}{Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).
+
+1 --> k = 2; 
+
+2 --> k = number of parameters optimized plus the intercept; 
+
+3 --> k =  the number of parameters optimized plus the intercept and the number of layers optimized.}
 
 \item{pop.mult}{Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.}
 
@@ -86,6 +95,8 @@ This function prepares and compiles objects and commands for optimization with t
 }
 \details{
 Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
+
+The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 
 \code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
 

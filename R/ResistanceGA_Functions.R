@@ -124,6 +124,8 @@ SS_optim <- function(CS.inputs = NULL,
   RESULTS.cont <-list() # List to store continuous results within
   cnt1<-0
   cnt2<-0
+  k.value <- GA.inputs$k.value
+  
   # Optimize each surface in turn
   for (i in 1:GA.inputs$n.layers){
     r<-GA.inputs$Resistance.stack[[i]]
@@ -191,23 +193,37 @@ SS_optim <- function(CS.inputs = NULL,
                               ID = CS.inputs$ID, 
                               ZZ = CS.inputs$ZZ ))
         
+        if(k.value == 1){
+          k <- 2
+        } else if (k.value == 2){
+          k <- GA.inputs$parm.type$n.parm[i] + 1
+        } else {
+          k <- GA.inputs$parm.type$n.parm[i] + 2
+        }
+        
+        n <- CS.inputs$n.Pops
+        AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+        # AICc <- (aic)+(((2*k)*(k+1))/(CS.inputs$n.Pops-k-1))
         
         RS <- data.frame(GA.inputs$layer.names[i],
                          single.GA@fitnessValue,
+                         k,
                          aic,
+                         AICc,
                          fit.stats[[1]],
                          fit.stats[[2]],
                          LL[[1]],
                          single.GA@solution)
         
         k <- GA.inputs$parm.type$n.parm[i]
+        
         Features <- matrix()
         for(z in 1:(k)){
           feature <- paste0("Feature",z)
           Features[z]<-feature
         }
         
-        colnames(RS) <- c("Surface", paste0("obj.func_",GA.inputs$method), "AIC","R2m", "R2c", "LL", Features)
+        colnames(RS) <- c("Surface", paste0("obj.func_",GA.inputs$method), "k", "AIC","AICc", "R2m", "R2c", "LL", Features)
         
         RESULTS.cat[[cnt1]] <- RS
         
@@ -290,9 +306,23 @@ SS_optim <- function(CS.inputs = NULL,
                                 ID = CS.inputs$ID, 
                                 ZZ = CS.inputs$ZZ ))
           
+          if(k.value == 1){
+            k <- 2
+          } else if (k.value == 2){
+            k <- GA.inputs$parm.type$n.parm[i]
+          } else {
+            k <- GA.inputs$parm.type$n.parm[i] + 1
+          }
+          
+          n <- CS.inputs$n.Pops
+          AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+          # AICc <- (aic)+(((2*k)*(k+1))/(CS.inputs$n.Pops-k-1))
+          
           RS <- data.frame(GA.inputs$layer.names[i],
                            single.GA@fitnessValue,
+                           k,
                            aic,
+                           AICc,
                            fit.stats[[1]],
                            fit.stats[[2]],
                            LL[[1]],
@@ -300,7 +330,10 @@ SS_optim <- function(CS.inputs = NULL,
                            single.GA@solution[2],
                            single.GA@solution[3])
           
-          colnames(RS) <- c("Surface", paste0("obj.func_",GA.inputs$method), "AIC", "R2m", "R2c", "LL", "Equation","shape","max")
+          
+          
+          
+          colnames(RS) <- c("Surface", paste0("obj.func_",GA.inputs$method), "k", "AIC", "AICc", "R2m", "R2c", "LL", "Equation","shape","max")
           RESULTS.cont[[cnt2]] <- RS
         }     
       } # Close if-else  
@@ -334,9 +367,12 @@ SS_optim <- function(CS.inputs = NULL,
           dist.obj <- LL[[1]]
         }
         
-        # k<-2
-        # AICc <- (Dist.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-        Dist.AICc<-data.frame("Distance", dist.obj, Dist.AIC, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Dist.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method), "AIC","R2m", "R2c", "LL")      
+        k<-2
+        n <- CS.inputs$n.Pops
+        AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+        # (Dist.AIC)+(((2*k)*(k+1))/((CS.inputs$n.Pops)-k-1))
+        
+        Dist.AICc<-data.frame("Distance", dist.obj,k, Dist.AIC, AICc, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Dist.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method),"k", "AIC", "AICc", "R2m", "R2c", "LL")      
       }
       
       if(null_mod==TRUE){
@@ -361,9 +397,11 @@ SS_optim <- function(CS.inputs = NULL,
         } else {
           null.obj <- LL[[1]]
         }
-        # k<-1
-        # AICc <- (Null.AIC)+(((2*k)*(k+1))/(nrow(CS.inputs$ID)-k-1))
-        Null.AICc<-data.frame("Null", null.obj, Null.AIC, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Null.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method),"AIC","R2m", "R2c", "LL")  
+        k<-1
+        n <- CS.inputs$n.Pops
+        AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+        # AICc <- (Null.AIC)+(((2*k)*(k+1))/((CS.inputs$n.Pops)-k-1))
+        Null.AICc<-data.frame("Null", null.obj, k, Null.AIC, AICc, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Null.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method),"k", "AIC", "AICc", "R2m", "R2c", "LL")  
       }
       
     }
@@ -428,22 +466,38 @@ SS_optim <- function(CS.inputs = NULL,
                                ID = gdist.inputs$ID, 
                                ZZ = gdist.inputs$ZZ))
         
+        if(k.value == 1){
+          k <- 2
+        } else if (k.value == 2){
+          k <- GA.inputs$parm.type$n.parm[i] + 1
+        } else {
+          k <- GA.inputs$parm.type$n.parm[i] + 2
+        }
+        
+        n <- gdist.inputs$n.Pops
+        AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+        # AICc <- (aic)+(((2*k)*(k+1))/(gdist.inputs$n.Pops-k-1))
+        
+        
         RS <- data.frame(GA.inputs$layer.names[i],
                          single.GA@fitnessValue, 
+                         k,
                          aic,
+                         AICc,
                          fit.stats[[1]],
                          fit.stats[[2]],
                          LL[[1]],
                          single.GA@solution)
-       
-         k=GA.inputs$parm.type$n.parm[i]
+        
+        k <- GA.inputs$parm.type$n.parm[i]
+        
         Features <- matrix()
         for(z in 1:(k)){
           feature <- paste0("Feature",z)
           Features[z]<-feature
         }
         
-        colnames(RS)<-c("Surface", paste0("obj.func_",GA.inputs$method), "AIC","R2m", "R2c", "LL", Features)
+        colnames(RS)<-c("Surface", paste0("obj.func_",GA.inputs$method), "k", "AIC", "AICc", "R2m", "R2c", "LL", Features)
         
         RESULTS.cat[[cnt1]]<-RS
         
@@ -537,9 +591,24 @@ SS_optim <- function(CS.inputs = NULL,
           
           LL <- logLik(MLPE.lmm(resistance = cd, pairwise.genetic = gdist.inputs$response,REML = F,  ID = gdist.inputs$ID, ZZ = gdist.inputs$ZZ))
           
+          if(k.value == 1){
+            k <- 2
+          } else if (k.value == 2){
+            k <- GA.inputs$parm.type$n.parm[i]
+          } else {
+            k <- GA.inputs$parm.type$n.parm[i] + 1
+          }
+          
+          n <- gdist.inputs$n.Pops
+          AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+          # AICc <- (aic)+(((2*k)*(k+1))/(gdist.inputs$n.Pops-k-1))
+          
+          
           RS <- data.frame(GA.inputs$layer.names[i],
                            single.GA@fitnessValue,
+                           k,
                            aic,
+                           AICc,
                            fit.stats[[1]],
                            fit.stats[[2]],
                            LL[[1]],
@@ -547,7 +616,7 @@ SS_optim <- function(CS.inputs = NULL,
                            single.GA@solution[2],
                            single.GA@solution[3])
           
-          colnames(RS) <- c("Surface", paste0("obj.func_",GA.inputs$method), "AIC", "R2m", "R2c", "LL", "Equation","shape","max")
+          colnames(RS) <- c("Surface", paste0("obj.func_",GA.inputs$method), 'k', "AIC", "AICc", "R2m", "R2c", "LL", "Equation","shape","max")
           RESULTS.cont[[cnt2]] <- RS
         }     
       } # Close if-else  
@@ -585,8 +654,26 @@ SS_optim <- function(CS.inputs = NULL,
         } else {
           dist.obj <- LL[[1]]
         }
-        # AICc <- (Dist.AIC)+(((2*k)*(k+1))/(ROW-k-1))
-        Dist.AICc<-data.frame("Distance", dist.obj, Dist.AIC, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Dist.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method), "AIC", "R2m", "R2c", "LL")      
+        
+        n <- gdist.inputs$n.Pops
+        AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+        # AICc <- (Dist.AIC)+(((2*k)*(k+1))/(gdist.inputs$n.Pops-k-1))
+        Dist.AICc<-data.frame("Distance",
+                              dist.obj, 
+                              k,
+                              Dist.AIC,
+                              AICc,
+                              fit.stats[[1]], 
+                              fit.stats[[2]], 
+                              LL[[1]])
+        colnames(Dist.AICc)<-c("Surface", 
+                               paste0("obj.func_",GA.inputs$method), 
+                               'k',
+                               "AIC", 
+                               "AICc",
+                               "R2m",
+                               "R2c", 
+                               "LL")      
       }
       
       if(null_mod==TRUE){          
@@ -611,8 +698,10 @@ SS_optim <- function(CS.inputs = NULL,
         } else {
           null.obj <- LL[[1]]
         }
-        # AICc <- (Null.AIC)+(((2*k)*(k+1))/(ROW-k-1))
-        Null.AICc<-data.frame("Null", null.obj, Null.AIC, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Null.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method), "AIC", "R2m", "R2c", "LL")  
+        n <- gdist.inputs$n.Pops
+        AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
+        # AICc <- (Null.AIC)+(((2*k)*(k+1))/(gdist.inputs$n.Pops-k-1))
+        Null.AICc<-data.frame("Null", null.obj, k, Null.AIC, AICc, fit.stats[[1]], fit.stats[[2]], LL[[1]]); colnames(Null.AICc)<-c("Surface", paste0("obj.func_",GA.inputs$method), 'k', "AIC", "AICc", "R2m", "R2c", "LL")  
       }
     }
   } # Close ascii loop
@@ -640,34 +729,34 @@ SS_optim <- function(CS.inputs = NULL,
   cat("\n")
   if(nrow(Results.cat)>0){
     Features <- array()
-    for(i in 1:ncol(Results.cat)-6){
+    for(i in 1:ncol(Results.cat)-8){
       feature <- paste0("Feature",i)
       Features[i]<-feature
     }
-    colnames(Results.cat)<-c("Surface", paste0("obj.func_",GA.inputs$method), "AIC","R2m", "R2c", "LL", Features)
-    Results.cat <-  Results.cat[order(-Results.cat$R2m),]
+    colnames(Results.cat)<-c("Surface", paste0("obj.func_",GA.inputs$method), 'k', "AIC", "AICc", "R2m", "R2c", "LL", Features)
+    Results.cat <-  Results.cat[order(Results.cat$AICc),]
     write.table(Results.cat,paste0(GA.inputs$Results.dir,"CategoricalResults.csv"),sep=",",col.names=T,row.names=F)
   }
   
   if(ncol(Results.cont)>0){    
-    colnames(Results.cont)<-c("Surface", paste0("obj.func_",GA.inputs$method), "AIC","R2m", "R2c", "LL", "Equation","shape","max")
-    Results.cont <- Results.cont[order(-Results.cont$R2m),]
+    colnames(Results.cont)<-c("Surface", paste0("obj.func_",GA.inputs$method), 'k', "AIC","AICc", "R2m", "R2c", "LL", "Equation","shape","max")
+    Results.cont <- Results.cont[order(Results.cont$AICc),]
     write.table(Results.cont,paste0(GA.inputs$Results.dir,"ContinuousResults.csv"),sep=",",col.names=T,row.names=F)
   }
   
   # Full Results
   if(nrow(Results.cat)>0 & nrow(Results.cont)>0){
-    Results.All<-rbind(Results.cat[,c(1:6)],Results.cont[,c(1:6)])
+    Results.All<-rbind(Results.cat[,c(1:8)],Results.cont[,c(1:8)])
   } else if(nrow(Results.cat)<1 & nrow(Results.cont)>0){
-    Results.All<-(Results.cont[,c(1:6)])  
+    Results.All<-(Results.cont[,c(1:8)])  
   } else {
-    Results.All<-(Results.cat[,c(1:6)])    
+    Results.All<-(Results.cat[,c(1:8)])    
   }
   
   if(dist_mod==TRUE) Results.All<-rbind(Results.All,Dist.AICc)
   if(null_mod==TRUE) Results.All<-rbind(Results.All,Null.AICc)
   
-  Results.All <- Results.All[order(-Results.All$R2m),]
+  Results.All <- Results.All[order(Results.All$AICc),]
   
   cat("\n")
   cat("\n")
@@ -683,7 +772,7 @@ SS_optim <- function(CS.inputs = NULL,
                                 ZZ=CS.inputs$ZZ)
     
   } else {  
-    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Write.dir,
+    MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
                                 genetic.dist=gdist.inputs$response,
                                 out.dir=GA.inputs$Results.dir,
                                 method="gd",
@@ -710,11 +799,11 @@ SS_optim <- function(CS.inputs = NULL,
 
 
 ########################################################################################  
-############ Single command function to execute mulit surface optimization ############ 
+############ Single command function to execute multiple surface optimization ############ 
 ########################################################################################  
 #' Simultaneous optimization of multiple resistance surfaces
 #' 
-#' Optimize multiple resistance surfaces simultaneously using genetic algorithms
+#' Optimize multiple resistance surfsaces simultaneously using genetic algorithms
 #' 
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
@@ -725,9 +814,12 @@ SS_optim <- function(CS.inputs = NULL,
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
+  k.value <- GA.inputs$k.value
+  
   if(!is.null(CS.inputs)){
     if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
     t1<-proc.time()[3]
+    
     multi.GA_nG <-ga(type= "real-valued",
                      fitness=Resistance.Opt_multi,
                      population=GA.inputs$population,
@@ -793,6 +885,18 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                           ID = CS.inputs$ID, 
                           ZZ = CS.inputs$ZZ ))
     
+    if(k.value == 1){
+      k <- 2
+    } else if (k.value == 2){
+      k <- sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
+    } else {
+      k <- sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+    }
+    
+    n <- CS.inputs$n.Pops
+    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
+    
+    
     # Get parameter estimates
     MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,
                                 genetic.dist=CS.inputs$response,
@@ -807,7 +911,9 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                Run.Time=rt, 
                fit.stats = fit.stats,
                optim = GA.inputs$method, 
+               k = k,
                aic = aic, 
+               AICc = AICc,
                LL = LL[[1]]) 
     
     file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
@@ -858,7 +964,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     NAME<-paste(GA.inputs$parm.type$name,collapse=".")
     names(RAST)<-NAME
     cd <- Run_gdistance(gdist.inputs,RAST)
-    write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,"_lcp.csv"), sep = ",", row.names = F, col.names = F)
+    write.table(as.matrix(cd),file=paste0(GA.inputs$Results.dir,NAME,"_lcp_dist.csv"), sep = ",", row.names = F, col.names = F)
     writeRaster(RAST,paste0(GA.inputs$Results.dir,NAME,".asc"), overwrite=TRUE)
     
     ifelse(length(unique(RAST))>15,type<-"continuous", type<-"categorical")
@@ -893,13 +999,26 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                           ID = gdist.inputs$ID, 
                           ZZ = gdist.inputs$ZZ ))
     
+    if(k.value == 1){
+      k <- 2
+    } else if (k.value == 2){
+      k <- sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
+    } else {
+      k <- sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+    }
+    
+    n <- gdist.inputs$n.Pops
+    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
+    
     Result.txt(GA.results=multi.GA_nG,
                GA.inputs=GA.inputs,
                method="cost distance", 
                Run.Time=rt, 
                fit.stats = fit.stats, 
                optim = GA.inputs$method,
+               k = k,
                aic = aic,
+               AICc = AICc,
                LL = LL[[1]]) 
     
     file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
@@ -2438,8 +2557,8 @@ MLPE.lmm_coef <- function(resistance, genetic.dist,out.dir=NULL, method, ID=NULL
     }
   } else {       
     response=genetic.dist
-    resist.mat<-list.files(resistance,pattern="*_lcp.csv",full.names=TRUE)
-    resist.names<-gsub(pattern="_lcp.csv","",x=list.files(resistance,pattern="_lcp.csv"))
+    resist.mat<-list.files(resistance,pattern="*_lcp_dist.csv",full.names=TRUE)
+    resist.names<-gsub(pattern="_lcp_dist.csv","",x=list.files(resistance,pattern="_lcp_dist.csv"))
     COEF.Table<-array()
     for(i in 1:length(resist.mat)){
       cd <- read.csv(resist.mat[i], header = F)
@@ -2694,7 +2813,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' 
 #' This function will prepare objects needed for running optimization functions
 #' 
-#' @param n.POPS The number of populations that are being assessed
+#' @param n.Pops The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. If using a Linux or Mac system, provide the full path to the "csrun.py" file. See details below. 
@@ -2705,7 +2824,7 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage CS.prep(n.POPS, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
+#' @usage CS.prep(n.Pops, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include)
 #' @details \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows: 
 #' 
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
@@ -2715,7 +2834,12 @@ Diagnostic.Plots<-function(resistance.mat, genetic.dist, XLAB="Estimated resista
 #' 
 #' The Linux and Mac versions are in development. Please let me know if you encounter errors.
 
-CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',Neighbor.Connect=8, pairs_to_include=NULL){
+CS.prep <- function(n.Pops, 
+                    response=NULL,
+                    CS_Point.File,
+                    CS.program='"C:/Program Files/Circuitscape/cs_run.exe"',
+                    Neighbor.Connect=8, 
+                    pairs_to_include=NULL){
   CS.exe_Test <- gsub("\"", "", CS.program)
   # Error messages
   if(!file.exists(CS_Point.File)) { stop( "The specified CS_Point.File does not exist" ) }
@@ -2769,10 +2893,10 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
   
   # Make to-from population list
   if(!exists(x = "ID")){
-    ID<-To.From.ID(n.POPS)
+    ID<-To.From.ID(n.Pops)
   }
   suppressWarnings(ZZ<-ZZ.mat(ID))
-  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.POPS=n.POPS,platform=platform,pairs_to_include=pairs_to_include)
+  list(ID=ID,ZZ=ZZ,response=response,CS_Point.File=CS_Point.File,CS.program=CS.program,Neighbor.Connect=Neighbor.Connect,n.Pops=n.Pops,platform=platform,pairs_to_include=pairs_to_include)
 }
 
 ##########################################################################################
@@ -2789,7 +2913,14 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.
-#' @param method Objective function to use to optimize surfaces. Select "AIC", "R2", or "LL" to optimize based on AIC, variance explained (R2), or log-likelihood. (Default = AIC)
+#' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "R2")
+#' @param k.value Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).  
+#' 
+#' 1 --> k = 2; 
+#' 
+#' 2 --> k = number of parameters optimized plus the intercept; 
+#' 
+#' 3 --> k =  the number of parameters optimized plus the intercept and the number of layers optimized. 
 #' @param pop.mult Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.
 #' @param percent.elite Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.
 #' @param type Default is "real-valued"
@@ -2810,6 +2941,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' 
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
 #' 
+#' The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
+#'
 #' \code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
 #' 
 #' If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, all transformations will be assessed for cntinuous surfaces unless otherwise specified. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
@@ -2827,7 +2960,8 @@ CS.prep <- function(n.POPS, response=NULL,CS_Point.File,CS.program='"C:/Program 
 #' max.cont=2500,
 #' cont.shape=NULL,
 #' select.trans=NULL,
-#' method = "AIC",
+#' method = "R2",
+#' k.value = 3,
 #' pop.mult = 15,
 #' percent.elite = 0.05,
 #' type= "real-valued",
@@ -2852,7 +2986,8 @@ GA.prep<-function(ASCII.dir,
                   max.cont = 2500,
                   cont.shape = NULL,
                   select.trans = NULL,
-                  method = "AIC",
+                  method = "R2",
+                  k.value = 3,
                   pop.mult = 15,
                   percent.elite = 0.05,
                   type = "real-valued",
@@ -3006,6 +3141,7 @@ GA.prep<-function(ASCII.dir,
        percent.elite = percent.elite,
        Min.Max=Min.Max,
        method = method,
+       k.value = k.value,
        seed=seed, 
        quiet = quiet)  
   
@@ -3412,19 +3548,19 @@ get.EQ <-function(equation){   # Apply specified transformation
   }
 }
 
-Result.txt <- function(GA.results, GA.inputs, method, Run.Time, fit.stats, MLPE.coef = NULL, optim, aic, LL){
+Result.txt <- function(GA.results, GA.inputs, method, k, Run.Time, fit.stats, MLPE.coef = NULL, optim, aic, AICc, LL){
   summary.file<-paste0(GA.inputs$Results.dir,"Multisurface_Optim_Summary.txt")
-  AICc<-GA.results@fitnessValue
-  AICc<-round(AICc,digits=4)
+  # AICc<-GA.results@fitnessValue
+  # AICc<-round(AICc,digits=4)
   ELITE<-floor(GA.inputs$percent.elite*GA.inputs$pop.size)
   #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
   
   sink(summary.file)
   cat(paste0("Summary from multisurface optimization run conducted on ",Sys.Date()),"\n")
   cat("\n")
-  cat(paste0("Optimized using:",method),"\n")
+  cat(paste0("Optimized using: ",method),"\n")
   cat("\n")
-  cat(paste0("Objective function:",optim),"\n")
+  cat(paste0("Objective function: ",optim),"\n")
   cat("\n")
   cat(paste0("Surfaces included in optimization:"),"\n")
   cat(GA.inputs$parm.type$name,"\n")
@@ -3440,12 +3576,16 @@ Result.txt <- function(GA.results, GA.inputs, method, Run.Time, fit.stats, MLPE.
   cat("\n")
   cat(paste0("The Genetic Algorithm completed after ",GA.results@iter," iterations"),"\n")
   cat("\n")
+  cat(paste0("k =  ", k),"\n")
+  cat("\n")
   cat(paste0("Minimum AIC: ",aic),"\n")
+  cat("\n")
+  cat(paste0("AICc: ",AICc),"\n")
   cat("\n")
   cat(paste0("Pseudo marginal R-square (R2m): ",fit.stats[[1]]),"\n")
   cat(paste0("Pseudo conditional R-square (R2c): ",fit.stats[[2]]),"\n")
   cat("\n")
-  cat(paste0("Log Likelihood: ",LL),"\n")
+  cat(paste0("Log Likelihood: ", LL),"\n")
   cat("\n")
   cat(paste0("Optimized values for each surface:"),"\n")
   cat(GA.results@solution,"\n")
