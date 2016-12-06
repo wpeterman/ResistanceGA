@@ -183,6 +183,8 @@ Run the transformed resistance surface through CIRCUITSCAPE to get effective res
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 ```
+####__Note: The 'CS.response' object is a simulated response variable for demonstration purposes. *When conducting your own analysis, replace 'CS.response' with the vector containing your pairwise genetic distances*__ &nbsp;   
+&nbsp;
 
 Rerun `CS.prep` including the newly created `CS.response`
 ```{r eval=FALSE}
