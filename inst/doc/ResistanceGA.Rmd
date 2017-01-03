@@ -2,11 +2,13 @@
 title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_document
-vignette: >
-  %\VignetteIndexEntry{ResistanceGA User Guide}
-  \usepackage[utf8]{inputenc}
-  %\VignetteEngine{knitr::rmarkdown}
+output:
+  html_document: rmarkdown::html_vignette
+  pdf_document: rmarkdown::html_document
+vignette: |
+  %\VignetteIndexEntry{ResistanceGA User Guide} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}

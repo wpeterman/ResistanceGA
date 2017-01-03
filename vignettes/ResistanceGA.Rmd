@@ -2,11 +2,13 @@
 title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
-vignette: >
-  %\VignetteIndexEntry{ResistanceGA User Guide}
-  \usepackage[utf8]{inputenc}
-  %\VignetteEngine{knitr::rmarkdown}
+output:
+  html_document: rmarkdown::html_vignette
+  pdf_document: rmarkdown::html_document
+vignette: |
+  %\VignetteIndexEntry{ResistanceGA User Guide} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -39,6 +41,14 @@ differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402-
 
 * Ruiz-Lopez, M. J., C. Barelli, F. Rovero, K. Hodges, C. Roos, W. E. Peterman, and N. Ting. 2016. A novel landscape genetic approach demonstrates the effects of human disturbance on the Udzungwa red colobus monkey (_Procolobus gordonorum_). Heredity 116:167–176.    
 
+
+Thoughts on Optimization
+------
+There are three options which can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topix of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
+$$ Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, $$
+which is the maximum liklihood population effects parameterization (see [Clarke et al., 2002](http://link.springer.com/article/10.1198%2F108571102320 "Clarke et al.")). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (_i.e. k_ = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter (_k_ = 3), while each category within a categorical surface is estimated (_k_ = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. _k_ in multisurface models is detemrined as the sum of all estimated parameters plus 1 (intercept). __Again, there are no guidelines for how to determine *n* or *k* in these models. Use your best judgement and clearly articulate and justify your methods__.
+
+Becasue of this uncertainty, it is now also possible to specify how _k_ is determined: (1) _k_ = the number of parameters in the in mixed effects model (i.e. 2); (2) _k_ = the total number of parameteers optimized oplus the intercept; (3) _k_ = the total number of parameters optimized, plus the number of layers and the intercept. The method for evaluating _k_ and the objective function to use during optimization can both be specified in the `GA.prep` function.
 
 Setup
 ------
@@ -149,15 +159,15 @@ plot(sample.locales, pch=16, col="blue", add=TRUE) # Add points
 Run the `GA.prep` and `CS.prep` functions
 ```{r eval=FALSE}
 # Set the random number seed to reproduce the results presented
-GA.inputs <- GA.prep(ASCII.dir=write.dir,
-                     max.cat=500,
-                     max.cont=500,
+GA.inputs <- GA.prep(ASCII.dir = write.dir,
+                     max.cat = 500,
+                     max.cont = 500,
                      select.trans = "A",
                      seed = 555) 
 
-CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                     CS_Point.File=paste0(write.dir,"samples.txt"),
-                     CS.program=CS.program) 
+CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+                     CS_Point.File = paste0(write.dir,"samples.txt"),
+                     CS.program = CS.program) 
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet.
 
@@ -175,13 +185,15 @@ Run the transformed resistance surface through CIRCUITSCAPE to get effective res
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 ```
+####__Note: The 'CS.response' object is a simulated response variable for demonstration purposes. *When conducting your own analysis, replace 'CS.response' with the vector containing your pairwise genetic distances*__ &nbsp;   
+&nbsp;
 
 Rerun `CS.prep` including the newly created `CS.response`
 ```{r eval=FALSE}
-CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                     response=CS.response,
-                     CS_Point.File=paste0(write.dir,"samples.txt"),
-                     CS.program=CS.program)
+CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+                     response = CS.response,
+                     CS_Point.File = paste0(write.dir,"samples.txt"),
+                     CS.program = CS.program)
 ```
 
 Run the Single surface optimization function (`SS_optim`). Running this example with the default settings
@@ -254,13 +266,13 @@ The example above outlines how the functions can be used while simulating and ge
 ```{r eval=FALSE}
 GA.inputs <- GA.prep(ASCII.dir=write.dir) 
 
-CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                     response=CS.response,
-                     CS_Point.File=paste0(write.dir,"samples.txt"),
-                     CS.program=CS.program)
+CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+                     response = CS.response,
+                     CS_Point.File = paste0(write.dir,"samples.txt"),
+                     CS.program = CS.program)
 
-SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
-                       GA.inputs=GA.inputs)
+SS_RESULTS <- SS_optim(CS.inputs = CS.inputs,
+                       GA.inputs = GA.inputs)
 ```
 
 # Optimzation using least cost paths   
@@ -282,7 +294,7 @@ GA.inputs <- GA.prep(ASCII.dir=continuous,
                      seed = 555,
                      parallel = 4) 
 
-gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
+gdist.inputs <- gdist.prep(length(sample.locales),
                            samples=sample.locales)
 
 # Transform resistance surface
@@ -292,7 +304,7 @@ r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=co
 gdist.response <- Run_gdistance(gdist.inputs=gdist.inputs, r=r.tran)
 
 # Rerun `gdist.prep` to include response
-gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
+gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
                            response=lower(as.matrix(gdist.response)),
                            samples=sample.locales)
 
@@ -399,7 +411,7 @@ Generate new CS response surface by using `Run_CS` and run `CS.prep` to add resp
 # Create the true resistance/response surface
 CS.response <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist)
 
-CS.inputs<-CS.prep(n.POPS=length(sample.locales),
+CS.inputs<-CS.prep(n.Pops=length(sample.locales),
                       response=CS.response,
                       CS_Point.File=paste0(write.dir,"samples.txt"),
                       CS.program=CS.program)
@@ -495,7 +507,7 @@ The optimization often converges on a highly correlated solution, but one that r
 The multisurface optimization can also be run in parallel when using least cost paths. This can be done by setting `parallel = TRUE` or `parallel = #cores` in `GA.prep`. This example took 210 iterations to run in parallel on 4 cores, and completed in 38 minutes.
 ```{r multisurface_lcp, eval=FALSE}
 # Run `gdist.prep`
-gdist.inputs<-gdist.prep(n.POPS=length(sample.locales),                         
+gdist.inputs<-gdist.prep(n.Pops=length(sample.locales),                         
                          samples=sample.locales)
 
 GA.inputs <- GA.prep(ASCII.dir=resistance_surfaces,
@@ -517,7 +529,7 @@ gd.response <- Run_gdistance(gdist.inputs=gdist.inputs,
                              r=Resist)
 
 # Run `CS.prep` functions
-gdist.inputs<-gdist.prep(n.POPS=length(sample.locales),
+gdist.inputs<-gdist.prep(n.Pops=length(sample.locales),
                          response=lower(as.matrix(gd.response)),
                          samples=sample.locales)
 

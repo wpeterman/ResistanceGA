@@ -68,15 +68,15 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 
 ## ----eval=FALSE----------------------------------------------------------
 #  # Set the random number seed to reproduce the results presented
-#  GA.inputs <- GA.prep(ASCII.dir=write.dir,
-#                       max.cat=500,
-#                       max.cont=500,
+#  GA.inputs <- GA.prep(ASCII.dir = write.dir,
+#                       max.cat = 500,
+#                       max.cont = 500,
 #                       select.trans = "A",
 #                       seed = 555)
 #  
-#  CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-#                       CS_Point.File=paste0(write.dir,"samples.txt"),
-#                       CS.program=CS.program)
+#  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+#                       CS_Point.File = paste0(write.dir,"samples.txt"),
+#                       CS.program = CS.program)
 
 ## ----monomolec.plot, eval = FALSE----------------------------------------
 #  r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=continuous)
@@ -88,10 +88,10 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
 
 ## ----eval=FALSE----------------------------------------------------------
-#  CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-#                       response=CS.response,
-#                       CS_Point.File=paste0(write.dir,"samples.txt"),
-#                       CS.program=CS.program)
+#  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+#                       response = CS.response,
+#                       CS_Point.File = paste0(write.dir,"samples.txt"),
+#                       CS.program = CS.program)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
@@ -114,13 +114,13 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 ## ----eval=FALSE----------------------------------------------------------
 #  GA.inputs <- GA.prep(ASCII.dir=write.dir)
 #  
-#  CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-#                       response=CS.response,
-#                       CS_Point.File=paste0(write.dir,"samples.txt"),
-#                       CS.program=CS.program)
+#  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+#                       response = CS.response,
+#                       CS_Point.File = paste0(write.dir,"samples.txt"),
+#                       CS.program = CS.program)
 #  
-#  SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
-#                         GA.inputs=GA.inputs)
+#  SS_RESULTS <- SS_optim(CS.inputs = CS.inputs,
+#                         GA.inputs = GA.inputs)
 
 ## ----gdistance, eval=FALSE-----------------------------------------------
 #  # Import data
@@ -139,7 +139,7 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #                       seed = 555,
 #                       parallel = 4)
 #  
-#  gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
+#  gdist.inputs <- gdist.prep(length(sample.locales),
 #                             samples=sample.locales)
 #  
 #  # Transform resistance surface
@@ -149,7 +149,7 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  gdist.response <- Run_gdistance(gdist.inputs=gdist.inputs, r=r.tran)
 #  
 #  # Rerun `gdist.prep` to include response
-#  gdist.inputs <- gdist.prep(n.POPS=length(sample.locales),
+#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
 #                             response=lower(as.matrix(gdist.response)),
 #                             samples=sample.locales)
 #  
@@ -232,7 +232,7 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 #  # Create the true resistance/response surface
 #  CS.response <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist)
 #  
-#  CS.inputs<-CS.prep(n.POPS=length(sample.locales),
+#  CS.inputs<-CS.prep(n.Pops=length(sample.locales),
 #                        response=CS.response,
 #                        CS_Point.File=paste0(write.dir,"samples.txt"),
 #                        CS.program=CS.program)
@@ -287,7 +287,7 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 
 ## ----multisurface_lcp, eval=FALSE----------------------------------------
 #  # Run `gdist.prep`
-#  gdist.inputs<-gdist.prep(n.POPS=length(sample.locales),
+#  gdist.inputs<-gdist.prep(n.Pops=length(sample.locales),
 #                           samples=sample.locales)
 #  
 #  GA.inputs <- GA.prep(ASCII.dir=resistance_surfaces,
@@ -309,7 +309,7 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 #                               r=Resist)
 #  
 #  # Run `CS.prep` functions
-#  gdist.inputs<-gdist.prep(n.POPS=length(sample.locales),
+#  gdist.inputs<-gdist.prep(n.Pops=length(sample.locales),
 #                           response=lower(as.matrix(gd.response)),
 #                           samples=sample.locales)
 #  

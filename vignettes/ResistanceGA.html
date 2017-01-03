@@ -12,7 +12,7 @@
 
 <meta name="author" content="Bill Peterman" />
 
-<meta name="date" content="2016-11-22" />
+<meta name="date" content="2017-01-03" />
 
 <title>A Vignette/Tutorial to use ResistanceGA</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">A Vignette/Tutorial to use ResistanceGA</h1>
 <h4 class="author"><em>Bill Peterman</em></h4>
-<h4 class="date"><em>2016-11-22</em></h4>
+<h4 class="date"><em>2017-01-03</em></h4>
 
 
 
@@ -90,6 +90,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><p>Ruiz-Lopez, M. J., C. Barelli, F. Rovero, K. Hodges, C. Roos, W. E. Peterman, and N. Ting. 2016. A novel landscape genetic approach demonstrates the effects of human disturbance on the Udzungwa red colobus monkey (<em>Procolobus gordonorum</em>). Heredity 116:167–176.</p></li>
 </ul>
 </div>
+</div>
+<div id="thoughts-on-optimization" class="section level2">
+<h2>Thoughts on Optimization</h2>
+<p>There are three options which can be used when optimizing resistance surfaces with <code>ResistanceGA</code>: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topix of model complexity, this is also not a cut-and-dry assessment. <strong>All</strong> the mixed effects models take the form: <span class="math display">\[ Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, \]</span> which is the maximum liklihood population effects parameterization (see <a href="http://link.springer.com/article/10.1198%2F108571102320" title="Clarke et al.">Clarke et al., 2002</a>). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (<em>i.e. k</em> = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter (<em>k</em> = 3), while each category within a categorical surface is estimated (<em>k</em> = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. <em>k</em> in multisurface models is detemrined as the sum of all estimated parameters plus 1 (intercept). <strong>Again, there are no guidelines for how to determine <em>n</em> or <em>k</em> in these models. Use your best judgement and clearly articulate and justify your methods</strong>.</p>
+<p>Becasue of this uncertainty, it is now also possible to specify how <em>k</em> is determined: (1) <em>k</em> = the number of parameters in the in mixed effects model (i.e. 2); (2) <em>k</em> = the total number of parameteers optimized oplus the intercept; (3) <em>k</em> = the total number of parameters optimized, plus the number of layers and the intercept. The method for evaluating <em>k</em> and the objective function to use during optimization can both be specified in the <code>GA.prep</code> function.</p>
 </div>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
@@ -180,15 +185,15 @@ sample.locales &lt;-<span class="st"> </span><span class="kw">SpatialPoints</spa
 <h2>Prepare data for optimization</h2>
 <p>Run the <code>GA.prep</code> and <code>CS.prep</code> functions</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Set the random number seed to reproduce the results presented</span>
-GA.inputs &lt;-<span class="st"> </span><span class="kw">GA.prep</span>(<span class="dt">ASCII.dir=</span>write.dir,
-                     <span class="dt">max.cat=</span><span class="dv">500</span>,
-                     <span class="dt">max.cont=</span><span class="dv">500</span>,
+GA.inputs &lt;-<span class="st"> </span><span class="kw">GA.prep</span>(<span class="dt">ASCII.dir =</span> write.dir,
+                     <span class="dt">max.cat =</span> <span class="dv">500</span>,
+                     <span class="dt">max.cont =</span> <span class="dv">500</span>,
                      <span class="dt">select.trans =</span> <span class="st">&quot;A&quot;</span>,
                      <span class="dt">seed =</span> <span class="dv">555</span>) 
 
-CS.inputs &lt;-<span class="st"> </span><span class="kw">CS.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
-                     <span class="dt">CS_Point.File=</span><span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
-                     <span class="dt">CS.program=</span>CS.program) </code></pre></div>
+CS.inputs &lt;-<span class="st"> </span><span class="kw">CS.prep</span>(<span class="dt">n.Pops =</span> <span class="kw">length</span>(sample.locales),
+                     <span class="dt">CS_Point.File =</span> <span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
+                     <span class="dt">CS.program =</span> CS.program) </code></pre></div>
 <p>Note that <code>response</code> was not defined in <code>CS.prep</code> because it has not been made yet.</p>
 <p><code>select.trans</code> allows you to specify which transformations can be applied to a surface during optimization. “A” = All; “M” = Monomolecular only; “R” = Ricker only. By default, all transformations will be assessed when a continuous surface is optimized. See <code>GA.prep</code> documentation for more details.</p>
 <p>Transform raw continuous surface using the <code>Resistance.tran</code> function to apply one of the eight transformations, and then view the transformation using <code>Plot.trans</code>. Note that <code>Plot.trans</code> returns a <code>ggplot2</code> object as well as the plot. Therefore you can manipulate and modify the plot as desired.</p>
@@ -199,11 +204,14 @@ plot.t &lt;-<span class="st"> </span><span class="kw">Plot.trans</span>(<span cl
 Run the transformed resistance surface through CIRCUITSCAPE to get effective resistance between each pair of points. <code>Run.CS</code> returns the lower half of the pairwise resistance matrix for use with the optimization prep functions. This will be our response that we optimize on.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create the true resistance/response surface</span>
 CS.response &lt;-<span class="st"> </span><span class="kw">Run_CS</span>(<span class="dt">CS.inputs=</span>CS.inputs,<span class="dt">GA.inputs=</span>GA.inputs, <span class="dt">r=</span>r.tran)</code></pre></div>
+<div id="note-the-cs.response-object-is-a-simulated-response-variable-for-demonstration-purposes.-when-conducting-your-own-analysis-replace-cs.response-with-the-vector-containing-your-pairwise-genetic-distances" class="section level4">
+<h4><strong>Note: The ‘CS.response’ object is a simulated response variable for demonstration purposes. <em>When conducting your own analysis, replace ‘CS.response’ with the vector containing your pairwise genetic distances</em></strong>  </h4>
+<p> </p>
 <p>Rerun <code>CS.prep</code> including the newly created <code>CS.response</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">CS.inputs &lt;-<span class="st"> </span><span class="kw">CS.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
-                     <span class="dt">response=</span>CS.response,
-                     <span class="dt">CS_Point.File=</span><span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
-                     <span class="dt">CS.program=</span>CS.program)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">CS.inputs &lt;-<span class="st"> </span><span class="kw">CS.prep</span>(<span class="dt">n.Pops =</span> <span class="kw">length</span>(sample.locales),
+                     <span class="dt">response =</span> CS.response,
+                     <span class="dt">CS_Point.File =</span> <span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
+                     <span class="dt">CS.program =</span> CS.program)</code></pre></div>
 <p>Run the Single surface optimization function (<code>SS_optim</code>). Running this example with the default settings took 147 iterations and ~72 minutes to complete on a computer with an Intel i7 3.4 GHz processor. The data generating values have been precisely recovered.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SS_RESULTS &lt;-<span class="st"> </span><span class="kw">SS_optim</span>(<span class="dt">CS.inputs=</span>CS.inputs,
                        <span class="dt">GA.inputs=</span>GA.inputs)</code></pre></div>
@@ -254,18 +262,19 @@ max                275      274.9982</code></pre>
 <p class="caption">GRID.Surface.update</p>
 </div>
 <p>Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get ‘stuck’ trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn’t correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates.</p>
+</div>
 <div id="minimum-code-for-running-resistancega" class="section level3">
 <h3>Minimum code for running ResistanceGA</h3>
 <p>The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to to use the <code>r.tran</code> or <code>Run_CS</code> functions. You should only have to use the following functions (although you may want to change settings from defaults).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">GA.inputs &lt;-<span class="st"> </span><span class="kw">GA.prep</span>(<span class="dt">ASCII.dir=</span>write.dir) 
 
-CS.inputs &lt;-<span class="st"> </span><span class="kw">CS.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
-                     <span class="dt">response=</span>CS.response,
-                     <span class="dt">CS_Point.File=</span><span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
-                     <span class="dt">CS.program=</span>CS.program)
+CS.inputs &lt;-<span class="st"> </span><span class="kw">CS.prep</span>(<span class="dt">n.Pops =</span> <span class="kw">length</span>(sample.locales),
+                     <span class="dt">response =</span> CS.response,
+                     <span class="dt">CS_Point.File =</span> <span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
+                     <span class="dt">CS.program =</span> CS.program)
 
-SS_RESULTS &lt;-<span class="st"> </span><span class="kw">SS_optim</span>(<span class="dt">CS.inputs=</span>CS.inputs,
-                       <span class="dt">GA.inputs=</span>GA.inputs)</code></pre></div>
+SS_RESULTS &lt;-<span class="st"> </span><span class="kw">SS_optim</span>(<span class="dt">CS.inputs =</span> CS.inputs,
+                       <span class="dt">GA.inputs =</span> GA.inputs)</code></pre></div>
 </div>
 </div>
 <div id="optimzation-using-least-cost-paths" class="section level1">
@@ -287,7 +296,7 @@ GA.inputs &lt;-<span class="st"> </span><span class="kw">GA.prep</span>(<span cl
                      <span class="dt">seed =</span> <span class="dv">555</span>,
                      <span class="dt">parallel =</span> <span class="dv">4</span>) 
 
-gdist.inputs &lt;-<span class="st"> </span><span class="kw">gdist.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
+gdist.inputs &lt;-<span class="st"> </span><span class="kw">gdist.prep</span>(<span class="kw">length</span>(sample.locales),
                            <span class="dt">samples=</span>sample.locales)
 
 <span class="co"># Transform resistance surface</span>
@@ -297,7 +306,7 @@ r.tran &lt;-<span class="st"> </span><span class="kw">Resistance.tran</span>(<sp
 gdist.response &lt;-<span class="st"> </span><span class="kw">Run_gdistance</span>(<span class="dt">gdist.inputs=</span>gdist.inputs, <span class="dt">r=</span>r.tran)
 
 <span class="co"># Rerun `gdist.prep` to include response</span>
-gdist.inputs &lt;-<span class="st"> </span><span class="kw">gdist.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
+gdist.inputs &lt;-<span class="st"> </span><span class="kw">gdist.prep</span>(<span class="dt">n.Pops =</span> <span class="kw">length</span>(sample.locales),
                            <span class="dt">response=</span><span class="kw">lower</span>(<span class="kw">as.matrix</span>(gdist.response)),
                            <span class="dt">samples=</span>sample.locales)
 
@@ -381,7 +390,7 @@ Resist &lt;-<span class="st"> </span><span class="kw">Combine_Surfaces</span>(<s
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create the true resistance/response surface</span>
 CS.response &lt;-<span class="st"> </span><span class="kw">Run_CS</span>(<span class="dt">CS.inputs=</span>CS.inputs, <span class="dt">GA.inputs=</span>GA.inputs, <span class="dt">r=</span>Resist)
 
-CS.inputs&lt;-<span class="kw">CS.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
+CS.inputs&lt;-<span class="kw">CS.prep</span>(<span class="dt">n.Pops=</span><span class="kw">length</span>(sample.locales),
                       <span class="dt">response=</span>CS.response,
                       <span class="dt">CS_Point.File=</span><span class="kw">paste0</span>(write.dir,<span class="st">&quot;samples.txt&quot;</span>),
                       <span class="dt">CS.program=</span>CS.program)</code></pre></div>
@@ -467,7 +476,7 @@ cs.stack &lt;-<span class="st"> </span><span class="kw">stack</span>(Resist.true
 <h1>Multisurface optimization using least cost paths</h1>
 <p>The multisurface optimization can also be run in parallel when using least cost paths. This can be done by setting <code>parallel = TRUE</code> or <code>parallel = #cores</code> in <code>GA.prep</code>. This example took 210 iterations to run in parallel on 4 cores, and completed in 38 minutes.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Run `gdist.prep`</span>
-gdist.inputs&lt;-<span class="kw">gdist.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),                         
+gdist.inputs&lt;-<span class="kw">gdist.prep</span>(<span class="dt">n.Pops=</span><span class="kw">length</span>(sample.locales),                         
                          <span class="dt">samples=</span>sample.locales)
 
 GA.inputs &lt;-<span class="st"> </span><span class="kw">GA.prep</span>(<span class="dt">ASCII.dir=</span>resistance_surfaces,
@@ -489,7 +498,7 @@ gd.response &lt;-<span class="st"> </span><span class="kw">Run_gdistance</span>(
                              <span class="dt">r=</span>Resist)
 
 <span class="co"># Run `CS.prep` functions</span>
-gdist.inputs&lt;-<span class="kw">gdist.prep</span>(<span class="dt">n.POPS=</span><span class="kw">length</span>(sample.locales),
+gdist.inputs&lt;-<span class="kw">gdist.prep</span>(<span class="dt">n.Pops=</span><span class="kw">length</span>(sample.locales),
                          <span class="dt">response=</span><span class="kw">lower</span>(<span class="kw">as.matrix</span>(gd.response)),
                          <span class="dt">samples=</span>sample.locales)
 
