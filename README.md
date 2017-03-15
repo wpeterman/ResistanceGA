@@ -28,9 +28,13 @@ If you wish to optimize using CIRCUITSCAPE, you must have CIRCUITSCAPE installed
 Version 4.0 or higher is required.
 Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
 
-At this point in time, CIRCUITSCAPE can only be executed through `ResistanceGA` on **_Windows_** machines. The only modifications that would be necessary to execute these functions on another platform would be a determining how to execute CIRCUITSCAPE from R. If there is interest in being able to use these functions on other platforms, I can work to incorporate that capability in future releases.
 
+Using `ResistanceGA` to optimize with CIRCUITSCAPE has been most thoroughly tested on **_Windows_** machines. To run CIRCUITSCAPE on Linux (tested with Ubuntu 16.04):    
+1.  Install CIRCUITSCAPE---Default installation directory is `/usr/local/bin/csrun.py`   
+2. To call CIRCUITSCAPE from R, change file permissions using ` sudo chomod 755 /usr/local/bin/csrun.py `  
+    * This will allow `csrun.py` to be executed without specifying paths.   
 
+***
 This approach has been developed from the methods first utilized in Peterman et al. (2014). I have also written a preprint manuscript further describing this `R` package. **_Please cite these papers if you use these methods!_**
 
 Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. [**PDF**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/peterman_et_al._2014--mec.pdf "Peterman et al.")

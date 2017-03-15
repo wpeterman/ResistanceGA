@@ -1,3 +1,8 @@
+ResistanceGA 3.0-1
+--------
+* It is now possible to run ResistanceGA with CIRCUITSCAPE on Linux (confirmed with Ubuntu)
+* Default method for optimization is now log likelihood (LL)
+
 ResistanceGA 3.0-0
 --------
 * Updates to the vignette
