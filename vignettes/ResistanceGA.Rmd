@@ -1,11 +1,9 @@
 ---
 title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
-date: "`r Sys.Date()`"
-output:
-  html_document: rmarkdown::html_vignette
-  pdf_document: rmarkdown::html_document
-vignette: |
+date: '`r Sys.Date()`'
+output: rmarkdown::html_vignette
+vignette: >
   %\VignetteIndexEntry{ResistanceGA User Guide} 
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteEncoding{UTF-8}
@@ -25,7 +23,7 @@ With this vignette/tutorial, hopefully you'll get an idea of what each of the fu
 This package fills a void in the landscape genetics toolbox. There are various methods proposed for determining resistance values (reviewed by [Spear et al., 2010](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2010.04657.x/abstract "Spear et al.")). Previously utilized methods generally searched a limited parameter space and/or relied on expert opinion. [Graves et al. (2013)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12348/abstract "Graves et al.") utilized optimization functions and interindividual genetic distances to determine resistance values, but found that the data generating values were rarely recoverable. I have not assessed the ability of functions/methods utilized in this package to optimize resistance surfaces as in Graves et al. (2013), but do note that very different methods of scaling, transforming, and combining resistance surfaces are utilized in `ResistanceGA`.
 
 
-A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If you choose to optimize using CIRCUITSCAPE, Please make sure you carefully read through the [CIRCUITSCAPE](http://www.circuitscape.org/home "CIRCUITSCAPE") documentation, as well as other relevant papers by [Brad McRae](http://www.circuitscape.org/pubs "McRae papers") to get a more complete understanding of resistance modeling and circuit theory. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will **not** be a helpful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 50x50 pixel simulated landscapes used in this tutorial, each (CIRCUITSCAPE) optimization iteration takes 0.75--1.00 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). Optimizing using least cost paths is ~3x faster than with CIRCUITSCAPE. To further reduce optimization time when using least cost paths, the optimization can be run in parallel. It appears that under most circumstances the resolution of the landscape can be reduced without loss of information ([McRae et al., 2008](http://www.esajournals.org/doi/abs/10.1890/07-1861.1 "McRae et al.")). If you want to use the optimization procedures in `ResistanceGA`, but are working with a large landscape, I might suggest reducing the resolution first. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--300 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that 2,500--45,000 iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I am eager to make this as accessible, functional, and as useful as possible, so any and all feedback is appreciated.
+A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If you choose to optimize using CIRCUITSCAPE, Please make sure you carefully read through the [CIRCUITSCAPE](http://www.circuitscape.org/home "CIRCUITSCAPE") documentation, as well as other relevant papers by [Brad McRae](http://www.circuitscape.org/pubs "McRae papers") to get a more complete understanding of resistance modeling and circuit theory. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will **not** be a useful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 50x50 pixel simulated landscapes used in this tutorial, each (CIRCUITSCAPE) optimization iteration takes 0.75--1.00 seconds to complete (Intel i7 3.4 GHz processor, 24 GB RAM). Optimizing using least cost paths is ~3x faster than with CIRCUITSCAPE. To further reduce optimization time when using least cost paths, the optimization can be run in parallel. It appears that under most circumstances the resolution of the landscape can be reduced without loss of information ([McRae et al., 2008](http://www.esajournals.org/doi/abs/10.1890/07-1861.1 "McRae et al.")). As of version 3.0-1, it is possible to optimize with CIRCUITSCAPE on Linux, which allows for CIRCUITSCAPE to be run in parallel. This may reduce optimization times when working with larfe landscapes. Another option when working with a large landscape, is to reduce the resolution. Depending upon whether you are optimizing a single surface or multiple surfaces simultaneously, the genetic algorithms typically run for 50--300 generations. `ga` settings will vary for each run, but there will typically be 50--150 offspring (i.e. different parameter value realizations) per generation. This means that 2,500--45,000 iterations will be needed to complete the optimization. This can be a **LONG** process! If you encounter issues while executing any of these functions, or would like some other functionality incorporated, please let me know (<bill.peterman@gmail.com>). I am eager to make this as accessible, functional, and as useful as possible, so any and all feedback is appreciated.
 
 
 **References**   
@@ -44,9 +42,13 @@ differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402-
 
 Thoughts on Optimization
 ------
-There are three options which can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topix of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
-$$ Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, $$
-which is the maximum liklihood population effects parameterization (see [Clarke et al., 2002](http://link.springer.com/article/10.1198%2F108571102320 "Clarke et al.")). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (_i.e. k_ = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter (_k_ = 3), while each category within a categorical surface is estimated (_k_ = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. _k_ in multisurface models is detemrined as the sum of all estimated parameters plus 1 (intercept). __Again, there are no guidelines for how to determine *n* or *k* in these models. Use your best judgement and clearly articulate and justify your methods__.
+There are three options which can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
+
+\begin{equation}
+Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, 
+\end{equation}
+
+which is the maximum liklihood population effects parameterization (see [Clarke et al., 2002](http://link.springer.com/article/10.1198%2F108571102320 "Clarke et al.")). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (_i.e. k_ = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter (_k_ = 3), while each category within a categorical surface is estimated (_k_ = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. _k_ in multisurface models is determined as the sum of all estimated parameters plus 1 (intercept). __Again, there are no guidelines for how to determine *n* or *k* in these models. Use your best judgement and clearly articulate and justify your methods__.
 
 Becasue of this uncertainty, it is now also possible to specify how _k_ is determined: (1) _k_ = the number of parameters in the in mixed effects model (i.e. 2); (2) _k_ = the total number of parameteers optimized oplus the intercept; (3) _k_ = the total number of parameters optimized, plus the number of layers and the intercept. The method for evaluating _k_ and the objective function to use during optimization can both be specified in the `GA.prep` function.
 
@@ -54,6 +56,12 @@ Setup
 ------
 ### Install necessary software and packages
 If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` has only been tested on *WINDOWS* operating systems. Ability to run on Mac or Linux systems is in testing. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.
+
+### Running on Linux
+To run CIRCUITSCAPE on Linux (tested with Ubuntu 16.04):    
+1.  Install CIRCUITSCAPE---Default installation directory is `/usr/local/bin/csrun.py`   
+2. To call CIRCUITSCAPE from R, first change file permissions from the command line terminal (shortcut: control + alt+ t) ` sudo chomod 755 /usr/local/bin/csrun.py `  
+    * This will allow `csrun.py` to be executed without specifying paths.   
 
 *R Packages*    
 This package consists of several wrapper functions for implementing functions from other packages, and these will all be imported when `ResistanceGA` is installed.   
@@ -123,6 +131,9 @@ write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"
 # Give path to CIRCUITSCAPE .exe file
 # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
 CS.program <- paste('"C:/Program Files/Circuitscape/cs_run.exe"')
+
+# If using Linux
+# CS.program <- 'csrun.py'
 ```
 
 ```{r load.data, echo = FALSE, message = FALSE, warning=FALSE}
@@ -195,6 +206,7 @@ CS.inputs <- CS.prep(n.Pops = length(sample.locales),
                      CS_Point.File = paste0(write.dir,"samples.txt"),
                      CS.program = CS.program)
 ```
+With Linux, `CS.program` should be designated as 'csrun.py'
 
 Run the Single surface optimization function (`SS_optim`). Running this example with the default settings
 took 147 iterations and ~72 minutes to complete on a computer with an Intel i7 3.4 GHz processor. The data generating values have been precisely recovered.   
@@ -274,6 +286,12 @@ CS.inputs <- CS.prep(n.Pops = length(sample.locales),
 SS_RESULTS <- SS_optim(CS.inputs = CS.inputs,
                        GA.inputs = GA.inputs)
 ```
+
+# Optimization with CIRCUITSCAPE on Linux platform
+Gains in optimization speed can be achieved in two ways:
+1.  Run the genetics algorithm in parallel (in the `GA.prep` function set `parallel = X` where 'X' is the number of cores to use).
+2.  In the `CS.prep` function, set `parallel = TRUE` and specify `cores` to the number of cores for CIRCUITSCAPE to use when quantifying current flow across a surface.
+
 
 # Optimzation using least cost paths   
 The above optimization can also be done using cost distances calculated in `gdistance`. This approach uses least cost paths between points, so it is a simpler representation of connectivity. However, optimization using `gdistance` is ~3x faster than optimization with CIRCUITSCAPE. This optimization took 86 iterations and 7 minutes to complete when run in parallel on 4 cores (`parallel = 4` in `GA.prep`)
@@ -366,10 +384,10 @@ writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
 write.table(samples,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
 ```
 
-Run `GA.prep`. In this example, the genetic algorithm will seek to maximize the amount of variance explained by the model (i.e. R<sup>2</sup>).
+Run `GA.prep`. In this example, the genetic algorithm will seek to maximize the log likelihood of the fitted model (`method = "LL"`).
 ```{r eval=FALSE}
 GA.inputs <- GA.prep(ASCII.dir=write.dir,
-                     method = "R2"
+                     method = "LL"
                      max.cat=500,
                      max.cont=500,
                      seed = 555,
@@ -479,7 +497,7 @@ pairs(ms.stack)
 ![correlation.plots](figure/correlation_plot.png)       
 
 
-If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` and `output="raster"` in `Run_CS`.
+If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap = TRUE` and `output = "raster"` in `Run_CS`.
 ```{r CS.maps, eval=FALSE}
 Resist.true <- Run_CS(CS.inputs=CS.inputs, 
                       GA.inputs=GA.inputs, 

@@ -1,5 +1,6 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
+library(ResistanceGA)
 
 ## ----install.package, eval=FALSE-----------------------------------------
 #  # Install 'devtools' package, if needed
@@ -43,6 +44,9 @@ rm(list = ls())
 #  # Give path to CIRCUITSCAPE .exe file
 #  # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
 #  CS.program <- paste('"C:/Program Files/Circuitscape/cs_run.exe"')
+#  
+#  # If using Linux
+#  # CS.program <- 'csrun.py'
 
 ## ----load.data, echo = FALSE, message = FALSE, warning=FALSE-------------
 data(resistance_surfaces)
@@ -197,7 +201,7 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 
 ## ----eval=FALSE----------------------------------------------------------
 #  GA.inputs <- GA.prep(ASCII.dir=write.dir,
-#                       method = "R2"
+#                       method = "LL"
 #                       max.cat=500,
 #                       max.cont=500,
 #                       seed = 555,
