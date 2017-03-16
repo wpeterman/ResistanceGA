@@ -13,7 +13,7 @@ if(!("devtools" %in% list.files(.libPaths()))) {
 
 library(devtools) # Loads devtools
 
-install_github("wpeterman/ResistanceGA") # Download package
+devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Download package
 library(ResistanceGA) # Installs package and the other required packages needed
 ```
 Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' using the code below, or you can view the vignette directly [**here**](https://www.dropbox.com/s/2z9e8je1n129c8n/ResistanceGA.pdf?raw=1 "Vignette")

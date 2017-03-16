@@ -2,7 +2,7 @@
 title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: '`r Sys.Date()`'
-output: rmarkdown::html_vignette
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{ResistanceGA User Guide} 
   %\VignetteEngine{knitr::rmarkdown} 
@@ -42,7 +42,7 @@ differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402-
 
 Thoughts on Optimization
 ------
-There are three options which can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
+There are three options which can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R^2^, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R^2^ as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R^2^. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
 
 \begin{equation}
 Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, 
@@ -244,7 +244,7 @@ What the `SS_optim` function does:
  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that relative spacing is preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
 * Several summary outputs are generated   
  * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).   
- * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the table of all surfaces (All_Results_Table.csv). This table reports the optimized objective function value, AIC, marginal and conditional R<sup>2</sup>, and log likelihood.   
+ * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the table of all surfaces (All_Results_Table.csv). This table reports the optimized objective function value, AIC, marginal and conditional R^2^, and log likelihood.   
  * MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface   
  * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.   
 * The returned object is a named list containing the tables described above.   
