@@ -28,4 +28,3 @@ Creates a necessary input for optimizing resistance surfaces based on pairwise c
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

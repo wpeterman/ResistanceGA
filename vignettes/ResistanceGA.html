@@ -12,7 +12,7 @@
 
 <meta name="author" content="Bill Peterman" />
 
-<meta name="date" content="2017-03-15" />
+<meta name="date" content="2017-03-21" />
 
 <title>A Vignette/Tutorial to use ResistanceGA</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">A Vignette/Tutorial to use ResistanceGA</h1>
 <h4 class="author"><em>Bill Peterman</em></h4>
-<h4 class="date"><em>2017-03-15</em></h4>
+<h4 class="date"><em>2017-03-21</em></h4>
 
 
 
@@ -93,7 +93,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="thoughts-on-optimization" class="section level2">
 <h2>Thoughts on Optimization</h2>
-<p>There are three options which can be used when optimizing resistance surfaces with <code>ResistanceGA</code>: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. <strong>All</strong> the mixed effects models take the form: <span class="math display">\[ Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, \]</span> which is the maximum liklihood population effects parameterization (see <a href="http://link.springer.com/article/10.1198%2F108571102320" title="Clarke et al.">Clarke et al., 2002</a>). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (<em>i.e. k</em> = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter (<em>k</em> = 3), while each category within a categorical surface is estimated (<em>k</em> = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. <em>k</em> in multisurface models is determined as the sum of all estimated parameters plus 1 (intercept). <strong>Again, there are no guidelines for how to determine <em>n</em> or <em>k</em> in these models. Use your best judgement and clearly articulate and justify your methods</strong>.</p>
+<p>There are three options which can be used when optimizing resistance surfaces with <code>ResistanceGA</code>: (1) AIC, (2) conditional R<sup>2</sup>, or (3) log-likelihood. By default (as of version 3.0-0), the default is to optimize using seeks to optimize using R<sup>2</sup> as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R<sup>2</sup>. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. <strong>All</strong> the mixed effects models take the form:</p>
+<span class="math display">\[\begin{equation}
+Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, 
+\end{equation}\]</span>
+<p>which is the maximum liklihood population effects parameterization (see <a href="http://link.springer.com/article/10.1198%2F108571102320" title="Clarke et al.">Clarke et al., 2002</a>). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (<em>i.e. k</em> = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter (<em>k</em> = 3), while each category within a categorical surface is estimated (<em>k</em> = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. <em>k</em> in multisurface models is determined as the sum of all estimated parameters plus 1 (intercept). <strong>Again, there are no guidelines for how to determine <em>n</em> or <em>k</em> in these models. Use your best judgement and clearly articulate and justify your methods</strong>.</p>
 <p>Becasue of this uncertainty, it is now also possible to specify how <em>k</em> is determined: (1) <em>k</em> = the number of parameters in the in mixed effects model (i.e. 2); (2) <em>k</em> = the total number of parameteers optimized oplus the intercept; (3) <em>k</em> = the total number of parameters optimized, plus the number of layers and the intercept. The method for evaluating <em>k</em> and the objective function to use during optimization can both be specified in the <code>GA.prep</code> function.</p>
 </div>
 <div id="setup" class="section level2">

@@ -34,4 +34,3 @@ Optimize all resistance surfaces that are located in the same directory individu
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

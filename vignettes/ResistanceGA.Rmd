@@ -2,7 +2,7 @@
 title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: '`r Sys.Date()`'
-output: rmarkdown::pdf_document
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ResistanceGA User Guide} 
   %\VignetteEngine{knitr::rmarkdown} 
