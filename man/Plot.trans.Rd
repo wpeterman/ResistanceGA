@@ -46,4 +46,3 @@ Because of the flexibility of the Ricker function to take a monomolecular shape 
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

@@ -22,4 +22,3 @@ Optimize multiple resistance surfsaces simultaneously using genetic algorithms
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

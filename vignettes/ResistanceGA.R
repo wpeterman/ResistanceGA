@@ -1,6 +1,5 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
-library(ResistanceGA)
 
 ## ----install.package, eval=FALSE-----------------------------------------
 #  # Install 'devtools' package, if needed

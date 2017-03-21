@@ -46,4 +46,3 @@ The Distance transformation sets all values equal to one. Because of the flexibi
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

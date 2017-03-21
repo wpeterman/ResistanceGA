@@ -29,4 +29,3 @@ Create composite resistance surface by simultaneously optimizing multiple catego
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

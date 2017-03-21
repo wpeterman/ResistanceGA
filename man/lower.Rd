@@ -21,4 +21,3 @@ This is a convenience function to obtain the lower half of a matrix, which is re
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

@@ -34,4 +34,3 @@ Optimize all surfaces contained in a directory using a genetic algorithm execute
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

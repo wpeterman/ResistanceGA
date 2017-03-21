@@ -19,4 +19,3 @@ A raster stack containing three raster surfaces
    }
 }
 \keyword{datasets}
-

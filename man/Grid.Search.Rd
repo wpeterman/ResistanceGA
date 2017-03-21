@@ -44,4 +44,3 @@ This function will perform a full factorial grid search of the values provided i
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

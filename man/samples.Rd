@@ -15,4 +15,3 @@ Sample file to be used with examples in the vignette
 A data frame that can be saved as a .txt file for running examples in the vignette
 }
 \keyword{datasets}
-

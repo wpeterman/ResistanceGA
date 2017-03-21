@@ -4,7 +4,13 @@
 \alias{Run_CS}
 \title{Run CIRCUITSCAPE in R}
 \usage{
-Run_CS(CS.inputs, GA.inputs, r, CurrentMap = FALSE, EXPORT.dir = GA.inputs$Write.dir, output = "matrix", hidden = TRUE)
+Run_CS(CS.inputs, 
+GA.inputs, 
+r, 
+CurrentMap = FALSE, 
+EXPORT.dir = GA.inputs$Write.dir, 
+output = "matrix", 
+hidden = TRUE)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
@@ -30,4 +36,3 @@ Execute CS from R
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

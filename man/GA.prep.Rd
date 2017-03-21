@@ -14,7 +14,7 @@ max.scale = NULL,
 cont.shape=NULL,
 select.trans=NULL,
 method = "LL",
-scale = NULL,
+scale = FALSE,
 k.value = 3,
 pop.mult = 15,
 percent.elite = 0.05,
@@ -44,11 +44,17 @@ quiet = FALSE)
 
 \item{max.cont}{The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)}
 
+\item{min.scale}{The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 1)}
+
+\item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.5 * nrows in the raster surface)}
+
 \item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)}
 
 \item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.}
 
 \item{method}{Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")}
+
+\item{scale}{Logical. To optimize a kernel smoothing scaling parameter during optimization, set to `TRUE` (Default = FALSE)}
 
 \item{k.value}{Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).
 
@@ -112,4 +118,3 @@ It is recommended to first run GA optimization with the default settings
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-

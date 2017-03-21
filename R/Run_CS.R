@@ -13,7 +13,13 @@
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' @param hidden Logical. If TRUE (Default), then no output from CIRCUITSCAPE will be printed to the console. Only set to FALSE when trying to troubleshoot/debug code.
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
-#' @usage Run_CS(CS.inputs, GA.inputs, r, CurrentMap = FALSE, EXPORT.dir = GA.inputs$Write.dir, output = "matrix", hidden = TRUE)
+#' @usage Run_CS(CS.inputs, 
+#' GA.inputs, 
+#' r, 
+#' CurrentMap = FALSE, 
+#' EXPORT.dir = GA.inputs$Write.dir, 
+#' output = "matrix", 
+#' hidden = TRUE)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>

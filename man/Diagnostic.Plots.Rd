@@ -34,4 +34,3 @@ This function will generate mixed effect model diagnostic plots following optimi
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }
-
