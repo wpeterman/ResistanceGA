@@ -30,6 +30,7 @@ SS_optim <- function(CS.inputs = NULL,
   cnt1 <- 0
   cnt2 <- 0
   k.value <- GA.inputs$k.value
+  MLPE.list <- list()
   
   # Optimize each surface in turn
   for (i in 1:GA.inputs$n.layers) {
@@ -187,6 +188,20 @@ SS_optim <- function(CS.inputs = NULL,
         
         RESULTS.cat[[cnt1]] <- RS
         
+        MLPE.list[[i]] <- MLPE.lmm(
+          resistance = paste0(
+            GA.inputs$Results.dir,
+            GA.inputs$layer.names[i],
+            "_resistances.out"
+          ),
+          pairwise.genetic = CS.inputs$response,
+          REML = F,
+          ID = CS.inputs$ID,
+          ZZ = CS.inputs$ZZ
+        )
+        
+        names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+        
       } else {
         # Processing of continuous surfaces
         cnt2 <- cnt2 + 1
@@ -282,6 +297,20 @@ SS_optim <- function(CS.inputs = NULL,
               "shape",
               "max")
           RESULTS.cont[[cnt2]] <- RS
+          
+          MLPE.list[[i]] <- MLPE.lmm(
+            resistance = paste0(
+              GA.inputs$Results.dir,
+              GA.inputs$layer.names[i],
+              "_resistances.out"
+            ),
+            pairwise.genetic = CS.inputs$response,
+            REML = F,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ
+          )
+          
+          names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           
         } else {
           EQ <- get.EQ(single.GA@solution[1])
@@ -406,6 +435,20 @@ SS_optim <- function(CS.inputs = NULL,
               "max"
             )
           RESULTS.cont[[cnt2]] <- RS
+          
+          MLPE.list[[i]] <- MLPE.lmm(
+            resistance = paste0(
+              GA.inputs$Results.dir,
+              GA.inputs$layer.names[i],
+              "_resistances.out"
+            ),
+            pairwise.genetic = CS.inputs$response,
+            REML = F,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ
+          )
+          
+          names(MLPE.list)[i] <- GA.inputs$layer.names[i]
         }
       } # Close if-else
       if (dist_mod == TRUE) {
@@ -444,6 +487,16 @@ SS_optim <- function(CS.inputs = NULL,
               ZZ = CS.inputs$ZZ
             )
           )
+        
+        MLPE.list[[i + 1]] <- MLPE.lmm(
+          resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
+          pairwise.genetic = CS.inputs$response,
+          REML = FALSE,
+          ID = CS.inputs$ID,
+          ZZ = CS.inputs$ZZ
+        )
+        
+        names(MLPE.list)[i + 1] <- "Distance"
         
         if (GA.inputs$method == "AIC") {
           dist.obj <- Dist.AIC
@@ -678,6 +731,16 @@ SS_optim <- function(CS.inputs = NULL,
         
         RESULTS.cat[[cnt1]] <- RS
         
+        MLPE.list[[i]] <-  MLPE.lmm2(
+          resistance = cd,
+          response = gdist.inputs$response,
+          REML = F,
+          ID = gdist.inputs$ID,
+          ZZ = gdist.inputs$ZZ
+        )
+        
+        names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+        
       } else {
         # Processing of continuous surfaces
         cnt2 <- cnt2 + 1
@@ -890,6 +953,16 @@ SS_optim <- function(CS.inputs = NULL,
               )
             )
           
+          MLPE.list[[i]] <-  MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            REML = F,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ
+          )
+          
+          names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+          
           if (k.value == 1) {
             k <- 2
           } else if (k.value == 2) {
@@ -970,6 +1043,16 @@ SS_optim <- function(CS.inputs = NULL,
             REML = FALSE
           )
         )
+        
+        MLPE.list[[i + 1]] <-  MLPE.lmm2(
+          resistance = cd,
+          response = gdist.inputs$response,
+          REML = F,
+          ID = gdist.inputs$ID,
+          ZZ = gdist.inputs$ZZ
+        )
+        
+        names(MLPE.list)[i + 1] <- "Distance"
         
         ROW <- nrow(gdist.inputs$ID)
         k <- 2
@@ -1193,8 +1276,9 @@ SS_optim <- function(CS.inputs = NULL,
         CategoricalResults = Results.cat,
         AICc = Results.All,
         MLPE = MLPE.results,
-        Run.Time = rt
-      )
+        Run.Time = rt,
+        MLPE.list = MLPE.list
+        )
   } else if (nrow(Results.cat) < 1 & nrow(Results.cont) > 0) {
     RESULTS <-
       list(
@@ -1202,8 +1286,9 @@ SS_optim <- function(CS.inputs = NULL,
         CategoricalResults = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
-        Run.Time = rt
-      )
+        Run.Time = rt,
+        MLPE.list = MLPE.list
+        )
   } else if (nrow(Results.cat) > 0 & nrow(Results.cont) < 1) {
     RESULTS <-
       list(
@@ -1211,7 +1296,8 @@ SS_optim <- function(CS.inputs = NULL,
         CategoricalResults = Results.cat,
         AICc = Results.All,
         MLPE = MLPE.results,
-        Run.Time = rt
+        Run.Time = rt,
+        MLPE.list = MLPE.list
       )
   } else {
     RESULTS <-
@@ -1220,7 +1306,8 @@ SS_optim <- function(CS.inputs = NULL,
         CategoricalResults = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
-        Run.Time = rt
+        Run.Time = rt,
+        MLPE.list = MLPE.list
       )
   }
   
