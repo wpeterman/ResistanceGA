@@ -12,7 +12,7 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
   k.value <- GA.inputs$k.value
-  
+
   if(!is.null(CS.inputs)){
     if(GA.inputs$parallel!=FALSE) {warning("\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",immediate. = TRUE)}
     t1<-proc.time()[3]
@@ -82,6 +82,12 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                           ID = CS.inputs$ID, 
                           ZZ = CS.inputs$ZZ ))
     
+    MLPE.model <- MLPE.lmm(resistance = paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),
+                           pairwise.genetic = CS.inputs$response, 
+                           REML = F,
+                           ID = CS.inputs$ID, 
+                           ZZ = CS.inputs$ZZ )
+    
     if(k.value == 1){
       k <- 2
     } else if (k.value == 2){
@@ -114,8 +120,11 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                LL = LL[[1]]) 
     
     file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
-    return(multi.GA_nG)
-  } 
+   
+     out <- list(GA.summary = multi.GA_nG,
+                MLPE.model = MLPE.model)
+    return(out) 
+     } 
   
   #### Optimize using gdistance ####
   if(!is.null(gdist.inputs)){
@@ -196,6 +205,12 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                           ID = gdist.inputs$ID, 
                           ZZ = gdist.inputs$ZZ ))
     
+    MLPE.model <- MLPE.lmm(resistance = cd,
+                           pairwise.genetic = gdist.inputs$response, 
+                           REML = F,
+                           ID = gdist.inputs$ID, 
+                           ZZ = gdist.inputs$ZZ )
+    
     if(k.value == 1){
       k <- 2
     } else if (k.value == 2){
@@ -219,7 +234,10 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
                LL = LL[[1]]) 
     
     file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
-    return(multi.GA_nG)
+    
+    out <- list(GA.summary <- multi.GA_nG,
+                MLPE.model = MLPE.model)
+    return(out)
   }
   
   #####  RUN BRENT OPTIMIZATION ####

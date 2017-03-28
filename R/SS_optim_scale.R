@@ -167,6 +167,20 @@ SS_optim.scale <- function(CS.inputs = NULL,
         )
       )
       
+      MLPE.list[[i]] <- MLPE.lmm(
+        resistance = paste0(
+          GA.inputs$Results.dir,
+          GA.inputs$layer.names[i],
+          "_resistances.out"
+        ),
+        pairwise.genetic = CS.inputs$response,
+        REML = F,
+        ID = CS.inputs$ID,
+        ZZ = CS.inputs$ZZ
+      )
+      
+      names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+      
       if (k.value == 1) {
         k <- 2
       } else if (k.value == 2) {
@@ -210,6 +224,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
           "scale"
         )
       RESULTS.cont[[cnt1]] <- RS
+      
       
       if (dist_mod == TRUE) {
         r <- reclassify(r, c(-Inf, Inf, 1))
@@ -281,6 +296,16 @@ SS_optim.scale <- function(CS.inputs = NULL,
             "R2c",
             "LL"
           )
+        
+        MLPE.list[[i + 1]] <- MLPE.lmm(
+          resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
+          pairwise.genetic = CS.inputs$response,
+          REML = FALSE,
+          ID = CS.inputs$ID,
+          ZZ = CS.inputs$ZZ
+        )
+        
+        names(MLPE.list)[i + 1] <- "Distance"
       }
       
       if (null_mod == TRUE) {
@@ -455,6 +480,16 @@ SS_optim.scale <- function(CS.inputs = NULL,
           )
         )
       
+      MLPE.list[[i]] <-  MLPE.lmm2(
+        resistance = cd,
+        response = gdist.inputs$response,
+        REML = F,
+        ID = gdist.inputs$ID,
+        ZZ = gdist.inputs$ZZ
+      )
+      
+      names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+      
       if (k.value == 1) {
         k <- 2
       } else if (k.value == 2) {
@@ -533,6 +568,16 @@ SS_optim.scale <- function(CS.inputs = NULL,
             REML = FALSE
           )
         )
+        
+        MLPE.list[[i + 1]] <-  MLPE.lmm2(
+          resistance = cd,
+          response = gdist.inputs$response,
+          REML = F,
+          ID = gdist.inputs$ID,
+          ZZ = gdist.inputs$ZZ
+        )
+        
+        names(MLPE.list)[i + 1] <- "Distance"
         
         ROW <- nrow(gdist.inputs$ID)
         k <- 2
@@ -720,7 +765,8 @@ SS_optim.scale <- function(CS.inputs = NULL,
         CategoricalResults = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
-        Run.Time = rt
+        Run.Time = rt,
+        MLPE.list = MLPE.list
       )
   # } else if (nrow(Results.cat) > 0 & nrow(Results.cont) < 1) {
   #   RESULTS <-
