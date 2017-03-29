@@ -14,7 +14,8 @@
 #' \item A .csv file with the Maximum Likelihood Population Effects mixed effects model coefficient estimates (MLPE_coeff_Table.csv)
 #' \item Three summary .csv files are generated: CategoricalResults.csv, ContinuousResults.csv, & All_Results_AICc.csv. These tables contain AICc values and optimization summaries for each surface.
 #' }
-#' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE)
+#' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE, $MLPE.list)\cr
+#' The \code{lmer} model objects stored $MLPE.list are fit using Restricted Maximum Likelihood
 #' @usage SS_optim.scale(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
@@ -174,7 +175,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
           "_resistances.out"
         ),
         pairwise.genetic = CS.inputs$response,
-        REML = F,
+        REML = TRUE,
         ID = CS.inputs$ID,
         ZZ = CS.inputs$ZZ
       )
@@ -300,7 +301,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
         MLPE.list[[i + 1]] <- MLPE.lmm(
           resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
           pairwise.genetic = CS.inputs$response,
-          REML = FALSE,
+          REML = TRUE,
           ID = CS.inputs$ID,
           ZZ = CS.inputs$ZZ
         )
@@ -483,7 +484,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
       MLPE.list[[i]] <-  MLPE.lmm2(
         resistance = cd,
         response = gdist.inputs$response,
-        REML = F,
+        REML = TRUE,
         ID = gdist.inputs$ID,
         ZZ = gdist.inputs$ZZ
       )
@@ -572,7 +573,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
         MLPE.list[[i + 1]] <-  MLPE.lmm2(
           resistance = cd,
           response = gdist.inputs$response,
-          REML = F,
+          REML = TRUE,
           ID = gdist.inputs$ID,
           ZZ = gdist.inputs$ZZ
         )
