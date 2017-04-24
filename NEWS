@@ -1,3 +1,7 @@
+ResistanceGA 3.0-3
+--------
+* Fix issue in SCALE returning infinite values (#3).
+
 ResistanceGA 3.0-1
 --------
 * The fitted, optimized MLPE mixed effects models are now saved with the output of the model runs.
@@ -77,11 +81,11 @@ ResistanceGA 2.0-11
 
 ResistanceGA 2.0-10
 --------
-* Updated CS.prep error message 
+* Updated CS.prep error message
 
 ResistanceGA 2.0-9
 --------
-* Fixed error in Diagnostic.Plot 
+* Fixed error in Diagnostic.Plot
 * Cleaned and consolodated code for conducting raster transformations
 * Added functionality to use the advanced CIRCUITSCAPE feature of "pairs_to_include". This is not yet well documented, so contact me directly if you have interest in using this feature.
 
@@ -115,7 +119,7 @@ ResistanceGA 2.0-3
 
 ResistanceGA 2.0-2
 ---------
-* Have tested and added the option to run optimization in parallel when using least cost paths. Set `parallel= TRUE` or `parallel = #cores` in `GA.prep`   
+* Have tested and added the option to run optimization in parallel when using least cost paths. Set `parallel= TRUE` or `parallel = #cores` in `GA.prep`
 * PARALLEL DOES NOT CURRENTLY WORK WHEN OPTIMIZING WITH CIRCUITSCAPE!!!
 
 ResistanceGA 2.0-1
