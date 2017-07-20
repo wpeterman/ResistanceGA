@@ -262,20 +262,29 @@ ZZ.mat <- function(ID) {
   return(ZZ)
 }
 
-
 # Rescale function
-SCALE.vector <- function(data, MIN, MAX) {
-  Mn = min(data)
-  Mx = max(data)
-  (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
+SCALE.vector <- function(data, MIN, MAX, threshold = 1e-5) {
+  if (abs(MIN - MAX) < threshold) {
+    data[is.finite(data)] <- 0
+    data
+  } else {
+    Mn = min(data)
+    Mx = max(data)
+    (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
+  }
 }
 
 # Define scaling function
 # This will rescale from 1 to specified MAX
-SCALE <- function(data, MIN, MAX) {
-  Mn = cellStats(data, stat = 'min')
-  Mx = cellStats(data, stat = 'max')
-  (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
+SCALE <- function(data, MIN, MAX, threshold = 1e-5) {
+  if (abs(MIN - MAX) < threshold) {
+    data[is.finite(raster::values(data))] <- 0
+    data
+  } else {
+    Mn = cellStats(data, stat = 'min')
+    Mx = cellStats(data, stat = 'max')
+    (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
+  }
 }
 
 # Sample values for suggests
