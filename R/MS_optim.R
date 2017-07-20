@@ -235,7 +235,7 @@ MS_optim<-function(CS.inputs=NULL, gdist.inputs=NULL, GA.inputs){
     
     file.remove(list.files(GA.inputs$Write.dir,full.names=TRUE))
     
-    out <- list(GA.summary <- multi.GA_nG,
+    out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model)
     return(out)
   }

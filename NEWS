@@ -1,4 +1,8 @@
-ResistanceGA 3.0-1
+ResistanceGA 3.0-3
+--------
+* Minor bug fixes
+
+ResistanceGA 3.0-2
 --------
 * The fitted, optimized MLPE mixed effects models are now saved with the output of the model runs.
 

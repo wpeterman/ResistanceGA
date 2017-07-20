@@ -62,6 +62,9 @@ To run CIRCUITSCAPE on Linux (tested with Ubuntu 16.04):
 1.  Install CIRCUITSCAPE---Default installation directory is `/usr/local/bin/csrun.py`   
 2. To call CIRCUITSCAPE from R, first change file permissions from the command line terminal (shortcut: control + alt+ t) ` sudo chomod 755 /usr/local/bin/csrun.py `  
     * This will allow `csrun.py` to be executed without specifying paths.   
+    
+*If you can provide code of how to run CIRCUITSCAPE from R, I will work to implement it*
+
 
 *R Packages*    
 This package consists of several wrapper functions for implementing functions from other packages, and these will all be imported when `ResistanceGA` is installed.   

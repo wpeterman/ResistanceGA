@@ -11,13 +11,11 @@ if(!("devtools" %in% list.files(.libPaths()))) {
     install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
 } 
 
-library(devtools) # Loads devtools
-
 devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Download package
 
 library(ResistanceGA) # Installs package and the other required packages needed
 ```
-Once the package is installed, you can further explore the functions by opening the HTML 'Vignette' using the code below, or you can view the vignette directly [**here**](https://www.dropbox.com/s/ugsb5t84il88lrh/ResistanceGA.pdf?dl=0 "Vignette")
+Once the package is installed, you can further explore the functions by opening the 'Vignette' using the code below, or you can view the vignette directly [**here**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/resistancega.pdf "Vignette")
 ```
 vignette('ResistanceGA')  # Opens PDF
 ```
