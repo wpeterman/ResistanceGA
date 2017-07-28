@@ -80,6 +80,7 @@
 #' mutation = gaControl(type)$mutation,
 #' pop.size = NULL,
 #' parallel = FALSE,
+#' seed = NULL,
 #' quiet = FALSE)
 
 GA.prep <- function(ASCII.dir,

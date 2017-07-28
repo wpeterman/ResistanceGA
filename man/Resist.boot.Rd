@@ -4,7 +4,7 @@
 \alias{Resist.boot}
 \title{Run bootstrap on optimized resistance surfaces}
 \usage{
-Resist.boot(mod.names, dist.mat, k, sample.prop, iters, obs, genetic.mat)
+Resist.boot(mod.names, dist.mat, n.parameters, sample.prop, iters, obs, genetic.mat)
 }
 \arguments{
 \item{mod.names}{A vector of the model names to be assessed}

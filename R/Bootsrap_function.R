@@ -15,7 +15,7 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage Resist.boot(mod.names, dist.mat, k, sample.prop, iters, obs, genetic.mat)
+#' @usage Resist.boot(mod.names, dist.mat, n.parameters, sample.prop, iters, obs, genetic.mat)
 #'
 
 Resist.boot <-
@@ -26,9 +26,10 @@ Resist.boot <-
             iters,
             obs,
             genetic.mat) {
+    library(dplyr)
     
     options(warn = -1)
-    progress_bar <- create_progress_bar("text")
+    progress_bar <- plyr::create_progress_bar("text")
     progress_bar$init(iters * length(mod.names))
     
     sample.n <- floor(sample.prop * obs)

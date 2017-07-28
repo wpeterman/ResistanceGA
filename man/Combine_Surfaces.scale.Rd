@@ -4,7 +4,7 @@
 \alias{Combine_Surfaces.scale}
 \title{Combine multiple resistance surfaces together}
 \usage{
-Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale)
+Combine_Surfaces.scale(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces}

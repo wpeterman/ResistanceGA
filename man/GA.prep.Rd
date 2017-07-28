@@ -30,6 +30,7 @@ crossover="gareal_blxCrossover",
 mutation = gaControl(type)$mutation,
 pop.size = NULL,
 parallel = FALSE,
+seed = NULL,
 quiet = FALSE)
 }
 \arguments{

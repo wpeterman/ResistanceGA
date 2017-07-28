@@ -4,7 +4,7 @@
 \alias{MS_optim.scale}
 \title{Simultaneous optimization of multiple resistance surfaces with kernel smoothing}
 \usage{
-MS_optim(CS.inputs, gdist.inputs, GA.inputs)
+MS_optim.scale(CS.inputs, gdist.inputs, GA.inputs)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}

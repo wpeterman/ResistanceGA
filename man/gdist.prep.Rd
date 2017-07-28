@@ -7,6 +7,8 @@
 gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, method)
 }
 \arguments{
+\item{n.Pops}{The number of populations that are being assessed}
+
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 
 \item{samples}{Either provide the path to a .txt file containing the xy coordinates, or provide a matrix with x values in column 1 and y values in column 2. Alternatively, you can provide a \code{\link[sp]{SpatialPoints}} object}
@@ -18,8 +20,6 @@ gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, m
 \item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorrection}} ill be applied to the transition  matrix. Defaault = FALSE}
 
 \item{method}{Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.}
-
-\item{n.POPS}{The number of populations that are being assessed}
 }
 \value{
 An R object that is a required input into optimization functions

@@ -6,7 +6,7 @@
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @return This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.
-#' @usage MS_optim(CS.inputs, gdist.inputs, GA.inputs)
+#' @usage MS_optim.scale(CS.inputs, gdist.inputs, GA.inputs)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
