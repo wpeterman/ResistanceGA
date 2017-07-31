@@ -74,26 +74,26 @@ Resist.boot <-
       # Calculate Delta AICc, weight, and rank
       AICc.tab <- plyr::ldply(AICc.tab, "identity")
       
-      AICc.tab <- AICc.tab %>% mutate(., delta = AICc - min(AICc)) %>%
-        mutate(., weight = (exp(-0.5 * delta)) / sum(exp(-0.5 * delta))) %>%
-        mutate(., rank = rank(AICc)) %>%
-        mutate(., iteration = i)
+      AICc.tab <- AICc.tab %>% plyr::mutate(., delta = AICc - min(AICc)) %>%
+        dplyr::mutate(., weight = (exp(-0.5 * delta)) / sum(exp(-0.5 * delta))) %>%
+        dplyr::mutate(., rank = rank(AICc)) %>%
+        dplyr::mutate(., iteration = i)
       
       AIC.tab.list[[i]] <- AICc.tab
     } # Close iteration loop
     
     # Get average weight and rank
-    group.list <- AIC.tab.list %>% plyr::ldply(.) %>% group_by(., surface)
+    group.list <- AIC.tab.list %>% plyr::ldply(.) %>% dplyr::group_by(., surface)
     boot.avg <-
-      group.list %>% summarise(.,
+      group.list %>% dplyr::summarise(.,
                                avg.weight = mean(weight),
                                avg.rank = mean(rank)) %>% arrange(., avg.rank)
     
     Freq_Percent <-
-      group.list %>%  filter(., rank == 1) %>% tally(.) %>%  mutate(Percent.top =
+      group.list %>%  dplyr::filter(., rank == 1) %>% dplyr::tally(.) %>%  dplyr::mutate(Percent.top =
                                                                       (100 * n) / sum(n))
     
-    boot.avg <- left_join(boot.avg, Freq_Percent, "surface") %>% left_join(., k.mod, "surface")
+    boot.avg <- dplyr::left_join(boot.avg, Freq_Percent, "surface") %>% dplyr::left_join(., k.mod, "surface")
     boot.avg[is.na(boot.avg)] <- 0
     # boot.avg <- as.data.frame(boot.avg)
     

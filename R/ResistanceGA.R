@@ -19,6 +19,7 @@
 #' @import raster GA lme4 ggplot2 gdistance
 #' @importFrom Matrix fac2sparse
 #' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text 
+#' @importFrom dplyr mutate group_by summarise filter tally left_join
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom magrittr "%>%"
