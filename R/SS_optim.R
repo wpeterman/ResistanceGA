@@ -422,7 +422,7 @@ SS_optim <- function(CS.inputs = NULL,
           if (k.value == 1) {
             k <- 2
           } else if (k.value == 2) {
-            k <- GA.inputs$parm.type$n.parm[i]
+            k <- GA.inputs$parm.type$n.parm[i] + 1
           } else {
             k <- GA.inputs$parm.type$n.parm[i] + 1
           }
@@ -736,7 +736,7 @@ SS_optim <- function(CS.inputs = NULL,
         } else if (k.value == 2) {
           k <- GA.inputs$parm.type$n.parm[i] + 1
         } else {
-          k <- GA.inputs$parm.type$n.parm[i] + 2
+          k <- GA.inputs$parm.type$n.parm[i] + 1
         }
         
         k.list[[i]] <- k
@@ -1023,7 +1023,7 @@ SS_optim <- function(CS.inputs = NULL,
           if (k.value == 1) {
             k <- 2
           } else if (k.value == 2) {
-            k <- GA.inputs$parm.type$n.parm[i]
+            k <- GA.inputs$parm.type$n.parm[i] + 1
           } else {
             k <- GA.inputs$parm.type$n.parm[i] + 1
           }
