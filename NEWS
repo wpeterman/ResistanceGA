@@ -1,4 +1,9 @@
-=======
+ResistanceGA 3.0-5
+--------
+* Updated `Grid.Search` function 
+* Updated vignette
+* Correction of documentation typos
+
 ResistanceGA 3.0-4
 --------
 * Default objective function for optimization has been set to log-likelihood (LL)

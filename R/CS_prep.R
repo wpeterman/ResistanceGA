@@ -18,7 +18,14 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage CS.prep(n.Pops, response, CS_Point.File, CS.program, Neighbor.Connect, pairs_to_include, platform, parallel, cores)
+#' @usage CS.prep(n.Pops, 
+#' response, CS_Point.File, 
+#' CS.program, 
+#' Neighbor.Connect, 
+#' pairs_to_include, 
+#' platform, 
+#' parallel, 
+#' cores)
 #' @details \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows:
 #'
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'

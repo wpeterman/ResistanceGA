@@ -26,10 +26,9 @@ Resist.boot <-
             iters,
             obs,
             genetic.mat) {
-    library(dplyr)
-    
+
     options(warn = -1)
-    progress_bar <- plyr::create_progress_bar("text")
+    progress_bar <- plyr::progress_text()
     progress_bar$init(iters * length(mod.names))
     
     sample.n <- floor(sample.prop * obs)
@@ -73,7 +72,7 @@ Resist.boot <-
         
       } # Close composite loop
       # Calculate Delta AICc, weight, and rank
-      AICc.tab <- ldply(AICc.tab, "identity")
+      AICc.tab <- plyr::ldply(AICc.tab, "identity")
       
       AICc.tab <- AICc.tab %>% mutate(., delta = AICc - min(AICc)) %>%
         mutate(., weight = (exp(-0.5 * delta)) / sum(exp(-0.5 * delta))) %>%
@@ -84,7 +83,7 @@ Resist.boot <-
     } # Close iteration loop
     
     # Get average weight and rank
-    group.list <- AIC.tab.list %>% ldply(.) %>% group_by(., surface)
+    group.list <- AIC.tab.list %>% plyr::ldply(.) %>% group_by(., surface)
     boot.avg <-
       group.list %>% summarise(.,
                                avg.weight = mean(weight),
@@ -94,7 +93,7 @@ Resist.boot <-
       group.list %>%  filter(., rank == 1) %>% tally(.) %>%  mutate(Percent.top =
                                                                       (100 * n) / sum(n))
     
-    boot.avg <- left_join(boot.avg, Freq_Percent, "surface") %>% left_join(k.mod, "surface")
+    boot.avg <- left_join(boot.avg, Freq_Percent, "surface") %>% left_join(., k.mod, "surface")
     boot.avg[is.na(boot.avg)] <- 0
     # boot.avg <- as.data.frame(boot.avg)
     

@@ -13,6 +13,11 @@
 MS_optim <- function(CS.inputs = NULL,
                      gdist.inputs = NULL,
                      GA.inputs) {
+  if (!is.null(GA.inputs$scale)) {
+    stop(
+      "This function should NOT be used if you intend to apply kernel smoothing to your resistance surfaces"
+    )
+  }
   k.value <- GA.inputs$k.value
   
   if (!is.null(CS.inputs)) {

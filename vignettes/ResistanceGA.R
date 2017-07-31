@@ -1,6 +1,10 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
+## ---- echo = FALSE-------------------------------------------------------
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(raster, warn.conflicts = F, quietly = T)
+
 ## ----install.package, eval=FALSE-----------------------------------------
 #  # Install 'devtools' package, if needed
 #  if(!("devtools" %in% list.files(.libPaths()))) {
@@ -13,19 +17,17 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ResistanceGA)
 rm(list = ls())
 
-## ----results='hide', eval=FALSE------------------------------------------
-#  Ricker.plot <- Plot.trans(PARM=c(1.5, 200),Resistance=c(1,10),transformation="Ricker")
+## ----Plot.trans.demo, fig.height = 4, fig.width = 4, fig.align = "center"----
+Ricker.plot <- Plot.trans(PARM = c(1.5, 200),
+                          Resistance = c(1,10),
+                          transformation="Ricker")
 
-## ----results='hide', eval=FALSE------------------------------------------
-#  # Change title of plot
-#  Ricker.plot$labels$title<-"Ricker Transformation"
-#  Ricker.plot
+# Change title of plot
+Ricker.plot$labels$title <- "Ricker Tansformation"
+Ricker.plot
 
-## ----max_resist, eval=FALSE----------------------------------------------
-#  # Find original data value that now has maximum resistance
-#  Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$data$transformed))]
-#  
-#  ## [1] 2.356784
+# Find original data value that now has maximum resistance
+Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$data$transformed))]
 
 ## ----warning=FALSE, results='hide',message=FALSE, eval=FALSE-------------
 #  
@@ -35,15 +37,11 @@ rm(list = ls())
 #  # Create a subdirectory for the first example
 #  dir.create(file.path("C:/ResistanceGA_Examples/","SingleSurface"))
 #  
-#  # Directory to write .asc files and results
-#  write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"
+#  write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      # Directory to write .asc files and results
 #  
 #  # Give path to CIRCUITSCAPE .exe file
 #  # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
 #  CS.program <- paste('"C:/Program Files/Circuitscape/cs_run.exe"')
-#  
-#  # If using Linux
-#  # CS.program <- 'csrun.py'
 
 ## ----load.data, echo = FALSE, message = FALSE, warning=FALSE-------------
 data(resistance_surfaces)
@@ -65,9 +63,9 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  # Create a spatial points object for plotting
 #  sample.locales <- SpatialPoints(samples[,c(2,3)])
 
-## ----single.surface.plot, eval = FALSE-----------------------------------
-#  plot(continuous)
-#  plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
+## ----single.surface.plot, fig.height = 4, fig.width = 4, fig.align = "center"----
+plot(continuous)
+plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 
 ## ----eval=FALSE----------------------------------------------------------
 #  # Set the random number seed to reproduce the results presented
@@ -75,11 +73,12 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #                       max.cat = 500,
 #                       max.cont = 500,
 #                       select.trans = "M",
+#                       method = "LL"
 #                       seed = 555)
 #  
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-#                       CS_Point.File = paste0(write.dir,"samples.txt"),
-#                       CS.program = CS.program)
+#                     CS_Point.File = paste0(write.dir,"samples.txt"),
+#                     CS.program = CS.program)
 
 ## ----monomolec.plot, eval = FALSE----------------------------------------
 #  r.tran <- Resistance.tran(transformation = "Monomolecular",
@@ -99,27 +98,13 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 
 ## ----eval=FALSE----------------------------------------------------------
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-#                       response = CS.response,
-#                       CS_Point.File = paste0(write.dir,"samples.txt"),
-#                       CS.program = CS.program)
+#                     response = CS.response,
+#                     CS_Point.File = paste0(write.dir,"samples.txt"),
+#                     CS.program = CS.program)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
 #                         GA.inputs=GA.inputs)
-
-## ----eval=FALSE----------------------------------------------------------
-#  Grid.Results <- Grid.Search(shape = seq(1, 4, by = 0.1),
-#                              max = seq(50, 500,by = 75),
-#                              transformation = "Monomolecular",
-#                              Resistance = continuous,
-#                              CS.inputs,
-#                              GA.inputs = GA.inputs)
-
-## ----recreate.grid, eval=FALSE-------------------------------------------
-#  filled.contour(Grid.Results$Plot.data,
-#                 col = rainbow(30),
-#                 xlab = "Shape parameter",
-#                 ylab = "Maximum value parameter")
 
 ## ----eval=FALSE----------------------------------------------------------
 #  GA.inputs <- GA.prep(ASCII.dir = write.dir)
@@ -150,6 +135,7 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #                       seed = 555,
 #                       parallel = 4)
 #  
+#  
 #  gdist.inputs <- gdist.prep(length(sample.locales),
 #                             samples = sample.locales,
 #                             response = CS.response,
@@ -159,6 +145,20 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
 #                               GA.inputs = GA.inputs)
 
+## ----eval=FALSE----------------------------------------------------------
+#  Grid.Results <- Grid.Search(shape = seq(1, 3, by = 0.1),
+#                              max = seq(125, 425, by = 75),
+#                              transformation = "Monomolecular",
+#                              Resistance = continuous,
+#                              gdist.inputs = gdist.inputs,
+#                              GA.inputs = GA.inputs)
+
+## ----recreate.grid, eval=FALSE-------------------------------------------
+#  filled.contour(Grid.Results$Plot.data,
+#                 col = rainbow(20),
+#                 xlab = "Shape parameter",
+#                 ylab = "Maximum value parameter")
+
 ## ----warning=FALSE, results='hide',message=FALSE, eval=FALSE-------------
 #  if("ResistanceGA_Examples"%in%dir("C:/")==FALSE)
 #    dir.create(file.path("C:/", "ResistanceGA_Examples"))
@@ -166,21 +166,20 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  # Create a subdirectory for the second example
 #  dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces"))
 #  
-#  # Directory to write .asc files and results
-#  write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"
+#  write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
 
 ## ----multi_surface.sim, warning=FALSE, message=FALSE,results='hide'------
 data(resistance_surfaces)
 data(samples)
 sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 
-## ----feature.sim, warning=FALSE,message=FALSE,eval=FALSE-----------------
-#  plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE)
-#  plot(resistance_surfaces[[2]],main = resistance_surfaces[[2]]@data@names)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE)
-#  plot(resistance_surfaces[[3]],main = resistance_surfaces[[3]]@data@names)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE)
+## ----feature.sim, warning=FALSE,message=FALSE, fig.height = 4, fig.width = 4, fig.align = "center"----
+plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
+plot(sample.locales, pch=16, col="blue", add=TRUE)
+plot(resistance_surfaces[[2]],main = resistance_surfaces[[2]]@data@names)
+plot(sample.locales, pch=16, col="blue", add=TRUE)
+plot(resistance_surfaces[[3]],main = resistance_surfaces[[3]]@data@names)
+plot(sample.locales, pch=16, col="blue", add=TRUE)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  ## Note that the `resistance_surfaces` is already a RasterStack object.
@@ -246,16 +245,9 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 ## ----eval=FALSE----------------------------------------------------------
 #  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim@solution),2))
 #  colnames(Summary.table)<-c("Truth", "Optimized")
-#  row.names(Summary.table)<-c("Category1",
-#                              "Category2",
-#                              "Category3",
-#                              "Transformation",
-#                              "Shape",
-#                              "Max",
-#                              "Feature1",
-#                              "Feature2")
+#  row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2")
 
-## ----combined.plots, eval=FALSE------------------------------------------
+## ----combined.plots,fig.width=12,fig.height=8, eval=FALSE----------------
 #  # Make combined, optimized resistance surface.
 #  optim.resist <- Combine_Surfaces(PARM = Multi.Surface_optim@solution,
 #                                   CS.inputs =  gdist.inputs,

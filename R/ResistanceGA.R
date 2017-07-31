@@ -16,11 +16,11 @@
 #'   
 #'   Official release: \url{http://www.circuitscape.org/downloads}
 #' 
-#' @import tidyverse raster GA lme4 gdistance  
+#' @import raster GA lme4 ggplot2
 #' @importFrom Matrix fac2sparse
+#' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
-#' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text
 #' @importFrom magrittr "%>%"
 #' @importFrom smoothie kernel2dsmooth
 #' @importFrom grDevices dev.off tiff topo.colors

@@ -2,15 +2,21 @@
 title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: '`r Sys.Date()`'
-output: rmarkdown::html_vignette
+output:
+  html_document: rmarkdown::html_vignette
+  pdf_document: rmarkdown::pdf_document
 vignette: |
-  %\VignetteIndexEntry{ResistanceGA User Guide}  
-  %\VignetteEngine{knitr::rmarkdown}  
+  %\VignetteIndexEntry{ResistanceGA User Guide} 
+  %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteEncoding{UTF-8}
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo = FALSE}
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(raster, warn.conflicts = F, quietly = T)
 ```
 
 ResistanceGA
@@ -96,7 +102,7 @@ rm(list = ls())
 ```
 
 There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
-![Transformations](figure/Transformations.svg)
+![Transformations](figure/Transformations.png)
 
 All of these figures were made with the `Plot.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
 ```{r Plot.trans.demo, fig.height = 4, fig.width = 4, fig.align = "center"}
@@ -173,11 +179,12 @@ GA.inputs <- GA.prep(ASCII.dir = write.dir,
                      max.cat = 500,
                      max.cont = 500,
                      select.trans = "M",
+                     method = "LL"
                      seed = 555) 
 
-CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                   CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.program=CS.program) 
+CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+                   CS_Point.File = paste0(write.dir,"samples.txt"),
+                   CS.program = CS.program) 
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet. When doing an actual analysis (not a simulation, as in this example) you will specify your pairwise genetic distance data as the response.     
 
@@ -205,10 +212,10 @@ CS.response <- Run_CS(CS.inputs = CS.inputs,
 
 Rerun `CS.prep` including the newly created `CS.response`
 ```{r eval=FALSE}
-CS.inputs <- CS.prep(n.POPS=length(sample.locales),
-                   response=CS.response,
-                   CS_Point.File=paste0(write.dir,"samples.txt"),
-                   CS.program=CS.program)
+CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+                   response = CS.response,
+                   CS_Point.File = paste0(write.dir,"samples.txt"),
+                   CS.program = CS.program)
 ```
 
 Run the Single surface optimization function (`SS_optim`). Running this example with the default settings
@@ -248,34 +255,11 @@ What the `SS_optim` function does:
  * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that relative spacing is preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
 * Several summary outputs are generated   
  * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).   
- * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the AICc of all surfaces (All_Results_AICc.csv)   
+ * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the objective function value for all surfaces (All_Results_AICc.csv)   
  * MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface   
  * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.   
-* The returned object is a named list containing the tables described above.   
+* The returned object is a named list containing the tables described above.      
   
-
-To view the AICc response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relevant for single continuous surfaces.
-```{r eval=FALSE}
-Grid.Results <- Grid.Search(shape = seq(1, 4, by = 0.1),
-                            max = seq(50, 500,by = 75),
-                            transformation = "Monomolecular",
-                            Resistance = continuous, 
-                            CS.inputs, 
-                            GA.inputs = GA.inputs)
-```
-![GRID.Surface](figure/grid_topo.png)      
-
-You can change the color scheme and color breaks by manually recreating the response surface from the generated data [default = topo.colors(20)]
-```{r recreate.grid, eval=FALSE}
-filled.contour(Grid.Results$Plot.data,
-               col = rainbow(30),
-               xlab = "Shape parameter",
-               ylab = "Maximum value parameter")
-```
-![GRID.Surface.update](figure/Raindow_Surface.png)    
-
-Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates.            
-
 
 ### Minimum code for running ResistanceGA
 The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to to use the `r.tran` or `Run_CS` functions. You should only have to use the following functions (although you may want to change settings from defaults).
@@ -344,6 +328,28 @@ max                275        274.9982                277.0668
 
 ```
 
+
+To view the response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relevant for single continuous surfaces.
+```{r eval=FALSE}
+Grid.Results <- Grid.Search(shape = seq(1, 3, by = 0.1),
+                            max = seq(125, 425, by = 75),
+                            transformation = "Monomolecular",
+                            Resistance = continuous, 
+                            gdist.inputs = gdist.inputs, 
+                            GA.inputs = GA.inputs)
+```
+![GRID.Surface](figure/grid1.png)      
+
+You can change the color scheme and color breaks by manually recreating the response surface from the generated data [default = topo.colors(20)]
+```{r recreate.grid, eval=FALSE}
+filled.contour(Grid.Results$Plot.data,
+               col = rainbow(20),
+               xlab = "Shape parameter",
+               ylab = "Maximum value parameter")
+```
+![GRID.Surface.update](figure/grid2.png)    
+
+Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates. 
 
  ****
 ### Simultaneous optimization of multiple surfaces
@@ -692,7 +698,7 @@ k <- rbind(SS_RESULTS.gdist$k.list, Multi.Surface_optim.gd$k)
 * As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates/relative relationship among resistance surfaces. 
 * While there is no established framework for how optimization of resistances surface can or should be done, below is a flowchart of how an analysis might proceed:   
 
-![flowchart](figure/FlowChart_Narrow2.png) 
+![flowchart](figure/FlowChart_Narrow2b.png) 
 
 
 ### Summary   

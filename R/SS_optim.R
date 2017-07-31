@@ -25,6 +25,11 @@ SS_optim <- function(CS.inputs = NULL,
                      nlm = FALSE,
                      dist_mod = TRUE,
                      null_mod = TRUE) {
+  if (!is.null(GA.inputs$scale)) {
+    stop(
+      "This function should NOT be used if you intend to apply kernel smoothing to your resistance surfaces"
+    )
+  }
   t1 <- proc.time()[3]
   RESULTS.cat <- list() # List to store categorical results within
   RESULTS.cont <- list() # List to store continuous results within
@@ -40,6 +45,13 @@ SS_optim <- function(CS.inputs = NULL,
   for (i in 1:GA.inputs$n.layers) {
     r <- GA.inputs$Resistance.stack[[i]]
     names(r) <- GA.inputs$layer.names[i]
+    
+    
+    # CIRCUITSCAPE ------------------------------------------------------------
+    
+    
+    # * Categorical -----------------------------------------------------------
+    
     
     # Processing of categorical surfaces
     if (!is.null(CS.inputs)) {
@@ -212,7 +224,9 @@ SS_optim <- function(CS.inputs = NULL,
         names(MLPE.list)[i] <- GA.inputs$layer.names[i]
         names(cd.list)[i] <- GA.inputs$layer.names[i]
         
+        # * Continuous -----------------------------------------------------------
       } else {
+        
         # Processing of continuous surfaces
         cnt2 <- cnt2 + 1
         r <- SCALE(r, 0, 10)
@@ -627,6 +641,7 @@ SS_optim <- function(CS.inputs = NULL,
     # Optimize with gdistance -------------------------------------------------
     
     if (!is.null(gdist.inputs)) {
+      # * Categorical -----------------------------------------------------------
       if (GA.inputs$surface.type[i] == 'cat') {
         cnt1 <- cnt1 + 1
         names(r) <- GA.inputs$layer.names[i]
@@ -914,6 +929,7 @@ SS_optim <- function(CS.inputs = NULL,
               "max")
           RESULTS.cont[[cnt2]] <- RS
           
+          # * Continuous -----------------------------------------------------------
         } else {
           EQ <- get.EQ(single.GA@solution[1])
           r <-
@@ -1056,6 +1072,14 @@ SS_optim <- function(CS.inputs = NULL,
         r <- reclassify(r, c(-Inf, Inf, 1))
         names(r) <- "dist"
         cd <- Run_gdistance(gdist.inputs, r)
+        
+        write.table(
+          as.matrix(cd),
+          file = paste0(GA.inputs$Results.dir, 'Distance', "_", gdist.inputs$method, "_distMat.csv"),
+          sep = ",",
+          row.names = F,
+          col.names = F
+        )
         
         Dist.AIC <- suppressWarnings(AIC(
           MLPE.lmm2(
