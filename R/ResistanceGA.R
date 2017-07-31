@@ -16,9 +16,9 @@
 #'   
 #'   Official release: \url{http://www.circuitscape.org/downloads}
 #' 
-#' @import raster GA lme4 ggplot2
+#' @import raster GA lme4 ggplot2 gdistance
 #' @importFrom Matrix fac2sparse
-#' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text
+#' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text 
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom magrittr "%>%"

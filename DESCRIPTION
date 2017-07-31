@@ -10,10 +10,10 @@ Description: This package contains functions to optimize
     novel resistance surfaces.
 VignetteBuilder: knitr
 Depends:
-    R (>= 3.0)
+    R (>= 3.0),
+    raster
 Imports:
     ggplot2,
-    raster,
     akima,
     plyr,
     gdistance,
