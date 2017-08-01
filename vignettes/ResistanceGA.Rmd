@@ -3,11 +3,12 @@ title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: '`r Sys.Date()`'
 output:
-  word_document: default
   pdf_document: rmarkdown::pdf_document
   html_document: rmarkdown::html_vignette
-vignette: "%\\VignetteIndexEntry{ResistanceGA User Guide} \n%\\VignetteEngine{knitr::rmarkdown}
-  \n%\\VignetteEncoding{UTF-8}\n"
+vignette: |
+  %\VignetteIndexEntry{ResistanceGA User Guide} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -104,7 +105,7 @@ There are 8 different transformations that can be applied to continuous surfaces
 ![Transformations](figure/Transformations.png)
 
 All of these figures were made with the `Plot.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
-```{r Plot.trans.demo, fig.height = 4, fig.width = 4, fig.align = "center"}
+```{r Plot.trans.demo, fig.height = 4, fig.width = 4}
 Ricker.plot <- Plot.trans(PARM = c(1.5, 200),
                           Resistance = c(1,10),
                           transformation="Ricker")
@@ -164,7 +165,7 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 ```
 
 Plot surface and overlay the sample points
-```{r single.surface.plot, fig.height = 4, fig.width = 4, fig.align = "center"}
+```{r single.surface.plot, fig.height = 4, fig.width = 4}
 plot(continuous)
 plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 ```
@@ -372,7 +373,7 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 ```
 
 Visualize each surface:
-```{r feature.sim, warning=FALSE,message=FALSE, fig.height = 4, fig.width = 4, fig.align = "center"}
+```{r feature.sim, warning=FALSE,message=FALSE, fig.height = 4, fig.width = 4}
 plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
 plot(resistance_surfaces[[2]],main = resistance_surfaces[[2]]@data@names)
