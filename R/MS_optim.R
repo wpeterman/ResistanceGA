@@ -348,7 +348,7 @@ MS_optim <- function(CS.inputs = NULL,
     Result.txt(
       GA.results = multi.GA_nG,
       GA.inputs = GA.inputs,
-      method = "cost distance",
+      method = gdist.inputs$method,
       Run.Time = rt,
       fit.stats = fit.stats,
       optim = GA.inputs$method,
