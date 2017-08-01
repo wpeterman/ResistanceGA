@@ -3,12 +3,11 @@ title: "A Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: '`r Sys.Date()`'
 output:
-  html_document: rmarkdown::html_vignette
+  word_document: default
   pdf_document: rmarkdown::pdf_document
-vignette: |
-  %\VignetteIndexEntry{ResistanceGA User Guide} 
-  %\VignetteEngine{knitr::rmarkdown} 
-  %\VignetteEncoding{UTF-8}
+  html_document: rmarkdown::html_vignette
+vignette: "%\\VignetteIndexEntry{ResistanceGA User Guide} \n%\\VignetteEngine{knitr::rmarkdown}
+  \n%\\VignetteEncoding{UTF-8}\n"
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
