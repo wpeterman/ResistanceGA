@@ -1,5 +1,4 @@
 #' Get cost distance using gdistance
-#'
 #' Execute gdistance
 #'
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
@@ -30,5 +29,6 @@ Run_gdistance <- function(gdist.inputs, r) {
     ret <-
       commuteDistance(tr, gdist.inputs$samples) / 1000   ## Calculate commute time = resistance distance
   }
+
   return(ret)
 }

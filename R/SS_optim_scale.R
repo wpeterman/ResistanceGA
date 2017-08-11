@@ -40,7 +40,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
   MLPE.list <- list()
   cd.list <- list()
   k.list <- list()
-  
+
   # Optimize each surface in turn
   for (i in 1:GA.inputs$n.layers) {
     r <- GA.inputs$Resistance.stack[[i]]
@@ -190,7 +190,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       names(MLPE.list)[i] <- GA.inputs$layer.names[i]
       names(cd.list)[i] <- GA.inputs$layer.names[i]
-      
+
       if (k.value == 1) {
         k <- 2
       } else if (k.value == 2) {
@@ -511,7 +511,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       names(MLPE.list)[i] <- GA.inputs$layer.names[i]
       names(cd.list)[i] <- GA.inputs$layer.names[i] 
-      
+
       if (k.value == 1) {
         k <- 2
       } else if (k.value == 2) {
@@ -600,7 +600,6 @@ SS_optim.scale <- function(CS.inputs = NULL,
           ID = gdist.inputs$ID,
           ZZ = gdist.inputs$ZZ
         )
-        
         
         cd.list[[i + 1]] <- as.matrix(cd)
         
@@ -778,17 +777,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
   }
   
   rt <- proc.time()[3] - t1
-  # Full Results
-  # if (nrow(Results.cat) > 0 & nrow(Results.cont) > 0) {
-  #   RESULTS <-
-  #     list(
-  #       ContinuousResults = Results.cont,
-  #       CategoricalResults = Results.cat,
-  #       AICc = Results.All,
-  #       MLPE = MLPE.results,
-  #       Run.Time = rt
-  #     )
-  # } else if (nrow(Results.cat) < 1 & nrow(Results.cont) > 0) {
+  
   k.list <- plyr::ldply(k.list)
   colnames(k.list) <- c("surface", "k")
   
@@ -803,25 +792,6 @@ SS_optim.scale <- function(CS.inputs = NULL,
         cd = cd.list,
         k = k.list
       )
-  # } else if (nrow(Results.cat) > 0 & nrow(Results.cont) < 1) {
-  #   RESULTS <-
-  #     list(
-  #       ContinuousResults = NULL,
-  #       CategoricalResults = Results.cat,
-  #       AICc = Results.All,
-  #       MLPE = MLPE.results,
-  #       Run.Time = rt
-  #     )
-  # } else {
-  #   RESULTS <-
-  #     list(
-  #       ContinuousResults = NULL,
-  #       CategoricalResults = NULL,
-  #       AICc = Results.All,
-  #       MLPE = MLPE.results,
-  #       Run.Time = rt
-  #     )
-  # }
   
   file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
  

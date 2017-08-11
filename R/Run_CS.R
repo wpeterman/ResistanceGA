@@ -120,13 +120,11 @@ Run_CS <-
       names(rast) <- NAME
       (rast)
     } else {
-      
       if(full.mat == FALSE) {
         cs.matrix <- read.matrix(CS.results)
       } else {
         cs.matrix <- read.matrix2(CS.results)
       }
-      
       # Replace NA with 0...a workaround for errors when two points fall within the same cell.
       if (any(is.na(cs.matrix))) {
         cs.matrix[is.na(cs.matrix)] <- 0

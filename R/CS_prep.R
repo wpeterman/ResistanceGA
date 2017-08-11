@@ -1,5 +1,3 @@
-# Function to bundle input parameters
-
 #' Prepare and bundle input CIRCUITSCAPE model parameters
 #'
 #' This function will prepare objects needed for running optimization functions
@@ -19,7 +17,8 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage CS.prep(n.Pops, 
-#' response, CS_Point.File, 
+#' response, 
+#' CS_Point.File, 
 #' CS.program, 
 #' Neighbor.Connect, 
 #' pairs_to_include, 

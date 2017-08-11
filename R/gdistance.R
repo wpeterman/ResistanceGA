@@ -15,7 +15,6 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
 #' @usage gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, method)
-#'
 
 gdist.prep <-
   function(n.Pops,
@@ -26,10 +25,11 @@ gdist.prep <-
            directions = 8,
            longlat = FALSE,
            method = 'commuteDistance') {
+    
     if (method != 'commuteDistance') {
       method <- 'costDistance'
     }
-    
+
     if (!is.null(response)) {
       TEST.response <- is.vector(response)
       if (TEST.response == FALSE) {
@@ -50,6 +50,7 @@ gdist.prep <-
         stop("The path to the specified samples.txt file is incorrect")
       }
       sp <- SpatialPoints(read.delim(samples, header = F)[,-1])
+
     }
     
     if (n.Pops != length(sp)) {

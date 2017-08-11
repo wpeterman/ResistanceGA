@@ -1,7 +1,7 @@
-#' Conduct grid search of response surface
-#'
+#' Conduct grid search of response surface 
+#' 
 #' Visualize the AICc response surface
-#'
+#' 
 #' @param shape A vector of values for the shape parameter
 #' @param max A vector of values for the maximum value parameter
 #' @param transformation Transformation to apply. Can be either numeric or character of transformation name
@@ -28,79 +28,62 @@
 
 
 
-Grid.Search <-
-  function(shape,
-           max,
-           transformation,
-           Resistance,
-           CS.inputs = NULL,
-           gdist.inputs = NULL,
-           GA.inputs) {
-    # if (class(Resistance)[1] != 'RasterLayer') {
-    #   r <- raster(Resistance)
-    #   r <- SCALE(r, 0, 10)
-    # } else {
-    #   r <- SCALE(Resistance, 0, 10)
-    # }
-    
-    GRID <- expand.grid(shape, max)
-    RESULTS <-
-      matrix(nrow = nrow(GRID), ncol = 3)
-    colnames(RESULTS) <- c("shape", "max", "Obj.func")
-    if (!is.numeric(transformation)) {
-      EQ <- get.EQ(transformation)
-    } else {
-      EQ <- transformation
-    }
-    
-    if (!is.null(CS.inputs)) {
-      for (i in 1:nrow(GRID)) {
-        # Modified 16 September 2015
-        AICc <- Resistance.Opt_single(
-          PARM = c(EQ, t(GRID[i, ])),
-          Resistance = Resistance,
-          CS.inputs = CS.inputs,
-          # Min.Max = 'min',
-          GA.inputs = GA.inputs
-        )
-        
-        # Original function used
-        # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
-        
-        results <- as.matrix(cbind(GRID[i, ], AICc))
-        
-        RESULTS[i, ] <- results
-      }
-    } else {
-      for (i in 1:nrow(GRID)) {
-        # Modified 16 September 2015
-        AICc <- Resistance.Opt_single(
-          PARM = c(EQ, t(GRID[i, ])),
-          Resistance = Resistance,
-          gdist.inputs = gdist.inputs,
-          # Min.Max = 'min',
-          GA.inputs = GA.inputs
-        )
-        
-        # Original function used
-        # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
-        
-        results <- as.matrix(cbind(GRID[i, ], AICc))
-        
-        RESULTS[i, ] <- results
-      }
-    }
-    RESULTS <- data.frame(RESULTS)
-    Results.mat <-
-      akima::interp(RESULTS$shape, RESULTS$max, RESULTS$Obj.func, duplicate = 'strip')
-    filled.contour(Results.mat,
-                   col = topo.colors(20),
-                   xlab = "Shape parameter",
-                   ylab = "Maximum value parameter")
-    
-    AICc <- RESULTS
-    colnames(AICc) <- c("shape", "max", "Obj.func")
-    Results.mat <- list(Plot.data = Results.mat, Obj.func = AICc)
-    
-    return(Results.mat)
+Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, gdist.inputs=NULL, GA.inputs) {
+  if(class(Resistance)[1]!='RasterLayer') {  
+    r <- raster(Resistance)
+    r <- SCALE(r,0,10)
+  } else {    
+    r <-SCALE(Resistance,0,10)
   }
+  
+  GRID <- expand.grid(shape,max)
+  RESULTS <- matrix(nrow=nrow(GRID),ncol=3); colnames(RESULTS)<-c("shape","max","AICc")
+  if(!is.numeric(transformation)){
+    EQ<-get.EQ(transformation)
+  } else {
+    EQ <- transformation
+  }
+  
+  if(!is.null(CS.inputs)){
+    for(i in 1:nrow(GRID)){
+      # Modified 16 September 2015
+      AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
+                                  Resistance = r,
+                                  CS.inputs = CS.inputs, 
+                                  Min.Max='min',
+                                  GA.inputs = GA.inputs)
+      
+      # Original function used
+      # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
+      
+      results<-as.matrix(cbind(GRID[i,],AICc))
+      
+      RESULTS[i,]<-results  
+    }
+  } else {
+    for(i in 1:nrow(GRID)){
+      # Modified 16 September 2015
+      AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
+                                  Resistance = r,
+                                  CS.inputs = CS.inputs, 
+                                  Min.Max='min',
+                                  GA.inputs = GA.inputs)
+      
+      # Original function used
+      # AICc<-Resistance.Optimization_cont.nlm(PARM=log(c(t(GRID[i,]))),Resistance=r,equation=EQ, get.best=FALSE,CS.inputs,Min.Max='min',write.dir=write.dir)
+      
+      results<-as.matrix(cbind(GRID[i,],AICc))
+      
+      RESULTS[i,]<-results  
+    }
+  }
+  RESULTS <- data.frame(RESULTS)
+  Results.mat <- interp(RESULTS$shape,RESULTS$max,RESULTS$AICc,duplicate='strip')
+  filled.contour(Results.mat,col=topo.colors(20),xlab="Shape parameter",ylab="Maximum value parameter")
+  
+  AICc<-RESULTS
+  colnames(AICc)<-c("shape","max","AICc")
+  Results.mat<-list(Plot.data=Results.mat,AICc=AICc)
+  
+  return(Results.mat)
+}

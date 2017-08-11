@@ -23,7 +23,7 @@ Ricker.plot <- Plot.trans(PARM = c(1.5, 200),
                           transformation="Ricker")
 
 # Change title of plot
-Ricker.plot$labels$title <- "Ricker Tansformation"
+Ricker.plot$labels$title <- "Ricker Transformation"
 Ricker.plot
 
 # Find original data value that now has maximum resistance
@@ -37,7 +37,8 @@ Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$da
 #  # Create a subdirectory for the first example
 #  dir.create(file.path("C:/ResistanceGA_Examples/","SingleSurface"))
 #  
-#  write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      # Directory to write .asc files and results
+#  # Directory to write .asc files and results
+#  write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"
 #  
 #  # Give path to CIRCUITSCAPE .exe file
 #  # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
@@ -166,7 +167,8 @@ plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 #  # Create a subdirectory for the second example
 #  dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces"))
 #  
-#  write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
+#  # Directory to write .asc files and results
+#  write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"
 
 ## ----multi_surface.sim, warning=FALSE, message=FALSE,results='hide'------
 data(resistance_surfaces)
@@ -182,8 +184,8 @@ plot(resistance_surfaces[[3]],main = resistance_surfaces[[3]]@data@names)
 plot(sample.locales, pch=16, col="blue", add=TRUE)
 
 ## ----eval=FALSE----------------------------------------------------------
-#  ## Note that the `resistance_surfaces` is already a RasterStack object.
-#  ## The code below for demonstration of how to make a stack.
+#  # Note that the `resistance_surfaces` is already a RasterStack object.
+#  # The code below for demonstration of how to make a stack.
 #  r.stack <- stack(resistance_surfaces$categorical,
 #                   resistance_surfaces$continuous,
 #                   resistance_surfaces$feature)
@@ -198,7 +200,7 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  
 #  gdist.inputs <- gdist.prep(length(sample.locales),
 #                             samples = sample.locales,
-#                             method = 'commuteDistance') ## Optimize using commute distance
+#                             method = 'commuteDistance') # Optimize using commute distance
 #  
 
 ## ----IR_Mono, eval=FALSE-------------------------------------------------
@@ -245,7 +247,9 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 ## ----eval=FALSE----------------------------------------------------------
 #  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim$GA.summary@solution),2))
 #  colnames(Summary.table)<-c("Truth", "Optimized")
-#  row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2")
+#  row.names(Summary.table)<-c("Category1", "Category2", "Category3",
+#                              "Transformation", "Shape", "Max",
+#                              "Feature1", "Feature2")
 
 ## ----combined.plots,fig.width=12,fig.height=8, eval=FALSE----------------
 #  # Make combined, optimized resistance surface.
@@ -261,7 +265,7 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  pairs(ms.stack)
 
 ## ----CS.maps, eval=FALSE-------------------------------------------------
-#  ## Note: You must run `CS.prep` to generate the CS.inputs object for doing this.
+#  # Note: You must run `CS.prep` to generate the CS.inputs object for doing this.
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
 #                       response = gdist.response,
 #                       CS_Point.File = paste0(write.dir,"samples.txt"),
@@ -279,8 +283,8 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #                       CurrentMap = TRUE,
 #                       output = "raster")
 #  
-#  ## We can confirm that, like the resistance surfaces above,
-#  ## the CIRCUITSCAPE current maps are also correlated
+#  # We can confirm that, like the resistance surfaces above,
+#  # the CIRCUITSCAPE current maps are also correlated
 #  cs.stack <- stack(Resist.true, Resist.opt)
 #  names(cs.stack) <- c("Truth", "Optimized")
 #  pairs(cs.stack)
@@ -290,11 +294,11 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  cat <- resistance_surfaces[[1]]
 #  cat[cat < 2] <- 0
 #  
-#  ## Make categorical surface binary
+#  # Make categorical surface binary
 #  cat[cat == 2] <- 1
 #  
-#  ## Smooth and visualize
-#  ## The `SCALE` parameter re-scales the surface to 0-10
+#  # Smooth and visualize
+#  # The `SCALE` parameter re-scales the surface to 0-10
 #  cat.smooth <- k.smooth(raster = cat,
 #                         sigma = 1,
 #                         SCALE = TRUE)
@@ -307,9 +311,9 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  data(samples)
 #  sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  
-#  ## Set the random number seed to reproduce the results presented
-#  ## Run in parallel on 4 cores
-#  ## NOTE: `scale = TRUE` to indicate optimization of scaling/smoothing parameter
+#  # Set the random number seed to reproduce the results presented
+#  # Run in parallel on 4 cores
+#  # NOTE: `scale = TRUE` to indicate optimization of scaling/smoothing parameter
 #  GA.inputs <- GA.prep(ASCII.dir = cat,
 #                       Results.dir = write.dir,
 #                       select.trans = "M",
@@ -320,7 +324,7 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #                       run = 35,
 #                       parallel = 4)
 #  
-#  ## Optimize using commute distance
+#  # Optimize using commute distance
 #  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
 #                             samples = sample.locales,
 #                             method = 'commuteDistance')
@@ -352,17 +356,12 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  # Create a spatial points object
 #  sample.locales <- SpatialPoints(samples[, c(2, 3)])
 #  
-#  # Set output directory
-#  write.dir <-
-#    "C:/ResistanceGA_Examples/run1/"      # Directory to write .asc files and results
-#  
-#  
 #  # Run `gdist.prep` & GA.prep
 #  gdist.inputs <-  gdist.prep(n.Pops = length(sample.locales),
 #                              samples = sample.locales,
 #                              method = 'commuteDistance')
 #  
-#  ## This will be used again later
+#  # This will be used again later
 #  GA.inputs_NoFeature <- GA.prep(method = "LL",
 #                                 ASCII.dir = resistance_surfaces[[-3]],
 #                                 Results.dir = "C:/ResistanceGA_Examples/run2/",
@@ -371,60 +370,68 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #                                 seed = 555,
 #                                 parallel = 4)
 #  
-#  ## The 'true' resistance surface will be the composite surface
-#  ## Combine resistance surfaces, omitting the feature surface
-#  ## Use an Inverse Ricker transformation of the continuous surface
-#  ## Inverse Ricker  = 8
+#  # The 'true' resistance surface will be the composite surface
+#  # Combine resistance surfaces, omitting the feature surface
+#  # Use an Inverse Ricker transformation of the continuous surface
+#  # Inverse Ricker  = 8
 #  PARM <- c(1, 250, 75, 8, 4, 150)
 #  
+#  # Setting `p.contribution = TRUE` to see how each surface
+#  # contributes to the total resistance of the composite surface
 #  Resist <- Combine_Surfaces(PARM = PARM,
 #                             gdist.inputs = gdist.inputs,
 #                             GA.inputs = GA.inputs_NoFeature,
 #                             out = NULL,
 #                             rescale = TRUE,
-#                             p.contribution = T)
+#                             p.contribution = TRUE)
 #  
-#  ## Assess contribution of each surface
+#  # Assess contribution of each surface
 #  Resist$percent.contribution
 #  
 
 ## ----analysis2, eval=FALSE-----------------------------------------------
+#  # Create a subdirectory for results
+#  dir.create(file.path("C:/ResistanceGA_Examples/","run1"))
+#  dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
+#  
 #  # Create the true response
 #  gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
-#                               r = Resist$combined.surface)
+#                           r = Resist$combined.surface)
+#  
 #  gd.true <- as.vector(gd.true)
 #  
-#  ## Add some noise to response
+#  # Add some noise to response
 #  set.seed(321)
 #  gd.response <- gd.true + rnorm(length(gd.true), 0, 5)
 #  
 #  plot(gd.response ~ gd.true)
 #  ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.58
-#  
-#  ## Re-run `gdist.prep` function
+
+## ----analysis2b, eval=FALSE----------------------------------------------
+#  # Re-run `gdist.prep` function
 #  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
 #                             response = gd.response,
 #                             samples = sample.locales)
 #  
 #  
-#  ## Re-run GA.prep to include all surfaces
+#  # Re-run GA.prep to include all surfaces
 #  GA.inputs_All <- GA.prep(method = "LL",
 #                                 ASCII.dir = resistance_surfaces,
-#                                 Results.dir = write.dir,
+#                                 Results.dir =  "C:/ResistanceGA_Examples/run1/",
 #                                 max.cat = 500,
 #                                 max.cont = 500,
 #                                 seed = 555,
 #                                 parallel = 4)
 #  
-#  ## First run all single surfaces, Multi-surface is response variable
+#  # First run all single surfaces, Multi-surface is response variable
 #  SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
 #                                GA.inputs = GA.inputs_All)
 #  
-#  ## Run `MS_optim` with all surfaces
+#  # Run `MS_optim` with all surfaces
 #  Multi.Surface_optim.gd <- MS_optim(gdist.inputs = gdist.inputs,
 #                                     GA.inputs = GA.inputs_All)
 #  
-#  ## Run `MS_optim` with without Feature surface
+#  # Run `MS_optim` with without Feature surface
 #  Multi.Surface_optim.gd2 <- MS_optim(gdist.inputs = gdist.inputs,
 #                                      GA.inputs = GA.inputs_NoFeature)
 
@@ -434,8 +441,8 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  Multi.Surface_optim.gd2$percent.contribution
 
 ## ----boot, eval = F------------------------------------------------------
-#  ## Extract relevant components from optimization outputs
-#  ## Make a list of cost/resistance distance matrices
+#  # Extract relevant components from optimization outputs
+#  # Make a list of cost/resistance distance matrices
 #  mat.list <- c(SS_RESULTS.gdist$cd,
 #                Multi.Surface_optim.gd$cd,
 #                Multi.Surface_optim.gd2$cd)
@@ -444,30 +451,31 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #             Multi.Surface_optim.gd$k,
 #             Multi.Surface_optim.gd2$k)
 #  
-#  ## Make square genetic distance matrix
+#  # Make square genetic distance matrix
 #  g.mat <- matrix(rep(0, 25^2),nrow = 25)
 #  g.mat[lower.tri(g.mat)] <- gd.response
 #  
-#  ## Run bootstrap
+#  # Run bootstrap
 #  (AIC.boot <- Resist.boot(mod.names = names(mat.list),
 #                           dist.mat = mat.list,
 #                           n.parameters = k[,2],
 #                           sample.prop = 0.75,
 #                           iters = 1000,
 #                           obs = 25,
-#                           genetic.mat = gd.response
+#                           genetic.mat = g.mat
 #  )
 #  )
 #  
 
 ## ---- eval = FALSE-------------------------------------------------------
-#  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd$GA.summary@solution),2))
+#  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd2$GA.summary@solution),2))
 #  colnames(Summary.table)<-c("Truth", "Optimized")
-#  row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2")
+#  row.names(Summary.table)<-c("Category1", "Category2", "Category3",
+#                              "Transformation", "Shape", "Max")
 
 ## ---- eval = FALSE-------------------------------------------------------
-#  opt.r <- raster("C:/ResistanceGA_Examples/run1/categorical.continuous.feature.asc")
-#  r.stack <- stack(Resist, opt.r)
+#  opt.r <- raster("C:/ResistanceGA_Examples/run2/Results/categorical.continuous.asc")
+#  r.stack <- stack(Resist$combined.surface, opt.r)
 #  names(r.stack) <- c("Truth", "Optimized")
 #  
 #  plot(r.stack)

@@ -5,7 +5,8 @@
 \title{Prepare and bundle input CIRCUITSCAPE model parameters}
 \usage{
 CS.prep(n.Pops, 
-response, CS_Point.File, 
+response, 
+CS_Point.File, 
 CS.program, 
 Neighbor.Connect, 
 pairs_to_include, 

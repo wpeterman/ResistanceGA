@@ -36,11 +36,9 @@ Resistance.Opt_single.scale <- function(PARM,
   r <- Resistance
   
   ## Scale surface
-  
   r <- k.smooth(raster = r,
                 sigma = PARM[4],
                 SCALE = TRUE)
-  
   
   # Set equation for continuous surface
   equation <- floor(PARM[1]) # Parameter can range from 1-9.99
@@ -50,7 +48,7 @@ Resistance.Opt_single.scale <- function(PARM,
   Max.SCALE <- (PARM[3])
   
   ## If selected transformation is not in list, assign very large objective function value
-  
+
   if (GA.inputs$surface.type[iter] == "cat") {
     stop(
       "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"

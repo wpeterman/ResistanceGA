@@ -396,47 +396,4 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 k = k.df)
     return(out)
   }
-  
-  #####  RUN BRENT OPTIMIZATION ####
-  # ##  Run second optimization to determine if maximum resistance values should be adjusted
-  #   Parm.multiplier <- optim(par=1,
-  #                            fn = Max.optim_Brent,
-  #                            method = "Brent",
-  #                            lower = 0,
-  #                            upper = 25,
-  #                            GA.inputs = GA.inputs,
-  #                            CS.inputs = CS.inputs,
-  #                            GA.opt = multi.GA_nG@solution)
-  # PARM<-Parm.multiplier$par
-  # ###########################################
-  # Opt.parm <- GA.opt <- multi.GA_nG@solution
-  # for(i in 1:GA.inputs$n.layers){
-  #     if(GA.inputs$surface.type[i]=="cat"){
-  #       ga.p <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-  #       parm <- ga.p/min(ga.p)#*PARM[1])+1
-  # #       parm <- parm/min(parm)
-  #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-  #
-  #     } else {
-  #       parm <- GA.opt[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]
-  #       Opt.parm[(GA.inputs$parm.index[i]+1):(GA.inputs$parm.index[i+1])]<-parm
-  #     }
-  # }
-  # # ####
-  # multi.GA_nG@solution <- Opt.parm
-  # multi.GA_nG@fitnessValue <- Parm.multiplier$value
-  # ##################################
-  
-  #   RAST<-Combine_Surfaces(PARM=multi.GA_nG@solution,CS.inputs=CS.inputs,GA.inputs=GA.inputs)
-  #   NAME<-paste(GA.inputs$parm.type$name,collapse=".")
-  #   names(RAST)<-NAME
-  #   Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
-  #
-  #   Diagnostic.Plots(resistance.mat=paste0(GA.inputs$Results.dir,NAME,"_resistances.out"),genetic.dist=CS.inputs$response,plot.dir=GA.inputs$Plots.dir,type="continuous")
-  #
-  #   # Get parameter estimates
-  #   MLPE.results<-MLPE.lmm_coef(resistance=GA.inputs$Results.dir,genetic.dist=CS.inputs$response,out.dir=GA.inputs$Results.dir)
-  #
-  #   Result.txt(GA.results=multi.GA_nG,GA.inputs=GA.inputs, CS.inputs=CS.inputs)
-  #   return(multi.GA_nG)
 }

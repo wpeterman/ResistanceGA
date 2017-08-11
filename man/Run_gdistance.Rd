@@ -2,7 +2,8 @@
 % Please edit documentation in R/Run_gdistance.R
 \name{Run_gdistance}
 \alias{Run_gdistance}
-\title{Get cost distance using gdistance}
+\title{Get cost distance using gdistance
+Execute gdistance}
 \usage{
 Run_gdistance(gdist.inputs, r)
 }
@@ -15,6 +16,7 @@ Run_gdistance(gdist.inputs, r)
 A costDistance matrix object from gdistance
 }
 \description{
+Get cost distance using gdistance
 Execute gdistance
 }
 \author{

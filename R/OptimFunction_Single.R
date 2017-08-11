@@ -31,7 +31,6 @@ Resistance.Opt_single <-
     method <- GA.inputs$method
     EXPORT.dir <- GA.inputs$Write.dir
     select.trans <- GA.inputs$select.trans
-    
     r <- Resistance
     if (GA.inputs$surface.type[iter] == "cat") {
       PARM <- PARM / min(PARM)
@@ -112,20 +111,6 @@ Resistance.Opt_single <-
       
       r <- reclassify(r, rclmat)
       
-      # if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
-      # r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
-      
-      # Error catch -------------------------------------------------------------
-        # 
-        # if (GA.inputs$surface.type[iter] != "cat") {
-        #   cat(paste0("\t", GA.inputs$layer.names[iter]),
-        #       "\n")
-        #   cat(paste0("\t", EQ, " | Shape = ", PARM[2], " | Max = ", PARM[3]),
-        #       "\n",
-        #       "\n")
-        # }
-      # CIRCUITSCAPE ------------------------------------------------------------
-      
       if (!is.null(CS.inputs)) {
         writeRaster(
           x = r,
@@ -140,7 +125,7 @@ Resistance.Opt_single <-
             EXPORT.dir = GA.inputs$Write.dir,
             File.name = File.name
           )
-        
+
         # Run mixed effect model on each Circuitscape effective resistance
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(
@@ -182,31 +167,15 @@ Resistance.Opt_single <-
 
 
 # gdistance ------------------------------------------------------------
-      
       if (!is.null(gdist.inputs)) {
         cd <- Run_gdistance(gdist.inputs, r)
-        
-        ## Add catch
-        # if(length(resistance) == 0) {
-        #   print("Resistance has length 0")
-        #   print(resistance)
-        #   print(ID)
-        #   
-        #   res <- response
-        #   res[] <- 1
-        # }
         
         l.cd <- as.vector(cd)
         
         if(length(l.cd) != length(gdist.inputs$response)) {
           cd <- Run_gdistance(gdist.inputs, r)
-          # print(GA.inputs$layer.names[iter])
-          # print(gdist.inputs$ID)
-          
-          # res <- gdist.inputs$response
-          # res[] <- 1
         }
-        
+
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(
             MLPE.lmm2(
@@ -242,18 +211,8 @@ Resistance.Opt_single <-
           ))
           obj.func.opt <- obj.func[[1]]
         }
-        
-        # AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-        #                                            response=gdist.inputs$response,
-        #                                            ID=gdist.inputs$ID,
-        #                                            ZZ=gdist.inputs$ZZ,
-        #                                            REML=FALSE)))
-        # ROW <- nrow(gdist.inputs$ID)
       }
-      
-      # k<-length(PARM)+1
-      # AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
-      
+
       rt <- proc.time()[3] - t1
       if (quiet == FALSE) {
         cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
@@ -267,9 +226,8 @@ Resistance.Opt_single <-
           }
         }
       }
-      # AICc.out <- OPTIM.DIRECTION(Min.Max)*(AICc) # Function to be minimized/maximized
     } else {
-      
+
       ## Use -99999 as 'ga' maximizes
       obj.func.opt <- -99999
       
@@ -286,5 +244,3 @@ Resistance.Opt_single <-
     }
     return(obj.func.opt)
   }
-
-

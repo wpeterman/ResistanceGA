@@ -82,6 +82,7 @@ Resistance.Opt_multi <- function(PARM,
           REML = FALSE
         )
       ))
+
       obj.func.opt <- obj.func[[1]]
     }
     
@@ -132,19 +133,10 @@ Resistance.Opt_multi <- function(PARM,
           REML = FALSE
         )
       ))
+
       obj.func.opt <- obj.func[[1]]
     }
-    
-    # AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
-    #                                            response=gdist.inputs$response,
-    #                                            ID=gdist.inputs$ID,
-    #                                            ZZ=gdist.inputs$ZZ,
-    #                                            REML=FALSE)))
-    # ROW <- nrow(gdist.inputs$ID)
   }
-  
-  # k<-max(GA.inputs$parm.index)+1
-  # AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
   
   rt <- proc.time()[3] - t1
   if (quiet == FALSE) {
@@ -154,4 +146,5 @@ Resistance.Opt_multi <- function(PARM,
   
   return(obj.func.opt)
   # OPTIM.DIRECTION(Min.Max)*(obj.func) # Function to be minimized/maximized
+
 }
