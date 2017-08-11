@@ -1,8 +1,13 @@
+ResistanceGA 3.1-0
+--------
+* Full release of extensively updated package 
+
 ResistanceGA 3.0-5
 --------
 * Updated `Grid.Search` function 
 * Updated vignette
 * Correction of documentation typos
+* Added a percent contribution summary to the Combine_surfaces and MS_optim functions
 
 ResistanceGA 3.0-4
 --------
