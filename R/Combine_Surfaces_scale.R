@@ -9,6 +9,7 @@
 #' @param out Directory to write combined .asc file. Default = NULL and no files are exported
 #' @param File.name Name of output .asc file. Default is the combination of all surfaces combined, separated by "."
 #' @param rescale Locical. If TRUE (default), the values of the combined raster surface will be divided by the minimum value to create a resistance surface with a minimum value = 1.
+#' @param p.contribution Logical. If TRUE, the function will return a list object containing (1) the combined raster surface and (2) the average and 95 percent confidence interval that each surface contributes to the resistance values of the combined surface.
 #' @details \code{PARM} is designed to accept the output of \code{MS_optim}. For continuous surfaces, there are three terms: 1) Transformation, 2) shape, and 3) maximum value. Transformation must be provided as a numeric value:\cr
 #' \tabular{ll}{
 #'    \tab 1 = "Inverse-Reverse Monomolecular"\cr
@@ -24,7 +25,7 @@
 #'
 #' The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverage of parameter space.
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
-#' @usage Combine_Surfaces.scale(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale)
+#' @usage Combine_Surfaces.scale(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale, p.contribution)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Combine_Surfaces.scale <-
@@ -34,7 +35,8 @@ Combine_Surfaces.scale <-
            GA.inputs,
            out = NULL,
            File.name = paste(GA.inputs$parm.type$name, collapse = "."),
-           rescale = TRUE) {
+           rescale = TRUE,
+           p.contribution = FALSE) {
     
     if (is.null(GA.inputs$scale)) {
       stop(
@@ -165,10 +167,32 @@ Combine_Surfaces.scale <-
     if (cellStats(multi_surface, "max") > 1e6)
       multi_surface <-
       SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
-    #       plot(multi_surface)
-    
+
     if (is.null(out)) {
-      (multi_surface)
+      if(p.contribution == FALSE) {
+        (multi_surface)
+        
+      } else {
+        cont.list <- vector(mode = 'list', length = GA.inputs$n.layers)
+        
+        for (i in 1:GA.inputs$n.layers) {
+          p.cont <- r[[i]] / ms.r
+          mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
+          ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
+          cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
+                                       mean = mean.cont,
+                                       l95 = ci.cont[[1]],
+                                       u95 = ci.cont[[2]])
+          
+        }
+        
+        cont.df <- plyr::ldply(cont.list)
+        
+        list.out <- list(percent.contribution = cont.df,
+                         combined.surface = multi_surface)
+        return(list.out)
+      }
+      
     } else {
       writeRaster(
         x = multi_surface,

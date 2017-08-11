@@ -11,8 +11,8 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim.scale <- function(CS.inputs = NULL,
-                     gdist.inputs = NULL,
-                     GA.inputs) {
+                           gdist.inputs = NULL,
+                           GA.inputs) {
   
   if (is.null(GA.inputs$scale)) {
     stop(
@@ -58,18 +58,18 @@ MS_optim.scale <- function(CS.inputs = NULL,
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for (i in 1:GA.inputs$n.layers) {
-    #   if (GA.inputs$surface.type[i] == "cat") {
-    #     ga.p <-
-    #       GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-    #     parm <- ga.p / min(ga.p)
-    #     Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-    #                                                                    1])] <- parm
-    #     
-    #   } else {
-        parm <-
-          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                       1])] <- parm
+      #   if (GA.inputs$surface.type[i] == "cat") {
+      #     ga.p <-
+      #       GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      #     parm <- ga.p / min(ga.p)
+      #     Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+      #                                                                    1])] <- parm
+      #     
+      #   } else {
+      parm <-
+        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                     1])] <- parm
       # }
     }
     multi.GA_nG@solution <- Opt.parm
@@ -80,8 +80,13 @@ MS_optim.scale <- function(CS.inputs = NULL,
         PARM = multi.GA_nG@solution,
         CS.inputs = CS.inputs,
         GA.inputs = GA.inputs,
-        rescale = TRUE
+        rescale = TRUE,
+        p.contribution = TRUE
       )
+    
+    p.cont <- RAST$percent.contribution
+    RAST <- RAST$combined.surface
+    
     NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
     names(RAST) <- NAME
     Run_CS(
@@ -191,6 +196,10 @@ MS_optim.scale <- function(CS.inputs = NULL,
       LL = LL[[1]]
     )
     
+    write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
+                row.names = F,
+                col.names = T)
+    
     file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
     
     k.df <- data.frame(surface = NAME, k = k)
@@ -201,6 +210,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
                 cd = cd.list,
+                percent.contribution = p.cont,
                 k = k.df)
     return(out)
   }
@@ -243,10 +253,10 @@ MS_optim.scale <- function(CS.inputs = NULL,
       #                                                                  1])] <- parm
       #   
       # } else {
-        parm <-
-          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                       1])] <- parm
+      parm <-
+        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                     1])] <- parm
       # }
     }
     multi.GA_nG@solution <- Opt.parm
@@ -256,8 +266,13 @@ MS_optim.scale <- function(CS.inputs = NULL,
         PARM = multi.GA_nG@solution,
         gdist.inputs = gdist.inputs,
         GA.inputs = GA.inputs,
-        rescale = TRUE
+        rescale = TRUE,
+        p.contribution = TRUE
       )
+    
+    p.cont <- RAST$percent.contribution
+    RAST <- RAST$combined.surface
+    
     NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
     names(RAST) <- NAME
     cd <- Run_gdistance(gdist.inputs, RAST)
@@ -278,7 +293,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     
     type <- "continuous"
     
-
+    
     Diagnostic.Plots(
       resistance.mat = cd,
       genetic.dist = gdist.inputs$response,
@@ -363,6 +378,10 @@ MS_optim.scale <- function(CS.inputs = NULL,
       LL = LL[[1]]
     )
     
+    write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
+                row.names = F,
+                col.names = T)
+    
     file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
     
     k.df <- data.frame(surface = NAME, k = k)
@@ -373,6 +392,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
                 cd = cd.list,
+                percent.contribution = p.cont,
                 k = k.df)
     return(out)
   }

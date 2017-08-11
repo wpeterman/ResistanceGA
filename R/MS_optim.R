@@ -78,8 +78,13 @@ MS_optim <- function(CS.inputs = NULL,
         PARM = multi.GA_nG@solution,
         CS.inputs = CS.inputs,
         GA.inputs = GA.inputs,
-        rescale = TRUE
+        rescale = TRUE,
+        p.contribution = TRUE
       )
+    
+    p.cont <- RAST$percent.contribution
+    RAST <- RAST$combined.surface
+    
     NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
     names(RAST) <- NAME
     Run_CS(
@@ -187,6 +192,10 @@ MS_optim <- function(CS.inputs = NULL,
       LL = LL[[1]]
     )
     
+    write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
+                row.names = F,
+                col.names = T)
+    
     file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
     
     k.df <- data.frame(surface = NAME, k = k)
@@ -197,6 +206,7 @@ MS_optim <- function(CS.inputs = NULL,
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
                 cd = cd.list,
+                percent.contribution = p.cont,
                 k = k.df)
     return(out)
   }
@@ -252,8 +262,13 @@ MS_optim <- function(CS.inputs = NULL,
         PARM = multi.GA_nG@solution,
         gdist.inputs = gdist.inputs,
         GA.inputs = GA.inputs,
-        rescale = TRUE
+        rescale = TRUE,
+        p.contribution = TRUE
       )
+    
+    p.cont <- RAST$percent.contribution
+    RAST <- RAST$combined.surface
+    
     NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
     names(RAST) <- NAME
     cd <- Run_gdistance(gdist.inputs, RAST)
@@ -358,6 +373,10 @@ MS_optim <- function(CS.inputs = NULL,
       LL = LL[[1]]
     )
     
+    write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
+                row.names = F,
+                col.names = T)
+    
     file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
     
     k.df <- data.frame(surface = NAME, k = k)
@@ -368,6 +387,7 @@ MS_optim <- function(CS.inputs = NULL,
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
                 cd = cd.list,
+                percent.contribution = p.cont,
                 k = k.df)
     return(out)
   }

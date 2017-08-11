@@ -4,7 +4,7 @@
 \alias{Combine_Surfaces}
 \title{Combine multiple resistance surfaces together}
 \usage{
-Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale)
+Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale, p.contribution)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces}
@@ -20,6 +20,8 @@ Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, resca
 \item{File.name}{Name of output .asc file. Default is the combination of all surfaces combined, separated by "."}
 
 \item{rescale}{Locical. If TRUE (default), the values of the combined raster surface will be divided by the minimum value to create a resistance surface with a minimum value = 1.}
+
+\item{p.contribution}{Logical. If TRUE, the function will return a list object containing (1) the combined raster surface and (2) the average and 95 percent confidence interval that each surface contributes to the resistance values of the combined surface.}
 }
 \value{
 R raster object that is the sum all transformed and/or reclassified resistance surfaces provided

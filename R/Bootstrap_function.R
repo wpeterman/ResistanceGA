@@ -6,7 +6,7 @@
 #' @param dist.mat A list containing all distance matrices from optimized resistance surfaces
 #' @param n.parameters A vector the length of mod.names, specifying the number of parameters in each model
 #' @param sample.prop Proportion of observations to be sampled each iteration (Default = 0.75)
-#' @param iters DNumber of bootstrap iterations to be conducted
+#' @param iters Number of bootstrap iterations to be conducted
 #' @param obs Total number of observations (populations or individuals) in your original analysis
 #' @param genetic.mat Genetic distance matrix without row or column names.
 #' @return A data frame reporting the average model weight, average rank, number of time a model was the top model in teh set, and the frequency a model was best.
@@ -40,10 +40,7 @@ Resist.boot <-
     sample.list <-
       replicate(iters, sample(obs, size = sample.n, replace = F), simplify = F)
     AIC.tab.list <- vector(mode = "list", length = iters)
-    
-    # Read all composite resistance matrices into list
-    # cs.files <- list.files(dist.mat,pattern = "*_resistances.out",full.names = T)
-    # dist.mat <- llply(cs.files,function(x) {read.table(x,header = F)[-1,-1]})
+   
     names(dist.mat) <- mod.names
     
     for (i in 1:iters) {

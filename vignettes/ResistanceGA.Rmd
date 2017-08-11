@@ -79,11 +79,9 @@ To run CIRCUITSCAPE on Linux (tested with Ubuntu 16.04):
 *If you can provide code of how to run CIRCUITSCAPE from R, I will work to implement it*
 
 *R Packages*    
-This package consists of several wrapper functions for implementing functions from other packages, and these will all be imported when `ResistanceGA` is installed.   
+This package consists of several wrapper functions for implementing functions from other packages, and these will all be imported when `ResistanceGA` is installed.  
 
-Demonstrations
-------
-### Continuous surface transformations
+### Installation
 
 First, install `ResistanceGA` from GitHub. This will require the `devtools` package
 ```{r install.package, eval=FALSE}
@@ -101,8 +99,12 @@ library(ResistanceGA)
 rm(list = ls())
 ```
 
+Demonstrations
+------
+### Continuous surface transformations
+
 There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
-![Transformations](figure/Transformations.png)
+![Transformations](figure/trans_plots.png)
 
 All of these figures were made with the `Plot.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
 ```{r Plot.trans.demo, fig.height = 4, fig.width = 4}
@@ -111,7 +113,7 @@ Ricker.plot <- Plot.trans(PARM = c(1.5, 200),
                           transformation="Ricker")
 
 # Change title of plot
-Ricker.plot$labels$title <- "Ricker Tansformation"
+Ricker.plot$labels$title <- "Ricker Transformation"
 Ricker.plot
 
 # Find original data value that now has maximum resistance
@@ -132,7 +134,8 @@ if("ResistanceGA_Examples"%in%dir("C:/")==FALSE)
 # Create a subdirectory for the first example
 dir.create(file.path("C:/ResistanceGA_Examples/","SingleSurface")) 
 
-write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      # Directory to write .asc files and results
+# Directory to write .asc files and results
+write.dir <- "C:/ResistanceGA_Examples/SingleSurface/"      
 
 # Give path to CIRCUITSCAPE .exe file
 # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
@@ -190,7 +193,7 @@ Note that `response` was not defined in `CS.prep` because it has not been made y
 
 `select.trans` allows you to specify which transformations can be applied to a surface during optimization. "A" = All; "M" = Monomolecular only; "R" = Ricker only. By default, all transformations will be assessed when a continuous surface is optimized. See `GA.prep` documentation for more details. In this example, we are constraining the genetic algorithm to only consider Monomolecular transformations. In an actual analysis, such a constraint may or may not be desired.     
 
-Transform raw the continuous surface using the `Resistance.tran` function to apply one of the eight transformations, and then view the transformation using `Plot.trans`. Note that `Plot.trans` returns a `ggplot2` object as well as the plot. Therefore you can manipulate and modify the plot as desired.
+Transform the raw continuous surface using the `Resistance.tran` function to apply one of the eight transformations, and then view the transformation using `Plot.trans`. Note that `Plot.trans` returns a `ggplot2` object as well as the plot. Therefore you can manipulate and modify the plot as desired.
 ```{r monomolec.plot, eval = FALSE}
 r.tran <- Resistance.tran(transformation = "Monomolecular", 
                           shape = 2, 
@@ -276,9 +279,9 @@ SS_RESULTS <- SS_optim(CS.inputs = CS.inputs,
 ```
 
 ## Optimization with CIRCUITSCAPE on Linux platform
-Gains in optimization speed can be achieved in two ways:
-1.  Run the genetic algorithm in parallel (in the `GA.prep` function set `parallel = X` where 'X' is the number of cores to use).
-2.  In the `CS.prep` function, set `parallel = TRUE` and specify `cores` to the number of cores for CIRCUITSCAPE to use when quantifying current flow across a surface.     
+Gains in optimization speed when using CIRCUITSCAPE can be achieved in two ways when using Linux:
+1.  Run the genetic algorithm in parallel (in the `GA.prep` function set `parallel = X` where 'X' is the number of cores to use).     
+2.  In the `CS.prep` function, set `parallel = TRUE` and specify `cores` to the number of cores for CIRCUITSCAPE to use when quantifying current flow across a surface.          
 
 
 ## Optimzation using `costDistance` (least cost paths) and `commuteDistance` (equivalent to CS resistance distance)
@@ -338,7 +341,7 @@ Grid.Results <- Grid.Search(shape = seq(1, 3, by = 0.025),
                             gdist.inputs = gdist.inputs, 
                             GA.inputs = GA.inputs)
 ```
-![GRID.Surface](figure/grid1.png)      
+![GRID.Surface](figure/grid1.png)    \  
 
 You can change the color scheme and color breaks by manually recreating the response surface from the generated data [default = topo.colors(20)]
 ```{r recreate.grid, eval=FALSE}
@@ -347,12 +350,12 @@ filled.contour(Grid.Results$Plot.data,
                xlab = "Shape parameter",
                ylab = "Maximum value parameter")
 ```
-![GRID.Surface.update](figure/grid2.png)    
+![GRID.Surface.update](figure/grid2.png)   \ 
 
 Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates. 
 
  ****
-### Simultaneous optimization of multiple surfaces
+## Simultaneous optimization of multiple surfaces
 
 First, make a new directory to write ASCII files, CIRCUITSCAPE batch files, and results.
 ```{r warning=FALSE, results='hide',message=FALSE, eval=FALSE}
@@ -362,7 +365,8 @@ if("ResistanceGA_Examples"%in%dir("C:/")==FALSE)
 # Create a subdirectory for the second example
 dir.create(file.path("C:/ResistanceGA_Examples/","MultipleSurfaces")) 
 
-write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      # Directory to write .asc files and results
+# Directory to write .asc files and results
+write.dir <- "C:/ResistanceGA_Examples/MultipleSurfaces/"      
 ```
 
 Extract other resistance surfaces from the 'resistance_surfaces' raster stack
@@ -384,8 +388,8 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 
 Create a raster stack and run the `GA.prep` function (needed to combine surfaces). In this example, the genetic algorithm will seek to maximize the log likelihood of the fitted model (`method = "LL"`).
 ```{r eval=FALSE}
-## Note that the `resistance_surfaces` is already a RasterStack object. 
-## The code below for demonstration of how to make a stack.
+# Note that the `resistance_surfaces` is already a RasterStack object. 
+# The code below for demonstration of how to make a stack.
 r.stack <- stack(resistance_surfaces$categorical,
                  resistance_surfaces$continuous,
                  resistance_surfaces$feature)
@@ -400,7 +404,7 @@ GA.inputs <- GA.prep(ASCII.dir = r.stack,
 
 gdist.inputs <- gdist.prep(length(sample.locales),
                            samples = sample.locales,
-                           method = 'commuteDistance') ## Optimize using commute distance
+                           method = 'commuteDistance') # Optimize using commute distance
 
 ```
 
@@ -410,7 +414,7 @@ plot.t <- Plot.trans(PARM = c(3.5, 150),
                      Resistance = continuous,
                      transformation = "Inverse-Reverse Monomolecular") 
 ```
-![InverseReverse_Monomolecular](figure\IR_Mono.png)  
+![InverseReverse_Monomolecular](figure\IR_Mono.png)  \
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically (if stored in a directory), or else imported in the order tehy occur in the raster stack. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`.   
 ```{r combine.surfaces, eval=FALSE}
@@ -435,7 +439,7 @@ Resist <- Combine_Surfaces(PARM = PARM,
 # View combined surface
 plot(Resist,  main = "scaled composite resistance")
 ```
-![RESIST.Surface](figure/combine_surfaces.png) 
+![RESIST.Surface](figure/combine_surfaces.png)\ 
 
 Generate new gdist response surface by using `Run_gdistance` and run `gdsit.prep` to add response
 ```{r combine.cs, eval=FALSE }
@@ -462,6 +466,7 @@ What the `MS_optim` function does:
  * In the 'Results' directory (i.e. Writedir), a final optimized resistance .asc file has been made (the name is a combination of the layers optimized, separated by "."), along with the CIRCUITSCAPE results (.out files) _OR_ gdistance results.   
  * 'Multisurface_Optim_Summary.txt' provides a text summary of the model parameters and results of the multisurface optimization  
  * A .csv file with the fitted MLPE model coefficients
+ * A 'Percent_Contribution.csv' file is generated, reporting the mean and 95% CI of the contribution of each surface to the final composite resistance surface    
  * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface.    
 * The `GA` object from the optimization is returned and can be further explored.   
 
@@ -469,7 +474,9 @@ The multisurface optimization procedure has done a pretty good job of recovering
 ```{r eval=FALSE}
 Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim$GA.summary@solution),2))
 colnames(Summary.table)<-c("Truth", "Optimized")
-row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2") 
+row.names(Summary.table)<-c("Category1", "Category2", "Category3", 
+                            "Transformation", "Shape", "Max",
+                            "Feature1", "Feature2") 
 ```
 ```
 Summary.table
@@ -498,14 +505,14 @@ plot(ms.stack)
 # Correlation between the two surfaces
 pairs(ms.stack)
 ```
-![combined.plots](figure/combined_plots.png)     
+![combined.plots](figure/combined_plots.png)     \
 
-![correlation.plots](figure/correlation_plot.png)       
+![correlation.plots](figure/correlation_plot.png)       \
 
 
-If you want to create a `CIRCUITSCAPE` current map from either the true or optimized surfaces, this can be done by setting `CurrentMap=TRUE` and `output="raster"` in `Run_CS`.
+If you want to create a `CIRCUITSCAPE` current surface from either the true or optimized surfaces, this can be done by setting `CurrentMap = TRUE` and `output = "raster"` in `Run_CS`.
 ```{r CS.maps, eval=FALSE}
-## Note: You must run `CS.prep` to generate the CS.inputs object for doing this.
+# Note: You must run `CS.prep` to generate the CS.inputs object for doing this.
 CS.inputs <- CS.prep(n.Pops = length(sample.locales),
                      response = gdist.response,
                      CS_Point.File = paste0(write.dir,"samples.txt"),
@@ -523,13 +530,13 @@ Resist.opt <- Run_CS(CS.inputs = CS.inputs,
                      CurrentMap = TRUE, 
                      output = "raster")
 
-## We can confirm that, like the resistance surfaces above, 
-## the CIRCUITSCAPE current maps are also correlated
+# We can confirm that, like the resistance surfaces above, 
+# the CIRCUITSCAPE current maps are also correlated
 cs.stack <- stack(Resist.true, Resist.opt)
 names(cs.stack) <- c("Truth", "Optimized")
 pairs(cs.stack)
 ```
-![CS_corr.plot](figure/CS_corr.png) 
+![CS_corr.plot](figure/CS_corr.png) \
 
 The optimization can converge on a highly correlated solution, but one that results in relative resistance values that are identical to those of the simulated data. This is important to understand, and interpretation of resistance values should be made with this fact in mind.        
 
@@ -541,11 +548,11 @@ data(resistance_surfaces)
 cat <- resistance_surfaces[[1]]
 cat[cat < 2] <- 0
 
-## Make categorical surface binary
+# Make categorical surface binary
 cat[cat == 2] <- 1
 
-## Smooth and visualize
-## The `SCALE` parameter re-scales the surface to 0-10
+# Smooth and visualize
+# The `SCALE` parameter re-scales the surface to 0-10
 cat.smooth <- k.smooth(raster = cat,
                        sigma = 1,
                        SCALE = TRUE)
@@ -554,16 +561,16 @@ plot(cat, main = "Original")
 plot(cat.smooth, main = "Smoothed, sigma = 1")
 par(mfrow = c(1,1))
 ```
-![smooth.plot](figure/smoothed_plot.png) 
+![smooth.plot](figure/smoothed_plot.png) \
 
 Run optimization to determine the transformation and smoothing parameters.
 ```{r k_smooth, eval=FALSE}
 data(samples)
 sample.locales <- SpatialPoints(samples[,c(2,3)])
 
-## Set the random number seed to reproduce the results presented
-## Run in parallel on 4 cores
-## NOTE: `scale = TRUE` to indicate optimization of scaling/smoothing parameter
+# Set the random number seed to reproduce the results presented
+# Run in parallel on 4 cores
+# NOTE: `scale = TRUE` to indicate optimization of scaling/smoothing parameter
 GA.inputs <- GA.prep(ASCII.dir = cat,
                      Results.dir = write.dir,
                      select.trans = "M",
@@ -574,7 +581,7 @@ GA.inputs <- GA.prep(ASCII.dir = cat,
                      run = 35,
                      parallel = 4) 
 
-## Optimize using commute distance
+# Optimize using commute distance
 gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
                            samples = sample.locales,
                            method = 'commuteDistance') 
@@ -614,98 +621,145 @@ max                275              313.7279
 scale                1             0.9916279
 
 ```
-Not too bad! As previusly mentioned, the maximum value parameter seems to be the hardest to optimize precisely.
+Not too bad! As previusly mentioned, the maximum value parameter seems to be the hardest to optimize precisely. Note that optimization with a scaling parameter can be done with single surfaces or with a multi-surface composite. However, make sure that only continuous or binary surfaces are included.
 
-## Bootstrap Analysis
-It is often the case that there is weak or ambiguous support for a single best resistance surface (i.e. similar AIC scores). One approach that may lead to additional insight beyond the AIC values generated during optimization is a bootstrap analysis using the `Resist.boot` function. This approach will assess the relative support for each optimized resistance surface through a 'pseudo'bootstrap where the sample locations/individuals as well as the resistance distance matrices are subsampled at each bootstrap iteration (without replacement), and the MLPE model is refit and the AIC scores calculated. Resistance surfaces are *NOT* re-optimized during this process. This analysis will assess the robustness of the optimized resistance surface given different combinations of samples. If the observed patterns in the resistance-genetics relationship are driven by one or a few sample locations, this analysis may reveal this. A full 'analysis' is presented below. Note that for the first time in the simulation of data, 'noise' is being added to the simulated data, making it more akin to empirical genetic data.
-```{r boot, eval=FALSE}
+## Example Analysis
+Below is an example analysis using the three raster surfaces and sample locations provided with `ResistanceGA`. The 'true' data generating surface in this example will be a combination of the categorical and transformed continuous surface. The feature surface will have no effect on the pairwise distances. This example will show how ResistanceGA can (1) be used for model selection; (2) determine the relative influence of each resistance surface within a composite or multisurface analysis. A full 'analysis' is presented below. Note that for the first time in the simulation of data, 'noise' is being added to make it more akin to empirical genetic data.
+
+```{r analysis1, eval=FALSE}
 data(samples)
 data("resistance_surfaces")
 
 # Create a spatial points object 
 sample.locales <- SpatialPoints(samples[, c(2, 3)])
 
-# Set output directory
-write.dir <-
-  "C:/ResistanceGA_Examples/run1/"      # Directory to write .asc files and results
-
-
 # Run `gdist.prep` & GA.prep
 gdist.inputs <-  gdist.prep(n.Pops = length(sample.locales),
                             samples = sample.locales,
                             method = 'commuteDistance')
 
-GA.inputs <- GA.prep(method = "LL",
-                     ASCII.dir = resistance_surfaces,
-                     Results.dir = write.dir,
-                     max.cat = 500,
-                     max.cont = 500,
-                     seed = 555,
-                     parallel = 4)
+# This will be used again later
+GA.inputs_NoFeature <- GA.prep(method = "LL",
+                               ASCII.dir = resistance_surfaces[[-3]],
+                               Results.dir = "C:/ResistanceGA_Examples/run2/",
+                               max.cat = 500,
+                               max.cont = 500,
+                               seed = 555,
+                               parallel = 4)
 
-## The 'true' resistance surface will be the composite surface
-## Combine resistance surfaces
-## Use an Inverse Ricker transformation of the continuous surface
-## Inverse Ricker  = 8
-PARM <- c(1, 250, 75, 8, 4, 150, 1, 350)
+# The 'true' resistance surface will be the composite surface
+# Combine resistance surfaces, omitting the feature surface
+# Use an Inverse Ricker transformation of the continuous surface
+# Inverse Ricker  = 8
+PARM <- c(1, 250, 75, 8, 4, 150)
 
+# Setting `p.contribution = TRUE` to see how each surface 
+# contributes to the total resistance of the composite surface
 Resist <- Combine_Surfaces(PARM = PARM,
                            gdist.inputs = gdist.inputs,
-                           GA.inputs = GA.inputs,
+                           GA.inputs = GA.inputs_NoFeature,
                            out = NULL,
-                           rescale = TRUE)
+                           rescale = TRUE,
+                           p.contribution = TRUE)
+
+# Assess contribution of each surface
+Resist$percent.contribution
+
+```
+```
+      surface      mean         l95       u95
+1 categorical 0.7162853 0.022074324 0.9951583
+2  continuous 0.2837147 0.004841735 0.9779257
+```
+Here, the categorical surface is responsible for ~72% of the total landscape resistance, while the continuous surface is responsible for ~28%.
+
+
+```{r analysis2, eval=FALSE}
+# Create a subdirectory for results
+dir.create(file.path("C:/ResistanceGA_Examples/","run1"))
+dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
 
 # Create the true response
 gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
-                             r = Resist) 
+                         r = Resist$combined.surface) 
+
 gd.true <- as.vector(gd.true)
 
-## Add some noise to response
-set.seed(456)
-gd.response <- gd.true + rnorm(length(gd.true), 0, 7)
+# Add some noise to response
+set.seed(321)
+gd.response <- gd.true + rnorm(length(gd.true), 0, 5)
 
 plot(gd.response ~ gd.true)
-ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.66
+ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.58
+```
+![Noisy Genetic x Resistance distance](figure/noisy_genetic.png)\
 
-## Re-run `gdist.prep` function
+```{r analysis2b, eval=FALSE}
+# Re-run `gdist.prep` function
 gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
                            response = gd.response,
                            samples = sample.locales)
 
-## First run all single surfaces, Multi-surface is response variable
+
+# Re-run GA.prep to include all surfaces
+GA.inputs_All <- GA.prep(method = "LL",
+                               ASCII.dir = resistance_surfaces,
+                               Results.dir =  "C:/ResistanceGA_Examples/run1/",
+                               max.cat = 500,
+                               max.cont = 500,
+                               seed = 555,
+                               parallel = 4)
+
+# First run all single surfaces, Multi-surface is response variable
 SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
-                              GA.inputs = GA.inputs)
+                              GA.inputs = GA.inputs_All)
 
-# Run `MS_optim` with all relevatn surfaces
+# Run `MS_optim` with all surfaces
 Multi.Surface_optim.gd <- MS_optim(gdist.inputs = gdist.inputs,
-                                   GA.inputs = GA.inputs)
+                                   GA.inputs = GA.inputs_All)
 
-# Run `MS_optim` with incorrect random continuous surface
-# Modify and replace the continuous surface
-set.seed(789)
-rand.cont <- resistance_surfaces$continuous
-rand.cont <-  rand.rast * rnorm(length(rand.cont), 1, 0.5)
-names(rand.cont) <- "random"
-pairs(stack(rand.cont, resistance_surfaces$continuous)) # r = 0.19
-
-multi.stack <- stack(resistance_surfaces$categorical,
-                     resistance_surfaces$feature,
-                     rand.cont)
-
-GA.inputs2 <- GA.prep(method = "LL",
-                      ASCII.dir = multi.stack,
-                      Results.dir =  "C:/ResistanceGA_Examples/run2/",
-                      max.cat = 500,
-                      max.cont = 500,
-                      seed = 555,
-                      parallel = 4)
-
+# Run `MS_optim` with without Feature surface
 Multi.Surface_optim.gd2 <- MS_optim(gdist.inputs = gdist.inputs,
-                                    GA.inputs = GA.inputs2)
+                                    GA.inputs = GA.inputs_NoFeature)
+```
 
 
-## Extract relevant components from optimization outputs
-## Make a list of cost/resistance distance matrices
+What are the Percent contributions of individual surfaces to the combined surface?
+```{r analysis3, eval=FALSE}
+Multi.Surface_optim.gd$percent.contribution
+
+Multi.Surface_optim.gd2$percent.contribution
+```
+```
+> Multi.Surface_optim.gd$percent.contribution;
+      surface       mean         l95       u95
+1 categorical 0.69634861 0.013726193 0.9943606
+2  continuous 0.26048108 0.003151459 0.9705886
+3     feature 0.04317031 0.001971552 0.3240171
+
+> Multi.Surface_optim.gd2$percent.contribution
+      surface    mean         l95       u95
+1 categorical 0.71418 0.017685212 0.9963173
+2  continuous 0.28582 0.003682675 0.9823148
+```
+We can see that the feature surface has a minimal contribution to the total resistance, and that the mean contributions of the categorical and continuous surfaces are nearly identical to the 'true' contributions, especially when only these two surfaces are optimized together.
+
+## Bootstrap Analysis
+It is often the case that there is weak or ambiguous support for a single best resistance surface (i.e. similar AIC scores), as can be seen in the AIC table below. Based strictly on AIC or marginal R^2^, there really is no difference between the multisurface optimization with and without the feature surface included. If we account for the additional parameters (k) present when including the feature surface, AICc does pretty clearly suggest that the compostire surface without the feature is best supported.
+```
+                        Surface  obj.func_LL  k      AIC     AICc   R2m   R2c       LL
+         categorical.continuous     -905.891  8 1819.783 1836.783 0.624 0.624 -905.891
+                     categorical    -915.727  4 1839.455 1841.455 0.606 0.612 -915.727
+ categorical.continuous.feature     -905.446 11 1818.894 1853.201 0.625 0.625 -905.446
+                        Distance    -947.434  2 1902.868 1899.414 0.234 0.545 -947.434
+                      continuous    -945.818  4 1899.636 1901.636 0.267 0.560 -945.818
+                         feature    -947.417  3 1902.834 1901.977 0.237 0.550 -947.417
+                            Null    -992.765  1 1991.531 1987.705 0.000 0.298 -992.765
+```
+Another approach that may lead to additional insight beyond the AIC(c) values generated during optimization is a bootstrap analysis using the `Resist.boot` function. This approach will assess the relative support for each optimized resistance surface through a 'pseudo'bootstrap where the sample locations/individuals as well as the resistance distance matrices are subsampled at each bootstrap iteration (without replacement), and the MLPE model is refit and the AIC scores calculated. Resistance surfaces are *NOT* re-optimized during this process. This analysis will assess the robustness of the optimized resistance surface given different combinations of samples. If the observed patterns in the resistance-genetics relationship are driven by one or a few sample locations, this analysis may reveal this. 
+```{r boot, eval = F}
+# Extract relevant components from optimization outputs
+# Make a list of cost/resistance distance matrices
 mat.list <- c(SS_RESULTS.gdist$cd,
               Multi.Surface_optim.gd$cd,
               Multi.Surface_optim.gd2$cd)
@@ -714,73 +768,75 @@ k <- rbind(SS_RESULTS.gdist$k,
            Multi.Surface_optim.gd$k,
            Multi.Surface_optim.gd2$k)
 
-## Make square genetic distance matrix
+# Make square genetic distance matrix
 g.mat <- matrix(rep(0, 25^2),nrow = 25)
 g.mat[lower.tri(g.mat)] <- gd.response
 
-## Run bootstrap
+# Run bootstrap
 (AIC.boot <- Resist.boot(mod.names = names(mat.list),
                          dist.mat = mat.list,
                          n.parameters = k[,2],
                          sample.prop = 0.75,
                          iters = 1000,
                          obs = 25,
-                         genetic.mat = gd.response
+                         genetic.mat = g.mat
 )
 )
 
 ```
-![Noisy Genetic x Resistance distance](figure/noisy_genetic.png)
+
 ```
                          surface   avg.weight avg.rank     n Percent.top     k
                            <chr>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
-1 categorical.continuous.feature 9.005107e-01    1.044   956        95.6    11
-2     categorical.feature.random 9.903130e-02    1.956    44         4.4    11
-3                    categorical 4.286153e-04    3.510     0         0.0     4
-4                        feature 2.675464e-05    3.561     0         0.0     3
-5                     continuous 1.730309e-06    5.011     0         0.0     4
-6                       Distance 9.013337e-07    5.918     0         0.0     2
+1         categorical.continuous 5.335519e-01    1.351   649        64.9     8
+2 categorical.continuous.feature 4.469329e-01    1.657   350        35.0    11
+3                    categorical 1.951522e-02    2.992     1         0.1     4
+4                     continuous 7.777292e-10    4.167     0         0.0     4
+5                       Distance 2.620175e-10    5.127     0         0.0     2
+6                        feature 2.414924e-10    5.706     0         0.0     3
 ```
-The model selection overwhelmingly suggests, correctly, that the multisurface combination with the true continuous surface is the best. Further, if you assess the optimized values from this analysis, you can see that each surface was parameterized very well. The maximum resistance value of all surfaces was lower than the true surface, but overall this resulted in a nearly perfectly correlated surface (r = 0.99). It is worth noting that the optimized surface resulted in a marginal R^2^ = 0.44, suggesting that optimization with 'noisy' genetic data may not result in the highest R^2^ values, but that optimization can nonetheless reliably determine the effects of the landscape on pairwise genetic distance. 
+You can see that there is decent support for the composite surface that (incorrectly) includes the feature surface, but that in 65% of bootstrap samples, the composite without the feature surface was the top model.      
+
+
+The model selection clearly suggests, correctly, that the multisurface combination with the categorical and continuous surface is the best. In looking at the full results output Further, if you assess the optimized values from this analysis, you can see that each surface was parameterized very well. The maximum resistance value of all surfaces was lower than the true surface, but overall this resulted in a nearly perfectly correlated surface (r = 1.00). It is worth noting that the optimized surface resulted in a marginal R^2^ = 0.62, suggesting that optimization with 'noisy' genetic data may not result in the highest R^2^ values, but that optimization can nonetheless reliably determine the effects of the landscape on pairwise genetic distance. 
 ```{r, eval = FALSE}
-Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd$GA.summary@solution),2))
+Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd2$GA.summary@solution),2))
 colnames(Summary.table)<-c("Truth", "Optimized")
-row.names(Summary.table)<-c("Category1", "Category2", "Category3", "Transformation", "Shape", "Max", "Feature1", "Feature2") 
+row.names(Summary.table)<-c("Category1", "Category2", "Category3", 
+                            "Transformation", "Shape", "Max") 
 ```
 ```
 > Summary.table
                Truth Optimized
 Category1          1      1.00
-Category2        250    217.65
-Category3         75     50.59
-Transformation     8      8.71
-Shape              4      4.00
-Max              150    239.94
-Feature1           1      1.00
-Feature2         350    353.50
+Category2        250    342.55
+Category3         75     91.49
+Transformation     8      8.28
+Shape              4      3.96
+Max              150    185.43
 ```
 ```{r, eval = FALSE}
-opt.r <- raster("C:/ResistanceGA_Examples/run1/categorical.continuous.feature.asc")
-r.stack <- stack(Resist, opt.r) 
+opt.r <- raster("C:/ResistanceGA_Examples/run2/Results/categorical.continuous.asc")
+r.stack <- stack(Resist$combined.surface, opt.r) 
 names(r.stack) <- c("Truth", "Optimized")
 
 plot(r.stack)
 
 pairs(r.stack)
 ```
-![Side by Side](figure/example_demo_pair.png)
+![Side by Side](figure/example_demo_pair.png)\
 
-![Example Correlation](figure/example_analysis.png)
+![Example Correlation](figure/example_analysis.png)\
 
 
-**Comments on multiple surface optimization:**
-* If the optimized resistance values are near the maximum value specified in `GA.prep`, it is recommended that you increase the maximum value and rerun the optimization.  
-* If the optimization ends very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (pmutation = 0.125, pcrossover = 0.85) have generally worked quite well with simulated data and produced reproducible estimates with real data. Alternatively, because this is a stochastic optimization, just rerun the optimization (make sure you have not set a seed!)
-* Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.
-* As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates/relative relationship among resistance surfaces. 
+**Comments on multiple surface optimization:**     
+* If the optimized resistance values are near the maximum value specified in `GA.prep`, it is recommended that you increase the maximum value and rerun the optimization.  \
+* If the optimization ends very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (`pmutation = 0.125`, `pcrossover = 0.85`) have generally worked quite well with simulated data and produced reproducible estimates with real data. Alternatively, because this is a stochastic optimization, just rerun the optimization (**make sure you have not set a seed!**)\
+* Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.\
+* As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates/relative relationship among resistance surfaces. \
 * While there is no established framework for how optimization of resistances surface can or should be done, below is a flowchart of how an analysis might proceed:   
 
-![flowchart](figure/FlowChart_Narrow2b.png) 
+![flowchart](figure/FlowChart_Narrow2b.png) \
 
 
 ### Summary   
