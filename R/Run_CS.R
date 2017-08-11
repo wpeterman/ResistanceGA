@@ -9,14 +9,16 @@
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param r Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object
 #' @param CurrentMap Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)
+#' @param full.mat Logical (Default = FALSE). If TRUE, the full distance matrix will be generated as an R object, rather than just the lower half of the distance matrix.
 #' @param EXPORT.dir Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results). It is critical that there are NO SPACES in the directory, as this will cause the function to fail.
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' @param hidden Logical. If TRUE (Default), then no output from CIRCUITSCAPE will be printed to the console. Only set to FALSE when trying to troubleshoot/debug code.
-#' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
+#' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out") OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
 #' @usage Run_CS(CS.inputs, 
 #' GA.inputs, 
 #' r, 
 #' CurrentMap = FALSE, 
+#' full.mat = FALSE,
 #' EXPORT.dir = GA.inputs$Write.dir, 
 #' output = "matrix", 
 #' hidden = TRUE)
@@ -28,6 +30,7 @@ Run_CS <-
            GA.inputs,
            r,
            CurrentMap = FALSE,
+           full.mat = FALSE,
            EXPORT.dir = GA.inputs$Write.dir,
            output = "matrix",
            hidden = TRUE) {
@@ -117,8 +120,11 @@ Run_CS <-
       names(rast) <- NAME
       (rast)
     } else {
-      cs.matrix <- read.matrix(CS.results)
-      
+      if(full.mat == FALSE) {
+        cs.matrix <- read.matrix(CS.results)
+      } else {
+        cs.matrix <- read.matrix2(CS.results)
+      }
       # Replace NA with 0...a workaround for errors when two points fall within the same cell.
       if (any(is.na(cs.matrix))) {
         cs.matrix[is.na(cs.matrix)] <- 0
@@ -136,7 +142,8 @@ Run_CS2 <-
            GA.inputs,
            r,
            EXPORT.dir = GA.inputs$Write.dir,
-           File.name) {
+           File.name,
+           full.mat = FALSE) {
     File.name <- File.name
     
     # Modify and write Circuitscape.ini file
@@ -182,7 +189,11 @@ Run_CS2 <-
     
     CS.results <- paste0(EXPORT.dir, File.name, "_resistances.out")
     
-    cs.matrix <- read.matrix(CS.results)
+    if(full.mat == FALSE) {
+      cs.matrix <- read.matrix(CS.results)
+    } else {
+      cs.matrix <- read.matrix2(CS.results)
+    }
     
     # Replace NA with 0...a workaround for errors when two points fall within the same cell.
     if (any(is.na(cs.matrix))) {

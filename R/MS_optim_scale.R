@@ -1,23 +1,25 @@
-#' Simultaneous optimization of multiple resistance surfaces
+#' Simultaneous optimization of multiple resistance surfaces with kernel smoothing
 #'
-#' Optimize multiple resistance surfsaces simultaneously using genetic algorithms
+#' Optimize multiple resistance surfaces simultaneously using genetic algorithms and kernel smoothing
 #'
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @return This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.
-#' @usage MS_optim(CS.inputs, gdist.inputs, GA.inputs)
+#' @usage MS_optim.scale(CS.inputs, gdist.inputs, GA.inputs)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-MS_optim <- function(CS.inputs = NULL,
-                     gdist.inputs = NULL,
-                     GA.inputs) {
-  if (!is.null(GA.inputs$scale)) {
+MS_optim.scale <- function(CS.inputs = NULL,
+                           gdist.inputs = NULL,
+                           GA.inputs) {
+  
+  if (is.null(GA.inputs$scale)) {
     stop(
-      "This function should NOT be used if you intend to apply kernel smoothing to your resistance surfaces"
+      "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
     )
   }
+  
   k.value <- GA.inputs$k.value
   
   if (!is.null(CS.inputs)) {
@@ -31,7 +33,7 @@ MS_optim <- function(CS.inputs = NULL,
     
     multi.GA_nG <- ga(
       type = "real-valued",
-      fitness = Resistance.Opt_multi,
+      fitness = Resistance.Opt_multi.scale,
       population = GA.inputs$population,
       selection = GA.inputs$selection,
       mutation = GA.inputs$mutation,
@@ -56,25 +58,25 @@ MS_optim <- function(CS.inputs = NULL,
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for (i in 1:GA.inputs$n.layers) {
-      if (GA.inputs$surface.type[i] == "cat") {
-        ga.p <-
-          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
-        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                       1])] <- parm
-        
-      } else {
-        parm <-
-          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                       1])] <- parm
-      }
+      #   if (GA.inputs$surface.type[i] == "cat") {
+      #     ga.p <-
+      #       GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      #     parm <- ga.p / min(ga.p)
+      #     Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+      #                                                                    1])] <- parm
+      #     
+      #   } else {
+      parm <-
+        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                     1])] <- parm
+      # }
     }
     multi.GA_nG@solution <- Opt.parm
     
     
     RAST <-
-      Combine_Surfaces(
+      Combine_Surfaces.scale(
         PARM = multi.GA_nG@solution,
         CS.inputs = CS.inputs,
         GA.inputs = GA.inputs,
@@ -95,9 +97,11 @@ MS_optim <- function(CS.inputs = NULL,
       EXPORT.dir = GA.inputs$Results.dir
     )
     
-    ifelse(length(unique(RAST)) > 15,
-           type <- "continuous",
-           type <- "categorical")
+    # ifelse(length(unique(RAST)) > 15,
+    #        type <- "continuous",
+    #        type <- "categorical")
+    
+    type <- "continuous"
     
     Diagnostic.Plots(
       resistance.mat = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
@@ -216,7 +220,7 @@ MS_optim <- function(CS.inputs = NULL,
     t1 <- proc.time()[3]
     multi.GA_nG <- ga(
       type = "real-valued",
-      fitness = Resistance.Opt_multi,
+      fitness = Resistance.Opt_multi.scale,
       population = GA.inputs$population,
       selection = GA.inputs$selection,
       mutation = GA.inputs$mutation,
@@ -241,24 +245,24 @@ MS_optim <- function(CS.inputs = NULL,
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for (i in 1:GA.inputs$n.layers) {
-      if (GA.inputs$surface.type[i] == "cat") {
-        ga.p <-
-          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
-        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                       1])] <- parm
-        
-      } else {
-        parm <-
-          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                       1])] <- parm
-      }
+      # if (GA.inputs$surface.type[i] == "cat") {
+      #   ga.p <-
+      #     GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      #   parm <- ga.p / min(ga.p)
+      #   Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+      #                                                                  1])] <- parm
+      #   
+      # } else {
+      parm <-
+        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                     1])] <- parm
+      # }
     }
     multi.GA_nG@solution <- Opt.parm
     
     RAST <-
-      Combine_Surfaces(
+      Combine_Surfaces.scale(
         PARM = multi.GA_nG@solution,
         gdist.inputs = gdist.inputs,
         GA.inputs = GA.inputs,
@@ -283,11 +287,12 @@ MS_optim <- function(CS.inputs = NULL,
                 paste0(GA.inputs$Results.dir, NAME, ".asc"),
                 overwrite = TRUE)
     
-    ifelse(length(unique(RAST)) > 15,
-           type <- "continuous",
-           type <- "categorical")
+    # ifelse(length(unique(RAST)) > 15,
+    #        type <- "continuous",
+    #        type <- "categorical")
     
-    #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
+    type <- "continuous"
+    
     
     Diagnostic.Plots(
       resistance.mat = cd,
@@ -389,7 +394,6 @@ MS_optim <- function(CS.inputs = NULL,
                 cd = cd.list,
                 percent.contribution = p.cont,
                 k = k.df)
-
     return(out)
   }
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/SS_optim_scale.R
 \name{SS_optim.scale}
 \alias{SS_optim.scale}
-\title{Single surface optimization}
+\title{Single surface optimization with kernel smoothing}
 \usage{
 SS_optim.scale(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
 }
@@ -30,7 +30,7 @@ All results tables are also summarized in a named list ($ContinuousResults, $Cat
 The \code{lmer} model objects stored $MLPE.list are fit using Restricted Maximum Likelihood
 }
 \description{
-Optimize all surfaces contained in a directory using a genetic algorithm executed with the \code{\link[GA]{ga}} function in the Genetic Algorithms package \pkg{GA}
+Optimize all binary and/or continuous surfaces contained in a directory using a genetic algorithm executed with the \code{\link[GA]{ga}} function in the Genetic Algorithms package \pkg{GA}. Optimizes a kernel smoothing parameter with all surfaces.
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

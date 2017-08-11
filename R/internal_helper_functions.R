@@ -206,7 +206,7 @@ Resistance.Opt_AICc <-
 
 # FUNCTIONS
 OPTIM.DIRECTION <- function(x) {
-  OPTIM <- ifelse(x == 'max',-1, 1)
+  OPTIM <- ifelse(x == 'max', -1, 1)
   return(OPTIM)
 }
 
@@ -221,12 +221,12 @@ Cont.Param <- function(PARM) {
 
 read.matrix <-
   function(cs.matrix) {
-    lower(read.table(cs.matrix)[-1,-1])
+    lower(read.table(cs.matrix)[-1, -1])
   }
 
 
 read.matrix2 <- function(cs.matrix) {
-  m <- read.table(cs.matrix)[-1,-1]
+  m <- read.table(cs.matrix)[-1, -1]
 }
 
 
@@ -300,8 +300,9 @@ sv.cat <- function(levels, pop.size, min, max) {
       }
       L[[i]] <- z
     }
-    #   uz<-unlist(L)
-    cat.starts[r,] <- (unlist(L))
+
+    cat.starts[r, ] <- (unlist(L))
+
   }
   cat.starts[, 1] <- 1
   return(cat.starts)
@@ -343,7 +344,8 @@ sv.cont.nG <- function(direction,
                runif(1, 1, max),
                scale.parm)
       }
-      cont.starts[r, ] <- z
+      cont.starts[r,] <- z
+
     }
   } else {
     cont.starts <- matrix(nrow = pop.size, ncol = 3)
@@ -358,7 +360,8 @@ sv.cont.nG <- function(direction,
       } else {
         z <- c(runif(1, 1, 9.99), runif(1, .01, 10), runif(1, 1, max))
       }
-      cont.starts[r, ] <- z
+      cont.starts[r,] <- z
+
     }
   }
   cont.starts
@@ -552,3 +555,85 @@ Result.txt <-
         "\n")
     sink()
   }
+
+##########################################################################################
+
+get.name <- function(x) {
+  nm <- deparse(substitute(x))
+  return(nm)
+}
+
+
+# Transformation Eqs ------------------------------------------------------
+
+Monomolecular <- function(r, parm) {
+  parm[3] * (1 - exp(-1 * r / parm[2])) + 1 # Monomolecular
+}
+
+Inv.Monomolecular <- function(r, parm) {
+  if (class(r) == "RasterLayer") {
+    R <- parm[3] * (exp(-1 * r / parm[2]))
+    (R <- (R - cellStats(R, stat = "min")) + 1)
+  } else {
+    R <- parm[3] * (exp(-1 * r / parm[2]))
+    (R <- (R - min(R)) + 1)
+  }
+}
+
+Inv.Rev.Monomolecular <- function(r, parm) {
+  if (class(r) == "RasterLayer") {
+    rev.rast <- SCALE((-1 * r), 0, 10)
+    Inv.Monomolecular(rev.rast, parm)
+  } else {
+    rev.rast <- SCALE.vector((-1 * r), 0, 10)
+    Inv.Monomolecular(rev.rast, parm)
+  }
+}
+
+Rev.Monomolecular <- function(r, parm) {
+  if (class(r) == "RasterLayer") {
+    rev.rast <- SCALE((-1 * r), 0, 10)
+    Monomolecular(rev.rast, parm)
+  } else {
+    rev.rast <- SCALE.vector((-1 * r), 0, 10)
+    Monomolecular(rev.rast, parm)
+  }
+}
+
+
+Ricker <- function(r, parm) {
+  parm[3] * r * exp(-1 * r / parm[2]) + 1 # Ricker
+}
+
+Inv.Ricker <- function(r, parm) {
+  if (class(r) == "RasterLayer") {
+    R <- (-1 * parm[3]) * r * exp(-1 * r / parm[2]) - 1 # Ricker
+    R <-
+      SCALE(R,
+            MIN = abs(cellStats(R, stat = 'max')),
+            MAX = abs(cellStats(R, stat = 'min'))) # Rescale
+  } else {
+    R <- (-1 * parm[3]) * r * exp(-1 * r / parm[2]) - 1 # Ricker
+    R <- SCALE.vector(R, MIN = abs(max(R)), MAX = abs(min(R))) # Rescale
+  }
+}
+
+Inv.Rev.Ricker <- function(r, parm) {
+  if (class(r) == "RasterLayer") {
+    rev.rast <- SCALE((-1 * r), 0, 10)
+    Inv.Ricker(rev.rast, parm)
+  } else {
+    rev.rast <- SCALE.vector((-1 * r), 0, 10)
+    Inv.Ricker(rev.rast, parm)
+  }
+}
+
+Rev.Ricker <- function(r, parm) {
+  if (class(r) == "RasterLayer") {
+    rev.rast <- SCALE((-1 * r), 0, 10)
+    Ricker(rev.rast, parm)
+  } else {
+    rev.rast <- SCALE.vector((-1 * r), 0, 10)
+    Ricker(rev.rast, parm)
+  }
+}

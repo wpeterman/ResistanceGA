@@ -1,0 +1,161 @@
+#' Optimize multiple resistance surfaces simultaneously with kernel smoothing
+#'
+#' Create composite resistance surface by simultaneously optimizing multiple binary and continuous surfaces to optimized with a kernel smoothing parameter. This optimization function is designed to be called from GA
+#'
+#' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.
+#' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
+#' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
+#' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
+#' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
+#' @return AIC value from mixed effect model
+#' @export
+#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+Resistance.Opt_multi.scale <-
+  function(PARM,
+           CS.inputs = NULL,
+           gdist.inputs = NULL,
+           GA.inputs,
+           Min.Max,
+           quiet = FALSE) {
+    if (is.null(GA.inputs$scale)) {
+      stop(
+        "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
+      )
+    }
+    
+    t1 <- proc.time()[3]
+    
+    method <- GA.inputs$method
+    EXPORT.dir <- GA.inputs$Write.dir
+    ######
+    #   r <- GA.inputs$Resistance.stack
+    File.name = "resist_surface"
+    if (!is.null(CS.inputs)) {
+      Combine_Surfaces.scale(
+        PARM = PARM,
+        CS.inputs = CS.inputs,
+        GA.inputs = GA.inputs,
+        out = GA.inputs$Write.dir,
+        File.name = File.name,
+        rescale = FALSE
+      )
+      
+      CS.resist <-
+        Run_CS2(
+          CS.inputs,
+          GA.inputs,
+          r = multi_surface,
+          EXPORT.dir = GA.inputs$Write.dir,
+          File.name = File.name
+        )
+      
+      # Replace NA with 0...a workaround for errors when two points fall within the same cell.
+      # CS.resist[is.na(CS.resist)] <- 0
+      
+      # Run mixed effect model on each Circuitscape effective resistance
+      if (method == "AIC") {
+        obj.func <- suppressWarnings(AIC(
+          MLPE.lmm2(
+            resistance = CS.resist,
+            response = CS.inputs$response,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func * -1
+      } else if (method == "R2") {
+        obj.func <-
+          suppressWarnings(r.squaredGLMM(
+            MLPE.lmm2(
+              resistance = CS.resist,
+              response = CS.inputs$response,
+              ID = CS.inputs$ID,
+              ZZ = CS.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+        obj.func.opt <- obj.func[[1]]
+      } else {
+        obj.func <- suppressWarnings(logLik(
+          MLPE.lmm2(
+            resistance = CS.resist,
+            response = CS.inputs$response,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func[[1]]
+      }
+      
+    }
+    
+    if (!is.null(gdist.inputs)) {
+      r <-
+        Combine_Surfaces.scale(
+          PARM = PARM,
+          gdist.inputs = gdist.inputs,
+          GA.inputs = GA.inputs,
+          out = NULL,
+          File.name = File.name,
+          rescale = FALSE
+        )
+      cd <- Run_gdistance(gdist.inputs, r)
+      
+      if (method == "AIC") {
+        obj.func <- suppressWarnings(AIC(
+          MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func * -1
+      } else if (method == "R2") {
+        obj.func <- suppressWarnings(r.squaredGLMM(
+          MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func[[1]]
+      } else {
+        obj.func <- suppressWarnings(logLik(
+          MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func[[1]]
+      }
+      
+      # AIC.stat <- suppressWarnings(AIC(MLPE.lmm2(resistance=cd,
+      #                                            response=gdist.inputs$response,
+      #                                            ID=gdist.inputs$ID,
+      #                                            ZZ=gdist.inputs$ZZ,
+      #                                            REML=FALSE)))
+      # ROW <- nrow(gdist.inputs$ID)
+    }
+    
+    # k<-max(GA.inputs$parm.index)+1
+    # AICc <- (AIC.stat)+(((2*k)*(k+1))/(ROW-k-1))
+    
+    rt <- proc.time()[3] - t1
+    if (quiet == FALSE) {
+      cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
+      cat(paste0("\t", method, " = ", round(obj.func, 4)), "\n", "\n")
+    }
+    
+    return(obj.func.opt)
+    # OPTIM.DIRECTION(Min.Max)*(obj.func) # Function to be minimized/maximized
+  }

@@ -8,6 +8,7 @@ Run_CS(CS.inputs,
 GA.inputs, 
 r, 
 CurrentMap = FALSE, 
+full.mat = FALSE,
 EXPORT.dir = GA.inputs$Write.dir, 
 output = "matrix", 
 hidden = TRUE)
@@ -21,6 +22,8 @@ hidden = TRUE)
 
 \item{CurrentMap}{Logical. If TRUE, the cumulative current resistance map will be generated during the CS run (Default = FALSE)}
 
+\item{full.mat}{Logical (Default = FALSE). If TRUE, the full distance matrix will be generated as an R object, rather than just the lower half of the distance matrix.}
+
 \item{EXPORT.dir}{Directory where CS results should be written (Default = GA.inputs$Write.dir, which is a temporary directory for reading/writing CS results). It is critical that there are NO SPACES in the directory, as this will cause the function to fail.}
 
 \item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}}
@@ -28,7 +31,7 @@ hidden = TRUE)
 \item{hidden}{Logical. If TRUE (Default), then no output from CIRCUITSCAPE will be printed to the console. Only set to FALSE when trying to troubleshoot/debug code.}
 }
 \value{
-Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"). Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
+Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out") OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
 }
 \description{
 Execute CS from R

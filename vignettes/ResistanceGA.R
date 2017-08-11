@@ -1,33 +1,33 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
+## ---- echo = FALSE-------------------------------------------------------
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(raster, warn.conflicts = F, quietly = T)
+
 ## ----install.package, eval=FALSE-----------------------------------------
 #  # Install 'devtools' package, if needed
 #  if(!("devtools" %in% list.files(.libPaths()))) {
 #      install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE)
 #  }
 #  
-#  library(devtools) # Loads devtools
-#  
-#  install_github("wpeterman/ResistanceGA") # Download package
+#  devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Download package
 
 ## ----results='hide',message=FALSE, warning=FALSE-------------------------
 library(ResistanceGA)
 rm(list = ls())
 
-## ----results='hide', eval=FALSE------------------------------------------
-#  Ricker.plot <- Plot.trans(PARM=c(1.5, 200),Resistance=c(1,10),transformation="Ricker")
+## ----Plot.trans.demo, fig.height = 4, fig.width = 4----------------------
+Ricker.plot <- Plot.trans(PARM = c(1.5, 200),
+                          Resistance = c(1,10),
+                          transformation="Ricker")
 
-## ----results='hide', eval=FALSE------------------------------------------
-#  # Change title of plot
-#  Ricker.plot$labels$title<-"Ricker Transformation"
-#  Ricker.plot
+# Change title of plot
+Ricker.plot$labels$title <- "Ricker Transformation"
+Ricker.plot
 
-## ----max_resist, eval=FALSE----------------------------------------------
-#  # Find original data value that now has maximum resistance
-#  Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$data$transformed))]
-#  
-#  ## [1] 2.356784
+# Find original data value that now has maximum resistance
+Ricker.plot$data$original[which(Ricker.plot$data$transformed==max(Ricker.plot$data$transformed))]
 
 ## ----warning=FALSE, results='hide',message=FALSE, eval=FALSE-------------
 #  
@@ -43,9 +43,6 @@ rm(list = ls())
 #  # Give path to CIRCUITSCAPE .exe file
 #  # Default = '"C:/Program Files/Circuitscape/cs_run.exe"'
 #  CS.program <- paste('"C:/Program Files/Circuitscape/cs_run.exe"')
-#  
-#  # If using Linux
-#  # CS.program <- 'csrun.py'
 
 ## ----load.data, echo = FALSE, message = FALSE, warning=FALSE-------------
 data(resistance_surfaces)
@@ -56,7 +53,9 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 ## ----eval=FALSE----------------------------------------------------------
 #  data(resistance_surfaces)
 #  continuous <- resistance_surfaces[[2]]
-#  writeRaster(continuous,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
+#  writeRaster(continuous,
+#              filename = paste0(write.dir,"cont.asc"),
+#              overwrite = TRUE)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  data(samples)
@@ -65,57 +64,51 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  # Create a spatial points object for plotting
 #  sample.locales <- SpatialPoints(samples[,c(2,3)])
 
-## ----single.surface.plot, eval = FALSE-----------------------------------
-#  plot(continuous)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE) # Add points
+## ----single.surface.plot, fig.height = 4, fig.width = 4------------------
+plot(continuous)
+plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 
 ## ----eval=FALSE----------------------------------------------------------
 #  # Set the random number seed to reproduce the results presented
 #  GA.inputs <- GA.prep(ASCII.dir = write.dir,
 #                       max.cat = 500,
 #                       max.cont = 500,
-#                       select.trans = "A",
+#                       select.trans = "M",
+#                       method = "LL"
 #                       seed = 555)
 #  
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-#                       CS_Point.File = paste0(write.dir,"samples.txt"),
-#                       CS.program = CS.program)
+#                     CS_Point.File = paste0(write.dir,"samples.txt"),
+#                     CS.program = CS.program)
 
 ## ----monomolec.plot, eval = FALSE----------------------------------------
-#  r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=continuous)
+#  r.tran <- Resistance.tran(transformation = "Monomolecular",
+#                            shape = 2,
+#                            max = 275,
+#                            r = continuous)
 #  
-#  plot.t <- Plot.trans(PARM=c(2,275), Resistance=continuous, transformation="Monomolecular")
+#  plot.t <- Plot.trans(PARM = c(2, 275),
+#                       Resistance = continuous,
+#                       transformation = "Monomolecular")
 
 ## ----eval=FALSE----------------------------------------------------------
 #  # Create the true resistance/response surface
-#  CS.response <- Run_CS(CS.inputs=CS.inputs,GA.inputs=GA.inputs, r=r.tran)
+#  CS.response <- Run_CS(CS.inputs = CS.inputs,
+#                        GA.inputs = GA.inputs,
+#                        r = r.tran)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-#                       response = CS.response,
-#                       CS_Point.File = paste0(write.dir,"samples.txt"),
-#                       CS.program = CS.program)
+#                     response = CS.response,
+#                     CS_Point.File = paste0(write.dir,"samples.txt"),
+#                     CS.program = CS.program)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
 #                         GA.inputs=GA.inputs)
 
 ## ----eval=FALSE----------------------------------------------------------
-#  Grid.Results <- Grid.Search(shape=seq(1,4,by=0.1),
-#                              max=seq(50,500,by=75),
-#                              transformation="Monomolecular",
-#                              Resistance=continuous,
-#                              CS.inputs,
-#                              GA.inputs=GA.inputs)
-
-## ----recreate.grid, eval=FALSE-------------------------------------------
-#  filled.contour(Grid.Results$Plot.data,
-#                 col=rainbow(30),
-#                 xlab="Shape parameter",
-#                 ylab="Maximum value parameter")
-
-## ----eval=FALSE----------------------------------------------------------
-#  GA.inputs <- GA.prep(ASCII.dir=write.dir)
+#  GA.inputs <- GA.prep(ASCII.dir = write.dir)
 #  
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
 #                       response = CS.response,
@@ -137,36 +130,35 @@ sample.locales <- SpatialPoints(samples[,c(2,3)])
 #  # Run in parallel on 4 cores
 #  GA.inputs <- GA.prep(ASCII.dir=continuous,
 #                       Results.dir=write.dir,
+#                       select.trans = "M",
 #                       max.cat=500,
 #                       max.cont=500,
 #                       seed = 555,
 #                       parallel = 4)
 #  
+#  
 #  gdist.inputs <- gdist.prep(length(sample.locales),
-#                             samples=sample.locales)
-#  
-#  # Transform resistance surface
-#  r.tran <- Resistance.tran(transformation="Monomolecular", shape=2, max=275, r=continuous)
-#  
-#  # Create the true resistance/response surface
-#  gdist.response <- Run_gdistance(gdist.inputs=gdist.inputs, r=r.tran)
-#  
-#  # Rerun `gdist.prep` to include response
-#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
-#                             response=lower(as.matrix(gdist.response)),
-#                             samples=sample.locales)
+#                             samples = sample.locales,
+#                             response = CS.response,
+#                             method = 'commuteDistance') ## Optimize using commute distance
 #  
 #  # Run optimization
-#  SS_RESULTS.gdist <- SS_optim(gdist.inputs=gdist.inputs,
-#                               GA.inputs=GA.inputs)
-#  
-#  # Grid search of response surface
-#  Grid.Results.gdist <- Grid.Search(shape=seq(1,4,by=0.1),
-#                                    max=seq(50,500,by=75),
-#                                    transformation="Monomolecular",
-#                                    Resistance=continuous,
-#                                    gdist.inputs=gdist.inputs,
-#                                    GA.inputs=GA.inputs)
+#  SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
+#                               GA.inputs = GA.inputs)
+
+## ----eval=FALSE----------------------------------------------------------
+#  Grid.Results <- Grid.Search(shape = seq(1, 3, by = 0.025),
+#                              max = seq(125, 425, by = 50),
+#                              transformation = "Monomolecular",
+#                              Resistance = continuous,
+#                              gdist.inputs = gdist.inputs,
+#                              GA.inputs = GA.inputs)
+
+## ----recreate.grid, eval=FALSE-------------------------------------------
+#  filled.contour(Grid.Results$Plot.data,
+#                 col = rainbow(14),
+#                 xlab = "Shape parameter",
+#                 ylab = "Maximum value parameter")
 
 ## ----warning=FALSE, results='hide',message=FALSE, eval=FALSE-------------
 #  if("ResistanceGA_Examples"%in%dir("C:/")==FALSE)
@@ -183,49 +175,56 @@ data(resistance_surfaces)
 data(samples)
 sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 
-## ----feature.sim, warning=FALSE,message=FALSE,eval=FALSE-----------------
-#  plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE)
-#  plot(resistance_surfaces[[2]],main = resistance_surfaces[[2]]@data@names)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE)
-#  plot(resistance_surfaces[[3]],main = resistance_surfaces[[3]]@data@names)
-#  plot(sample.locales, pch=16, col="blue", add=TRUE)
-
-## ----write_multi.ASCII, warning=FALSE, results='hide',message=FALSE, eval=FALSE----
-#  writeRaster(categorical,filename=paste0(write.dir,"cat.asc"),overwrite=TRUE)
-#  writeRaster(continuous,filename=paste0(write.dir,"cont.asc"),overwrite=TRUE)
-#  writeRaster(feature,filename=paste0(write.dir,"feature.asc"),overwrite=TRUE)
-#  
-#  write.table(samples,file=paste0(write.dir,"samples.txt"),sep="\t",col.names=F,row.names=F)
+## ----feature.sim, warning=FALSE,message=FALSE, fig.height = 4, fig.width = 4----
+plot(resistance_surfaces[[1]],main = resistance_surfaces[[1]]@data@names)
+plot(sample.locales, pch=16, col="blue", add=TRUE)
+plot(resistance_surfaces[[2]],main = resistance_surfaces[[2]]@data@names)
+plot(sample.locales, pch=16, col="blue", add=TRUE)
+plot(resistance_surfaces[[3]],main = resistance_surfaces[[3]]@data@names)
+plot(sample.locales, pch=16, col="blue", add=TRUE)
 
 ## ----eval=FALSE----------------------------------------------------------
-#  GA.inputs <- GA.prep(ASCII.dir=write.dir,
-#                       method = "LL"
-#                       max.cat=500,
-#                       max.cont=500,
+#  # Note that the `resistance_surfaces` is already a RasterStack object.
+#  # The code below for demonstration of how to make a stack.
+#  r.stack <- stack(resistance_surfaces$categorical,
+#                   resistance_surfaces$continuous,
+#                   resistance_surfaces$feature)
+#  
+#  GA.inputs <- GA.prep(ASCII.dir = r.stack,
+#                       Results.dir = write.dir,
+#                       method = "LL",
+#                       max.cat = 500,
+#                       max.cont = 500,
 #                       seed = 555,
-#                       quiet = TRUE)
+#                       parallel = 4)
+#  
+#  gdist.inputs <- gdist.prep(length(sample.locales),
+#                             samples = sample.locales,
+#                             method = 'commuteDistance') # Optimize using commute distance
+#  
 
-## ----reverse.ricker, eval=FALSE------------------------------------------
-#  plot.t <- Plot.trans(PARM=c(3.5,400),Resistance=continuous,transformation="Reverse Ricker")
+## ----IR_Mono, eval=FALSE-------------------------------------------------
+#  plot.t <- Plot.trans(PARM = c(3.5, 150),
+#                       Resistance = continuous,
+#                       transformation = "Inverse-Reverse Monomolecular")
 
 ## ----combine.surfaces, eval=FALSE----------------------------------------
-#  PARM <- c(1, 250, 75, 6, 3.5, 150, 1, 350)
+#  PARM <- c(1, 250, 75, 1, 3.5, 150, 1, 350)
 #  
 #  # PARM<- c(1,   # First feature of categorical
 #  #          250, # Second feature of categorical
 #  #          75,  # Third feature of categorical
-#  #          6,   # Transformation equation for continuous surface
+#  #          1,   # Transformation equation for continuous surface = Inverse-Reverse Monomolecular
 #  #          3.5,   # Shape parameter
 #  #          150, # Scale parameter
 #  #          1,   # First feature of feature surface
 #  #          350) # Second feature of feature surface
 #  
 #  # Combine resistance surfaces
-#  Resist <- Combine_Surfaces(PARM=PARM,
-#                             CS.inputs=CS.inputs,
-#                             GA.inputs=GA.inputs,
-#                             out=NULL,
+#  Resist <- Combine_Surfaces(PARM = PARM,
+#                             gdist.inputs = gdist.inputs,
+#                             GA.inputs = GA.inputs,
+#                             out = NULL,
 #                             rescale = TRUE)
 #  
 #  # View combined surface
@@ -233,33 +232,29 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 
 ## ----combine.cs, eval=FALSE----------------------------------------------
 #  # Create the true resistance/response surface
-#  CS.response <- Run_CS(CS.inputs=CS.inputs, GA.inputs=GA.inputs, r=Resist)
+#  gdist.response <- Run_gdistance(gdist.inputs = gdist.inputs,
+#                                  r = Resist)
 #  
-#  CS.inputs<-CS.prep(n.Pops=length(sample.locales),
-#                        response=CS.response,
-#                        CS_Point.File=paste0(write.dir,"samples.txt"),
-#                        CS.program=CS.program)
+#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
+#                             samples = sample.locales,
+#                             response = as.vector(gdist.response),
+#                             method = 'commuteDistance')
 
 ## ----eval=FALSE----------------------------------------------------------
-#  Multi.Surface_optim <- MS_optim(CS.inputs=CS.inputs,
-#                                 GA.inputs=GA.inputs)
+#  Multi.Surface_optim <- MS_optim(gdist.inputs = gdist.inputs,
+#                                  GA.inputs = GA.inputs)
 
 ## ----eval=FALSE----------------------------------------------------------
-#  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim@solution),2))
+#  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim$GA.summary@solution),2))
 #  colnames(Summary.table)<-c("Truth", "Optimized")
-#  row.names(Summary.table)<-c("Category1",
-#                              "Category2",
-#                              "Category3",
-#                              "Transformation",
-#                              "Shape",
-#                              "Max",
-#                              "Feature1",
-#                              "Feature2")
+#  row.names(Summary.table)<-c("Category1", "Category2", "Category3",
+#                              "Transformation", "Shape", "Max",
+#                              "Feature1", "Feature2")
 
-## ----combined.plots, eval=FALSE------------------------------------------
+## ----combined.plots,fig.width=12,fig.height=8, eval=FALSE----------------
 #  # Make combined, optimized resistance surface.
-#  optim.resist <- Combine_Surfaces(PARM=Multi.Surface_optim@solution,
-#                                   CS.inputs =  CS.inputs,
+#  optim.resist <- Combine_Surfaces(PARM = Multi.Surface_optim$GA.summary@solution,
+#                                   gdist.inputs = gdist.inputs,
 #                                   GA.inputs =  GA.inputs,
 #                                   rescale = TRUE)
 #  ms.stack <- stack(Resist, optim.resist)
@@ -270,55 +265,220 @@ sample.locales <- SpatialPoints(samples[ ,c(2,3)])
 #  pairs(ms.stack)
 
 ## ----CS.maps, eval=FALSE-------------------------------------------------
-#  Resist.true <- Run_CS(CS.inputs=CS.inputs,
-#                        GA.inputs=GA.inputs,
-#                        r=Resist,
-#                        CurrentMap=TRUE,
-#                        output="raster")
+#  # Note: You must run `CS.prep` to generate the CS.inputs object for doing this.
+#  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
+#                       response = gdist.response,
+#                       CS_Point.File = paste0(write.dir,"samples.txt"),
+#                       CS.program = CS.program)
 #  
-#  Resist.opt <- Run_CS(CS.inputs=CS.inputs,
-#                       GA.inputs=GA.inputs,
-#                       r=optim.resist,
-#                       CurrentMap=TRUE,
-#                       output="raster")
+#  Resist.true <- Run_CS(CS.inputs = CS.inputs,
+#                        GA.inputs = GA.inputs,
+#                        r = Resist,
+#                        CurrentMap = TRUE,
+#                        output = "raster")
 #  
-#  ## We can confirm that, like the resistance surfaces above,
-#  ## the CIRCUITSCAPE current maps are also correlated
+#  Resist.opt <- Run_CS(CS.inputs = CS.inputs,
+#                       GA.inputs = GA.inputs,
+#                       r = optim.resist,
+#                       CurrentMap = TRUE,
+#                       output = "raster")
+#  
+#  # We can confirm that, like the resistance surfaces above,
+#  # the CIRCUITSCAPE current maps are also correlated
 #  cs.stack <- stack(Resist.true, Resist.opt)
 #  names(cs.stack) <- c("Truth", "Optimized")
 #  pairs(cs.stack)
 
-## ----multisurface_lcp, eval=FALSE----------------------------------------
-#  # Run `gdist.prep`
-#  gdist.inputs<-gdist.prep(n.Pops=length(sample.locales),
-#                           samples=sample.locales)
+## ----eval = FALSE--------------------------------------------------------
+#  data(resistance_surfaces)
+#  cat <- resistance_surfaces[[1]]
+#  cat[cat < 2] <- 0
 #  
-#  GA.inputs <- GA.prep(ASCII.dir=resistance_surfaces,
-#                       Results.dir=write.dir,
-#                       max.cat=500,
-#                       max.cont=500,
-#                       seed = 999,
+#  # Make categorical surface binary
+#  cat[cat == 2] <- 1
+#  
+#  # Smooth and visualize
+#  # The `SCALE` parameter re-scales the surface to 0-10
+#  cat.smooth <- k.smooth(raster = cat,
+#                         sigma = 1,
+#                         SCALE = TRUE)
+#  par(mfrow = c(1,2))
+#  plot(cat, main = "Original")
+#  plot(cat.smooth, main = "Smoothed, sigma = 1")
+#  par(mfrow = c(1,1))
+
+## ----k_smooth, eval=FALSE------------------------------------------------
+#  data(samples)
+#  sample.locales <- SpatialPoints(samples[,c(2,3)])
+#  
+#  # Set the random number seed to reproduce the results presented
+#  # Run in parallel on 4 cores
+#  # NOTE: `scale = TRUE` to indicate optimization of scaling/smoothing parameter
+#  GA.inputs <- GA.prep(ASCII.dir = cat,
+#                       Results.dir = write.dir,
+#                       select.trans = "M",
+#                       scale = TRUE,
+#                       max.cat = 500,
+#                       max.cont = 500,
+#                       seed = 321,
+#                       run = 35,
 #                       parallel = 4)
 #  
-#  # Combine resistance surfaces
-#  Resist <- Combine_Surfaces(PARM=PARM,
-#                             gdist.inputs=gdist.inputs,
-#                             GA.inputs=GA.inputs,
-#                             out=NULL,
-#                             rescale=TRUE)
+#  # Optimize using commute distance
+#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
+#                             samples = sample.locales,
+#                             method = 'commuteDistance')
+#  
+#  # Transform resistance surface
+#  r.tran_smooth <- Resistance.tran(transformation = "Monomolecular",
+#                                   shape = 2,
+#                                   max = 275,
+#                                   r = cat.smooth)
 #  
 #  # Create the true resistance/response surface
-#  gd.response <- Run_gdistance(gdist.inputs=gdist.inputs,
-#                               r=Resist)
+#  gdist.response <- Run_gdistance(gdist.inputs = gdist.inputs,
+#                                  r = r.tran_smooth)
 #  
-#  # Run `CS.prep` functions
-#  gdist.inputs<-gdist.prep(n.Pops=length(sample.locales),
-#                           response=lower(as.matrix(gd.response)),
-#                           samples=sample.locales)
+#  # Rerun `gdist.prep` to include response
+#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
+#                             response = as.vector(gdist.response),
+#                             samples = sample.locales,
+#                             method = 'commuteDistance')
 #  
-#  # Run `MS_optim`
-#  Multi.Surface_optim.gd <- MS_optim(gdist.inputs=gdist.inputs,
-#                                     GA.inputs=GA.inputs)
+#  # Run optimization: NOTE use of `SS_optim.scale` to optimize the smoothing parameter
+#  SS_RESULTS.gdist_scale <- SS_optim.scale(gdist.inputs = gdist.inputs,
+#                                           GA.inputs = GA.inputs)
+
+## ----analysis1, eval=FALSE-----------------------------------------------
+#  data(samples)
+#  data("resistance_surfaces")
 #  
-#  summary(Multi.Surface_optim.gd)
+#  # Create a spatial points object
+#  sample.locales <- SpatialPoints(samples[, c(2, 3)])
+#  
+#  # Run `gdist.prep` & GA.prep
+#  gdist.inputs <-  gdist.prep(n.Pops = length(sample.locales),
+#                              samples = sample.locales,
+#                              method = 'commuteDistance')
+#  
+#  # This will be used again later
+#  GA.inputs_NoFeature <- GA.prep(method = "LL",
+#                                 ASCII.dir = resistance_surfaces[[-3]],
+#                                 Results.dir = "C:/ResistanceGA_Examples/run2/",
+#                                 max.cat = 500,
+#                                 max.cont = 500,
+#                                 seed = 555,
+#                                 parallel = 4)
+#  
+#  # The 'true' resistance surface will be the composite surface
+#  # Combine resistance surfaces, omitting the feature surface
+#  # Use an Inverse Ricker transformation of the continuous surface
+#  # Inverse Ricker  = 8
+#  PARM <- c(1, 250, 75, 8, 4, 150)
+#  
+#  # Setting `p.contribution = TRUE` to see how each surface
+#  # contributes to the total resistance of the composite surface
+#  Resist <- Combine_Surfaces(PARM = PARM,
+#                             gdist.inputs = gdist.inputs,
+#                             GA.inputs = GA.inputs_NoFeature,
+#                             out = NULL,
+#                             rescale = TRUE,
+#                             p.contribution = TRUE)
+#  
+#  # Assess contribution of each surface
+#  Resist$percent.contribution
+#  
+
+## ----analysis2, eval=FALSE-----------------------------------------------
+#  # Create a subdirectory for results
+#  dir.create(file.path("C:/ResistanceGA_Examples/","run1"))
+#  dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
+#  
+#  # Create the true response
+#  gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
+#                           r = Resist$combined.surface)
+#  
+#  gd.true <- as.vector(gd.true)
+#  
+#  # Add some noise to response
+#  set.seed(321)
+#  gd.response <- gd.true + rnorm(length(gd.true), 0, 5)
+#  
+#  plot(gd.response ~ gd.true)
+#  ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.58
+
+## ----analysis2b, eval=FALSE----------------------------------------------
+#  # Re-run `gdist.prep` function
+#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
+#                             response = gd.response,
+#                             samples = sample.locales)
+#  
+#  
+#  # Re-run GA.prep to include all surfaces
+#  GA.inputs_All <- GA.prep(method = "LL",
+#                                 ASCII.dir = resistance_surfaces,
+#                                 Results.dir =  "C:/ResistanceGA_Examples/run1/",
+#                                 max.cat = 500,
+#                                 max.cont = 500,
+#                                 seed = 555,
+#                                 parallel = 4)
+#  
+#  # First run all single surfaces, Multi-surface is response variable
+#  SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
+#                                GA.inputs = GA.inputs_All)
+#  
+#  # Run `MS_optim` with all surfaces
+#  Multi.Surface_optim.gd <- MS_optim(gdist.inputs = gdist.inputs,
+#                                     GA.inputs = GA.inputs_All)
+#  
+#  # Run `MS_optim` with without Feature surface
+#  Multi.Surface_optim.gd2 <- MS_optim(gdist.inputs = gdist.inputs,
+#                                      GA.inputs = GA.inputs_NoFeature)
+
+## ----analysis3, eval=FALSE-----------------------------------------------
+#  Multi.Surface_optim.gd$percent.contribution
+#  
+#  Multi.Surface_optim.gd2$percent.contribution
+
+## ----boot, eval = F------------------------------------------------------
+#  # Extract relevant components from optimization outputs
+#  # Make a list of cost/resistance distance matrices
+#  mat.list <- c(SS_RESULTS.gdist$cd,
+#                Multi.Surface_optim.gd$cd,
+#                Multi.Surface_optim.gd2$cd)
+#  
+#  k <- rbind(SS_RESULTS.gdist$k,
+#             Multi.Surface_optim.gd$k,
+#             Multi.Surface_optim.gd2$k)
+#  
+#  # Make square genetic distance matrix
+#  g.mat <- matrix(rep(0, 25^2),nrow = 25)
+#  g.mat[lower.tri(g.mat)] <- gd.response
+#  
+#  # Run bootstrap
+#  (AIC.boot <- Resist.boot(mod.names = names(mat.list),
+#                           dist.mat = mat.list,
+#                           n.parameters = k[,2],
+#                           sample.prop = 0.75,
+#                           iters = 1000,
+#                           obs = 25,
+#                           genetic.mat = g.mat
+#  )
+#  )
+#  
+
+## ---- eval = FALSE-------------------------------------------------------
+#  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd2$GA.summary@solution),2))
+#  colnames(Summary.table)<-c("Truth", "Optimized")
+#  row.names(Summary.table)<-c("Category1", "Category2", "Category3",
+#                              "Transformation", "Shape", "Max")
+
+## ---- eval = FALSE-------------------------------------------------------
+#  opt.r <- raster("C:/ResistanceGA_Examples/run2/Results/categorical.continuous.asc")
+#  r.stack <- stack(Resist$combined.surface, opt.r)
+#  names(r.stack) <- c("Truth", "Optimized")
+#  
+#  plot(r.stack)
+#  
+#  pairs(r.stack)
 

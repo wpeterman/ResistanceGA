@@ -1,6 +1,23 @@
+ResistanceGA 3.1-0
+--------
+* Full release of extensively updated package 
+
+ResistanceGA 3.0-5
+--------
+* Updated `Grid.Search` function 
+* Updated vignette
+* Correction of documentation typos
+* Added a percent contribution summary to the Combine_surfaces and MS_optim functions
+
+ResistanceGA 3.0-4
+--------
+* Default objective function for optimization has been set to log-likelihood (LL)
+* Surfaces can be optimized with `commuteDistance` from the `gdistance` package. This is nearly equivalent to CIRCUITSCAPE (except for different scaling of values), is faster, and allows optimization to be done in parallel.
+* It is possible to optimize a kernel smoothing scaling parameter (set `scale = TRUE` in the `GA.prep` function). This applies a Gaussian smoothing function from the `smoothie` package.
+* A new function was added to facilitate a bootstrap AIC analysis of optimized resistance surfaces. See the vignette for a worked example. (`Resist.boot`)
+
 ResistanceGA 3.0-3
 --------
-<<<<<<< HEAD
 * Minor bug fixes
 
 ResistanceGA 3.0-2

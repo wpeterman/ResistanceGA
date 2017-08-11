@@ -1,6 +1,6 @@
 #' Combine multiple resistance surfaces together
 #'
-#' Combine multiple resistance surfaces into new composite surface based on specified parameters
+#' Combine multiple resistance surfaces into a new composite surface based on specified parameters, including a kernel smoothing parameter
 #'
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
@@ -25,10 +25,10 @@
 #'
 #' The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverage of parameter space.
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
-#' @usage Combine_Surfaces(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale, p.contribution)
+#' @usage Combine_Surfaces.scale(PARM, CS.inputs, gdist.inputs, GA.inputs, out, File.name, rescale, p.contribution)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-Combine_Surfaces <-
+Combine_Surfaces.scale <-
   function(PARM,
            CS.inputs = NULL,
            gdist.inputs = NULL,
@@ -37,6 +37,12 @@ Combine_Surfaces <-
            File.name = paste(GA.inputs$parm.type$name, collapse = "."),
            rescale = TRUE,
            p.contribution = FALSE) {
+    
+    if (is.null(GA.inputs$scale)) {
+      stop(
+        "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
+      )
+    }
     
     if (!is.null(CS.inputs)) {
       ID <- CS.inputs$ID
@@ -62,6 +68,10 @@ Combine_Surfaces <-
     
     for (i in 1:GA.inputs$n.layers) {
       if (GA.inputs$surface.type[i] == "cat") {
+        stop(
+          "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
+        )
+        
         parm <-
           PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
         parm <- parm / min(parm)
@@ -73,12 +83,18 @@ Combine_Surfaces <-
         
         
       } else {
-        rast <- SCALE(data = r[[i]],
-                      MIN = 0,
-                      MAX = 10)
+        
         parm <-
           PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
         
+        
+        rast <- k.smooth(raster = r[[i]],
+                      sigma = parm[4],
+                      SCALE = TRUE)
+        
+        # rast <- SCALE(data = r[[i]],
+        #               MIN = 0,
+        #               MAX = 10)
         
         # Set equation for continuous surface
         equation <- floor(parm[1]) # Parameter can range from 1-9.99
@@ -142,7 +158,7 @@ Combine_Surfaces <-
     
     File.name <- File.name
     
-    ms.r <- multi_surface <- sum(r) #+ 1 # Add all surfaces together
+    multi_surface <- sum(r) #+ 1 # Add all surfaces together
     
     if (rescale == TRUE)
       multi_surface <-
@@ -158,15 +174,15 @@ Combine_Surfaces <-
         
       } else {
         cont.list <- vector(mode = 'list', length = GA.inputs$n.layers)
-
+        
         for (i in 1:GA.inputs$n.layers) {
           p.cont <- r[[i]] / ms.r
           mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
           ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
           cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
-                                mean = mean.cont,
-                                l95 = ci.cont[[1]],
-                                u95 = ci.cont[[2]])
+                                       mean = mean.cont,
+                                       l95 = ci.cont[[1]],
+                                       u95 = ci.cont[[2]])
           
         }
         

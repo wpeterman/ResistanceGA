@@ -1,4 +1,4 @@
-#' Optimize resistance surfaces individually
+#' Optimize resistance surfaces individually with kernel smoothing
 #'
 #' Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA
 #'
@@ -14,13 +14,13 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_single.scale <- function(PARM,
-                                         Resistance,
-                                         CS.inputs = NULL,
-                                         gdist.inputs = NULL,
-                                         GA.inputs,
-                                         Min.Max = 'max',
-                                         iter = NULL,
-                                         quiet = TRUE) {
+                                        Resistance,
+                                        CS.inputs = NULL,
+                                        gdist.inputs = NULL,
+                                        GA.inputs,
+                                        Min.Max = 'max',
+                                        iter = NULL,
+                                        quiet = TRUE) {
   if (is.null(GA.inputs$scale)) {
     stop(
       "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
@@ -36,7 +36,9 @@ Resistance.Opt_single.scale <- function(PARM,
   r <- Resistance
   
   ## Scale surface
-  r <- k.smooth(raster = r, sigma = PARM[4])
+  r <- k.smooth(raster = r,
+                sigma = PARM[4],
+                SCALE = TRUE)
   
   # Set equation for continuous surface
   equation <- floor(PARM[1]) # Parameter can range from 1-9.99
@@ -45,14 +47,14 @@ Resistance.Opt_single.scale <- function(PARM,
   SHAPE <- (PARM[2])
   Max.SCALE <- (PARM[3])
   
-  ## If selected transformation is not in list, assign very large AIC
-  
+  ## If selected transformation is not in list, assign very large objective function value
+
   if (GA.inputs$surface.type[iter] == "cat") {
     stop(
       "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
     )
     
-    PARM <- PARM / min(PARM)
+    PARM <- PARM / min(PARM, na.rm = T)
     parm <- PARM
     df <-
       data.frame(id = unique(r), PARM) # Data frame with original raster values and replacement values
@@ -70,7 +72,7 @@ Resistance.Opt_single.scale <- function(PARM,
     Max.SCALE <- (PARM[3])
     
     ## If selected transformation is not in list, assign very large AIC
-    ## Use 99999 as 'ga' maximizes and the inverse of of the calculated AIC is used
+    ## Use 99999 as 'ga' maximizes and the inverse of the calculated objective function is used
     
     if (equation %in% select.trans[[iter]]) {
       # Apply specified transformation

@@ -8,12 +8,13 @@
 #' @param transitionFunction The function to calculate the gdistance TransitionLayer object. See \code{\link[gdistance]{transition}}. Default = function(x) 1/mean(x)
 #' @param directions Directions in which cells are connected (4, 8, 16, or other). Default = 8
 #' @param longlat Logical. If true, a \code{\link[gdistance]{geoCorrection}} ill be applied to the transition  matrix. Defaault = FALSE
+#' @param method Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.
 #' @return An R object that is a required input into optimization functions
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat)
-#'
+
+#' @usage gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, method)
 
 gdist.prep <-
   function(n.Pops,
@@ -22,7 +23,13 @@ gdist.prep <-
            transitionFunction = function(x)
              1 / mean(x),
            directions = 8,
-           longlat = FALSE) {
+           longlat = FALSE,
+           method = 'commuteDistance') {
+    
+    if (method != 'commuteDistance') {
+      method <- 'costDistance'
+    }
+
     if (!is.null(response)) {
       TEST.response <- is.vector(response)
       if (TEST.response == FALSE) {
@@ -42,7 +49,8 @@ gdist.prep <-
       if (!file.exists(samples)) {
         stop("The path to the specified samples.txt file is incorrect")
       }
-      sp <- SpatialPoints(read.delim(samples, header = F)[, -1])
+      sp <- SpatialPoints(read.delim(samples, header = F)[,-1])
+
     }
     
     if (n.Pops != length(sp)) {
@@ -62,7 +70,8 @@ gdist.prep <-
           ID = ID,
           ZZ = ZZ,
           n.Pops = n.Pops,
-          longlat = longlat
+          longlat = longlat,
+          method = method
         )
     )
   }

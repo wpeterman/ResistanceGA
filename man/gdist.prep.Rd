@@ -4,7 +4,7 @@
 \alias{gdist.prep}
 \title{Prepare data for optimization using \code{gdistance}}
 \usage{
-gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat)
+gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, method)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -18,6 +18,8 @@ gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat)
 \item{directions}{Directions in which cells are connected (4, 8, 16, or other). Default = 8}
 
 \item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorrection}} ill be applied to the transition  matrix. Defaault = FALSE}
+
+\item{method}{Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.}
 }
 \value{
 An R object that is a required input into optimization functions

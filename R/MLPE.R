@@ -25,7 +25,8 @@ MLPE.lmm <-
     response = pairwise.genetic
     
     if (class(resistance)[[1]] == 'dist') {
-      mm <- lower(as.matrix(resistance))
+      mm <- as.vector(resistance)
+
       m <- attr(resistance, "Size")
       mm <- mm[which(mm != -1)]
       
@@ -74,12 +75,14 @@ MLPE.lmm <-
 
 MLPE.lmm2 <- function(resistance, response, REML = FALSE, ID, ZZ) {
   if (class(resistance)[1] != 'dist') {
-    resistance <- resistance[which(resistance != -1)]
-    dat <- data.frame(ID, resistance = resistance, response = response)
+    res <- resistance[which(resistance != -1)]
+    
+    dat <- data.frame(ID, resistance = res, response = response)
     colnames(dat) <- c("pop1", "pop2", "resistance", "response")
   } else {
-    resistance <- lower(as.matrix(resistance))
+    resistance <- as.vector(resistance)
     resistance <- resistance[which(resistance != -1)]
+
     dat <- data.frame(ID, resistance = resistance, response = response)
     colnames(dat) <- c("pop1", "pop2", "resistance", "response")
     
@@ -122,6 +125,7 @@ MLPE.lmm_coef <-
         mm <- read.table(resist.mat[i])[-1, -1]
         mm <- lower(mm)
         mm <- mm[which(mm != -1)]
+
         if (is.null(ID)) {
           ID <- To.From.ID(POPS = m)
           
@@ -154,17 +158,19 @@ MLPE.lmm_coef <-
         COEF.Table <- rbind(COEF.Table, COEF)
       }
     } else {
-      response = genetic.dist
+      response <- genetic.dist
       resist.mat <-
-        list.files(resistance, pattern = "*_lcp_dist.csv", full.names = TRUE)
+        list.files(resistance, pattern = "*_distMat.csv", full.names = TRUE)
       resist.names <-
-        gsub(pattern = "_lcp_dist.csv",
+        gsub(pattern = "_distMat.csv",
              "",
-             x = list.files(resistance, pattern = "_lcp_dist.csv"))
+             x = list.files(resistance, pattern = "*_distMat.csv"))
+      resist.names <- plyr::ldply(strsplit(resist.names, "_"))[,1]
+      
       COEF.Table <- array()
       for (i in 1:length(resist.mat)) {
         cd <- read.csv(resist.mat[i], header = F)
-        mm <- lower(as.matrix(cd))
+        mm <- lower(cd)
         m <- dim(cd)[1]
         ID <- To.From.ID(POPS = m)
         ZZ <- ZZ.mat(ID = ID)

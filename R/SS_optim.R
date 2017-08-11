@@ -25,6 +25,11 @@ SS_optim <- function(CS.inputs = NULL,
                      nlm = FALSE,
                      dist_mod = TRUE,
                      null_mod = TRUE) {
+  if (!is.null(GA.inputs$scale)) {
+    stop(
+      "This function should NOT be used if you intend to apply kernel smoothing to your resistance surfaces"
+    )
+  }
   t1 <- proc.time()[3]
   RESULTS.cat <- list() # List to store categorical results within
   RESULTS.cont <- list() # List to store continuous results within
@@ -32,11 +37,18 @@ SS_optim <- function(CS.inputs = NULL,
   cnt2 <- 0
   k.value <- GA.inputs$k.value
   MLPE.list <- list()
-  
+  cd.list <- list()
+  k.list <- list()
+
   # Optimize each surface in turn
   for (i in 1:GA.inputs$n.layers) {
     r <- GA.inputs$Resistance.stack[[i]]
     names(r) <- GA.inputs$layer.names[i]
+
+    # CIRCUITSCAPE ------------------------------------------------------------
+    
+    
+    # * Categorical -----------------------------------------------------------
     
     # Processing of categorical surfaces
     if (!is.null(CS.inputs)) {
@@ -201,8 +213,15 @@ SS_optim <- function(CS.inputs = NULL,
           ZZ = CS.inputs$ZZ
         )
         
-        names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+        cd.list[[i]] <- (read.table(paste0(
+          GA.inputs$Results.dir,
+          GA.inputs$layer.names[i],
+          "_resistances.out"))[-1, -1])
         
+        names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+        names(cd.list)[i] <- GA.inputs$layer.names[i]
+        
+        # * Continuous -----------------------------------------------------------
       } else {
         # Processing of continuous surfaces
         cnt2 <- cnt2 + 1
@@ -311,8 +330,14 @@ SS_optim <- function(CS.inputs = NULL,
             ZZ = CS.inputs$ZZ
           )
           
-          names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+          cd.list[[i]] <- (read.table(paste0(
+            GA.inputs$Results.dir,
+            GA.inputs$layer.names[i],
+            "_resistances.out"))[-1, -1])
           
+          names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+          names(cd.list)[i] <- GA.inputs$layer.names[i]          
+
         } else {
           EQ <- get.EQ(single.GA@solution[1])
           r.tran <-
@@ -394,10 +419,14 @@ SS_optim <- function(CS.inputs = NULL,
           if (k.value == 1) {
             k <- 2
           } else if (k.value == 2) {
-            k <- GA.inputs$parm.type$n.parm[i]
+            k <- GA.inputs$parm.type$n.parm[i] + 1
+
           } else {
             k <- GA.inputs$parm.type$n.parm[i] + 1
           }
+          
+          k.list[[i]] <- k
+          names(k.list)[i] <- GA.inputs$layer.names[i]
           
           n <- CS.inputs$n.Pops
           AICc <-
@@ -449,13 +478,22 @@ SS_optim <- function(CS.inputs = NULL,
             ZZ = CS.inputs$ZZ
           )
           
+          cd.list[[i]] <- (read.table(paste0(
+            GA.inputs$Results.dir,
+            GA.inputs$layer.names[i],
+            "_resistances.out"))[-1, -1])
+          
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+          names(cd.list)[i] <- GA.inputs$layer.names[i]
+          
+
         }
       } # Close if-else
       if (dist_mod == TRUE) {
         r <- reclassify(r, c(-Inf, Inf, 1))
         names(r) <- "dist"
-        Run_CS(CS.inputs, GA.inputs, r)
+        cd <- Run_CS(CS.inputs, GA.inputs, r, full.mat = T)
+
         Dist.AIC <-
           AIC(
             MLPE.lmm(
@@ -497,6 +535,11 @@ SS_optim <- function(CS.inputs = NULL,
           ZZ = CS.inputs$ZZ
         )
         
+        cd.list[[i + 1]] <- cd
+        # (read.table(paste0(GA.inputs$Write.dir, "dist_resistances.out"))[-1, -1])
+        
+        names(cd.list)[i + 1] <- 'Distance'
+
         names(MLPE.list)[i + 1] <- "Distance"
         
         if (GA.inputs$method == "AIC") {
@@ -508,6 +551,9 @@ SS_optim <- function(CS.inputs = NULL,
         }
         
         k <- 2
+        k.list[[i + 1]] <- k
+        names(k.list)[i + 1] <- 'Distance'
+
         n <- CS.inputs$n.Pops
         AICc <-
           (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
@@ -592,8 +638,12 @@ SS_optim <- function(CS.inputs = NULL,
       
     }
     
-    ###############################################
+
+    # Optimize with gdistance -------------------------------------------------
+    
     if (!is.null(gdist.inputs)) {
+      # * Categorical -----------------------------------------------------------
+
       if (GA.inputs$surface.type[i] == 'cat') {
         cnt1 <- cnt1 + 1
         names(r) <- GA.inputs$layer.names[i]
@@ -635,7 +685,8 @@ SS_optim <- function(CS.inputs = NULL,
         save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
         write.table(
           as.matrix(cd),
-          file = paste0(GA.inputs$Results.dir, NAME, "_lcp_dist", ".csv"),
+          file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,  "_distMat.csv"),
+
           sep = ",",
           row.names = F,
           col.names = F
@@ -688,9 +739,12 @@ SS_optim <- function(CS.inputs = NULL,
         } else if (k.value == 2) {
           k <- GA.inputs$parm.type$n.parm[i] + 1
         } else {
-          k <- GA.inputs$parm.type$n.parm[i] + 2
+          k <- GA.inputs$parm.type$n.parm[i] + 1
         }
         
+        k.list[[i]] <- k
+        names(k.list)[i] <- GA.inputs$layer.names[i]
+
         n <- gdist.inputs$n.Pops
         AICc <-
           (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
@@ -739,7 +793,10 @@ SS_optim <- function(CS.inputs = NULL,
           ID = gdist.inputs$ID,
           ZZ = gdist.inputs$ZZ
         )
-        
+
+        cd.list[[i]] <- as.matrix(cd)
+        names(cd.list)[i] <- GA.inputs$layer.names[i]
+
         names(MLPE.list)[i] <- GA.inputs$layer.names[i]
         
       } else {
@@ -808,7 +865,8 @@ SS_optim <- function(CS.inputs = NULL,
           save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
           write.table(
             as.matrix(cd),
-            file = paste0(GA.inputs$Results.dir, NAME, "_lcp_dist", ".csv"),
+            file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,  "_distMat.csv"),
+
             sep = ",",
             row.names = F,
             col.names = F
@@ -876,6 +934,8 @@ SS_optim <- function(CS.inputs = NULL,
               "max")
           RESULTS.cont[[cnt2]] <- RS
           
+          # * Continuous -----------------------------------------------------------
+
         } else {
           EQ <- get.EQ(single.GA@solution[1])
           r <-
@@ -892,7 +952,8 @@ SS_optim <- function(CS.inputs = NULL,
           save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
           write.table(
             as.matrix(cd),
-            file = paste0(GA.inputs$Results.dir, NAME, "_lcp_dist", ".csv"),
+            file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method, "_distMat.csv"),
+
             sep = ",",
             row.names = F,
             col.names = F
@@ -962,16 +1023,23 @@ SS_optim <- function(CS.inputs = NULL,
             ZZ = gdist.inputs$ZZ
           )
           
+          cd.list[[i]] <- as.matrix(cd)
+          names(cd.list)[i] <- GA.inputs$layer.names[i]
+
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           
           if (k.value == 1) {
             k <- 2
           } else if (k.value == 2) {
-            k <- GA.inputs$parm.type$n.parm[i]
+            k <- GA.inputs$parm.type$n.parm[i] + 1
+
           } else {
             k <- GA.inputs$parm.type$n.parm[i] + 1
           }
           
+          k.list[[i]] <- k
+          names(k.list)[i] <- GA.inputs$layer.names[i]
+
           n <- gdist.inputs$n.Pops
           AICc <-
             (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
@@ -1015,6 +1083,14 @@ SS_optim <- function(CS.inputs = NULL,
         names(r) <- "dist"
         cd <- Run_gdistance(gdist.inputs, r)
         
+        write.table(
+          as.matrix(cd),
+          file = paste0(GA.inputs$Results.dir, 'Distance', "_", gdist.inputs$method, "_distMat.csv"),
+          sep = ",",
+          row.names = F,
+          col.names = F
+        )
+        
         Dist.AIC <- suppressWarnings(AIC(
           MLPE.lmm2(
             resistance = cd,
@@ -1053,10 +1129,16 @@ SS_optim <- function(CS.inputs = NULL,
           ZZ = gdist.inputs$ZZ
         )
         
+        cd.list[[i + 1]] <- as.matrix(cd)
+        names(cd.list)[i + 1] <- "Distance"
+
         names(MLPE.list)[i + 1] <- "Distance"
         
         ROW <- nrow(gdist.inputs$ID)
         k <- 2
+        
+        k.list[[i + 1]] <- k
+        names(k.list)[i + 1] <- 'Distance'
         
         if (GA.inputs$method == "AIC") {
           dist.obj <- Dist.AIC
@@ -1240,7 +1322,8 @@ SS_optim <- function(CS.inputs = NULL,
   cat("\n")
   write.table(
     Results.All,
-    paste0(GA.inputs$Results.dir, "All_Results_Table.csv"),
+    paste0(GA.inputs$Results.dir, "All_Results_Table_", gdist.inputs$method,".csv"),
+
     sep = ",",
     col.names = T,
     row.names = F
@@ -1268,6 +1351,9 @@ SS_optim <- function(CS.inputs = NULL,
     )
   }
   
+  k.list <- plyr::ldply(k.list)
+  colnames(k.list) <- c("surface", "k")
+  
   rt <- proc.time()[3] - t1
   # Full Results
   if (nrow(Results.cat) > 0 & nrow(Results.cont) > 0) {
@@ -1278,8 +1364,11 @@ SS_optim <- function(CS.inputs = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
         Run.Time = rt,
-        MLPE.list = MLPE.list
-        )
+        MLPE.list = MLPE.list,
+        cd = cd.list,
+        k = k.list
+      )
+
   } else if (nrow(Results.cat) < 1 & nrow(Results.cont) > 0) {
     RESULTS <-
       list(
@@ -1288,8 +1377,11 @@ SS_optim <- function(CS.inputs = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
         Run.Time = rt,
-        MLPE.list = MLPE.list
-        )
+        MLPE.list = MLPE.list,
+        cd = cd.list,
+        k = k.list
+      )
+
   } else if (nrow(Results.cat) > 0 & nrow(Results.cont) < 1) {
     RESULTS <-
       list(
@@ -1298,7 +1390,9 @@ SS_optim <- function(CS.inputs = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
         Run.Time = rt,
-        MLPE.list = MLPE.list
+        MLPE.list = MLPE.list,
+        cd = cd.list,
+        k = k.list
       )
   } else {
     RESULTS <-
@@ -1308,7 +1402,9 @@ SS_optim <- function(CS.inputs = NULL,
         AICc = Results.All,
         MLPE = MLPE.results,
         Run.Time = rt,
-        MLPE.list = MLPE.list
+        MLPE.list = MLPE.list,
+        cd = cd.list,
+        k = k.list
       )
   }
   

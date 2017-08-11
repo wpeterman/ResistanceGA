@@ -54,7 +54,7 @@ quiet = FALSE)
 
 \item{method}{Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")}
 
-\item{scale}{Logical. To optimize a kernel smoothing scaling parameter during optimization, set to `TRUE` (Default = FALSE)}
+\item{scale}{Logical. To optimize a kernel smoothing scaling parameter during optimization, set to TRUE (Default = FALSE). See Details below.}
 
 \item{k.value}{Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).
 
@@ -104,6 +104,8 @@ This function prepares and compiles objects and commands for optimization with t
 }
 \details{
 Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
+
+When `scale = TRUE`, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when `scale = TRUE`
 
 The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 

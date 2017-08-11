@@ -2,7 +2,7 @@
 % Please edit documentation in R/OptimFunction_Single_scale.R
 \name{Resistance.Opt_single.scale}
 \alias{Resistance.Opt_single.scale}
-\title{Optimize resistance surfaces individually}
+\title{Optimize resistance surfaces individually with kernel smoothing}
 \usage{
 Resistance.Opt_single.scale(PARM, Resistance, CS.inputs = NULL,
   gdist.inputs = NULL, GA.inputs, Min.Max = "max", iter = NULL,
