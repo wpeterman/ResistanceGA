@@ -300,9 +300,8 @@ sv.cat <- function(levels, pop.size, min, max) {
       }
       L[[i]] <- z
     }
-
+    #   uz<-unlist(L)
     cat.starts[r, ] <- (unlist(L))
-
   }
   cat.starts[, 1] <- 1
   return(cat.starts)
@@ -345,7 +344,6 @@ sv.cont.nG <- function(direction,
                scale.parm)
       }
       cont.starts[r,] <- z
-
     }
   } else {
     cont.starts <- matrix(nrow = pop.size, ncol = 3)
@@ -361,7 +359,6 @@ sv.cont.nG <- function(direction,
         z <- c(runif(1, 1, 9.99), runif(1, .01, 10), runif(1, 1, max))
       }
       cont.starts[r,] <- z
-
     }
   }
   cont.starts

@@ -158,7 +158,7 @@ Combine_Surfaces.scale <-
     
     File.name <- File.name
     
-    multi_surface <- sum(r) #+ 1 # Add all surfaces together
+    ms.r <- multi_surface <- sum(r) #+ 1 # Add all surfaces together
     
     if (rescale == TRUE)
       multi_surface <-

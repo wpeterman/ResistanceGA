@@ -26,7 +26,6 @@ MLPE.lmm <-
     
     if (class(resistance)[[1]] == 'dist') {
       mm <- as.vector(resistance)
-
       m <- attr(resistance, "Size")
       mm <- mm[which(mm != -1)]
       
@@ -82,7 +81,7 @@ MLPE.lmm2 <- function(resistance, response, REML = FALSE, ID, ZZ) {
   } else {
     resistance <- as.vector(resistance)
     resistance <- resistance[which(resistance != -1)]
-
+    
     dat <- data.frame(ID, resistance = resistance, response = response)
     colnames(dat) <- c("pop1", "pop2", "resistance", "response")
     
@@ -125,7 +124,7 @@ MLPE.lmm_coef <-
         mm <- read.table(resist.mat[i])[-1, -1]
         mm <- lower(mm)
         mm <- mm[which(mm != -1)]
-
+        
         if (is.null(ID)) {
           ID <- To.From.ID(POPS = m)
           
@@ -171,6 +170,7 @@ MLPE.lmm_coef <-
       for (i in 1:length(resist.mat)) {
         cd <- read.csv(resist.mat[i], header = F)
         mm <- lower(cd)
+        # mm <- lower(cd)
         m <- dim(cd)[1]
         ID <- To.From.ID(POPS = m)
         ZZ <- ZZ.mat(ID = ID)

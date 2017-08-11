@@ -65,7 +65,7 @@ Grid.Search <- function(shape, max, transformation, Resistance, CS.inputs=NULL, 
       # Modified 16 September 2015
       AICc <- Resistance.Opt_AICc(PARM = c(EQ,t(GRID[i,])),
                                   Resistance = r,
-                                  CS.inputs = CS.inputs, 
+                                  gdist.inputs = gdist.inputs, 
                                   Min.Max='min',
                                   GA.inputs = GA.inputs)
       
