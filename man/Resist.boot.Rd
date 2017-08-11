@@ -15,7 +15,7 @@ Resist.boot(mod.names, dist.mat, n.parameters, sample.prop, iters, obs, genetic.
 
 \item{sample.prop}{Proportion of observations to be sampled each iteration (Default = 0.75)}
 
-\item{iters}{DNumber of bootstrap iterations to be conducted}
+\item{iters}{Number of bootstrap iterations to be conducted}
 
 \item{obs}{Total number of observations (populations or individuals) in your original analysis}
 
