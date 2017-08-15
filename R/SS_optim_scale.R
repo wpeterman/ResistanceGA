@@ -443,7 +443,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
         col.names = F
       )
       
-      writeRaster(r, paste0(GA.inputs$Results.dir, NAME, ".asc"), overwrite =
+      writeRaster(r.tran, paste0(GA.inputs$Results.dir, NAME, ".asc"), overwrite =
                     TRUE)
       
       Diagnostic.Plots(

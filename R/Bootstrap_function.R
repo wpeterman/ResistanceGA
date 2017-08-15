@@ -62,7 +62,7 @@ Resist.boot <-
         )
         
         mod.aic <- data.frame(mod.names[j], n.parameters[j], AICc)
-        names(mod.aic) <- c("surface", "k", "AICc")
+        names(mod.aic) <- c("surface", "k", "AICc", "R2m")
         
         AICc.tab[[j]] <- mod.aic
         progress_bar$step()
@@ -74,23 +74,30 @@ Resist.boot <-
       AICc.tab <- AICc.tab %>% plyr::mutate(., delta = AICc - min(AICc)) %>%
         dplyr::mutate(., weight = (exp(-0.5 * delta)) / sum(exp(-0.5 * delta))) %>%
         dplyr::mutate(., rank = rank(AICc)) %>%
-        dplyr::mutate(., iteration = i)
+        dplyr::mutate(., iteration = i) %>%
+        dplyr::mutate(., R2m = R2m)
       
       AIC.tab.list[[i]] <- AICc.tab
     } # Close iteration loop
     
-    # Get average weight and rank
+    # Get average weight, rank, & R2
     group.list <- AIC.tab.list %>% plyr::ldply(.) %>% dplyr::group_by(., surface)
     boot.avg <-
-      group.list %>% dplyr::summarise(.,
-                               avg.weight = mean(weight),
-                               avg.rank = mean(rank)) %>% arrange(., avg.rank)
+      group.list %>% 
+      dplyr::summarise(.,
+                       avg.R2m = mean(R2m),
+                       avg.weight = mean(weight),
+                       avg.rank = mean(rank)) %>% 
+      arrange(., avg.rank)
     
     Freq_Percent <-
-      group.list %>%  dplyr::filter(., rank == 1) %>% dplyr::tally(.) %>%  dplyr::mutate(Percent.top =
-                                                                      (100 * n) / sum(n))
+      group.list %>%  
+      dplyr::filter(., rank == 1) %>% 
+      dplyr::tally(.) %>%  
+      dplyr::mutate(Percent.top = (100 * n) / sum(n))
     
-    boot.avg <- dplyr::left_join(boot.avg, Freq_Percent, "surface") %>% dplyr::left_join(., k.mod, "surface")
+    boot.avg <- dplyr::left_join(boot.avg, Freq_Percent, "surface") %>% 
+      dplyr::left_join(., k.mod, "surface")
     boot.avg[is.na(boot.avg)] <- 0
     # boot.avg <- as.data.frame(boot.avg)
     
@@ -146,8 +153,10 @@ boot.AICc <- function(response, resistance, ID, ZZ, k) {
   mod$reTrms$Zt <- ZZ
   dfun <- do.call(mkLmerDevfun, mod)
   opt <- optimizeLmer(dfun)
-  mod.AIC <-
-    AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+  fit.mod <- mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr)
+  R.sq <- MuMIn::r.squaredGLMM(fit.mod)[[1]]
+  mod.AIC <- AIC(fit.mod)
   AICc <- mod.AIC + ((2 * k * (k + 1)) / (length(response) - k - 1))
-  return(AICc)
+  out <- data.frame(AICc = AICc, R2m = R.sq)
+  return(out)
 }

@@ -68,3 +68,15 @@ NULL
 #' @description  Sample file to be used with examples in the vignette
 #' @keywords datasets
 NULL
+
+#' Example pairwise genetic response data
+#'
+#' A square matrix of simulated pairwise distances
+#'
+#' @docType data
+#' @name response
+#' @format A 25 x 25 matrix
+#' @usage data(response)
+#' @description  Sample file that can be used with examples in the vignette. These simulated pairwise resistance distances represent the 'true' response to a composite resistance surface consisting of an inverse Ricker transformation of the the example continuous surface, and a reclassification of the categorical surface such that 0 = 1, 1 = 250, and 2 = 75.
+#' @keywords datasets
+NULL

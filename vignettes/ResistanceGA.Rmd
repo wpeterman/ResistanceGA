@@ -90,7 +90,9 @@ if(!("devtools" %in% list.files(.libPaths()))) {
     install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
 }
 
-devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Download package
+# Download package, build vignette
+devtools::install_github("wpeterman/ResistanceGA", 
+                         build_vignettes = TRUE) 
 ```
 
 Load `ResistancaGA` and clear your workspace.
@@ -104,7 +106,7 @@ Demonstrations
 ### Continuous surface transformations
 
 There are 8 different transformations that can be applied to continuous surfaces. Since the publication of Peterman et al. (2014), I have added Reverse Ricker and Inverse-Reverse Ricker transformation to better cover parameter space. I still think that there are more flexible ways to optimize surfaces, and I'm continuing to develop these as I have time.   
-![Transformations](figure/trans_plots.png)
+![Transformations](figure/trans_plots.png)\
 
 All of these figures were made with the `Plot.trans` function. This function returns a ggplot object, which allows you to manipulate some aspects of the plot, as well as determine the resistance value at different levels of your original surface.
 ```{r Plot.trans.demo, fig.height = 4, fig.width = 4}
@@ -414,7 +416,7 @@ plot.t <- Plot.trans(PARM = c(3.5, 150),
                      Resistance = continuous,
                      transformation = "Inverse-Reverse Monomolecular") 
 ```
-![InverseReverse_Monomolecular](figure\IR_Mono.png)  \
+![InverseReverse_Monomolecular](figure\IR_Mono.png)\
 
 Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically (if stored in a directory), or else imported in the order tehy occur in the raster stack. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`.   
 ```{r combine.surfaces, eval=FALSE}
@@ -655,6 +657,8 @@ PARM <- c(1, 250, 75, 8, 4, 150)
 
 # Setting `p.contribution = TRUE` to see how each surface 
 # contributes to the total resistance of the composite surface
+# This is the 'true' resistance surface that the example 'response'
+# data were generated from
 Resist <- Combine_Surfaces(PARM = PARM,
                            gdist.inputs = gdist.inputs,
                            GA.inputs = GA.inputs_NoFeature,
@@ -679,20 +683,26 @@ Here, the categorical surface is responsible for ~72% of the total landscape res
 dir.create(file.path("C:/ResistanceGA_Examples/","run1"))
 dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
 
-# Create the true response
-gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
+# Turn response data into vector
+gd.response <- Run_gdistance(gdist.inputs = gdist.inputs,
                          r = Resist$combined.surface) 
 
 gd.true <- as.vector(gd.true)
 
 # Add some noise to response
 set.seed(321)
-gd.response <- gd.true + rnorm(length(gd.true), 0, 5)
+gd.response <- gd.true + rnorm(length(gd.true), 0, 7)
 
 plot(gd.response ~ gd.true)
-ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.58
+ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.68
+
+# Correlation with distance
+ecodist::mantel(gd.response ~ as.vector(dist(samples[, c(2, 3)]))) # Mantel r = 0.28
+plot(gd.response ~ as.vector(dist(samples[, c(2, 3)])), xlab = "Euclidean distance")
 ```
 ![Noisy Genetic x Resistance distance](figure/noisy_genetic.png)\
+![Resistance dist x Euc. dist](figure/response_dist.png)\
+
 
 ```{r analysis2b, eval=FALSE}
 # Re-run `gdist.prep` function
@@ -731,16 +741,16 @@ Multi.Surface_optim.gd$percent.contribution
 Multi.Surface_optim.gd2$percent.contribution
 ```
 ```
-> Multi.Surface_optim.gd$percent.contribution;
+> Multi.Surface_optim.gd$percent.contribution
       surface       mean         l95       u95
-1 categorical 0.69634861 0.013726193 0.9943606
-2  continuous 0.26048108 0.003151459 0.9705886
-3     feature 0.04317031 0.001971552 0.3240171
-
+1 categorical 0.69442309 0.015257424 0.9936574
+2  continuous 0.25750338 0.003547613 0.9665766
+3     feature 0.04807353 0.002228049 0.3271122
+> 
 > Multi.Surface_optim.gd2$percent.contribution
-      surface    mean         l95       u95
-1 categorical 0.71418 0.017685212 0.9963173
-2  continuous 0.28582 0.003682675 0.9823148
+      surface      mean         l95       u95
+1 categorical 0.7162091 0.018947318 0.9962710
+2  continuous 0.2837909 0.003729041 0.9810527
 ```
 We can see that the feature surface has a minimal contribution to the total resistance, and that the mean contributions of the categorical and continuous surfaces are nearly identical to the 'true' contributions, especially when only these two surfaces are optimized together.
 
@@ -768,9 +778,9 @@ k <- rbind(SS_RESULTS.gdist$k,
            Multi.Surface_optim.gd$k,
            Multi.Surface_optim.gd2$k)
 
-# Make square genetic distance matrix
-g.mat <- matrix(rep(0, 25^2),nrow = 25)
-g.mat[lower.tri(g.mat)] <- gd.response
+# Use 'response' data provided with package, 
+# which is the square matrix of pairwise resistances
+data("response")
 
 # Run bootstrap
 (AIC.boot <- Resist.boot(mod.names = names(mat.list),
@@ -779,23 +789,23 @@ g.mat[lower.tri(g.mat)] <- gd.response
                          sample.prop = 0.75,
                          iters = 1000,
                          obs = 25,
-                         genetic.mat = g.mat
+                         genetic.mat = response
 )
 )
 
 ```
 
 ```
-                         surface   avg.weight avg.rank     n Percent.top     k
-                           <chr>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
-1         categorical.continuous 5.335519e-01    1.351   649        64.9     8
-2 categorical.continuous.feature 4.469329e-01    1.657   350        35.0    11
-3                    categorical 1.951522e-02    2.992     1         0.1     4
-4                     continuous 7.777292e-10    4.167     0         0.0     4
-5                       Distance 2.620175e-10    5.127     0         0.0     2
-6                        feature 2.414924e-10    5.706     0         0.0     3
+                         surface   avg.R2m   avg.weight avg.rank     n Percent.top     k
+                           <chr>     <dbl>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
+1         categorical.continuous 0.4536016 5.161502e-01    1.322   679        67.9     8
+2 categorical.continuous.feature 0.4549328 4.277633e-01    1.708   315        31.5    11
+3                    categorical 0.4306851 5.608608e-02    2.970     6         0.6     4
+4                     continuous 0.1773572 1.842331e-07    4.075     0         0.0     4
+5                        feature 0.1587058 7.339831e-08    5.437     0         0.0     3
+6                       Distance 0.1612018 7.210663e-08    5.488     0         0.0     2
 ```
-You can see that there is decent support for the composite surface that (incorrectly) includes the feature surface, but that in 65% of bootstrap samples, the composite without the feature surface was the top model.      
+You can see that there is decent support for the composite surface that (incorrectly) includes the feature surface, but that in 68% of bootstrap samples, the composite without the feature surface was the top model.      
 
 
 The model selection clearly suggests, correctly, that the multisurface combination with the categorical and continuous surface is the best. In looking at the full results output Further, if you assess the optimized values from this analysis, you can see that each surface was parameterized very well. The maximum resistance value of all surfaces was lower than the true surface, but overall this resulted in a nearly perfectly correlated surface (r = 1.00). It is worth noting that the optimized surface resulted in a marginal R^2^ = 0.62, suggesting that optimization with 'noisy' genetic data may not result in the highest R^2^ values, but that optimization can nonetheless reliably determine the effects of the landscape on pairwise genetic distance. 
@@ -809,11 +819,11 @@ row.names(Summary.table)<-c("Category1", "Category2", "Category3",
 > Summary.table
                Truth Optimized
 Category1          1      1.00
-Category2        250    342.55
-Category3         75     91.49
-Transformation     8      8.28
-Shape              4      3.96
-Max              150    185.43
+Category2        250    334.23
+Category3         75     86.07
+Transformation     8      8.45
+Shape              4      3.95
+Max              150    171.22
 ```
 ```{r, eval = FALSE}
 opt.r <- raster("C:/ResistanceGA_Examples/run2/Results/categorical.continuous.asc")

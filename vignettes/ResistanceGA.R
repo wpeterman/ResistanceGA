@@ -378,6 +378,8 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  
 #  # Setting `p.contribution = TRUE` to see how each surface
 #  # contributes to the total resistance of the composite surface
+#  # This is the 'true' resistance surface that the example 'response'
+#  # data were generated from
 #  Resist <- Combine_Surfaces(PARM = PARM,
 #                             gdist.inputs = gdist.inputs,
 #                             GA.inputs = GA.inputs_NoFeature,
@@ -394,18 +396,22 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  dir.create(file.path("C:/ResistanceGA_Examples/","run1"))
 #  dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
 #  
-#  # Create the true response
-#  gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
+#  # Turn response data into vector
+#  gd.response <- Run_gdistance(gdist.inputs = gdist.inputs,
 #                           r = Resist$combined.surface)
 #  
 #  gd.true <- as.vector(gd.true)
 #  
 #  # Add some noise to response
 #  set.seed(321)
-#  gd.response <- gd.true + rnorm(length(gd.true), 0, 5)
+#  gd.response <- gd.true + rnorm(length(gd.true), 0, 7)
 #  
 #  plot(gd.response ~ gd.true)
-#  ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.58
+#  ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.68
+#  
+#  # Correlation with distance
+#  ecodist::mantel(gd.response ~ as.vector(dist(samples[, c(2, 3)]))) # Mantel r = 0.28
+#  plot(gd.response ~ as.vector(dist(samples[, c(2, 3)])), xlab = "Euclidean distance")
 
 ## ----analysis2b, eval=FALSE----------------------------------------------
 #  # Re-run `gdist.prep` function
@@ -451,9 +457,8 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #             Multi.Surface_optim.gd$k,
 #             Multi.Surface_optim.gd2$k)
 #  
-#  # Make square genetic distance matrix
-#  g.mat <- matrix(rep(0, 25^2),nrow = 25)
-#  g.mat[lower.tri(g.mat)] <- gd.response
+#  # Use 'response' data provided with package, which is the square matrix of pairwise resistances
+#  data("response")
 #  
 #  # Run bootstrap
 #  (AIC.boot <- Resist.boot(mod.names = names(mat.list),
@@ -462,7 +467,7 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #                           sample.prop = 0.75,
 #                           iters = 1000,
 #                           obs = 25,
-#                           genetic.mat = g.mat
+#                           genetic.mat = response
 #  )
 #  )
 #  
