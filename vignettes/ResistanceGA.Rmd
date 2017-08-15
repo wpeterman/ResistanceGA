@@ -684,7 +684,7 @@ dir.create(file.path("C:/ResistanceGA_Examples/","run1"))
 dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
 
 # Turn response data into vector
-gd.response <- Run_gdistance(gdist.inputs = gdist.inputs,
+gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
                          r = Resist$combined.surface) 
 
 gd.true <- as.vector(gd.true)
