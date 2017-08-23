@@ -41,9 +41,9 @@
 #'
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
 #'
-#' When `scale = TRUE`, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when `scale = TRUE`
+#' When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 #' 
-#' \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled.
+#' \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. For example, \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled. The order of surfaces will match either the order of the raster stack, or alphabetical order when reading in from a directory.
 #' 
 #' The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 #'
@@ -58,29 +58,29 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
-#' Results.dir=NULL,
-#' min.cat=1e-04,
-#' max.cat=2500,
-#' max.cont=2500,
+#' Results.dir = NULL,
+#' min.cat = 1e-04,
+#' max.cat = 2500,
+#' max.cont = 2500,
 #' min.scale = NULL,
 #' max.scale = NULL,
-#' cont.shape=NULL,
-#' select.trans=NULL,
+#' cont.shape = NULL,
+#' select.trans = NULL,
 #' method = "LL",
 #' scale = FALSE,
 #' scale.surfaces = NULL,
 #' k.value = 3,
 #' pop.mult = 15,
 #' percent.elite = 0.05,
-#' type= "real-valued",
-#' pcrossover=0.85,
-#' pmutation=0.125,
-#' maxiter=1000,
-#' run=25,
-#' keepBest=TRUE,
+#' type = "real-valued",
+#' pcrossover = 0.85,
+#' pmutation = 0.125,
+#' maxiter = 1000,
+#' run = 25,
+#' keepBest = TRUE,
 #' population = gaControl(type)$population,
 #' selection = gaControl(type)$selection,
-#' crossover="gareal_blxCrossover",
+#' crossover = "gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
 #' pop.size = NULL,
 #' parallel = FALSE,
