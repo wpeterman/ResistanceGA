@@ -12,7 +12,8 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,
-                           GA.inputs) {
+                           GA.inputs,
+                           scale.surfaces = NULL) {
   
   if (is.null(GA.inputs$scale)) {
     stop(
@@ -58,19 +59,19 @@ MS_optim.scale <- function(CS.inputs = NULL,
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for (i in 1:GA.inputs$n.layers) {
-      #   if (GA.inputs$surface.type[i] == "cat") {
-      #     ga.p <-
-      #       GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      #     parm <- ga.p / min(ga.p)
-      #     Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-      #                                                                    1])] <- parm
-      #     
-      #   } else {
+        if (GA.inputs$surface.type[i] == "cat") {
+          ga.p <-
+            GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+          parm <- ga.p / min(ga.p)
+          Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                         1])] <- parm
+
+        } else {
       parm <-
         GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
       Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                      1])] <- parm
-      # }
+      }
     }
     multi.GA_nG@solution <- Opt.parm
     
@@ -97,11 +98,11 @@ MS_optim.scale <- function(CS.inputs = NULL,
       EXPORT.dir = GA.inputs$Results.dir
     )
     
-    # ifelse(length(unique(RAST)) > 15,
-    #        type <- "continuous",
-    #        type <- "categorical")
+    ifelse(length(unique(RAST)) > 15,
+           type <- "continuous",
+           type <- "categorical")
     
-    type <- "continuous"
+    # type <- "continuous"
     
     Diagnostic.Plots(
       resistance.mat = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
@@ -245,19 +246,19 @@ MS_optim.scale <- function(CS.inputs = NULL,
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for (i in 1:GA.inputs$n.layers) {
-      # if (GA.inputs$surface.type[i] == "cat") {
-      #   ga.p <-
-      #     GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      #   parm <- ga.p / min(ga.p)
-      #   Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-      #                                                                  1])] <- parm
-      #   
-      # } else {
+      if (GA.inputs$surface.type[i] == "cat") {
+        ga.p <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        parm <- ga.p / min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+
+      } else {
       parm <-
         GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
       Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                      1])] <- parm
-      # }
+      }
     }
     multi.GA_nG@solution <- Opt.parm
     
@@ -287,11 +288,11 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 paste0(GA.inputs$Results.dir, NAME, ".asc"),
                 overwrite = TRUE)
     
-    # ifelse(length(unique(RAST)) > 15,
-    #        type <- "continuous",
-    #        type <- "categorical")
+    ifelse(length(unique(RAST)) > 15,
+           type <- "continuous",
+           type <- "categorical")
     
-    type <- "continuous"
+    # type <- "continuous"
     
     
     Diagnostic.Plots(

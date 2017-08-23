@@ -15,6 +15,7 @@ cont.shape=NULL,
 select.trans=NULL,
 method = "LL",
 scale = FALSE,
+scale.surfaces = NULL,
 k.value = 3,
 pop.mult = 15,
 percent.elite = 0.05,
@@ -55,6 +56,8 @@ quiet = FALSE)
 \item{method}{Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")}
 
 \item{scale}{Logical. To optimize a kernel smoothing scaling parameter during optimization, set to TRUE (Default = FALSE). See Details below.}
+
+\item{scale.surfaces}{(Optional) If doing multisurface optimization with kernel smoothing, indicate which surfaces should be smoothed. A vector equal in length to the number of resistance surfaces to be optimized using MS_optim.scale that is used to indicate whether a surface should (1) or should not (0) have kernel smoothing applied. See details.}
 
 \item{k.value}{Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).
 
@@ -106,6 +109,8 @@ This function prepares and compiles objects and commands for optimization with t
 Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
 
 When `scale = TRUE`, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when `scale = TRUE`
+
+\code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled.
 
 The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 
