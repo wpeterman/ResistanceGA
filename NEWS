@@ -1,3 +1,8 @@
+ResistanceGA 3.1-1
+--------
+* Fixed bug in MS_optim.scale function
+* Added option to select which surfaces to apply kernel smoothing to when conducting multisurface optimization
+
 ResistanceGA 3.1-0
 --------
 * Full release of extensively updated package 

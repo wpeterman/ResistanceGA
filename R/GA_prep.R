@@ -13,6 +13,7 @@
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
 #' @param scale Logical. To optimize a kernel smoothing scaling parameter during optimization, set to TRUE (Default = FALSE). See Details below.
+#' @param scale.surfaces (Optional) If doing multisurface optimization with kernel smoothing, indicate which surfaces should be smoothed. A vector equal in length to the number of resistance surfaces to be optimized using MS_optim.scale that is used to indicate whether a surface should (1) or should not (0) have kernel smoothing applied. See details.
 #' @param k.value Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).
 #'
 #' 1 --> k = 2;
@@ -40,7 +41,9 @@
 #'
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
 #'
-#' When `scale = TRUE`, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when `scale = TRUE`
+#' When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
+#' 
+#' \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. For example, \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled. The order of surfaces will match either the order of the raster stack, or alphabetical order when reading in from a directory.
 #' 
 #' The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 #'
@@ -55,28 +58,29 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
-#' Results.dir=NULL,
-#' min.cat=1e-04,
-#' max.cat=2500,
-#' max.cont=2500,
+#' Results.dir = NULL,
+#' min.cat = 1e-04,
+#' max.cat = 2500,
+#' max.cont = 2500,
 #' min.scale = NULL,
 #' max.scale = NULL,
-#' cont.shape=NULL,
-#' select.trans=NULL,
+#' cont.shape = NULL,
+#' select.trans = NULL,
 #' method = "LL",
 #' scale = FALSE,
+#' scale.surfaces = NULL,
 #' k.value = 3,
 #' pop.mult = 15,
 #' percent.elite = 0.05,
-#' type= "real-valued",
-#' pcrossover=0.85,
-#' pmutation=0.125,
-#' maxiter=1000,
-#' run=25,
-#' keepBest=TRUE,
+#' type = "real-valued",
+#' pcrossover = 0.85,
+#' pmutation = 0.125,
+#' maxiter = 1000,
+#' run = 25,
+#' keepBest = TRUE,
 #' population = gaControl(type)$population,
 #' selection = gaControl(type)$selection,
-#' crossover="gareal_blxCrossover",
+#' crossover = "gareal_blxCrossover",
 #' mutation = gaControl(type)$mutation,
 #' pop.size = NULL,
 #' parallel = FALSE,
@@ -94,6 +98,7 @@ GA.prep <- function(ASCII.dir,
                     select.trans = NULL,
                     method = "LL",
                     scale = FALSE,
+                    scale.surfaces = NULL,
                     k.value = 3,
                     pop.mult = 15,
                     percent.elite = 0.05,
@@ -111,7 +116,7 @@ GA.prep <- function(ASCII.dir,
                     parallel = FALSE,
                     seed = NULL,
                     quiet = FALSE) {
-  if (scale == FALSE) {
+  if(scale == FALSE) {
     scale <- NULL
   }
   
@@ -152,6 +157,18 @@ GA.prep <- function(ASCII.dir,
     n.layers <- length(ASCII.list)
   }
   
+  if(is.null(scale.surfaces) && !is.null(scale)) {
+    scale.surfaces <- rep(1, n.layers)
+  }
+  
+  if(is.null(scale.surfaces) && is.null(scale)) {
+    scale.surfaces <- rep(0, n.layers)
+  }
+  
+  if(length(scale.surfaces) != n.layers) {
+    stop("The 'scale.surfaces' vector is not the same length as the number of layers")
+  }
+  
   if ("Results" %in% dir(Results.dir) == FALSE)
     dir.create(file.path(Results.dir, "Results"))
   #   dir.create(file.path(ASCII.dir, "Results"),showWarnings = FALSE)
@@ -176,13 +193,14 @@ GA.prep <- function(ASCII.dir,
     
     if (n.levels <= 15 &
         n.levels > 2 &
-        !is.null(scale)) {
+        !is.null(scale) &
+        scale.surfaces[i] == 1) {
       stop(
         "Kernel smoothing can only be applied to binary (1/0) categorical or feature surfaces. Please refer to 'Details' of the `GA.prep` function or the Vignette for help."
       )
     }
     
-    if (n.levels == 2 & !is.null(scale)) {
+    if (n.levels == 2 & !is.null(scale) & scale.surfaces[i]==1) {
       parm.type[i, 1] <- "cont"
       parm.type[i, 2] <- 4
       parm.type[i, 3] <- names[i]
@@ -222,7 +240,7 @@ GA.prep <- function(ASCII.dir,
       
     } else {
       parm.type[i, 1] <- "cont"
-      if (!is.null(scale)) {
+      if (!is.null(scale)  & scale.surfaces[i]==1) {
         parm.type[i, 2] <- 4
         
         if (is.null(min.scale)) {
@@ -271,7 +289,7 @@ GA.prep <- function(ASCII.dir,
   }
   
   for (i in 1:length(surface.type)) {
-    if (surface.type[i] == "cat" & !is.null(scale)) {
+    if (surface.type[i] == "cat" & !is.null(scale) & scale.surfaces[i] == 1) {
       SUGGESTS[[i]] <-
         sv.cont.nG(
           "NA",
@@ -289,7 +307,7 @@ GA.prep <- function(ASCII.dir,
                max.cat)
       
     } else if (exists("cont.shape") &&
-               length(cont.shape > 0) && !is.null(scale)) {
+               length(cont.shape > 0) && !is.null(scale) && scale.surfaces[i] == 1) {
       SUGGESTS[[i]] <-
         sv.cont.nG(
           "NA",
@@ -305,7 +323,7 @@ GA.prep <- function(ASCII.dir,
         sv.cont.nG(cont.shape[1], pop.size = pop.size, max.cont)
       cont.shape <- cont.shape[-1]
       
-    } else if (!is.null(scale)) {
+    } else if (!is.null(scale) && scale.surfaces[i] == 1) {
       SUGGESTS[[i]] <-
         sv.cont.nG(
           "NA",
@@ -335,6 +353,7 @@ GA.prep <- function(ASCII.dir,
     ga.max = ga.max,
     select.trans = eqs,
     scale = scale,
+    scale.surfaces = scale.surfaces,
     surface.type = surface.type,
     parm.type = parm.type,
     Resistance.stack = r,

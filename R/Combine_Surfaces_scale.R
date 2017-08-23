@@ -65,32 +65,95 @@ Combine_Surfaces.scale <-
     ######
     select.trans <- GA.inputs$select.trans
     r <- GA.inputs$Resistance.stack
-    
     for (i in 1:GA.inputs$n.layers) {
-      if (GA.inputs$surface.type[i] == "cat") {
-        stop(
-          "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
-        )
+      
+      if(GA.inputs$scale.surfaces[i] == 0) {
         
-        parm <-
-          PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- parm / min(parm)
-        df <-
-          data.frame(id = unique(r[[i]]), parm) # Data frame with original raster values and replacement values
-        r[[i]] <- subs(r[[i]], df)
-        
-        r[[i]] <- r[[i]]#-1 # Set minimum to 0
-        
-        
-      } else {
+        if (GA.inputs$surface.type[i] == "cat") {
+          parm <-
+            PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+          parm <- parm / min(parm)
+          df <-
+            data.frame(id = unique(r[[i]]), parm) # Data frame with original raster values and replacement values
+          r[[i]] <- subs(r[[i]], df)
+          
+          r[[i]] <- r[[i]]#-1 # Set minimum to 0
+          
+          
+        } else {
+          rast <- SCALE(data = r[[i]],
+                        MIN = 0,
+                        MAX = 10)
+          parm <-
+            PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+          
+          
+          # Set equation for continuous surface
+          equation <- floor(parm[1]) # Parameter can range from 1-9.99
+          
+          # Read in resistance surface to be optimized
+          SHAPE <-  (parm[2])
+          Max.SCALE <- (parm[3])
+          
+          # Apply specified transformation
+          rick.eq <- (equation == 2 ||
+                        equation == 4 || equation == 6 || equation == 8)
+          if (rick.eq == TRUE & SHAPE > 5) {
+            equation <- 9
+          }
+          
+          if (equation %in% select.trans[[i]]) {
+            equation <- equation
+          } else {
+            equation <- 9
+          }
+          
+          # Apply specified transformation
+          if (equation == 1) {
+            r[[i]] <- Inv.Rev.Monomolecular(rast, parm)
+            EQ <- "Inverse-Reverse Monomolecular"
+            
+          } else if (equation == 5) {
+            r[[i]] <- Rev.Monomolecular(rast, parm)
+            EQ <- "Reverse Monomolecular"
+            
+          } else if (equation == 3) {
+            r[[i]] <- Monomolecular(rast, parm)
+            EQ <- "Monomolecular"
+            
+          } else if (equation == 7) {
+            r[[i]] <- Inv.Monomolecular(rast, parm)
+            EQ <- "Inverse Monomolecular"
+            
+          } else if (equation == 8) {
+            r[[i]] <- Inv.Ricker(rast, parm)
+            EQ <- "Inverse Ricker"
+            
+          } else if (equation == 4) {
+            r[[i]] <- Ricker(rast, parm)
+            EQ <- "Ricker"
+            
+          } else if (equation == 6) {
+            r[[i]] <- Rev.Ricker(rast, parm)
+            EQ <- "Reverse Ricker"
+            
+          } else if (equation == 2) {
+            r[[i]] <- Inv.Rev.Ricker(rast, parm)
+            EQ <- "Inverse-Reverse Ricker"
+            
+          } else {
+            r[[i]] <- (rast * 0) + 1 #  Cancel layer...set to zero
+          } # End if-else
+        } # Close parameter type if-else
+      } else { # Else scale surface
         
         parm <-
           PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
         
         
         rast <- k.smooth(raster = r[[i]],
-                      sigma = parm[4],
-                      SCALE = TRUE)
+                         sigma = parm[4],
+                         SCALE = TRUE)
         
         # rast <- SCALE(data = r[[i]],
         #               MIN = 0,
@@ -152,14 +215,14 @@ Combine_Surfaces.scale <-
         } else {
           r[[i]] <- (rast * 0) + 1 #  Cancel layer...set to zero
         } # End if-else
-      } # Close parameter type if-else
-    } # Close layer loop
+      } # Close parameter type scale if-else
+    } # Close layer loop layer i
     
     
     File.name <- File.name
     
-    ms.r <- multi_surface <- sum(r) #+ 1 # Add all surfaces together
-    
+    ms.r <- multi_surface <- sum(r) # Add all surfaces together
+
     if (rescale == TRUE)
       multi_surface <-
       multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
@@ -167,7 +230,7 @@ Combine_Surfaces.scale <-
     if (cellStats(multi_surface, "max") > 1e6)
       multi_surface <-
       SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
-
+    
     if (is.null(out)) {
       if(p.contribution == FALSE) {
         (multi_surface)
