@@ -8,6 +8,7 @@
 #' @param REML Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE
 #' @param ID The to_from ID list for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
 #' @param ZZ The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)
+#' @param scale Specify whether the pairwise distance values be scaled and centered (Default = TRUE)
 #' @return A lmer object from the fitted model
 #' @details An AIC value will only be returned if \code{REML = FALSE}
 
@@ -21,7 +22,8 @@ MLPE.lmm <-
            pairwise.genetic,
            REML = FALSE,
            ID = NULL,
-           ZZ = NULL) {
+           ZZ = NULL,
+           scale = TRUE) {
     response = pairwise.genetic
     
     if (class(resistance)[[1]] == 'dist') {
@@ -35,7 +37,31 @@ MLPE.lmm <-
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)
       }
-      cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+      
+      if(scale == T) {
+        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+      } else {
+        cs.matrix <- mm
+      }
+      
+    } else if(nrow(resistance) == ncol(resistance)) {
+      mm <- resistance
+      m <- nrow(mm)
+      mm <- lower(mm)
+      mm <- mm[which(mm != -1)]
+      
+      if (is.null(ID)) {
+        ID <- To.From.ID(POPS = m)
+      }
+      if (is.null(ZZ)) {
+        ZZ <- ZZ.mat(ID = ID)
+      }
+      
+      if(scale == T) {
+        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+      } else {
+        cs.matrix <- mm
+      }  
       
     } else {
       mm <- (read.table(resistance)[-1, -1])
@@ -49,7 +75,12 @@ MLPE.lmm <-
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)
       }
-      cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+      
+      if(scale == T) {
+        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+      } else {
+        cs.matrix <- mm
+      }
     }
     
     dat <- data.frame(ID, resistance = cs.matrix, response = response)

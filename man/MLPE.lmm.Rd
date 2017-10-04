@@ -16,6 +16,8 @@ MLPE.lmm(resistance, pairwise.genetic, REML, ID, ZZ)
 \item{ID}{The to_from ID list for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)}
 
 \item{ZZ}{The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)}
+
+\item{scale}{Specify whether the pairwise distance values be scaled and centered (Default = TRUE)}
 }
 \value{
 A lmer object from the fitted model
