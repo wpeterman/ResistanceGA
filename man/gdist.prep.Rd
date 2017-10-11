@@ -17,7 +17,7 @@ gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, m
 
 \item{directions}{Directions in which cells are connected (4, 8, 16, or other). Default = 8}
 
-\item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorrection}} ill be applied to the transition  matrix. Defaault = FALSE}
+\item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorrection}} will be applied to the transition  matrix. Default = FALSE}
 
 \item{method}{Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.}
 }

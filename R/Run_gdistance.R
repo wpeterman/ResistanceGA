@@ -18,17 +18,15 @@ Run_gdistance <- function(gdist.inputs, r) {
     directions = gdist.inputs$directions
   )
   
-  if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8) {
-    tr <- geoCorrection(tr, "c")
-  }
-  
-  if (gdist.inputs$method == 'costDistance') {
-    ## Calculate least cost distance (Default)
-    ret <- costDistance(tr, gdist.inputs$samples)
-  } else {
-    ret <-
-      commuteDistance(tr, gdist.inputs$samples) / 1000   ## Calculate commute time = resistance distance
-  }
+    if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
+      trC <- geoCorrection(tr, "c")
+      ret <- costDistance(trC, gdist.inputs$samples)
+    }
+    
+    if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
+      trR <- geoCorrection(tr, "r")
+      ret <- commuteDistance(trR, gdist.inputs$samples) / 1000
+    } 
 
   return(ret)
 }

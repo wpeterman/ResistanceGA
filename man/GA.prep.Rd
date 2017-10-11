@@ -47,7 +47,7 @@ quiet = FALSE)
 
 \item{min.scale}{The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 1)}
 
-\item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.5 * nrows in the raster surface)}
+\item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.25 * nrows in the raster surface)}
 
 \item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)}
 

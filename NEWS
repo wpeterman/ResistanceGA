@@ -1,3 +1,7 @@
+ResistanceGA 3.1-2
+--------
+* Updated `Run_gdistance` function to apply geoCorrections specic to costDistance and commuteDistance
+
 ResistanceGA 3.1-1
 --------
 * Fixed bug in MS_optim.scale function

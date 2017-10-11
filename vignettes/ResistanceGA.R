@@ -11,7 +11,9 @@ library(raster, warn.conflicts = F, quietly = T)
 #      install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE)
 #  }
 #  
-#  devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Download package
+#  # Download package, build vignette
+#  devtools::install_github("wpeterman/ResistanceGA",
+#                           build_vignettes = TRUE)
 
 ## ----results='hide',message=FALSE, warning=FALSE-------------------------
 library(ResistanceGA)
@@ -397,7 +399,7 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  dir.create(file.path("C:/ResistanceGA_Examples/","run2"))
 #  
 #  # Turn response data into vector
-#  gd.response <- Run_gdistance(gdist.inputs = gdist.inputs,
+#  gd.true <- Run_gdistance(gdist.inputs = gdist.inputs,
 #                           r = Resist$combined.surface)
 #  
 #  gd.true <- as.vector(gd.true)
@@ -457,7 +459,8 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #             Multi.Surface_optim.gd$k,
 #             Multi.Surface_optim.gd2$k)
 #  
-#  # Use 'response' data provided with package, which is the square matrix of pairwise resistances
+#  # Use 'response' data provided with package,
+#  # which is the square matrix of pairwise resistances
 #  data("response")
 #  
 #  # Run bootstrap
