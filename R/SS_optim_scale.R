@@ -40,7 +40,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
   MLPE.list <- list()
   cd.list <- list()
   k.list <- list()
-
+  
   # Optimize each surface in turn
   for (i in 1:GA.inputs$n.layers) {
     r <- GA.inputs$Resistance.stack[[i]]
@@ -190,13 +190,15 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       names(MLPE.list)[i] <- GA.inputs$layer.names[i]
       names(cd.list)[i] <- GA.inputs$layer.names[i]
-
+      
       if (k.value == 1) {
         k <- 2
       } else if (k.value == 2) {
         k <- GA.inputs$parm.type$n.parm[i] + 1
+      } else if (k.value == 3) {
+        k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
       } else {
-        k <- GA.inputs$parm.type$n.parm[i] + 1
+        k <- length(GA.inputs$layer.names[i]) + 1
       }
       
       k.list[[i]] <- k
@@ -318,9 +320,9 @@ SS_optim.scale <- function(CS.inputs = NULL,
         )
         
         cd.list[[i + 1]] <- cd
-          # (read.table(paste0(
-          # GA.inputs$Results.dir,
-          # "dist_resistances.out"))[-1, -1])
+        # (read.table(paste0(
+        # GA.inputs$Results.dir,
+        # "dist_resistances.out"))[-1, -1])
         
         names(MLPE.list)[i + 1] <- 'Distance'
         names(cd.list)[i + 1] <- 'Distance'
@@ -511,13 +513,15 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       names(MLPE.list)[i] <- GA.inputs$layer.names[i]
       names(cd.list)[i] <- GA.inputs$layer.names[i] 
-
+      
       if (k.value == 1) {
         k <- 2
       } else if (k.value == 2) {
         k <- GA.inputs$parm.type$n.parm[i] + 1
+      } else if (k.value == 3) {
+        k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
       } else {
-        k <- GA.inputs$parm.type$n.parm[i] + 1
+        k <- length(GA.inputs$layer.names[i]) + 1
       }
       
       k.list[[i]] <- k
@@ -605,7 +609,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
         
         names(MLPE.list)[i + 1] <- 'Distance'
         names(cd.list)[i + 1] <- 'Distance'
-
+        
         ROW <- nrow(gdist.inputs$ID)
         k <- 2
         
@@ -781,20 +785,20 @@ SS_optim.scale <- function(CS.inputs = NULL,
   k.list <- plyr::ldply(k.list)
   colnames(k.list) <- c("surface", "k")
   
-   RESULTS <-
-      list(
-        ContinuousResults = Results.cont,
-        CategoricalResults = NULL,
-        AICc = Results.All,
-        MLPE = MLPE.results,
-        Run.Time = rt,
-        MLPE.list = MLPE.list,
-        cd = cd.list,
-        k = k.list
-      )
+  RESULTS <-
+    list(
+      ContinuousResults = Results.cont,
+      CategoricalResults = NULL,
+      AICc = Results.All,
+      MLPE = MLPE.results,
+      Run.Time = rt,
+      MLPE.list = MLPE.list,
+      cd = cd.list,
+      k = k.list
+    )
   
   file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
- 
-   return(RESULTS)
+  
+  return(RESULTS)
   
 }
