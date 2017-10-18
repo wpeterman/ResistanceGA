@@ -1,3 +1,9 @@
+ResistanceGA 3.1-3
+--------
+* Default setting for k.value in GA.prep is now 2, meaning that AICc is calculated based on the number of parameters optimized, plus 1 for the mixed effects model intercept.
+* Typos corrected throughout documentation
+* Updated vignette
+
 ResistanceGA 3.1-2
 --------
 * Updated `Run_gdistance` function to apply geoCorrections specic to costDistance and commuteDistance

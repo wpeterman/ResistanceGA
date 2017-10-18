@@ -1,6 +1,6 @@
 Package: ResistanceGA
 Title: Optimize resistance surfaces using genetic algorithms
-Version: 3.1-2
+Version: 3.1-3
 Author: Bill Peterman <Bill.Peterman@gmail.com>
 Maintainer: Bill Peterman <bill.peterman@gmail.com>
 Description: This package contains functions to optimize

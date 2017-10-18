@@ -157,8 +157,10 @@ SS_optim <- function(CS.inputs = NULL,
           k <- 2
         } else if (k.value == 2) {
           k <- GA.inputs$parm.type$n.parm[i] + 1
+        } else if (k.value == 3) {
+          k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
         } else {
-          k <- GA.inputs$parm.type$n.parm[i] + 2
+          k <- length(GA.inputs$layer.names[i]) + 1
         }
         
         n <- CS.inputs$n.Pops
@@ -420,9 +422,10 @@ SS_optim <- function(CS.inputs = NULL,
             k <- 2
           } else if (k.value == 2) {
             k <- GA.inputs$parm.type$n.parm[i] + 1
-
+          } else if (k.value == 3) {
+            k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
           } else {
-            k <- GA.inputs$parm.type$n.parm[i] + 1
+            k <- length(GA.inputs$layer.names[i]) + 1
           }
           
           k.list[[i]] <- k
@@ -738,8 +741,10 @@ SS_optim <- function(CS.inputs = NULL,
           k <- 2
         } else if (k.value == 2) {
           k <- GA.inputs$parm.type$n.parm[i] + 1
+        } else if (k.value == 3) {
+          k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
         } else {
-          k <- GA.inputs$parm.type$n.parm[i] + 1
+          k <- length(GA.inputs$layer.names[i]) + 1
         }
         
         k.list[[i]] <- k
@@ -1032,9 +1037,10 @@ SS_optim <- function(CS.inputs = NULL,
             k <- 2
           } else if (k.value == 2) {
             k <- GA.inputs$parm.type$n.parm[i] + 1
-
+          } else if (k.value == 3) {
+            k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
           } else {
-            k <- GA.inputs$parm.type$n.parm[i] + 1
+            k <- length(GA.inputs$layer.names[i]) + 1
           }
           
           k.list[[i]] <- k

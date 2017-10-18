@@ -11,11 +11,11 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+  knitr::opts_chunk$set(echo = TRUE)
 ```
-
+  
 ```{r, echo = FALSE}
-library(ggplot2, warn.conflicts = F, quietly = T)
+  library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 ```
 
@@ -28,7 +28,7 @@ An R Package for Optimizing Resistance Surfaces using Genetic Algorithms
 With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how you can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, implemented using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
 
 
-This package fills a void in the landscape genetics toolbox. There are various methods proposed for determining resistance values (reviewed by [Spear et al., 2010](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2010.04657.x/abstract "Spear et al.")). Previously utilized methods generally searched a limited parameter space and/or relied on expert opinion. [Graves et al. (2013)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12348/abstract "Graves et al.") utilized optimization functions and interindividual genetic distances to determine resistance values, but found that the data generating values were rarely recoverable. I have not assessed the ability of functions/methods utilized in this package to optimize resistance surfaces as in Graves et al. (2013), but do note that very different methods of scaling, transforming, and combining resistance surfaces are utilized in `ResistanceGA`.     
+This package fills a void in the landscape genetics toolbox. There are various methods proposed for determining resistance values (reviewed by [Spear et al., 2010](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2010.04657.x/abstract "Spear et al.")). Previously utilized methods generally searched a limited parameter space and/or relied on expert opinion. [Graves et al. (2013)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12348/abstract "Graves et al.") utilized optimization functions and inter-individual genetic distances to determine resistance values, but found that the data generating values were rarely recoverable. I have not assessed the ability of functions/methods utilized in this package to optimize resistance surfaces as in Graves et al. (2013), but do note that very different methods of scaling, transforming, and combining resistance surfaces are utilized in `ResistanceGA`.     
 
 A few words of caution. I have made every effort to run and test each function with simulated data, but I make no guarantees concerning function performance and stability. Data formatting can be a challenge, and I have tried to simplify the process as much as possible. If you choose to optimize using CIRCUITSCAPE, please make sure you carefully read through the [CIRCUITSCAPE](http://www.circuitscape.org/home "CIRCUITSCAPE") documentation, as well as other relevant papers by [Brad McRae](http://www.circuitscape.org/pubs "McRae papers") to get a more complete understanding of resistance modeling and circuit theory. If errors occur, start by making sure that you are providing function inputs in the correct format. If a function does not work, there likely will **not** be a useful error message to help you troubleshoot. Depending on interest and use, these are features that may be added in the future. Lastly, this is not a fast process. Even with the 50x50 pixel simulated landscapes used in this tutorial, each (CIRCUITSCAPE) optimization iteration takes 0.75--1.00 seconds to complete (Intel i7 3.6 GHz processor, 24 GB RAM). As of version 3.0-4, it is possible to optimize using the `commuteDistance` function of `gdistance`. This approach is functionally equivalent to CIRCUITSCAPE [Kivimäki et al., 2014](https://doi.org/10.1016/j.physa.2013.09.016 "Kivimäki et al."), is slightly faster, and allows the optimization algorithm to be run in parallel. Optimizing using least cost paths is ~3x faster than with CIRCUITSCAPE, optimization with commute-time distance is ~2x faster (although processing times for CIRCUITSCAPE and `commuteDistance` converge for larger landscapes [e.g., > 1 million pixels]). To further reduce optimization time when using least cost paths or commute-time distance, the optimization can be run in parallel. This will effectively reduce optimization time by the number of cores used for optimization. It appears that under most circumstances the resolution of the landscape can be reduced without loss of information ([McRae et al., 2008](http://www.esajournals.org/doi/abs/10.1890/07-1861.1 "McRae et al.")).      
 
@@ -52,30 +52,30 @@ differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402-
 
 Thoughts on Optimization
 ------
-There are three options for objective functions that can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R^2^, or (3) log-likelihood. By default (as of version 3.0-4), the default is to optimize using seeks to optimize using log-likelihood as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R^2^. However, R^2^ seems not to be a sensitive enough to allow the optimization procedure to reliably progress. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations inlcuded in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
+There are three options for objective functions that can be used when optimizing resistance surfaces with `ResistanceGA`: (1) AIC, (2) conditional R^2^, or (3) log-likelihood. By default (as of version 3.0-4), the default is to optimize using seeks to optimize using log-likelihood as the objective function. Given that the overall goal of a landscape genetics analysis is to assign resistance values that best explain genetic differentiation, it seems sensible to use R^2^. However, R^2^ seems not to be a sensitive enough to allow the optimization procedure to reliably progress. Previously, AICc was used as the objective function, but it is not clear how best to determine the sample size when calculating AICc. Prior to version 3.0-0, the number of pairwise comparisons was used as the sample size. Now, sample size is equivalent to the number of populations included in your analysis. This is much more conservative, and increases in model complexity are more drastically penalized. On the topic of model complexity, this is also not a cut-and-dry assessment. __All__ the mixed effects models take the form:
 
 \begin{equation}
 Y_{ij} = \alpha + \beta(X_{ij} - x) + \tau_i + \tau_j + e_{ij}, \qquad j=2, .... n; \quad i = 1, ..., j-1, 
 \end{equation}
 
-which is the maximum liklihood population effects parameterization (see [Clarke et al., 2002](http://link.springer.com/article/10.1198%2F108571102320 "Clarke et al.")). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (_i.e. k_ = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter in addition to the intercept (_k_ = 3), while each category within a categorical surface is estimated (_k_ = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate indpendent variables because of high multicollinearity among surfaces that occurs during optimization. _k_ in multisurface models is determined as the sum of all estimated parameters plus 1 (intercept). __Again, there are no guidelines for how to determine *n* or *k* in these models. Use your best judgement and clearly articulate and justify your methods__.
+which is the maximum likelihood population effects parameterization (see [Clarke et al., 2002](http://link.springer.com/article/10.1198%2F108571102320 "Clarke et al.")). Because there is only ever a single independent variable (the vector of pairwise transformed resistance values), all models technically have the same number of parameters (_i.e. k_ = 2). However, multiple values were optimized to create these resistance values. For continuous surfaces there is a shape and a scale parameter in addition to the intercept (_k_ = 3), while each category within a categorical surface is estimated (_k_ = number of categories + 1). When multiple surfaces are optimized simultaneously, a single composite resistance is created. It is not possible to have each of these surfaces assessed as separate independent variables because of high multicollinearity among surfaces that occurs during optimization. As of version 3.1-3, the default setting for _k_ in multisurface models is determined as the number of surfaces present in the optimization plus 1 (intercept). __Again, there are no guidelines for how to determine *n* or *k* in these models. Use your best judgement and clearly articulate and justify your methods__. Through various testing, it seemed that the counting each optimized parameter toward the total _k_ over-penalized the fitted model, leading to ambiguity about the best supported model.
 
-Becasue of this uncertainty, it is now also possible to specify how _k_ is determined: (1) _k_ = the number of parameters in the in mixed effects model (i.e. 2); (2) _k_ = the total number of parameteers optimized plus the intercept; (3) _k_ = the total number of parameters optimized, plus the number of layers and the intercept. The method for evaluating _k_ and the objective function to use during optimization can both be specified in the `GA.prep` function.     
+Because of this uncertainty, it is now also possible to specify how _k_ is determined: (1) _k_ = the number of parameters in the in mixed effects model (i.e. 2); (2) _k_ = the total number of parameters optimized plus the intercept; (3) _k_ = the total number of parameters optimized, plus the number of layers and the intercept; (4) _k_ = the total number of surfaces optimized, plus the intercept. The method for evaluating _k_ and the objective function to use during optimization can both be specified in the `GA.prep` function.     
 
 Setup
 ------
 ### Install necessary software and packages
 If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` can only execute CIRCUITSCAPE on *WINDOWS* operating systems. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.     
 
-__Because it has now been determined that `commuteDistance` is equivalent to CIRCUITSCAPE, it is highly recommended to to conduct all optimizations using this approach, run in parallel. Doing do allows for all processes to be conducted within R, and will not require execution of software outside of the R environment. If final current flow maps are desired, these can still be generated using the optimized resistance surface using CIRCUITSCAPE.__     
+__Because it has now been determined that `commuteDistance` is equivalent to CIRCUITSCAPE, it is highly recommended to to conduct all optimizations using this approach, run in parallel. Doing so allows for all processes to be conducted within R, and will not require execution of software outside of the R environment. If final current flow maps are desired, these can still be generated using the optimized resistance surface using CIRCUITSCAPE.__     
 
 
 ### Running on Linux
 To run CIRCUITSCAPE on Linux (tested with Ubuntu 16.04):    
 1.  Install CIRCUITSCAPE---Default installation directory is `/usr/local/bin/csrun.py`   
 2. To call CIRCUITSCAPE from R, first change file permissions from the command line terminal (shortcut: control + alt+ t) ` sudo chomod 755 /usr/local/bin/csrun.py `  
-    * This will allow `csrun.py` to be executed without specifying paths.   
-    
+* This will allow `csrun.py` to be executed without specifying paths.   
+
 *If you can provide code of how to run CIRCUITSCAPE from R, I will work to implement it*
 
 *R Packages*    
@@ -87,7 +87,7 @@ First, install `ResistanceGA` from GitHub. This will require the `devtools` pack
 ```{r install.package, eval=FALSE}
 # Install 'devtools' package, if needed
 if(!("devtools" %in% list.files(.libPaths()))) {
-    install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
+  install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE) 
 }
 
 # Download package, build vignette
@@ -129,7 +129,7 @@ Example Function Use
 
 Make a directory to write ASCII files, CIRCUITSCAPE batch files, and results. It is critical that there are **NO SPACES** in the specified directory as this will cause functions that interact with CIRCUITSCAPE to fail.  
 ```{r warning=FALSE, results='hide',message=FALSE, eval=FALSE}
- 
+
 if("ResistanceGA_Examples"%in%dir("C:/")==FALSE) 
   dir.create(file.path("C:/", "ResistanceGA_Examples")) 
 
@@ -188,8 +188,8 @@ GA.inputs <- GA.prep(ASCII.dir = write.dir,
                      seed = 555) 
 
 CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-                   CS_Point.File = paste0(write.dir,"samples.txt"),
-                   CS.program = CS.program) 
+                     CS_Point.File = paste0(write.dir,"samples.txt"),
+                     CS.program = CS.program) 
 ```
 Note that `response` was not defined in `CS.prep` because it has not been made yet. When doing an actual analysis (not a simulation, as in this example) you will specify your pairwise genetic distance data as the response.     
 
@@ -218,9 +218,9 @@ CS.response <- Run_CS(CS.inputs = CS.inputs,
 Rerun `CS.prep` including the newly created `CS.response`
 ```{r eval=FALSE}
 CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-                   response = CS.response,
-                   CS_Point.File = paste0(write.dir,"samples.txt"),
-                   CS.program = CS.program)
+                     response = CS.response,
+                     CS_Point.File = paste0(write.dir,"samples.txt"),
+                     CS.program = CS.program)
 ```
 
 Run the Single surface optimization function (`SS_optim`). Running this example with the default settings
@@ -233,11 +233,11 @@ SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
 View the results and compare with truth   
 ```
 SS_table <- data.frame(c("Monomolecular", 2.0, 275),
-                        t(SS_RESULTS$ContinuousResults[c(3:5)]))
+t(SS_RESULTS$ContinuousResults[c(3:5)]))
 colnames(SS_table) <- c("Truth", "Optimized")
 
 SS_table
-                 Truth     Optimized
+Truth     Optimized
 Equation Monomolecular Monomolecular
 shape                2      1.999999
 max                275      274.9982
@@ -246,7 +246,7 @@ max                275      274.9982
 If you get the error:
 ```
 Error in initializePtr() : 
-  function 'dataptr' not provided by package 'Rcpp'
+function 'dataptr' not provided by package 'Rcpp'
 ```
 Reinstall the `Rcpp` package and execute the `SS_optim` function again.
 
@@ -256,15 +256,15 @@ After executing the function, the console will be updated to report the time to 
 What the `SS_optim` function does:       
 * Read each .asc file that is in the specified ASCII.dir and determines whether it is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values.   
 * Optimize each resistance surface   
- * Categorical surfaces: Each optimized value represents the resistance of that category to current flow   
- * Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that relative spacing is preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
+* Categorical surfaces: Each optimized value represents the resistance of that category to current flow   
+* Continuous surfaces: Each continuous surface is first rescaled so that values range from 0--10 (note that relative spacing is preserved during rescaling). The genetic algorithm then tests different combinations of the transformation equation, shape parameter value, and maximum resistance value. When the genetic algorithm has finished optimization, the optimized parameters can be passed to a second optimization function that uses `nlm` to fine-tune the shape and maximum value parameters (`nlm = TRUE`). However, this approach may lead to overfitting and the default is `nlm = FALSE`.   
 * Several summary outputs are generated   
- * In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).   
- * Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the objective function value for all surfaces (All_Results_AICc.csv)   
- * MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface   
- * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.   
+* In the 'Results' directory (located in the directory with the .asc files), a final optimized resistance .asc file has been made, along with the CIRCUITSCAPE results (.out files).   
+* Summary tables for continuous surfaces (ContinuousResults.csv), categorical surfaces (CategoricalResults.csv), and the objective function value for all surfaces (All_Results_AICc.csv)   
+* MLPE_coeff_Table.csv contains the model coefficients from the fitted mixed effects model for each surface   
+* In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface. If a continuous surface was optimized, there is also a plot showing the relationship of the transformed resistance surface with the original data.   
 * The returned object is a named list containing the tables described above.      
-  
+
 
 ### Minimum code for running ResistanceGA
 The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to to use the `r.tran` or `Run_CS` functions. You should only have to use the following functions (although you may want to change settings from defaults).
@@ -321,18 +321,17 @@ SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
 Now compare the results from optimization with CIRCUITSCAPE and optimization with `commuteDistance` 
 ```
 SS_table <- data.frame(c("Monomolecular", 2.0, 275),
-                        t(SS_RESULTS$ContinuousResults[c(9:11)]),
-                        t(SS_RESULTS.gdist$ContinuousResults[c(9:11)]))
+t(SS_RESULTS$ContinuousResults[c(9:11)]),
+t(SS_RESULTS.gdist$ContinuousResults[c(9:11)]))
 colnames(SS_table) <- c("Truth", "CS.Optimized", "commuteDist.Optimized")
 
 SS_table
-                 Truth     CS.Optimized   commuteDist.Optimized
+                  Truth     CS.Optimized   commuteDist.Optimized
 Equation Monomolecular    Monomolecular           Monomolecular
 shape                2        1.999999                1.999504
 max                275        274.9982                277.0668
 
 ```
-
 
 To view the response surface for the Monomolecular optimization of this surface, you can run `Grid.Search`. This function is only relevant for single continuous surfaces.
 ```{r eval=FALSE}
@@ -356,7 +355,7 @@ filled.contour(Grid.Results$Plot.data,
 
 Note that actual response surfaces tend to be slightly flatter, and the maximum value for a single surface is more difficult to identify precisely. If you were to add some random noise to the CS.response, the single surface optimization generally would do a good job of recovering the transformation and shape parameters, but the true maximum value may remain elusive. Occasionally the algorithm will get 'stuck' trying to optimize on an incorrect transformation. If this happens, rerun the optimization. Of course, you may not know that a surface wasn't correctly optimized when using real data. For this reason, it is good practice to run all optimizations at least twice to confirm parameter estimates. 
 
- ****
+****
 ## Simultaneous optimization of multiple surfaces
 
 First, make a new directory to write ASCII files, CIRCUITSCAPE batch files, and results.
@@ -418,7 +417,7 @@ plot.t <- Plot.trans(PARM = c(3.5, 150),
 ```
 ![InverseReverse_Monomolecular](figure\IR_Mono.png)\
 
-Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically (if stored in a directory), or else imported in the order tehy occur in the raster stack. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`.   
+Combine raster surfaces together using `Combine_Surfaces`. Note that the .asc files are read in alphabetically (if stored in a directory), or else imported in the order they occur in the raster stack. You can check the order of surfaces by inspecting `GA.inputs$layer.names`. First, define the parameters that will be passed to `Combine_Surfaces`.   
 ```{r combine.surfaces, eval=FALSE}
 PARM <- c(1, 250, 75, 1, 3.5, 150, 1, 350)
 
@@ -465,11 +464,11 @@ What the `MS_optim` function does:
 * Read all .asc files that are in the specified ASCII.dir (if using CIRCUITSCAPE), makes a raster stack, and determines whether each is a categorical or continuous surface. A surface is considered categorical if it contains 15 or fewer unique values. 
 * Transformation and resistance values are chosen for each surface, all surfaces are added together, and chosen objective function is obtained from the mixed effects model.   
 * Several summary outputs are generated   
- * In the 'Results' directory (i.e. Writedir), a final optimized resistance .asc file has been made (the name is a combination of the layers optimized, separated by "."), along with the CIRCUITSCAPE results (.out files) _OR_ gdistance results.   
- * 'Multisurface_Optim_Summary.txt' provides a text summary of the model parameters and results of the multisurface optimization  
- * A .csv file with the fitted MLPE model coefficients
- * A 'Percent_Contribution.csv' file is generated, reporting the mean and 95% CI of the contribution of each surface to the final composite resistance surface    
- * In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface.    
+* In the 'Results' directory (i.e. Writedir), a final optimized resistance .asc file has been made (the name is a combination of the layers optimized, separated by "."), along with the CIRCUITSCAPE results (.out files) _OR_ gdistance results.   
+* 'Multisurface_Optim_Summary.txt' provides a text summary of the model parameters and results of the multisurface optimization  
+* A .csv file with the fitted MLPE model coefficients
+* A 'Percent_Contribution.csv' file is generated, reporting the mean and 95% CI of the contribution of each surface to the final composite resistance surface    
+* In the 'Plots' directory there is a 4-panel figure with different model diagnostic plots generated from the fitted mixed effects model of each optimized resistance surface.    
 * The `GA` object from the optimization is returned and can be further explored.   
 
 The multisurface optimization procedure has done a pretty good job of recovering the relative data generating values. You'll notice that we have not exactly recovered the values, but that the relative relationship among surfaces is preserved (see below).
@@ -482,7 +481,7 @@ row.names(Summary.table)<-c("Category1", "Category2", "Category3",
 ```
 ```
 Summary.table
-               Truth Optimized
+Truth Optimized
 Category1        1.0      1.00
 Category2      250.0    233.10
 Category3       75.0     69.97
@@ -612,20 +611,20 @@ SS_RESULTS.gdist_scale <- SS_optim.scale(gdist.inputs = gdist.inputs,
 Assess optimized against truth 
 ```
 SS_table <- data.frame(c("Monomolecular", 2.0, 275, 1),
-                        t(SS_RESULTS.gdist_scale$ContinuousResults[c(9:12)]))
+t(SS_RESULTS.gdist_scale$ContinuousResults[c(9:12)]))
 colnames(SS_table) <- c("Truth", "commuteDist.Optimized")
 
 SS_table
-                 Truth commuteDist.Optimized
+Truth commuteDist.Optimized
 Equation Monomolecular         Monomolecular
 shape                2               2.10675
 max                275              313.7279
 scale                1             0.9916279
 
 ```
-Not too bad! As previusly mentioned, the maximum value parameter seems to be the hardest to optimize precisely. Note that optimization with a scaling parameter can be done with single surfaces or with a multi-surface composite. However, make sure that only continuous or binary surfaces are included.
+Not too bad! As previously mentioned, the maximum value parameter seems to be the hardest to optimize precisely. Note that optimization with a scaling parameter can be done with single surfaces or with a multi-surface composite. However, make sure that only continuous or binary surfaces are included.
 
-## Example Analysis
+# Example Analysis
 Below is an example analysis using the three raster surfaces and sample locations provided with `ResistanceGA`. The 'true' data generating surface in this example will be a combination of the categorical and transformed continuous surface. The feature surface will have no effect on the pairwise distances. This example will show how ResistanceGA can (1) be used for model selection; (2) determine the relative influence of each resistance surface within a composite or multisurface analysis. A full 'analysis' is presented below. Note that for the first time in the simulation of data, 'noise' is being added to make it more akin to empirical genetic data.
 
 ```{r analysis1, eval=FALSE}
@@ -641,19 +640,24 @@ gdist.inputs <-  gdist.prep(n.Pops = length(sample.locales),
                             method = 'commuteDistance')
 
 # This will be used again later
+# Note: to speed up the analysis, only Monomolecular tranformations will be assessed
 GA.inputs_NoFeature <- GA.prep(method = "LL",
                                ASCII.dir = resistance_surfaces[[-3]],
                                Results.dir = "C:/ResistanceGA_Examples/run2/",
                                max.cat = 500,
                                max.cont = 500,
-                               seed = 555,
-                               parallel = 4)
+                               select.trans = list(NA,
+                                                   "M"),
+                               seed = 123,
+                               parallel = 6)
 
 # The 'true' resistance surface will be the composite surface
 # Combine resistance surfaces, omitting the feature surface
-# Use an Inverse Ricker transformation of the continuous surface
-# Inverse Ricker  = 8
-PARM <- c(1, 250, 75, 8, 4, 150)
+# Use an Reverse Monomolecular transformation of the continuous surface
+# Reverse Monomolecular  = 5
+PARM <- c(1, 250, 100, 1, 1.5, 150)
+# PARM <- c(1, 250, 100, 1, 1.5, 150) # GOOD
+
 
 # Setting `p.contribution = TRUE` to see how each surface 
 # contributes to the total resistance of the composite surface
@@ -668,14 +672,13 @@ Resist <- Combine_Surfaces(PARM = PARM,
 
 # Assess contribution of each surface
 Resist$percent.contribution
-
 ```
 ```
       surface      mean         l95       u95
-1 categorical 0.7162853 0.022074324 0.9951583
-2  continuous 0.2837147 0.004841735 0.9779257
+1 categorical 0.7486327 0.043705035 0.9919852
+2  continuous 0.2513673 0.008014751 0.9562950
 ```
-Here, the categorical surface is responsible for ~72% of the total landscape resistance, while the continuous surface is responsible for ~28%.
+Here, the categorical surface is responsible for ~62% of the total landscape resistance, while the continuous surface is responsible for ~38%.
 
 
 ```{r analysis2, eval=FALSE}
@@ -691,13 +694,13 @@ gd.true <- as.vector(gd.true)
 
 # Add some noise to response
 set.seed(321)
-gd.response <- gd.true + rnorm(length(gd.true), 0, 7)
+gd.response <- gd.true + rnorm(length(gd.true), 0, 9)
 
 plot(gd.response ~ gd.true)
-ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.68
+ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.67
 
 # Correlation with distance
-ecodist::mantel(gd.response ~ as.vector(dist(samples[, c(2, 3)]))) # Mantel r = 0.28
+ecodist::mantel(gd.response ~ as.vector(dist(samples[, c(2, 3)]))) # Mantel r = 0.26
 plot(gd.response ~ as.vector(dist(samples[, c(2, 3)])), xlab = "Euclidean distance")
 ```
 ![Noisy Genetic x Resistance distance](figure/noisy_genetic.png)\
@@ -712,17 +715,22 @@ gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
 
 
 # Re-run GA.prep to include all surfaces
+# Note: to speed up the analysis, only Monomolecular tranformations will be assessed
+
 GA.inputs_All <- GA.prep(method = "LL",
-                               ASCII.dir = resistance_surfaces,
-                               Results.dir =  "C:/ResistanceGA_Examples/run1/",
-                               max.cat = 500,
-                               max.cont = 500,
-                               seed = 555,
-                               parallel = 4)
+                         ASCII.dir = resistance_surfaces,
+                         Results.dir =  "C:/ResistanceGA_Examples/run1/",
+                         max.cat = 500,
+                         max.cont = 500,
+                         select.trans = list(NA,
+                                             "M",
+                                             NA),
+                         seed = 123,
+                         parallel = 6)
 
 # First run all single surfaces, Multi-surface is response variable
 SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
-                              GA.inputs = GA.inputs_All)
+                             GA.inputs = GA.inputs_All)
 
 # Run `MS_optim` with all surfaces
 Multi.Surface_optim.gd <- MS_optim(gdist.inputs = gdist.inputs,
@@ -742,31 +750,31 @@ Multi.Surface_optim.gd2$percent.contribution
 ```
 ```
 > Multi.Surface_optim.gd$percent.contribution
-      surface       mean         l95       u95
-1 categorical 0.69442309 0.015257424 0.9936574
-2  continuous 0.25750338 0.003547613 0.9665766
-3     feature 0.04807353 0.002228049 0.3271122
+      surface      mean         l95       u95
+1 categorical 0.7010857 0.020919088 0.9798840
+2  continuous 0.2632950 0.017292284 0.9468672
+3     feature 0.0356193 0.002216987 0.1878875
 > 
 > Multi.Surface_optim.gd2$percent.contribution
-      surface      mean         l95       u95
-1 categorical 0.7162091 0.018947318 0.9962710
-2  continuous 0.2837909 0.003729041 0.9810527
+      surface      mean        l95       u95
+1 categorical 0.7174886 0.03268185 0.9841884
+2  continuous 0.2825114 0.01581160 0.9673181
 ```
-We can see that the feature surface has a minimal contribution to the total resistance, and that the mean contributions of the categorical and continuous surfaces are nearly identical to the 'true' contributions, especially when only these two surfaces are optimized together.
+We can see that the feature surface has a minimal contribution to the total resistance, and that the mean contributions of the categorical and continuous surfaces mirror the 'true' contributions (categorical = 75%, continuous = 25%).
 
 ## Bootstrap Analysis
-It is often the case that there is weak or ambiguous support for a single best resistance surface (i.e. similar AIC scores), as can be seen in the AIC table below. Based strictly on AIC or marginal R^2^, there really is no difference between the multisurface optimization with and without the feature surface included. If we account for the additional parameters (k) present when including the feature surface, AICc does pretty clearly suggest that the compostire surface without the feature is best supported.
+It is often the case that there is weak or ambiguous support for a single best resistance surface (i.e. similar AIC scores), as can be seen in the AIC table below. Based strictly on AIC or marginal R^2^, there really is no difference between the multisurface optimization with and without the feature surface included. If we account for the additional parameters (k) present when including the feature surface, AICc does pretty clearly suggest that the composite surface without the feature is best supported.
 ```
-                        Surface  obj.func_LL  k      AIC     AICc   R2m   R2c       LL
-         categorical.continuous     -905.891  8 1819.783 1836.783 0.624 0.624 -905.891
-                     categorical    -915.727  4 1839.455 1841.455 0.606 0.612 -915.727
- categorical.continuous.feature     -905.446 11 1818.894 1853.201 0.625 0.625 -905.446
-                        Distance    -947.434  2 1902.868 1899.414 0.234 0.545 -947.434
-                      continuous    -945.818  4 1899.636 1901.636 0.267 0.560 -945.818
-                         feature    -947.417  3 1902.834 1901.977 0.237 0.550 -947.417
-                            Null    -992.765  1 1991.531 1987.705 0.000 0.298 -992.765
+Surface	                      obj.func_LL	k	  AIC	      AICc	    R2m	  R2c	  LL
+categorical.continuous	        -1081.73  6	  2171.46	  2180.12	  0.46	0.46	-1081.73
+categorical	                    -1086.49	4	  2180.98	  2182.98	  0.44	0.44	-1086.49
+categorical.continuous.feature	-1081.44	8	  2170.88	  2187.88	  0.46	0.46	-1081.44
+Distance	                      -1114.83	2	  2237.66	  2234.20	  0.16	0.38	-1114.83
+feature	                        -1114.82	3	  2237.63	  2236.78	  0.15	0.37	-1114.82
+continuous	                    -1114.47	4	  2236.93	  2238.93	  0.16	0.37	-1114.47
+Null	                          -1139.25	1	  2284.50	  2280.67	  0.00	0.20	-1139.25
 ```
-Another approach that may lead to additional insight beyond the AIC(c) values generated during optimization is a bootstrap analysis using the `Resist.boot` function. This approach will assess the relative support for each optimized resistance surface through a 'pseudo'bootstrap where the sample locations/individuals as well as the resistance distance matrices are subsampled at each bootstrap iteration (without replacement), and the MLPE model is refit and the AIC scores calculated. Resistance surfaces are *NOT* re-optimized during this process. This analysis will assess the robustness of the optimized resistance surface given different combinations of samples. If the observed patterns in the resistance-genetics relationship are driven by one or a few sample locations, this analysis may reveal this. 
+Another approach that may lead to additional insight beyond the AIC(c) values generated during optimization is a bootstrap analysis using the `Resist.boot` function. This approach will assess the relative support for each optimized resistance surface through a 'pseudo'bootstrap where the sample locations/individuals as well as the resistance distance matrices are sub-sampled at each bootstrap iteration (without replacement), and the MLPE model is refit and the AIC scores calculated. Resistance surfaces are *NOT* re-optimized during this process. This analysis will assess the robustness of the optimized resistance surface given different combinations of samples. If the observed patterns in the resistance-genetics relationship are driven by one or a few sample locations, this analysis may reveal this. 
 ```{r boot, eval = F}
 # Extract relevant components from optimization outputs
 # Make a list of cost/resistance distance matrices
@@ -778,9 +786,11 @@ k <- rbind(SS_RESULTS.gdist$k,
            Multi.Surface_optim.gd$k,
            Multi.Surface_optim.gd2$k)
 
-# Use 'response' data provided with package, 
-# which is the square matrix of pairwise resistances
-data("response")
+# Create square distance matrix for response for use with 
+# the bootstrap function
+
+response <- matrix(0, 25, 25)
+response[lower.tri(response)] <- gd.response
 
 # Run bootstrap
 (AIC.boot <- Resist.boot(mod.names = names(mat.list),
@@ -792,23 +802,20 @@ data("response")
                          genetic.mat = response
 )
 )
-
 ```
 
 ```
                          surface   avg.R2m   avg.weight avg.rank     n Percent.top     k
                            <chr>     <dbl>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
-1         categorical.continuous 0.4536016 5.161502e-01    1.322   679        67.9     8
-2 categorical.continuous.feature 0.4549328 4.277633e-01    1.708   315        31.5    11
-3                    categorical 0.4306851 5.608608e-02    2.970     6         0.6     4
-4                     continuous 0.1773572 1.842331e-07    4.075     0         0.0     4
-5                        feature 0.1587058 7.339831e-08    5.437     0         0.0     3
-6                       Distance 0.1612018 7.210663e-08    5.488     0         0.0     2
+1         categorical.continuous 0.4537753 4.674643e-01    1.436   569        56.9     6
+2 categorical.continuous.feature 0.4545434 4.441112e-01    1.643   404        40.4     8
+3                    categorical 0.4374701 8.842401e-02    2.921    27         2.7     4
+4                     continuous 0.1533399 1.430606e-07    4.578     0         0.0     4
+5                       Distance 0.1512606 1.676945e-07    5.147     0         0.0     2
+6                        feature 0.1493708 1.716814e-07    5.275     0         0.0     3
 ```
-You can see that there is decent support for the composite surface that (incorrectly) includes the feature surface, but that in 68% of bootstrap samples, the composite without the feature surface was the top model.      
-
-
-The model selection clearly suggests, correctly, that the multisurface combination with the categorical and continuous surface is the best. In looking at the full results output Further, if you assess the optimized values from this analysis, you can see that each surface was parameterized very well. The maximum resistance value of all surfaces was lower than the true surface, but overall this resulted in a nearly perfectly correlated surface (r = 1.00). It is worth noting that the optimized surface resulted in a marginal R^2^ = 0.62, suggesting that optimization with 'noisy' genetic data may not result in the highest R^2^ values, but that optimization can nonetheless reliably determine the effects of the landscape on pairwise genetic distance. 
+You can see that there is decent support for the composite surface that (incorrectly) includes the feature surface, but that in 57% of bootstrap samples, the composite without the feature surface was the top model.   
+The model selection clearly suggests, correctly, that the multisurface combination with the categorical and continuous surface is the best. There was some ambiguity about whether the categorical.continuous composite was an improvement over the categorical surface alone, but the bootstrap analysis suggests virtually no support for the categorical surface.  Further, if you assess the optimized values from this analysis (below), you can see that each surface was parameterized fairly well. The optimized parameters do not perfectly match the true data generating parameters, but overall this resulted in a nearly perfectly correlated surface (r = 1.00). It is worth noting that the optimized surface resulted in a marginal R^2^ = 0.46, suggesting that optimization with 'noisy' genetic data may not result in the highest R^2^ values, but that optimization can nonetheless reliably determine the effects of the landscape on pairwise genetic distance. 
 ```{r, eval = FALSE}
 Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd2$GA.summary@solution),2))
 colnames(Summary.table)<-c("Truth", "Optimized")
@@ -818,12 +825,12 @@ row.names(Summary.table)<-c("Category1", "Category2", "Category3",
 ```
 > Summary.table
                Truth Optimized
-Category1          1      1.00
-Category2        250    334.23
-Category3         75     86.07
-Transformation     8      8.45
-Shape              4      3.95
-Max              150    171.22
+Category1        1.0      1.00
+Category2      250.0    347.56
+Category3      100.0    123.80
+Transformation   1.0      1.60
+Shape            1.5      3.03
+Max            150.0     83.75
 ```
 ```{r, eval = FALSE}
 opt.r <- raster("C:/ResistanceGA_Examples/run2/Results/categorical.continuous.asc")

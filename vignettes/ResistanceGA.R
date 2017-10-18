@@ -1,14 +1,14 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+  knitr::opts_chunk$set(echo = TRUE)
 
 ## ---- echo = FALSE-------------------------------------------------------
-library(ggplot2, warn.conflicts = F, quietly = T)
+  library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 
 ## ----install.package, eval=FALSE-----------------------------------------
 #  # Install 'devtools' package, if needed
 #  if(!("devtools" %in% list.files(.libPaths()))) {
-#      install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE)
+#    install.packages("devtools", repo = "http://cran.rstudio.com", dep = TRUE)
 #  }
 #  
 #  # Download package, build vignette
@@ -80,8 +80,8 @@ plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 #                       seed = 555)
 #  
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-#                     CS_Point.File = paste0(write.dir,"samples.txt"),
-#                     CS.program = CS.program)
+#                       CS_Point.File = paste0(write.dir,"samples.txt"),
+#                       CS.program = CS.program)
 
 ## ----monomolec.plot, eval = FALSE----------------------------------------
 #  r.tran <- Resistance.tran(transformation = "Monomolecular",
@@ -101,9 +101,9 @@ plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 
 ## ----eval=FALSE----------------------------------------------------------
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
-#                     response = CS.response,
-#                     CS_Point.File = paste0(write.dir,"samples.txt"),
-#                     CS.program = CS.program)
+#                       response = CS.response,
+#                       CS_Point.File = paste0(write.dir,"samples.txt"),
+#                       CS.program = CS.program)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  SS_RESULTS <- SS_optim(CS.inputs=CS.inputs,
@@ -364,19 +364,24 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #                              method = 'commuteDistance')
 #  
 #  # This will be used again later
+#  # Note: to speed up the analysis, only Monomolecular tranformations will be assessed
 #  GA.inputs_NoFeature <- GA.prep(method = "LL",
 #                                 ASCII.dir = resistance_surfaces[[-3]],
 #                                 Results.dir = "C:/ResistanceGA_Examples/run2/",
 #                                 max.cat = 500,
 #                                 max.cont = 500,
-#                                 seed = 555,
-#                                 parallel = 4)
+#                                 select.trans = list(NA,
+#                                                     "M"),
+#                                 seed = 123,
+#                                 parallel = 6)
 #  
 #  # The 'true' resistance surface will be the composite surface
 #  # Combine resistance surfaces, omitting the feature surface
-#  # Use an Inverse Ricker transformation of the continuous surface
-#  # Inverse Ricker  = 8
-#  PARM <- c(1, 250, 75, 8, 4, 150)
+#  # Use an Reverse Monomolecular transformation of the continuous surface
+#  # Reverse Monomolecular  = 5
+#  PARM <- c(1, 250, 100, 1, 1.5, 150)
+#  # PARM <- c(1, 250, 100, 1, 1.5, 150) # GOOD
+#  
 #  
 #  # Setting `p.contribution = TRUE` to see how each surface
 #  # contributes to the total resistance of the composite surface
@@ -391,7 +396,6 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  
 #  # Assess contribution of each surface
 #  Resist$percent.contribution
-#  
 
 ## ----analysis2, eval=FALSE-----------------------------------------------
 #  # Create a subdirectory for results
@@ -406,13 +410,13 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  
 #  # Add some noise to response
 #  set.seed(321)
-#  gd.response <- gd.true + rnorm(length(gd.true), 0, 7)
+#  gd.response <- gd.true + rnorm(length(gd.true), 0, 9)
 #  
 #  plot(gd.response ~ gd.true)
-#  ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.68
+#  ecodist::mantel(gd.response ~ gd.true) # Mantel r = 0.67
 #  
 #  # Correlation with distance
-#  ecodist::mantel(gd.response ~ as.vector(dist(samples[, c(2, 3)]))) # Mantel r = 0.28
+#  ecodist::mantel(gd.response ~ as.vector(dist(samples[, c(2, 3)]))) # Mantel r = 0.26
 #  plot(gd.response ~ as.vector(dist(samples[, c(2, 3)])), xlab = "Euclidean distance")
 
 ## ----analysis2b, eval=FALSE----------------------------------------------
@@ -423,17 +427,22 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  
 #  
 #  # Re-run GA.prep to include all surfaces
+#  # Note: to speed up the analysis, only Monomolecular tranformations will be assessed
+#  
 #  GA.inputs_All <- GA.prep(method = "LL",
-#                                 ASCII.dir = resistance_surfaces,
-#                                 Results.dir =  "C:/ResistanceGA_Examples/run1/",
-#                                 max.cat = 500,
-#                                 max.cont = 500,
-#                                 seed = 555,
-#                                 parallel = 4)
+#                           ASCII.dir = resistance_surfaces,
+#                           Results.dir =  "C:/ResistanceGA_Examples/run1/",
+#                           max.cat = 500,
+#                           max.cont = 500,
+#                           select.trans = list(NA,
+#                                               "M",
+#                                               NA),
+#                           seed = 123,
+#                           parallel = 6)
 #  
 #  # First run all single surfaces, Multi-surface is response variable
 #  SS_RESULTS.gdist <- SS_optim(gdist.inputs = gdist.inputs,
-#                                GA.inputs = GA.inputs_All)
+#                               GA.inputs = GA.inputs_All)
 #  
 #  # Run `MS_optim` with all surfaces
 #  Multi.Surface_optim.gd <- MS_optim(gdist.inputs = gdist.inputs,
@@ -459,9 +468,11 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #             Multi.Surface_optim.gd$k,
 #             Multi.Surface_optim.gd2$k)
 #  
-#  # Use 'response' data provided with package,
-#  # which is the square matrix of pairwise resistances
-#  data("response")
+#  # Create square distance matrix for response for use with
+#  # the bootstrap function
+#  
+#  response <- matrix(0, 25, 25)
+#  response[lower.tri(response)] <- gd.response
 #  
 #  # Run bootstrap
 #  (AIC.boot <- Resist.boot(mod.names = names(mat.list),
@@ -473,7 +484,6 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #                           genetic.mat = response
 #  )
 #  )
-#  
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  Summary.table <- data.frame(PARM,round(t(Multi.Surface_optim.gd2$GA.summary@solution),2))

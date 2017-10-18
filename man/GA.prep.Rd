@@ -16,7 +16,7 @@ select.trans = NULL,
 method = "LL",
 scale = FALSE,
 scale.surfaces = NULL,
-k.value = 3,
+k.value = 2,
 pop.mult = 15,
 percent.elite = 0.05,
 type = "real-valued",
@@ -59,13 +59,15 @@ quiet = FALSE)
 
 \item{scale.surfaces}{(Optional) If doing multisurface optimization with kernel smoothing, indicate which surfaces should be smoothed. A vector equal in length to the number of resistance surfaces to be optimized using MS_optim.scale that is used to indicate whether a surface should (1) or should not (0) have kernel smoothing applied. See details.}
 
-\item{k.value}{Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, or 3 (Default = 3; see details).
+\item{k.value}{Specification of how k, the number of parameters in the mixed effects model, is determined. Specify 1, 2, 3, or 4 (Default = 2; see details).
 
 1 --> k = 2;
 
 2 --> k = number of parameters optimized plus the intercept;
 
-3 --> k =  the number of parameters optimized plus the intercept and the number of layers optimized.}
+3 --> k =  the number of parameters optimized plus the intercept and the number of layers optimized;
+
+4 --> k = the number of layers optimized plus the intercept}
 
 \item{pop.mult}{Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.}
 
@@ -112,7 +114,7 @@ When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothin
 
 \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. For example, \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled. The order of surfaces will match either the order of the raster stack, or alphabetical order when reading in from a directory.
 
-The Default for \code{k.value} is 3, which sets k equal to the number of parameters optimized plus the number of surfaces optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
+The Default for \code{k.value} is 2, which sets k equal to the number of parameters optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 
 \code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
 

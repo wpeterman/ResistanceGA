@@ -160,9 +160,11 @@ MS_optim <- function(CS.inputs = NULL,
     } else if (k.value == 2) {
       k <-
         sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
-    } else {
+    } else if (k.value == 3) {
       k <-
         sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+    } else {
+      k <- length(GA.inputs$layer.names) + 1
     }
     
     n <- CS.inputs$n.Pops
@@ -352,9 +354,11 @@ MS_optim <- function(CS.inputs = NULL,
     } else if (k.value == 2) {
       k <-
         sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
-    } else {
+    } else if (k.value == 3) {
       k <-
         sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+    } else {
+      k <- length(GA.inputs$layer.names) + 1
     }
     
     n <- gdist.inputs$n.Pops
