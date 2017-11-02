@@ -195,7 +195,7 @@ MLPE.lmm_coef <-
         gsub(pattern = "_distMat.csv",
              "",
              x = list.files(resistance, pattern = "*_distMat.csv"))
-      resist.names <- plyr::ldply(strsplit(resist.names, "_"))[,1]
+      resist.names <- plyr::ldply(strsplit(resist.names, "_c"))[,1]
       
       COEF.Table <- array()
       for (i in 1:length(resist.mat)) {
