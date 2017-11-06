@@ -9,7 +9,7 @@
 #' @param iters Number of bootstrap iterations to be conducted
 #' @param obs Total number of observations (populations or individuals) in your original analysis
 #' @param genetic.mat Genetic distance matrix without row or column names.
-#' @return A data frame reporting the average model weight, average rank, number of time a model was the top model in teh set, and the frequency a model was best.
+#' @return A data frame reporting the average model weight, average rank, number of time a model was the top model in the set, and the frequency a model was best.
 #' 
 #' @details This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface, and assesses the model AICc. AICc is calculated based on the number of parameters specified.
 
@@ -65,7 +65,7 @@ Resist.boot <-
         names(mod.aic) <- c("surface", "k", "AICc", "R2m")
         
         AICc.tab[[j]] <- mod.aic
-        progress_bar$step()
+        # progress_bar$step()
         
       } # Close composite loop
       # Calculate Delta AICc, weight, and rank

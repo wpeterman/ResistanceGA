@@ -17,6 +17,7 @@
 #'   Official release: \url{http://www.circuitscape.org/downloads}
 #' 
 #' @import raster GA lme4 ggplot2 gdistance
+#' @importFrom ggExtra removeGrid ggMarginal
 #' @importFrom Matrix fac2sparse
 #' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text 
 #' @importFrom dplyr mutate group_by summarise filter tally left_join

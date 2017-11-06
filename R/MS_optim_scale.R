@@ -12,8 +12,7 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,
-                           GA.inputs,
-                           scale.surfaces = NULL) {
+                           GA.inputs) {
   
   if (is.null(GA.inputs$scale)) {
     stop(
@@ -203,15 +202,38 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
-    file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # move(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
     cd.list <- list(as.matrix(cd))
     names(cd.list) <- NAME
     
+    AICc.tab <- data.frame(surface = NAME,
+                           obj = multi.GA_nG@fitnessValue,
+                           k = k,
+                           AIC = aic,
+                           AICc = AICc,
+                           R2m = fit.stats[[1]],
+                           R2c = fit.stats[[2]],
+                           LL = LL)
+    
+    colnames(AICc.tab) <-
+      c(
+        "Surface",
+        paste0("obj.func_", GA.inputs$method),
+        "k",
+        "AIC",
+        "AICc",
+        "R2m",
+        "R2c",
+        "LL"
+      )
+    
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
+                AICc.tab = AICc.tab,
                 cd = cd.list,
                 percent.contribution = p.cont,
                 k = k.df)
@@ -387,15 +409,38 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
-    file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # move(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
     cd.list <- list(as.matrix(cd))
     names(cd.list) <- NAME
     
+    AICc.tab <- data.frame(surface = NAME,
+                           obj = multi.GA_nG@fitnessValue,
+                           k = k,
+                           AIC = aic,
+                           AICc = AICc,
+                           R2m = fit.stats[[1]],
+                           R2c = fit.stats[[2]],
+                           LL = LL)
+    
+    colnames(AICc.tab) <-
+      c(
+        "Surface",
+        paste0("obj.func_", GA.inputs$method),
+        "k",
+        "AIC",
+        "AICc",
+        "R2m",
+        "R2c",
+        "LL"
+      )
+    
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
+                AICc.tab = AICc.tab,
                 cd = cd.list,
                 percent.contribution = p.cont,
                 k = k.df)

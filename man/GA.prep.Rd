@@ -37,7 +37,7 @@ quiet = FALSE)
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.}
 
-\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail.}
+\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all.comb}} function, specify \code{Results.dir} as "all.comb".}
 
 \item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)}
 
@@ -49,7 +49,7 @@ quiet = FALSE)
 
 \item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.25 * nrows in the raster surface)}
 
-\item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)}
+\item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)}
 
 \item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.}
 

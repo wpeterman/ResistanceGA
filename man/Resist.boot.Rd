@@ -22,7 +22,7 @@ Resist.boot(mod.names, dist.mat, n.parameters, sample.prop, iters, obs, genetic.
 \item{genetic.mat}{Genetic distance matrix without row or column names.}
 }
 \value{
-A data frame reporting the average model weight, average rank, number of time a model was the top model in teh set, and the frequency a model was best.
+A data frame reporting the average model weight, average rank, number of time a model was the top model in the set, and the frequency a model was best.
 }
 \description{
 This is a 'pseudo' bootstrap procedure that will subsample a specified proportion of the sample locations/individuals, and will refit the MLPE model using the previously optimized resistance surface.

@@ -14,8 +14,9 @@
 #' \item A .csv file with the Maximum Likelihood Population Effects mixed effects model coefficient estimates (MLPE_coeff_Table.csv)
 #' \item Three summary .csv files are generated: CategoricalResults.csv, ContinuousResults.csv, & All_Results_AICc.csv. These tables contain AICc values and optimization summaries for each surface.
 #' }
-#' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE, $MLPE.list)\cr
-#' The \code{lmer} model objects stored $MLPE.list are fit using Restricted Maximum Likelihood
+#' All results tables are also summarized in a named list ($ContinuousResults, $CategoricalResults, $AICc, $MLPE, $MLPE.list, $cd, $k)\cr
+#' The \code{lmer} model objects stored $MLPE.list are fit using Restricted Maximum Likelihood \cr
+#' $cd is a list of the optimized cost pairwise distance matrices and $k is a table of the surface names and number of parameters used to calculate AICc. These two objects can be passed to \code{\link[ResistanceGA]{Resist.boot}} to conduct a bootstrap analysis.
 #' @usage SS_optim(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
@@ -450,9 +451,6 @@ SS_optim <- function(CS.inputs = NULL,
             single.GA@solution[3]
           )
           
-          
-          
-          
           colnames(RS) <-
             c(
               "Surface",
@@ -685,7 +683,7 @@ SS_optim <- function(CS.inputs = NULL,
         names(r) <- NAME
         
         cd <- Run_gdistance(gdist.inputs, r)
-        save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
+        # save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
         write.table(
           as.matrix(cd),
           file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,  "_distMat.csv"),
@@ -867,7 +865,7 @@ SS_optim <- function(CS.inputs = NULL,
           NAME <- GA.inputs$layer.names[i]
           
           cd <- Run_gdistance(gdist.inputs, r)
-          save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
+          # save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
           write.table(
             as.matrix(cd),
             file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,  "_distMat.csv"),
@@ -954,7 +952,7 @@ SS_optim <- function(CS.inputs = NULL,
           NAME <- GA.inputs$layer.names[i]
           
           cd <- Run_gdistance(gdist.inputs, r)
-          save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
+          # save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
           write.table(
             as.matrix(cd),
             file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method, "_distMat.csv"),
@@ -1414,7 +1412,7 @@ SS_optim <- function(CS.inputs = NULL,
       )
   }
   
-  file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+  unlink(GA.inputs$Write.dir, recursive = T, force = T)
   return(RESULTS)
   ###############################################################################################################
 }

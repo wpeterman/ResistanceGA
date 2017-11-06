@@ -435,7 +435,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       cd <- Run_gdistance(gdist.inputs, r.tran)
       
-      save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
+      # save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
       
       write.table(
         as.matrix(cd),
@@ -797,7 +797,8 @@ SS_optim.scale <- function(CS.inputs = NULL,
       k = k.list
     )
   
-  file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+  # file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+  unlink(GA.inputs$Write.dir, recursive = T, force = T)
   
   return(RESULTS)
   
