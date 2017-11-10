@@ -5,14 +5,13 @@
 #' @param r Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object
 #' @param scl scale the correction values (default is TRUE). No scaling should be done if the user wants to obtain absolute distance values as output. See \code{\link[gdistance]{geoCorrection}} for details
 #' @return A costDistance matrix object from gdistance
-#' @usage Run_gdistance(gdist.inputs, r, scl, CorrMatrix = NULL)
+#' @usage Run_gdistance(gdist.inputs, r, scl)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Run_gdistance <- function(gdist.inputs, 
                           r, 
-                          scl = TRUE,
-                          CorrMatrix = NULL) {
+                          scl = TRUE) {
   if (class(r)[1] != 'RasterLayer') {
     r <- raster(r)
   }
