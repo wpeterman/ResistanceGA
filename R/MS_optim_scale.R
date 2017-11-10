@@ -16,7 +16,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
   
   if (is.null(GA.inputs$scale)) {
     stop(
-      "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
+      "`MS_optim.scale` should only be used if you intend to apply kernel smoothing to your resistance surfaces"
     )
   }
   

@@ -36,7 +36,7 @@ Plot.trans <- function(PARM,
                        transformation,
                        scale = NULL,
                        print.dir = NULL,
-                       marginal.plot = FALSE,
+                       marginal.plot = TRUE,
                        marg.type = "histogram",
                        Name = "layer") {
   if (length(Resistance) == 2) {
@@ -107,218 +107,233 @@ Plot.trans <- function(PARM,
     NAME <- Name
   }
   
-# Make vector data --------------------------------------------------------
-
-# * No marginal plots -----------------------------------------------------
-if(marginal.plot == FALSE) {
-  original <- seq(from = Mn,
-                  to = Mx,
-                  length.out = 200)
-  dat.t <- SCALE.vector(data = original, 0, 10)
+  # Make vector data --------------------------------------------------------
   
-  SHAPE <- PARM[[1]]
-  Max.SCALE <- PARM[[2]]
-  
-  if (is.numeric(transformation)) {
-    equation <- get.EQ(transformation)
+  # * No marginal plots -----------------------------------------------------
+  if(marginal.plot == FALSE) {
+    original <- seq(from = Mn,
+                    to = Mx,
+                    length.out = 200)
+    dat.t <- SCALE.vector(data = original, 0, 10)
+    
+    SHAPE <- PARM[[1]]
+    Max.SCALE <- PARM[[2]]
+    
+    if (is.numeric(transformation)) {
+      equation <- get.EQ(transformation)
+      
+    } else {
+      equation <- transformation
+    }
+    # Set equation/name combination
+    if (equation == "Distance") {
+      Trans.vec <- (dat.t * 0) + 1
+      TITLE <- "Distance"
+      
+    } else if (equation == "Inverse-Reverse Monomolecular") {
+      SIGN <- -1 # Inverse
+      Trans.vec <-
+        SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+      Trans.vec <-
+        rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
+      TITLE <- "Inverse-Reverse Monomolecular"
+      
+    } else if (equation == "Inverse Monomolecular") {
+      SIGN <- -1 # Inverse
+      Trans.vec <-
+        SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+      Trans.vec <-
+        (SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
+      TITLE <- "Inverse Monomolecular"
+      
+    } else if (equation == "Monomolecular") {
+      SIGN <- 1
+      Trans.vec <-
+        SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+      TITLE <- "Monomolecular"
+      
+    } else if (equation == "Reverse Monomolecular") {
+      SIGN <- 1
+      Trans.vec <-
+        SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+      Trans.vec <- rev(Trans.vec) # Reverse
+      TITLE <- "Reverse Monomolecular"
+      
+    } else if (equation == "Inverse Ricker") {
+      SIGN <- -1 # Inverse
+      Trans.vec <-
+        SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+      Trans.vec <-
+        SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))
+      TITLE <- "Inverse Ricker"
+      
+    } else if (equation == "Reverse Ricker") {
+      SIGN <- 1
+      Trans.vec <-
+        SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+      Trans.vec <- rev(Trans.vec) # Reverse
+      TITLE <- "Reverse Ricker"
+      
+    } else if (equation == "Inverse-Reverse Ricker") {
+      SIGN <- -1 # Inverse
+      Trans.vec <-
+        SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+      Trans.vec <-
+        rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))) # Reverse
+      TITLE <- "Inverse-Reverse Ricker"
+      
+    }  else  {
+      SIGN <- 1
+      Trans.vec <-
+        SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+      TITLE <- "Ricker"
+    }
+    transformed <- Trans.vec
+    plot.data <- data.frame(original, transformed)
+    x.break <- pretty(original * 1.07)
+    y.break <- pretty(transformed * 1.07)
+    
+    (
+      p <- ggplot(plot.data, aes(x = original, y = transformed)) +
+        ggtitle(equation) +
+        theme_bw() +
+        geom_line(size = 1.5) +
+        xlab(expression(bold(
+          "Original data values"
+        ))) +
+        ylab(expression(bold(
+          "Transformed data values"
+        ))) +
+        theme(
+          plot.title = element_text(
+            lineheight = 2,
+            face = "bold",
+            size = 20
+          ),
+          legend.title = element_blank(),
+          legend.key = element_blank(),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.title.x = element_text(size = 16),
+          axis.title.y = element_text(size = 16)
+          # axis.line = element_line(colour = "black"),
+          # panel.grid.major = element_blank(),
+          # panel.grid.minor = element_blank(),
+          # panel.border = element_blank(),
+          # panel.background = element_blank()
+        ) +
+        scale_x_continuous(limits = c(min(original), max(original)), breaks =
+                             x.break) +
+        scale_y_continuous(limits = c(min(transformed), max(transformed)), breaks =
+                             y.break)
+    )
+    
+    # * Marginal plots --------------------------------------------------------
     
   } else {
-    equation <- transformation
-  }
-  # Set equation/name combination
-  if (equation == "Distance") {
-    Trans.vec <- (dat.t * 0) + 1
-    TITLE <- "Distance"
+    original1 <- seq(from = Mn,
+                     to = Mx,
+                     length.out = 200)
+    dat.t1 <- SCALE.vector(data = original1, 0, 10)
+    type1 <- rep(2, 200)
     
-  } else if (equation == "Inverse-Reverse Monomolecular") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    Trans.vec <-
-      rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
-    TITLE <- "Inverse-Reverse Monomolecular"
+    original2 <- sort(as.vector(r))
+    dat.t2 <- SCALE.vector(data = original2, 0, 10)
+    type <- rep(1, length(original2))
     
-  } else if (equation == "Inverse Monomolecular") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    Trans.vec <-
-      (SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
-    TITLE <- "Inverse Monomolecular"
+    Trans.list <- DAT <- list(dat.t2,
+                              dat.t1
+    )
     
-  } else if (equation == "Monomolecular") {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    TITLE <- "Monomolecular"
     
-  } else if (equation == "Reverse Monomolecular") {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    Trans.vec <- rev(Trans.vec) # Reverse
-    TITLE <- "Reverse Monomolecular"
+    SHAPE <- PARM[[1]]
+    Max.SCALE <- PARM[[2]]
     
-  } else if (equation == "Inverse Ricker") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    Trans.vec <-
-      SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))
-    TITLE <- "Inverse Ricker"
+    if (is.numeric(transformation)) {
+      equation <- get.EQ(transformation)
+      
+    } else {
+      equation <- transformation
+    }
+    # Set equation/name combination
+    for(i in 1:2){
+      dat.t <- DAT[[i]]
+      if (equation == "Distance") {
+        Trans.vec <- (dat.t * 0) + 1
+        TITLE <- "Distance"
+        
+      } else if (equation == "Inverse-Reverse Monomolecular") {
+        SIGN <- -1 # Inverse
+        Trans.vec <-
+          SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+        Trans.vec <-
+          rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
+        TITLE <- "Inverse-Reverse Monomolecular"
+        
+      } else if (equation == "Inverse Monomolecular") {
+        SIGN <- -1 # Inverse
+        Trans.vec <-
+          SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+        Trans.vec <-
+          (SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
+        TITLE <- "Inverse Monomolecular"
+        
+      } else if (equation == "Monomolecular") {
+        SIGN <- 1
+        Trans.vec <-
+          SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+        TITLE <- "Monomolecular"
+        
+      } else if (equation == "Reverse Monomolecular") {
+        SIGN <- 1
+        Trans.vec <-
+          SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
+        Trans.vec <- rev(Trans.vec) # Reverse
+        TITLE <- "Reverse Monomolecular"
+        
+      } else if (equation == "Inverse Ricker") {
+        SIGN <- -1 # Inverse
+        Trans.vec <-
+          SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+        Trans.vec <-
+          SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))
+        TITLE <- "Inverse Ricker"
+        
+      } else if (equation == "Reverse Ricker") {
+        SIGN <- 1
+        Trans.vec <-
+          SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+        Trans.vec <- rev(Trans.vec) # Reverse
+        TITLE <- "Reverse Ricker"
+        
+      } else if (equation == "Inverse-Reverse Ricker") {
+        SIGN <- -1 # Inverse
+        Trans.vec <-
+          SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+        Trans.vec <-
+          rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))) # Reverse
+        TITLE <- "Inverse-Reverse Ricker"
+        
+      }  else  {
+        SIGN <- 1
+        Trans.vec <-
+          SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
+        TITLE <- "Ricker"
+      }
+      Trans.list[[i]] <- Trans.vec
+    } # End for loop
     
-  } else if (equation == "Reverse Ricker") {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    Trans.vec <- rev(Trans.vec) # Reverse
-    TITLE <- "Reverse Ricker"
     
-  } else if (equation == "Inverse-Reverse Ricker") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    Trans.vec <-
-      rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))) # Reverse
-    TITLE <- "Inverse-Reverse Ricker"
+    transformed <- unlist(Trans.list)
+    plot.data <- data.frame(original = c(original2, original1), 
+                            transformed = transformed, 
+                            type = c(type, type1))
+    x.break <- pretty(original1 * 1.07)
+    y.break <- pretty(transformed * 1.07)
     
-  }  else  {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    TITLE <- "Ricker"
-  }
-  transformed <- Trans.vec
-  plot.data <- data.frame(original, transformed)
-  x.break <- pretty(original * 1.07)
-  y.break <- pretty(transformed * 1.07)
-  
-  (
-    p <- ggplot(plot.data, aes(x = original, y = transformed)) +
-      ggtitle(equation) +
+    p <- ggplot(plot.data[type==1,], aes(x = original, y = transformed)) +
       theme_bw() +
-      geom_line(size = 1.5) +
-      xlab(expression(bold(
-        "Original data values"
-      ))) +
-      ylab(expression(bold(
-        "Transformed data values"
-      ))) +
-      theme(
-        plot.title = element_text(
-          lineheight = 2,
-          face = "bold",
-          size = 20
-        ),
-        legend.title = element_blank(),
-        legend.key = element_blank(),
-        axis.text.x = element_text(size = 14),
-        axis.text.y = element_text(size = 14),
-        axis.title.x = element_text(size = 16),
-        axis.title.y = element_text(size = 16)
-        # axis.line = element_line(colour = "black"),
-        # panel.grid.major = element_blank(),
-        # panel.grid.minor = element_blank(),
-        # panel.border = element_blank(),
-        # panel.background = element_blank()
-      ) +
-      scale_x_continuous(limits = c(min(original), max(original)), breaks =
-                           x.break) +
-      scale_y_continuous(limits = c(min(transformed), max(transformed)), breaks =
-                           y.break)
-  )
-  
-  # * Marginal plots --------------------------------------------------------
-  
-} else {
-  # original <- seq(from = Mn,
-  #                 to = Mx,
-  #                 length.out = 200)
-  # dat.t <- SCALE.vector(data = original, 0, 10)
-
-  original <- sort(as.vector(r))
-  dat.t <- SCALE.vector(data = original, 0, 10)
-  
-  SHAPE <- PARM[[1]]
-  Max.SCALE <- PARM[[2]]
-  
-  if (is.numeric(transformation)) {
-    equation <- get.EQ(transformation)
-    
-  } else {
-    equation <- transformation
-  }
-  # Set equation/name combination
-  if (equation == "Distance") {
-    Trans.vec <- (dat.t * 0) + 1
-    TITLE <- "Distance"
-    
-  } else if (equation == "Inverse-Reverse Monomolecular") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    Trans.vec <-
-      rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
-    TITLE <- "Inverse-Reverse Monomolecular"
-    
-  } else if (equation == "Inverse Monomolecular") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    Trans.vec <-
-      (SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec))))
-    TITLE <- "Inverse Monomolecular"
-    
-  } else if (equation == "Monomolecular") {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    TITLE <- "Monomolecular"
-    
-  } else if (equation == "Reverse Monomolecular") {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * PARM[[2]] * (1 - exp(-1 * dat.t / PARM[[1]])) + SIGN # Monomolecular
-    Trans.vec <- rev(Trans.vec) # Reverse
-    TITLE <- "Reverse Monomolecular"
-    
-  } else if (equation == "Inverse Ricker") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    Trans.vec <-
-      SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))
-    TITLE <- "Inverse Ricker"
-    
-  } else if (equation == "Reverse Ricker") {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    Trans.vec <- rev(Trans.vec) # Reverse
-    TITLE <- "Reverse Ricker"
-    
-  } else if (equation == "Inverse-Reverse Ricker") {
-    SIGN <- -1 # Inverse
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    Trans.vec <-
-      rev(SCALE.vector(Trans.vec, MIN = abs(max(Trans.vec)), MAX = abs(min(Trans.vec)))) # Reverse
-    TITLE <- "Inverse-Reverse Ricker"
-    
-  }  else  {
-    SIGN <- 1
-    Trans.vec <-
-      SIGN * (PARM[[2]] * dat.t * exp(-1 * dat.t / PARM[[1]])) + SIGN #  Ricker
-    TITLE <- "Ricker"
-  }
-  transformed <- Trans.vec
-  plot.data <- data.frame(original, transformed)
-  x.break <- pretty(original * 1.07)
-  y.break <- pretty(transformed * 1.07)
-  
-    p <- ggplot(plot.data, aes(x = original, y = transformed)) +
-      theme_bw() +
-      geom_line(size = 1.5) +
+      geom_line(size = 1.5, color = "white") +
       xlab(expression(bold(
         "Original data values"
       ))) +
@@ -332,25 +347,23 @@ if(marginal.plot == FALSE) {
         axis.title.y = element_text(size = 16)
       ) +
       scale_x_continuous(
-        # limits = c(min(original), max(original)), 
         breaks = x.break) +
       scale_y_continuous(
-        # limits = c(min(transformed), max(transformed)), 
         breaks = y.break) +
+      geom_line(data = plot.data[plot.data$type==2,],
+                aes(x = original, y = transformed),
+                size = 1.5,
+                color = "black") +
       removeGrid()
     
-    p
-    
     # Add marginal plot
-    (p.marg <- ggMarginal(p, 
+    (p <- ggMarginal(p, 
                           type = marg.type,
                           size = 8
-                          ))
+    ))
     
-    p <- p.marg
-      
-  
-} # End response plot
+    
+  } # End response plot
   
   if (!is.null(print.dir)) {
     tiff(

@@ -38,7 +38,7 @@
 #' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param seed Integer random number seed to replicate \code{ga} optimization
-#' @param quiet Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE
+#' @param quiet Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)
 #' @return An R object that is a required input into optimization functions
 #'
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
@@ -210,15 +210,17 @@ GA.prep <- function(ASCII.dir,
       )
     }
     
-    if (n.levels == 2 & !is.null(scale) & scale.surfaces[i]==1) {
+    if (n.levels == 2 & 
+        !is.null(scale) & 
+        scale.surfaces[i]==1) {
       parm.type[i, 1] <- "cont"
       parm.type[i, 2] <- 4
       parm.type[i, 3] <- names[i]
       
       if (is.null(min.scale)) {
         min.scale <- 0.3
-        
       }
+      
       if (is.null(max.scale)) {
         max.scale <- max(dim(r[[i]])) / 4
       }

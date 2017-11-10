@@ -217,7 +217,7 @@ Resistance.Opt_single <-
       if (quiet == FALSE) {
         cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
         #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
-        cat(paste0("\t", method, " = ", round(obj.func, 4)), "\n", "\n")
+        cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
         if (!is.null(iter)) {
           if (GA.inputs$surface.type[iter] != "cat") {
             cat(paste0("\t", EQ, " | Shape = ", PARM[2], " | Max = ", PARM[3]),

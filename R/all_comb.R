@@ -5,7 +5,7 @@
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{\link[ResistanceGA]{Results.dir}} has been been correctly specified as "all.comb"
 #' @param results.dir Directory to write and save analysis results. This should be an empty directory. Any existing files located in this directory will be deleted!
-#' @param max.combination The maximum number of surfaces to include in the all combinations analysis (Default = 4)
+#' @param max.combination The maximum number of surfaces to include in the all combinations analysis (Default = 4). Alternatively, specify a vector with the minimum and maximum number of surfaces to combine (e.g., c(2,4). If the minimum > 1, then the single surface optimization will be skipped.
 #' @param iters Number of bootstrap iterations to be conducted (Default = 1000)
 #' @param sample.prop Proportion of observations to be sampled each iteration (Default = 0.75)
 #' @param replicate The number of times to replicate the GA optimization process for each surface (Default = 1)
@@ -29,18 +29,32 @@ all_comb <- function(gdist.inputs,
                      null_mod = TRUE) {
   
   if(!exists('results.dir')) 
-    stop("An empty results directory must be specified")
+    return(cat("ERROR: An empty results directory must be specified"))
   
   if(!exists('gdist.inputs')) 
-    stop("Please specify gdist.inputs")
+    return(cat("ERROR: Please specify gdist.inputs"))
   
   if(!exists('GA.inputs')) 
-    stop("Please specify GA.inputs")
+    return(cat("ERROR: Please specify GA.inputs"))
   
   if(!is.null(GA.inputs$Results.dir) & 
      !is.null(GA.inputs$Write.dir) &
      !is.null(GA.inputs$Plots.dir)) {
-    stop("Please correctly specify the `Results.dir` as 'all.comb' when running GA.prep")
+    return(cat("ERROR: Please correctly specify the `Results.dir` as 'all.comb' when running GA.prep"))
+  }
+  
+  if(length(max.combination) > 2) {
+    return(cat("ERROR: Please specify either a single value or a vector with the minimum and maximum value"))
+  }
+  
+  dir.files <- list.files(results.dir)
+  if(length(dir.files) != 0) {
+    q <- yn.question(cat(
+      paste0("This function is about to delete all files and folders in '", results.dir, "'"),
+      '\n', '\n',
+      paste0("Do you want to proceed? Select 1 (Yes) or 2 (No), then press [Enter]")))
+    
+    if(q == FALSE) return(cat("Function stopped"))
   }
   
   unlink(dir(results.dir, 
@@ -50,14 +64,32 @@ all_comb <- function(gdist.inputs,
   )
   
   # Create combination list -------------------------------------------------
+  mc <- max.combination
+  
+  if(length(max.combination) == 2) {
+    if(mc[1] == 1) {
+      min.combination <- 2
+      max.combination <- mc[2]
+      ss <- TRUE
+    } else {
+      min.combination <- mc[1]
+      max.combination <- mc[2]
+      ss <- FALSE
+    } 
+  } else {
+    min.combination <- 2
+    ss <- TRUE
+  }
+  
   if(max.combination > GA.inputs$n.layers) {
     max.combination <- GA.inputs$n.layers
   }
   comb.list <- vector(mode = "list", length = (max.combination - 1))
   
+  
   list.count <- 0
   surface.count <- 0
-  for(i in 2:max.combination) {
+  for(i in min.combination:max.combination) {
     list.count <- list.count + 1
     comb.list[[list.count]] <- t(combn(1:GA.inputs$n.layers, i))
     if(is.null(nrow(comb.list[[list.count]]))) {
@@ -93,40 +125,71 @@ all_comb <- function(gdist.inputs,
   Results <- vector(mode = 'list', length = replicate)
   # Begin Replicate Loop --------------------------------------------------
   for(i in 1:replicate){
+    # Skip if min combination > 1
+    if(ss == FALSE) {
+      ss.results <- NULL
+      AICc.tab <- NULL
+      dir.create(paste0(results.dir,'rep_',i))
+    } else {  # Do single surface optimization
+      dir.create(paste0(results.dir,'rep_',i))
+      dir.create(paste0(results.dir,'rep_',i, "/", "single.surface"))
+      dir.create(paste0(results.dir,'rep_',i, "/", "single.surface/", "Plots"))
+      
+      # Single Surface optimization -----------------------------------------------------
+      if(!is.null(GA.inputs$scale)) {
+        
+        # * Single Surface: scaled --------------------------------------------------------
+        
+        # Update GA.input directories
+        GA.inputs$Plots.dir <- paste0(results.dir,
+                                      'rep_',i, 
+                                      "/",
+                                      "single.surface/",
+                                      "Plots/")
+        
+        GA.inputs$Results.dir <- paste0(results.dir,
+                                        'rep_',i, 
+                                        "/", 
+                                        "single.surface/")
+        
+        ss.results <- SS_optim.scale(gdist.inputs = gdist.inputs,
+                                     GA.inputs = GA.inputs,
+                                     nlm = nlm,
+                                     dist_mod = dist_mod,
+                                     null_mod = null_mod)
+        
+        AICc.tab <- ss.results$AICc 
+      } else {
+        # * Single Surface --------------------------------------------------------
+        
+        # Update GA.input directories
+        GA.inputs$Plots.dir <- paste0(results.dir,
+                                      'rep_',i, 
+                                      "/",
+                                      "single.surface/",
+                                      "Plots/")
+        
+        GA.inputs$Results.dir <- paste0(results.dir,
+                                        'rep_',i, 
+                                        "/", 
+                                        "single.surface/")
+        
+        ss.results <- SS_optim(gdist.inputs = gdist.inputs,
+                               GA.inputs = GA.inputs,
+                               nlm = nlm,
+                               dist_mod = dist_mod,
+                               null_mod = null_mod)
+        
+        AICc.tab <- ss.results$AICc
+      }
+    }
     
-    dir.create(paste0(results.dir,'rep_',i))
-    dir.create(paste0(results.dir,'rep_',i, "/", "single.surface"))
-    dir.create(paste0(results.dir,'rep_',i, "/", "single.surface/", "Plots"))
     
+    # Multisurface optimization -----------------------------------------------
     
-    # Scaled optimization -----------------------------------------------------
-    
-    # * Single Surface --------------------------------------------------------
+    # * Multisurface: scaled ----------------------------------------------------------
     
     if(!is.null(GA.inputs$scale)) {
-      # Update GA.input directories
-      
-      # Update GA.input directories
-      GA.inputs$Plots.dir <- paste0(results.dir,
-                                    'rep_',i, 
-                                    "/",
-                                    "single.surface/",
-                                    "Plots/")
-      
-      GA.inputs$Results.dir <- paste0(results.dir,
-                                      'rep_',i, 
-                                      "/", 
-                                      "single.surface/")
-      
-      ss.results <- SS_optim.scale(gdist.inputs = gdist.inputs,
-                                   GA.inputs = GA.inputs,
-                                   nlm = nlm,
-                                   dist_mod = dist_mod,
-                                   null_mod = null_mod)
-      
-      AICc.tab <- ss.results$AICc
-      
-      # * Multisurface ----------------------------------------------------------
       
       ms.cd <- vector(mode = 'list',
                       length = length(all.combs))
@@ -139,9 +202,15 @@ all_comb <- function(gdist.inputs,
       
       ms.results <- vector(mode = "list", length = length(all.combs))
       
-      n_ss.cd <- length(ss.results$cd)
-      all.cd <- c(ss.results$cd,
-                  ms.cd)
+      if(is.null(ss.results)) {
+        n_ss.cd <- 0
+        all.cd <- ms.cd
+      } else {
+        n_ss.cd <- length(ss.results$cd)
+        all.cd <- c(ss.results$cd,
+                    ms.cd)
+      }
+      
       
       for(j in 1:length(all.combs)) {
         dir.create(paste0(results.dir,'rep_',i, "/", comb.names[[j]]))
@@ -233,8 +302,13 @@ all_comb <- function(gdist.inputs,
       
       names(all.cd) <- all.k$surface
       
-      all.AICc <- rbind(ss.results$AICc,
-                        plyr::ldply(AICc.tab_list))
+      if(is.null(ss.results)) {
+        all.AICc <- plyr::ldply(AICc.tab_list)
+      } else {
+        all.AICc <- rbind(ss.results$AICc,
+                          plyr::ldply(AICc.tab_list))  
+      }
+      
       
       all.AICc <- all.AICc %>% 
         dplyr::arrange(., AICc) %>%
@@ -243,7 +317,7 @@ all_comb <- function(gdist.inputs,
         as.data.frame()
       
       
-      # * Bootstrap -----------------------------------------------------
+      # * Bootstrap: scaled -----------------------------------------------------
       
       obs <- gdist.inputs$n.Pops
       genetic.mat <- matrix(0, obs, obs)
@@ -259,28 +333,6 @@ all_comb <- function(gdist.inputs,
     } else {     # End scaled optimization
       
       # Optimization without scaling --------------------------------------------
-      
-      # * Single Surface --------------------------------------------------------
-      
-      # Update GA.input directories
-      GA.inputs$Plots.dir <- paste0(results.dir,
-                                    'rep_',i, 
-                                    "/",
-                                    "single.surface/",
-                                    "Plots/")
-      
-      GA.inputs$Results.dir <- paste0(results.dir,
-                                      'rep_',i, 
-                                      "/", 
-                                      "single.surface/")
-      
-      ss.results <- SS_optim(gdist.inputs = gdist.inputs,
-                             GA.inputs = GA.inputs,
-                             nlm = nlm,
-                             dist_mod = dist_mod,
-                             null_mod = null_mod)
-      
-      AICc.tab <- ss.results$AICc
       
       # * Multisurface ----------------------------------------------------------
       
@@ -389,8 +441,12 @@ all_comb <- function(gdist.inputs,
       
       names(all.cd) <- all.k$surface
       
-      all.AICc <- rbind(ss.results$AICc,
-                        plyr::ldply(AICc.tab_list))
+      if(is.null(ss.results)) {
+        all.AICc <- plyr::ldply(AICc.tab_list)
+      } else {
+        all.AICc <- rbind(ss.results$AICc,
+                          plyr::ldply(AICc.tab_list))  
+      }
       
       all.AICc <- all.AICc %>% 
         dplyr::arrange(., AICc) %>%

@@ -13,7 +13,7 @@ all_comb(gdist.inputs, GA.inputs, max.combination, iters, sample.prop, replicate
 
 \item{results.dir}{Directory to write and save analysis results. This should be an empty directory. Any existing files located in this directory will be deleted!}
 
-\item{max.combination}{The maximum number of surfaces to include in the all combinations analysis (Default = 4)}
+\item{max.combination}{The maximum number of surfaces to include in the all combinations analysis (Default = 4). Alternatively, specify a vector with the minimum and maximum number of surfaces to combine (e.g., c(2,4). If the minimum > 1, then the single surface optimization will be skipped.}
 
 \item{iters}{Number of bootstrap iterations to be conducted (Default = 1000)}
 

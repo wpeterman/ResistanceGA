@@ -405,8 +405,8 @@ eq.set <- function(include.list) {
         Please see Details of the GA.prep."
       )
     }
-    }
   }
+}
 
 get.EQ <- function(equation) {
   # Apply specified transformation
@@ -633,4 +633,12 @@ Rev.Ricker <- function(r, parm) {
     rev.rast <- SCALE.vector((-1 * r), 0, 10)
     Ricker(rev.rast, parm)
   }
+}
+
+yn.question <- function(question, add_lines_before = TRUE) {
+  choices <- c("Yes", "No")
+  if(add_lines_before) cat("------------------------\n")   
+  the_answer <- menu(choices, title = question)            
+  
+  ifelse(the_answer == 1L, TRUE, FALSE)   # returns TRUE or FALSE
 }

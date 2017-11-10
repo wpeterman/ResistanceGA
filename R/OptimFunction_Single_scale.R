@@ -51,7 +51,7 @@ Resistance.Opt_single.scale <- function(PARM,
 
   if (GA.inputs$surface.type[iter] == "cat") {
     stop(
-      "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
+      "`SS_optim_scale` should only be used if you intend to apply kernel smoothing to a continuous or binary resistance surface"
     )
     
     PARM <- PARM / min(PARM, na.rm = T)
@@ -120,7 +120,7 @@ Resistance.Opt_single.scale <- function(PARM,
       } # End if-else
     } # Close select transformation
   } # Close surface type if-else
-  
+
   ## If a surface was reclassified or transformed, apply the following
   if ((GA.inputs$surface.type[iter] == "cat") ||
       (equation %in% select.trans[[iter]])) {
@@ -135,7 +135,9 @@ Resistance.Opt_single.scale <- function(PARM,
     # if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
     # r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
     
-    
+
+# CIRCUITSCAPE ------------------------------------------------------------
+
     if (!is.null(CS.inputs)) {
       writeRaster(
         x = r,
@@ -190,8 +192,12 @@ Resistance.Opt_single.scale <- function(PARM,
       }
     }
     ##
+
+# gdistance ---------------------------------------------------------------
+
     
     if (!is.null(gdist.inputs)) {
+
       cd <- Run_gdistance(gdist.inputs, r)
       
       if (method == "AIC") {
@@ -236,15 +242,7 @@ Resistance.Opt_single.scale <- function(PARM,
     rt <- proc.time()[3] - t1
     if (quiet == FALSE) {
       cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
-      #     cat(paste0("\t", EQ,"; ",round(SHAPE,digits=2),"; ", round(Max.SCALE,digits=2)),"\n")
-      cat(paste0("\t", method, " = ", round(obj.func, 4)), "\n", "\n")
-      # if (!is.null(iter)) {
-      #   # if (GA.inputs$surface.type[iter] != "cat") {
-      #   #   cat(paste0("\t", EQ, " | Shape = ", PARM[2], " | Max = ", PARM[3]),
-      #   #       "\n",
-      #   #       "\n")
-      #   # }
-      # }
+      cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
     }
   } else {
     obj.func.opt <- -99999
@@ -253,11 +251,6 @@ Resistance.Opt_single.scale <- function(PARM,
     if (quiet == FALSE) {
       cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
       cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
-      # if (!is.null(iter)) {
-      #   if (GA.inputs$surface.type[iter] != "cat") {
-      #     cat(paste0("EXCLUDED TRANSFORMATION", "\n", "\n"))
-      #   }
-      # }
     }
   }
   return(obj.func.opt)
