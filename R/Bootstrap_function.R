@@ -65,7 +65,7 @@ Resist.boot <-
         names(mod.aic) <- c("surface", "k", "AICc", "R2m")
         
         AICc.tab[[j]] <- mod.aic
-        # progress_bar$step()
+        progress_bar$step()
         
       } # Close composite loop
       # Calculate Delta AICc, weight, and rank
