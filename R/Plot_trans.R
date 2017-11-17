@@ -195,7 +195,7 @@ Plot.trans <- function(PARM,
     
     (
       p <- ggplot(plot.data, aes(x = original, y = transformed)) +
-        ggtitle(equation) +
+        # ggtitle(equation) +
         theme_bw() +
         geom_line(size = 1.5) +
         xlab(expression(bold(
@@ -205,27 +205,23 @@ Plot.trans <- function(PARM,
           "Transformed data values"
         ))) +
         theme(
-          plot.title = element_text(
-            lineheight = 2,
-            face = "bold",
-            size = 20
-          ),
+          # plot.title = element_text(
+          #   lineheight = 2,
+          #   face = "bold",
+          #   size = 20
+          # ),
           legend.title = element_blank(),
           legend.key = element_blank(),
           axis.text.x = element_text(size = 14),
           axis.text.y = element_text(size = 14),
           axis.title.x = element_text(size = 16),
           axis.title.y = element_text(size = 16)
-          # axis.line = element_line(colour = "black"),
-          # panel.grid.major = element_blank(),
-          # panel.grid.minor = element_blank(),
-          # panel.border = element_blank(),
-          # panel.background = element_blank()
         ) +
         scale_x_continuous(limits = c(min(original), max(original)), breaks =
                              x.break) +
         scale_y_continuous(limits = c(min(transformed), max(transformed)), breaks =
-                             y.break)
+                             y.break) +
+        removeGrid()
     )
     
     # * Marginal plots --------------------------------------------------------

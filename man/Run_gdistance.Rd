@@ -5,7 +5,7 @@
 \title{Get cost distance using gdistance
 Execute gdistance}
 \usage{
-Run_gdistance(gdist.inputs, r, scl, CorrMatrix = NULL)
+Run_gdistance(gdist.inputs, r, scl)
 }
 \arguments{
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}

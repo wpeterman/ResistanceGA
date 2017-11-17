@@ -217,7 +217,7 @@ all_comb <- function(gdist.inputs,
         # dir.create(paste0(results.dir,'rep_',i, "/", comb.names[[j]],"/Plots"))
         
         # Select raster surfaces
-        r.vec <- 1:GA.inputs$n.layers
+        r.vec <- 1:GA.input_orig$n.layers
         drop.vec <- r.vec[!(r.vec %in% all.combs[[j]])]
         asc.comb <- dropLayer(GA.input_orig$Resistance.stack, drop.vec)
         
@@ -356,7 +356,7 @@ all_comb <- function(gdist.inputs,
         # dir.create(paste0(results.dir,'rep_',i, "/", comb.names[[j]],"/Plots"))
         
         # Select raster surfaces
-        r.vec <- 1:GA.inputs$n.layers
+        r.vec <- 1:GA.input_orig$n.layers
         drop.vec <- r.vec[!(r.vec %in% all.combs[[j]])]
         asc.comb <- dropLayer(GA.input_orig$Resistance.stack, drop.vec)
         
