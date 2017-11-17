@@ -40,10 +40,10 @@ Plot.trans <- function(PARM,
                        marg.type = "histogram",
                        Name = "layer") {
   if (length(Resistance) == 2) {
-    if (marginal.plot == TRUE)
-      stop(
-        "If you wish to generate marginal plots, please supply the raster surface to the `Resistance` arguement."
-      )
+    marginal.plot <- FALSE
+      # stop(
+      #   "If you wish to generate marginal plots, please supply the raster surface to the `Resistance` arguement."
+      # )
     
     r <- Resistance
     if (!is.null(scale)) {
