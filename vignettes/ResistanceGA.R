@@ -1,8 +1,8 @@
 ## ----setup, include=FALSE------------------------------------------------
-  knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 
 ## ---- echo = FALSE-------------------------------------------------------
-  library(ggplot2, warn.conflicts = F, quietly = T)
+library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 
 ## ----install.package, eval=FALSE-----------------------------------------

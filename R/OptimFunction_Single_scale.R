@@ -36,6 +36,10 @@ Resistance.Opt_single.scale <- function(PARM,
   r <- Resistance
   
   ## Scale surface
+  if(PARM[4] < 0.5) {
+    PARM[4] <- 0.000123456543210
+  }
+  
   r <- k.smooth(raster = r,
                 sigma = PARM[4],
                 SCALE = TRUE)
@@ -48,7 +52,7 @@ Resistance.Opt_single.scale <- function(PARM,
   Max.SCALE <- (PARM[3])
   
   ## If selected transformation is not in list, assign very large objective function value
-
+  
   if (GA.inputs$surface.type[iter] == "cat") {
     stop(
       "`SS_optim_scale` should only be used if you intend to apply kernel smoothing to a continuous or binary resistance surface"
@@ -120,7 +124,7 @@ Resistance.Opt_single.scale <- function(PARM,
       } # End if-else
     } # Close select transformation
   } # Close surface type if-else
-
+  
   ## If a surface was reclassified or transformed, apply the following
   if ((GA.inputs$surface.type[iter] == "cat") ||
       (equation %in% select.trans[[iter]])) {
@@ -135,9 +139,9 @@ Resistance.Opt_single.scale <- function(PARM,
     # if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
     # r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
     
-
-# CIRCUITSCAPE ------------------------------------------------------------
-
+    
+    # CIRCUITSCAPE ------------------------------------------------------------
+    
     if (!is.null(CS.inputs)) {
       writeRaster(
         x = r,
@@ -192,12 +196,12 @@ Resistance.Opt_single.scale <- function(PARM,
       }
     }
     ##
-
-# gdistance ---------------------------------------------------------------
-
+    
+    # gdistance ---------------------------------------------------------------
+    
     
     if (!is.null(gdist.inputs)) {
-
+      
       cd <- Run_gdistance(gdist.inputs, r)
       
       if (method == "AIC") {

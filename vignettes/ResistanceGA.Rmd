@@ -6,16 +6,16 @@ output:
   pdf_document: rmarkdown::pdf_document
   html_document: rmarkdown::html_vignette
 vignette: |
-  %\VignetteIndexEntry{ResistanceGA User Guide} 
+%\VignetteIndexEntry{ResistanceGA User Guide} 
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteEncoding{UTF-8}
----
-```{r setup, include=FALSE}
-  knitr::opts_chunk$set(echo = TRUE)
+  ---
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
-  
+
 ```{r, echo = FALSE}
-  library(ggplot2, warn.conflicts = F, quietly = T)
+library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 ```
 
@@ -326,7 +326,7 @@ t(SS_RESULTS.gdist$ContinuousResults[c(9:11)]))
 colnames(SS_table) <- c("Truth", "CS.Optimized", "commuteDist.Optimized")
 
 SS_table
-                  Truth     CS.Optimized   commuteDist.Optimized
+Truth     CS.Optimized   commuteDist.Optimized
 Equation Monomolecular    Monomolecular           Monomolecular
 shape                2        1.999999                1.999504
 max                275        274.9982                277.0668
@@ -672,7 +672,7 @@ Resist <- Combine_Surfaces(PARM = PARM,
 Resist$percent.contribution
 ```
 ```
-      surface      mean         l95       u95
+surface      mean         l95       u95
 1 categorical 0.7486327 0.043705035 0.9919852
 2  continuous 0.2513673 0.008014751 0.9562950
 ```
@@ -748,13 +748,13 @@ Multi.Surface_optim.gd2$percent.contribution
 ```
 ```
 > Multi.Surface_optim.gd$percent.contribution
-      surface      mean         l95       u95
+surface      mean         l95       u95
 1 categorical 0.7010857 0.020919088 0.9798840
 2  continuous 0.2632950 0.017292284 0.9468672
 3     feature 0.0356193 0.002216987 0.1878875
 > 
 > Multi.Surface_optim.gd2$percent.contribution
-      surface      mean        l95       u95
+surface      mean        l95       u95
 1 categorical 0.7174886 0.03268185 0.9841884
 2  continuous 0.2825114 0.01581160 0.9673181
 ```
@@ -803,8 +803,8 @@ response[lower.tri(response)] <- gd.response
 ```
 
 ```
-                         surface   avg.R2m   avg.weight avg.rank     n Percent.top     k
-                           <chr>     <dbl>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
+surface   avg.R2m   avg.weight avg.rank     n Percent.top     k
+<chr>     <dbl>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
 1         categorical.continuous 0.4537753 4.674643e-01    1.436   569        56.9     6
 2 categorical.continuous.feature 0.4545434 4.441112e-01    1.643   404        40.4     8
 3                    categorical 0.4374701 8.842401e-02    2.921    27         2.7     4
@@ -822,7 +822,7 @@ row.names(Summary.table)<-c("Category1", "Category2", "Category3",
 ```
 ```
 > Summary.table
-               Truth Optimized
+Truth Optimized
 Category1        1.0      1.00
 Category2      250.0    347.56
 Category3      100.0    123.80

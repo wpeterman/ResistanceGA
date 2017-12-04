@@ -150,6 +150,9 @@ Combine_Surfaces.scale <-
         parm <-
           PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
         
+        if(parm[4] < 0.5) {
+          parm[4] <- 0.000123456543210
+        }
         
         rast <- k.smooth(raster = r[[i]],
                          sigma = parm[4],

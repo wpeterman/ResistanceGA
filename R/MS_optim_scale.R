@@ -57,19 +57,25 @@ MS_optim.scale <- function(CS.inputs = NULL,
     rt <- proc.time()[3] - t1
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
+    
     for (i in 1:GA.inputs$n.layers) {
-        if (GA.inputs$surface.type[i] == "cat") {
-          ga.p <-
-            GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-          parm <- ga.p / min(ga.p)
-          Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                         1])] <- parm
-
-        } else {
-      parm <-
-        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                     1])] <- parm
+      if (GA.inputs$surface.type[i] == "cat") {
+        ga.p <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        parm <- ga.p / min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+        
+      } else {
+        parm <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        
+        if(length(parm == 4) & parm[4] < 0.5) {
+          parm[4] <- 0.000123456543210
+        }
+        
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
       }
     }
     multi.GA_nG@solution <- Opt.parm
@@ -174,6 +180,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     n <- CS.inputs$n.Pops
     AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
     
+    multi.GA_nG@solution[multi.GA_nG@solution == 0.000123456543210] <- 0
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(
@@ -276,12 +283,17 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parm <- ga.p / min(ga.p)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
-
+        
       } else {
-      parm <-
-        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                     1])] <- parm
+        parm <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        
+        if(length(parm == 4) & parm[4] < 0.5) {
+          parm[4] <- 0.000123456543210
+        }
+        
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
       }
     }
     multi.GA_nG@solution <- Opt.parm
@@ -328,6 +340,8 @@ MS_optim.scale <- function(CS.inputs = NULL,
       ID = gdist.inputs$ID,
       ZZ = gdist.inputs$ZZ
     )
+    
+    multi.GA_nG@solution[multi.GA_nG@solution == 0.000123456543210] <- 0
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(

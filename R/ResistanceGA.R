@@ -25,7 +25,7 @@
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom magrittr "%>%"
 #' @importFrom plyr arrange rbind.fill ldply
-#' @importFrom smoothie kernel2dsmooth
+#' @importFrom spatstat as.im blur as.matrix.im
 #' @importFrom grDevices dev.off tiff topo.colors
 #' @importFrom graphics abline filled.contour par
 #' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif

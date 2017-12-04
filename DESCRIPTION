@@ -24,7 +24,7 @@ Imports:
     lme4 (>= 1.0),
     Matrix,
     MuMIn,
-    smoothie
+    spatstat
 Suggests:
     knitr,
     rmarkdown

@@ -7,8 +7,8 @@
 #' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
-#' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 1)
-#' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.25 * nrows in the raster surface)
+#' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details
+#' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
@@ -46,6 +46,8 @@
 #' When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 #' 
 #' \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. For example, \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled. The order of surfaces will match either the order of the raster stack, or alphabetical order when reading in from a directory.
+#' 
+#' \code{min.scale} defaults to a minimum of 0.01. During optimization, whenever the scaling factor (sigma) is less than 0.5, ResistanceGA will not apply scaling. In this way, it is possible for a surface to not be scaled.
 #' 
 #' The Default for \code{k.value} is 2, which sets k equal to the number of parameters optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 #'
@@ -218,11 +220,11 @@ GA.prep <- function(ASCII.dir,
       parm.type[i, 3] <- names[i]
       
       if (is.null(min.scale)) {
-        min.scale <- 0.3
+        min.scale <- 0.01
       }
       
       if (is.null(max.scale)) {
-        max.scale <- max(dim(r[[i]])) / 4
+        max.scale <- floor(max(dim(r[[i]])) * 0.1)
       }
       
       min.list[[i]] <-
@@ -256,11 +258,11 @@ GA.prep <- function(ASCII.dir,
         parm.type[i, 2] <- 4
         
         if (is.null(min.scale)) {
-          min.scale <- 0.3
+          min.scale <- 0.01
           
         }
         if (is.null(max.scale)) {
-          max.scale <- max(dim(r[[i]]))
+          max.scale <- floor(max(dim(r[[i]])) * 0.1)
         }
         
         min.list[[i]] <-
@@ -308,6 +310,7 @@ GA.prep <- function(ASCII.dir,
           pop.size = pop.size,
           max = max.cont,
           scale = scale,
+          min.scale = min.scale,
           max.scale = max.scale
         )
       
@@ -326,6 +329,7 @@ GA.prep <- function(ASCII.dir,
           pop.size = pop.size,
           max = max.cont,
           scale = scale,
+          min.scale = min.scale,
           max.scale = max.scale
         )
       cont.shape <- cont.shape#[-1]
@@ -342,6 +346,7 @@ GA.prep <- function(ASCII.dir,
           pop.size = pop.size,
           max = max.cont,
           scale = scale,
+          min.scale = min.scale,
           max.scale = max.scale
         )
     } else {

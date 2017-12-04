@@ -31,6 +31,12 @@ SS_optim.scale <- function(CS.inputs = NULL,
     )
   }
   
+  if (!is.null(GA.inputs$scale) & any(GA.inputs$scale.surfaces == 0)) {
+    stop(
+      "It is not currently possible to selectively scale surfaces while using 'SS_optim scale'. Either remove surfaces you do not wish to scale and/or do not specify values for `scale.surfaces` in GA.prep."
+    )
+  }
+  
   t1 <- proc.time()[3]
   RESULTS.cat <- list() # List to store categorical results within
   RESULTS.cont <- list() # List to store continuous results within
@@ -62,103 +68,144 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       names(r) <- GA.inputs$layer.names[i]
       
-
-# Scaled optimization: CS -----------------------------------------------------
-
-if(GA.inputs$scale.surfaces[i] == 1) {
-  single.GA <- ga(
-    type = "real-valued",
-    fitness = Resistance.Opt_single.scale,
-    Resistance = r,
-    population = GA.inputs$population,
-    selection = GA.inputs$selection,
-    pcrossover = GA.inputs$pcrossover,
-    pmutation = GA.inputs$pmutation,
-    crossover = GA.inputs$crossover,
-    Min.Max = GA.inputs$Min.Max,
-    GA.inputs = GA.inputs,
-    CS.inputs = CS.inputs,
-    min = GA.inputs$min.list[[i]],
-    max = GA.inputs$max.list[[i]],
-    popSize = GA.inputs$pop.mult * length(GA.inputs$max.list[[i]]),
-    maxiter = GA.inputs$maxiter,
-    run = GA.inputs$run,
-    keepBest = GA.inputs$keepBest,
-    elitism = GA.inputs$percent.elite,
-    mutation = GA.inputs$mutation,
-    seed = GA.inputs$seed,
-    iter = i,
-    quiet = GA.inputs$quiet
-  )
-} else {
-  single.GA <- ga(
-    type = "real-valued",
-    fitness = Resistance.Opt_single,
-    Resistance = r,
-    population = GA.inputs$population,
-    selection = GA.inputs$selection,
-    pcrossover = GA.inputs$pcrossover,
-    pmutation = GA.inputs$pmutation,
-    crossover = GA.inputs$crossover,
-    Min.Max = GA.inputs$Min.Max,
-    GA.inputs = GA.inputs,
-    CS.inputs = CS.inputs,
-    min = GA.inputs$min.list[[i]],
-    max = GA.inputs$max.list[[i]],
-    popSize = GA.inputs$pop.mult * length(GA.inputs$max.list[[i]]),
-    maxiter = GA.inputs$maxiter,
-    run = GA.inputs$run,
-    keepBest = GA.inputs$keepBest,
-    elitism = GA.inputs$percent.elite,
-    mutation = GA.inputs$mutation,
-    seed = GA.inputs$seed,
-    iter = i,
-    quiet = GA.inputs$quiet
-  )
-}    
-
       
+      # Scaled optimization: CS -----------------------------------------------------
       
-      start.vals <- single.GA@solution[-1]
-      
-      EQ <- get.EQ(single.GA@solution[1])
-      
-      r.tran <-
-        Resistance.tran(
-          transformation = single.GA@solution[1],
-          shape = single.GA@solution[2],
-          max = single.GA@solution[3],
-          scale = single.GA@solution[4],
-          r = R.orig
+      if(GA.inputs$scale.surfaces[i] == 1) {
+        single.GA <- ga(
+          type = "real-valued",
+          fitness = Resistance.Opt_single.scale,
+          Resistance = r,
+          population = GA.inputs$population,
+          selection = GA.inputs$selection,
+          pcrossover = GA.inputs$pcrossover,
+          pmutation = GA.inputs$pmutation,
+          crossover = GA.inputs$crossover,
+          Min.Max = GA.inputs$Min.Max,
+          GA.inputs = GA.inputs,
+          CS.inputs = CS.inputs,
+          min = GA.inputs$min.list[[i]],
+          max = GA.inputs$max.list[[i]],
+          popSize = GA.inputs$pop.mult * length(GA.inputs$max.list[[i]]),
+          maxiter = GA.inputs$maxiter,
+          run = GA.inputs$run,
+          keepBest = GA.inputs$keepBest,
+          elitism = GA.inputs$percent.elite,
+          mutation = GA.inputs$mutation,
+          seed = GA.inputs$seed,
+          iter = i,
+          quiet = GA.inputs$quiet
         )
-      
-      names(r.tran) <- GA.inputs$layer.names[i]
-      
-      Run_CS(CS.inputs,
-             GA.inputs,
-             r.tran,
-             EXPORT.dir = GA.inputs$Results.dir)
-      
-      Diagnostic.Plots(
-        resistance.mat = paste0(
-          GA.inputs$Results.dir,
-          GA.inputs$layer.names[i],
-          "_resistances.out"
-        ),
-        genetic.dist = CS.inputs$response,
-        plot.dir = GA.inputs$Plots.dir,
-        type = "continuous",
-        ID = CS.inputs$ID,
-        ZZ = CS.inputs$ZZ
-      )
-      
-      Plot.trans(
-        PARM = single.GA@solution[-1],
-        Resistance = GA.inputs$Resistance.stack[[i]],
-        transformation = single.GA@solution[1],
-        print.dir = GA.inputs$Plots.dir,
-        scale = single.GA@solution[4]
-      )
+        
+        start.vals <- single.GA@solution[-1]
+        
+        EQ <- get.EQ(single.GA@solution[1])
+        
+        if(single.GA@solution[4] < 0.5) {
+          single.GA@solution[4] <- 0.000123456543210
+        }
+        
+        r.tran <-
+          Resistance.tran(
+            transformation = single.GA@solution[1],
+            shape = single.GA@solution[2],
+            max = single.GA@solution[3],
+            scale = single.GA@solution[4],
+            r = R.orig
+          )
+        
+        names(r.tran) <- GA.inputs$layer.names[i]
+        
+        Run_CS(CS.inputs,
+               GA.inputs,
+               r.tran,
+               EXPORT.dir = GA.inputs$Results.dir)
+        
+        Diagnostic.Plots(
+          resistance.mat = paste0(
+            GA.inputs$Results.dir,
+            GA.inputs$layer.names[i],
+            "_resistances.out"
+          ),
+          genetic.dist = CS.inputs$response,
+          plot.dir = GA.inputs$Plots.dir,
+          type = "continuous",
+          ID = CS.inputs$ID,
+          ZZ = CS.inputs$ZZ
+        )
+        
+        Plot.trans(
+          PARM = single.GA@solution[-1],
+          Resistance = GA.inputs$Resistance.stack[[i]],
+          transformation = single.GA@solution[1],
+          print.dir = GA.inputs$Plots.dir,
+          scale = single.GA@solution[4]
+        )
+      } else {
+        single.GA <- ga(
+          type = "real-valued",
+          fitness = Resistance.Opt_single,
+          Resistance = r,
+          population = GA.inputs$population,
+          selection = GA.inputs$selection,
+          pcrossover = GA.inputs$pcrossover,
+          pmutation = GA.inputs$pmutation,
+          crossover = GA.inputs$crossover,
+          Min.Max = GA.inputs$Min.Max,
+          GA.inputs = GA.inputs,
+          CS.inputs = CS.inputs,
+          min = GA.inputs$min.list[[i]],
+          max = GA.inputs$max.list[[i]],
+          popSize = GA.inputs$pop.mult * length(GA.inputs$max.list[[i]]),
+          maxiter = GA.inputs$maxiter,
+          run = GA.inputs$run,
+          keepBest = GA.inputs$keepBest,
+          elitism = GA.inputs$percent.elite,
+          mutation = GA.inputs$mutation,
+          seed = GA.inputs$seed,
+          iter = i,
+          quiet = GA.inputs$quiet
+        )
+        
+        start.vals <- single.GA@solution[-1]
+        
+        EQ <- get.EQ(single.GA@solution[1])
+        
+        r.tran <-
+          Resistance.tran(
+            transformation = single.GA@solution[1],
+            shape = single.GA@solution[2],
+            max = single.GA@solution[3],
+            r = R.orig
+          )
+        
+        names(r.tran) <- GA.inputs$layer.names[i]
+        
+        Run_CS(CS.inputs,
+               GA.inputs,
+               r.tran,
+               EXPORT.dir = GA.inputs$Results.dir)
+        
+        Diagnostic.Plots(
+          resistance.mat = paste0(
+            GA.inputs$Results.dir,
+            GA.inputs$layer.names[i],
+            "_resistances.out"
+          ),
+          genetic.dist = CS.inputs$response,
+          plot.dir = GA.inputs$Plots.dir,
+          type = "continuous",
+          ID = CS.inputs$ID,
+          ZZ = CS.inputs$ZZ
+        )
+        
+        Plot.trans(
+          PARM = single.GA@solution[-1],
+          Resistance = GA.inputs$Resistance.stack[[i]],
+          transformation = single.GA@solution[1],
+          print.dir = GA.inputs$Plots.dir,
+        )
+      }    
       
       fit.stats <- r.squaredGLMM(
         MLPE.lmm(
@@ -238,20 +285,42 @@ if(GA.inputs$scale.surfaces[i] == 1) {
       AICc <-
         (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
       
-      RS <- data.frame(
-        GA.inputs$layer.names[i],
-        single.GA@fitnessValue,
-        k,
-        aic,
-        AICc,
-        fit.stats[[1]],
-        fit.stats[[2]],
-        LL[[1]],
-        get.EQ(single.GA@solution[1]),
-        single.GA@solution[2],
-        single.GA@solution[3],
-        single.GA@solution[4]
-      )
+      if(single.GA@solution[4] < 0.5) {
+        single.GA@solution[4] <- 0
+      }
+      
+      if(GA.inputs$scale.surfaces[i] == 1) {
+        RS <- data.frame(
+          GA.inputs$layer.names[i],
+          single.GA@fitnessValue,
+          k,
+          aic,
+          AICc,
+          fit.stats[[1]],
+          fit.stats[[2]],
+          LL[[1]],
+          get.EQ(single.GA@solution[1]),
+          single.GA@solution[2],
+          single.GA@solution[3],
+          single.GA@solution[4]
+        )
+      } else {
+        RS <- data.frame(
+          GA.inputs$layer.names[i],
+          single.GA@fitnessValue,
+          k,
+          aic,
+          AICc,
+          fit.stats[[1]],
+          fit.stats[[2]],
+          LL[[1]],
+          get.EQ(single.GA@solution[1]),
+          single.GA@solution[2],
+          single.GA@solution[3],
+          NA
+        )
+      }
+      
       
       colnames(RS) <-
         c(
@@ -437,6 +506,7 @@ if(GA.inputs$scale.surfaces[i] == 1) {
           gdist.inputs = gdist.inputs,
           min = GA.inputs$min.list[[i]],
           max = GA.inputs$max.list[[i]],
+          parallel = GA.inputs$parallel,
           popSize = GA.inputs$pop.mult * length(GA.inputs$max.list[[i]]),
           maxiter = GA.inputs$maxiter,
           run = GA.inputs$run,
@@ -554,7 +624,7 @@ if(GA.inputs$scale.surfaces[i] == 1) {
           n <- gdist.inputs$n.Pops
           AICc <-
             (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
-
+          
           
           RS <- data.frame(
             GA.inputs$layer.names[i],
@@ -645,6 +715,10 @@ if(GA.inputs$scale.surfaces[i] == 1) {
         EQ <- get.EQ(single.GA@solution[1])
         
         if(GA.inputs$scale.surfaces[i] == 1) {
+          if(single.GA@solution[4] < 0.5) {
+            single.GA@solution[4] <- 0.000123456543210
+          }
+          
           r.tran <-
             Resistance.tran(
               transformation = single.GA@solution[1],
@@ -678,14 +752,14 @@ if(GA.inputs$scale.surfaces[i] == 1) {
             print.dir = GA.inputs$Plots.dir
           )
         }
-
+        
         
         names(r.tran) <- GA.inputs$layer.names[i]
         
         NAME <- GA.inputs$layer.names[i]
         
         cd <- Run_gdistance(gdist.inputs, r.tran)
-
+        
         write.table(
           as.matrix(cd),
           file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,"_distMat.csv"),
@@ -769,20 +843,44 @@ if(GA.inputs$scale.surfaces[i] == 1) {
         n <- gdist.inputs$n.Pops
         AICc <- (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
         
-        RS <- data.frame(
-          GA.inputs$layer.names[i],
-          single.GA@fitnessValue,
-          k,
-          aic,
-          AICc,
-          fit.stats[[1]],
-          fit.stats[[2]],
-          LL[[1]],
-          get.EQ(single.GA@solution[1]),
-          single.GA@solution[2],
-          single.GA@solution[3],
-          single.GA@solution[4]
-        )
+        if(GA.inputs$scale.surfaces[i] == 1) {
+          if(single.GA@solution[4] < 0.5) {
+            single.GA@solution[4] <- 0
+          }
+          
+          RS <- data.frame(
+            GA.inputs$layer.names[i],
+            single.GA@fitnessValue,
+            k,
+            aic,
+            AICc,
+            fit.stats[[1]],
+            fit.stats[[2]],
+            LL[[1]],
+            get.EQ(single.GA@solution[1]),
+            single.GA@solution[2],
+            single.GA@solution[3],
+            single.GA@solution[4]
+          )
+        } else {
+          RS <- data.frame(
+            GA.inputs$layer.names[i],
+            single.GA@fitnessValue,
+            k,
+            aic,
+            AICc,
+            fit.stats[[1]],
+            fit.stats[[2]],
+            LL[[1]],
+            get.EQ(single.GA@solution[1]),
+            single.GA@solution[2],
+            single.GA@solution[3],
+            NA
+          )
+        }
+
+        
+        
         
         colnames(RS) <-
           c(

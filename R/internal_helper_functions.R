@@ -312,6 +312,7 @@ sv.cat <- function(levels, pop.size, min, max) {
 sv.cont.nG <- function(direction,
                        pop.size,
                        max,
+                       min.scale,
                        max.scale,
                        scale = NULL) {
   inc <- c(1, 3)
@@ -322,7 +323,7 @@ sv.cont.nG <- function(direction,
   if (!is.null(scale)) {
     cont.starts <- matrix(nrow = pop.size, ncol = 4)
     for (r in 1:pop.size) {
-      scale.parm <- runif(1, 1, max.scale)
+      scale.parm <- runif(1, min.scale, max.scale)
       if (runif(1) < .5 && direction == "Increase") {
         #       z1<-c(sample(inc,1)
         z <- Increase.starts.nG(sample(inc, 1))
@@ -361,6 +362,11 @@ sv.cont.nG <- function(direction,
       cont.starts[r,] <- z
     }
   }
+  if(ncol(cont.starts) == 4) {
+    rs <- sample(pop.size, floor(0.25 * pop.size), replace = F)
+    cont.starts[rs, 4] <- 0.25
+  }
+  
   cont.starts
 }
 
