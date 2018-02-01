@@ -242,5 +242,7 @@ Resistance.Opt_single <-
         }
       }
     }
+    rm(r)
+    gc()
     return(obj.func.opt)
   }

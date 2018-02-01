@@ -37,7 +37,7 @@ quiet = FALSE)
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.}
 
-\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all.comb}} function, specify \code{Results.dir} as "all.comb".}
+\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all.comb".}
 
 \item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)}
 

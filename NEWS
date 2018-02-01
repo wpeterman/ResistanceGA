@@ -1,7 +1,11 @@
+ResistanceGA 4.0-0
+--------
+* This is the official release of the development version that includes the `all_comb` function, as well as a generic `mlpe_rga` function for flexibly fitting MLPE mixed effects models.
+
 ResistanceGA 3.1-4
 --------
-* Upadted Plot.trans function to generate marginal plots for response curve transformations. This uses the ggExtra package
-* Have implemented an `all.combs` function to facilitate the running of a full analysis from a single function: replicate runs of single and multisurface combinations, bootstrap resampling of results.
+* Updated Plot.trans function to generate marginal plots for response curve transformations. This uses the ggExtra package
+* Have implemented an `all_combs` function to facilitate the running of a full analysis from a single function: replicate runs of single and multisurface combinations, bootstrap resampling of results.
 * Gaussian smoothing now done with spatstat rather than smoothie package
 
 ResistanceGA 3.1-3

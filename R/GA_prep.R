@@ -3,7 +3,7 @@
 #' This function prepares and compiles objects and commands for optimization with the GA package
 #'
 #' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.
-#' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all.comb}} function, specify \code{Results.dir} as "all.comb".
+#' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all.comb".
 #' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
@@ -266,15 +266,15 @@ GA.prep <- function(ASCII.dir,
         }
         
         min.list[[i]] <-
-          c(1, 0.001, 0.001, min.scale) # eq, shape/gaus.opt, max, gaus.sd
+          c(1, 0.5, 0.001, min.scale) # eq, shape/gaus.opt, max, gaus.sd
         max.list[[i]] <- c(9.99, 15, max.cont, max.scale)
         
       } else {
         parm.type[i, 2] <- 3
         min.list[[i]] <-
-          c(1, 0.001, 0.001) # eq, shape/gaus.opt, max
+          c(1, 0.5, 0.001) # eq, shape/gaus.opt, max
         
-        max.list[[i]] <- c(9.99, 15, max.cont)
+        max.list[[i]] <- c(9.99, 14.5, max.cont)
       }
       
       parm.type[i, 3] <- names[i]

@@ -3,7 +3,7 @@
 #' A wrapper function to run both \code{\link[ResistanceGA]{SS_optim}} and \code{\link[ResistanceGA]{MS_optim}} to optimize all combinations of resistance surfaces with the Genetic Algorithms package \pkg{GA}. Following optimization, \code{\link[ResistanceGA]{Resist.boot}} is run to conduct a bootstrap analysis.  This function can only be used when optimizing resistance surface with least cost path or commute distance (\pkg{gdistance}).
 #'
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
-#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{\link[ResistanceGA]{Results.dir}} has been been correctly specified as "all.comb"
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{Results.dir} has been been correctly specified as "all.comb"
 #' @param results.dir Directory to write and save analysis results. This should be an empty directory. Any existing files located in this directory will be deleted!
 #' @param max.combination The maximum number of surfaces to include in the all combinations analysis (Default = 4). Alternatively, specify a vector with the minimum and maximum number of surfaces to combine (e.g., c(2,4). If the minimum > 1, then the single surface optimization will be skipped.
 #' @param iters Number of bootstrap iterations to be conducted (Default = 1000)
@@ -14,7 +14,16 @@
 #' @param null_mod Logical, if TRUE, an intercept-only model will be calculated and added to the output table (Default = TRUE)
 
 #' @return This function optimizes resistance surfaces in isolation using \code{\link[ResistanceGA]{SS_optim}}, followed by multisurface optimization using \code{\link[ResistanceGA]{MS_optim}}, and then conducts a bootstrap analysis.
-#' @usage all_comb(gdist.inputs, GA.inputs, max.combination, iters, sample.prop, replicate, nlm, dist_mod, null_mod)
+#' @usage all_comb(gdist.inputs, 
+#'                 GA.inputs, 
+#'                 results.dir,
+#'                 max.combination = 4,
+#'                 iters = 1000,
+#'                 replicate = 1,
+#'                 sample.prop = 0.75,
+#'                 nlm = FALSE,
+#'                 dist_mod = TRUE,
+#'                 null_mod = TRUE)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
 all_comb <- function(gdist.inputs,
@@ -488,12 +497,24 @@ all_comb <- function(gdist.inputs,
     
     if(replicate > 1) {
       Results[[i]] <- list(summary.table = all.AICc,
-                           boot.results = boot.results)
-      names(Results[[i]]) <- paste0('rep_',i)
+                           boot.results = boot.results,
+                           all.k = all.k,
+                           all.cd = all.cd,
+                           genetic.dist_mat = genetic.mat,
+                           ss.results = ss.results,
+                           ms.results = ms.results
+                           )
+      names(Results)[i] <- paste0('rep_',i)
       
     } else {
       Results <- list(summary.table = all.AICc,
-                      boot.results = boot.results)
+                      boot.results = boot.results,
+                      all.k = all.k,
+                      all.cd = all.cd,
+                      genetic.dist_mat = genetic.mat,
+                      ss.results = ss.results,
+                      ms.results = ms.results
+                      )
     }
     
   } # Close replicate loop

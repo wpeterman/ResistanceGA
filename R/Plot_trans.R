@@ -27,7 +27,14 @@
 #'
 #' The "Distance" equation sets all cell values equal to 1.
 #' Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverage of parameter space. This constraint has not been implemented in the \code{Plot.tans} function.
-#' @usage Plot.trans(PARM, Resistance, transformation, scale, print.dir, marginal.plot, marg.type, Name)
+#' @usage Plot.trans(PARM, 
+#'                   Resistance, 
+#'                   transformation,
+#'                   scale, 
+#'                   print.dir,
+#'                   marginal.plot, 
+#'                   marg.type, 
+#'                   Name)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
@@ -41,20 +48,20 @@ Plot.trans <- function(PARM,
                        Name = "layer") {
   if (length(Resistance) == 2) {
     marginal.plot <- FALSE
-      # stop(
-      #   "If you wish to generate marginal plots, please supply the raster surface to the `Resistance` arguement."
-      # )
+    # stop(
+    #   "If you wish to generate marginal plots, please supply the raster surface to the `Resistance` arguement."
+    # )
     
     r <- Resistance
     if (!is.null(scale)) {
       zmat <- as.matrix(r)
-      r <- smoothie::kernel2dsmooth(
-        zmat,
-        kernel.type = "gauss",
-        nx = nrow(r),
-        ny = ncol(r),
-        sigma = scale
-      )
+      
+      x <- spatstat::as.im(zmat)
+      
+      r <- spatstat::blur(x = x,
+                          sigma = sigma,
+                          normalise = TRUE,
+                          bleed = FALSE)
     }
     Mn = min(r)
     Mx = max(r)
@@ -66,13 +73,14 @@ Plot.trans <- function(PARM,
     names(r) <- NAME
     if (!is.null(scale)) {
       zmat <- as.matrix(r)
-      r <- smoothie::kernel2dsmooth(
-        zmat,
-        kernel.type = "gauss",
-        nx = nrow(r),
-        ny = ncol(r),
-        sigma = scale
-      )
+      
+      x <- spatstat::as.im(zmat)
+      
+      r <- spatstat::blur(x = x,
+                          sigma = sigma,
+                          normalise = TRUE,
+                          bleed = FALSE)
+      
       Mn = min(r)
       Mx = max(r)
     } else {
@@ -88,13 +96,13 @@ Plot.trans <- function(PARM,
     
     if (!is.null(scale)) {
       zmat <- as.matrix(r)
-      r <- smoothie::kernel2dsmooth(
-        zmat,
-        kernel.type = "gauss",
-        nx = nrow(r),
-        ny = ncol(r),
-        sigma = scale
-      )
+      
+      x <- spatstat::as.im(zmat)
+      
+      r <- spatstat::blur(x = x,
+                          sigma = sigma,
+                          normalise = TRUE,
+                          bleed = FALSE)
       Mn = min(r)
       Mx = max(r)
     } else {
@@ -354,8 +362,8 @@ Plot.trans <- function(PARM,
     
     # Add marginal plot
     (p <- ggMarginal(p, 
-                          type = marg.type,
-                          size = 8
+                     type = marg.type,
+                     size = 8
     ))
     
     

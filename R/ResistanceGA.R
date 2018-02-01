@@ -17,6 +17,7 @@
 #'   Official release: \url{http://www.circuitscape.org/downloads}
 #' 
 #' @import raster GA lme4 ggplot2 gdistance
+#' @importFrom utils combn menu
 #' @importFrom ggExtra removeGrid ggMarginal
 #' @importFrom Matrix fac2sparse
 #' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text 
@@ -28,7 +29,7 @@
 #' @importFrom spatstat as.im blur as.matrix.im
 #' @importFrom grDevices dev.off tiff topo.colors
 #' @importFrom graphics abline filled.contour par
-#' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif
+#' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif as.formula sigma
 #' @importFrom utils file_test read.csv read.delim read.table write.table
 #' 
 #' @references Please cite: 

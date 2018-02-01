@@ -4,12 +4,21 @@
 \alias{all_comb}
 \title{Analyze all combinations}
 \usage{
-all_comb(gdist.inputs, GA.inputs, max.combination, iters, sample.prop, replicate, nlm, dist_mod, null_mod)
+all_comb(gdist.inputs, 
+                GA.inputs, 
+                results.dir,
+                max.combination = 4,
+                iters = 1000,
+                replicate = 1,
+                sample.prop = 0.75,
+                nlm = FALSE,
+                dist_mod = TRUE,
+                null_mod = TRUE)
 }
 \arguments{
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
-\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{\link[ResistanceGA]{Results.dir}} has been been correctly specified as "all.comb"}
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{Results.dir} has been been correctly specified as "all.comb"}
 
 \item{results.dir}{Directory to write and save analysis results. This should be an empty directory. Any existing files located in this directory will be deleted!}
 

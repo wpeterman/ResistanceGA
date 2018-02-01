@@ -4,7 +4,14 @@
 \alias{Plot.trans}
 \title{Plot continuous surface transformation}
 \usage{
-Plot.trans(PARM, Resistance, transformation, scale, print.dir, marginal.plot, marg.type, Name)
+Plot.trans(PARM, 
+                  Resistance, 
+                  transformation,
+                  scale, 
+                  print.dir,
+                  marginal.plot, 
+                  marg.type, 
+                  Name)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term is the value of shape parameter (c), and the second term is the value of maximum scale parameter (b)}

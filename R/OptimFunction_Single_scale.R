@@ -257,5 +257,7 @@ Resistance.Opt_single.scale <- function(PARM,
       cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
     }
   }
+  rm(r)
+  gc()
   return(obj.func.opt)
 }
