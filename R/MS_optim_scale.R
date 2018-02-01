@@ -12,12 +12,11 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,
-                           GA.inputs,
-                           scale.surfaces = NULL) {
+                           GA.inputs) {
   
   if (is.null(GA.inputs$scale)) {
     stop(
-      "This function should only be used if you intend to apply kernel smoothing to your resistance surfaces"
+      "`MS_optim.scale` should only be used if you intend to apply kernel smoothing to your resistance surfaces"
     )
   }
   
@@ -58,19 +57,25 @@ MS_optim.scale <- function(CS.inputs = NULL,
     rt <- proc.time()[3] - t1
     
     Opt.parm <- GA.opt <- multi.GA_nG@solution
+    
     for (i in 1:GA.inputs$n.layers) {
-        if (GA.inputs$surface.type[i] == "cat") {
-          ga.p <-
-            GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-          parm <- ga.p / min(ga.p)
-          Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                         1])] <- parm
-
-        } else {
-      parm <-
-        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                     1])] <- parm
+      if (GA.inputs$surface.type[i] == "cat") {
+        ga.p <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        parm <- ga.p / min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+        
+      } else {
+        parm <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        
+        if(length(parm == 4) & parm[4] < 0.5) {
+          parm[4] <- 0.000123456543210
+        }
+        
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
       }
     }
     multi.GA_nG@solution <- Opt.parm
@@ -175,6 +180,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     n <- CS.inputs$n.Pops
     AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
     
+    multi.GA_nG@solution[multi.GA_nG@solution == 0.000123456543210] <- 0
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(
@@ -203,15 +209,38 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
-    file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # move(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
     cd.list <- list(as.matrix(cd))
     names(cd.list) <- NAME
     
+    AICc.tab <- data.frame(surface = NAME,
+                           obj = multi.GA_nG@fitnessValue,
+                           k = k,
+                           AIC = aic,
+                           AICc = AICc,
+                           R2m = fit.stats[[1]],
+                           R2c = fit.stats[[2]],
+                           LL = LL)
+    
+    colnames(AICc.tab) <-
+      c(
+        "Surface",
+        paste0("obj.func_", GA.inputs$method),
+        "k",
+        "AIC",
+        "AICc",
+        "R2m",
+        "R2c",
+        "LL"
+      )
+    
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
+                AICc.tab = AICc.tab,
                 cd = cd.list,
                 percent.contribution = p.cont,
                 k = k.df)
@@ -254,12 +283,17 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parm <- ga.p / min(ga.p)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
-
+        
       } else {
-      parm <-
-        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                     1])] <- parm
+        parm <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        
+        if(length(parm == 4) & parm[4] < 0.5) {
+          parm[4] <- 0.000123456543210
+        }
+        
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
       }
     }
     multi.GA_nG@solution <- Opt.parm
@@ -306,6 +340,8 @@ MS_optim.scale <- function(CS.inputs = NULL,
       ID = gdist.inputs$ID,
       ZZ = gdist.inputs$ZZ
     )
+    
+    multi.GA_nG@solution[multi.GA_nG@solution == 0.000123456543210] <- 0
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(
@@ -387,15 +423,38 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
-    file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # move(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
     cd.list <- list(as.matrix(cd))
     names(cd.list) <- NAME
     
+    AICc.tab <- data.frame(surface = NAME,
+                           obj = multi.GA_nG@fitnessValue,
+                           k = k,
+                           AIC = aic,
+                           AICc = AICc,
+                           R2m = fit.stats[[1]],
+                           R2c = fit.stats[[2]],
+                           LL = LL)
+    
+    colnames(AICc.tab) <-
+      c(
+        "Surface",
+        paste0("obj.func_", GA.inputs$method),
+        "k",
+        "AIC",
+        "AICc",
+        "R2m",
+        "R2c",
+        "LL"
+      )
+    
     out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
+                AICc.tab = AICc.tab,
                 cd = cd.list,
                 percent.contribution = p.cont,
                 k = k.df)

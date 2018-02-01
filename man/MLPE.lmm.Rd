@@ -4,7 +4,12 @@
 \alias{MLPE.lmm}
 \title{Run maximum likelihood population effects mixed effects model (MLPE)}
 \usage{
-MLPE.lmm(resistance, pairwise.genetic, REML, ID, ZZ)
+MLPE.lmm(resistance, 
+                pairwise.genetic, 
+                REML = FALSE, 
+                ID = NULL, 
+                ZZ = NULL,
+                scale = TRUE)
 }
 \arguments{
 \item{resistance}{Path to pairwise resistance distance matrix (resistances.out) from CS results. Alternatively, provide the pairwise resistances created from optimizing with `gdistance` (result of Run_gdistance).}
@@ -23,7 +28,7 @@ MLPE.lmm(resistance, pairwise.genetic, REML, ID, ZZ)
 A lmer object from the fitted model
 }
 \description{
-Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
+Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return lmer object
 }
 \details{
 An AIC value will only be returned if \code{REML = FALSE}

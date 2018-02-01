@@ -4,7 +4,13 @@
 \alias{gdist.prep}
 \title{Prepare data for optimization using \code{gdistance}}
 \usage{
-gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, method)
+gdist.prep(n.Pops, 
+                  response = NULL,
+                  samples,
+                  transitionFunction = function(x)  1 / mean(x),
+                  directions = 8,
+                  longlat = FALSE,
+                  method = 'commuteDistance')
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}

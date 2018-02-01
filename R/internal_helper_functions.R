@@ -230,29 +230,6 @@ read.matrix2 <- function(cs.matrix) {
 }
 
 
-# Make to-from population list
-To.From.ID <- function(POPS) {
-  tmp <- matrix(nrow = POPS, ncol = POPS)
-  dimnames(tmp) <- list(1:POPS, 1:POPS)
-  tmp2 <-
-    as.data.frame(which(row(tmp) < col(tmp), arr.ind = TRUE))
-  tmp2[[2]] <- dimnames(tmp)[[2]][tmp2$col]
-  tmp2[[1]] <- dimnames(tmp)[[2]][tmp2$row]
-  colnames(tmp2) <- c("pop1", "pop2")
-  as.numeric(tmp2$pop1)
-  as.numeric(tmp2$pop2)
-  ID <- plyr::arrange(tmp2, as.numeric(pop1), as.numeric(pop2))
-  #   ID<-tmp2[with(tmp2, order(pop1, pop2)), ]
-  p1 <- ID[POPS - 1, 1]
-  p2 <- ID[POPS - 1, 2]
-  ID[POPS - 1, 1] <- p2
-  ID[POPS - 1, 2] <- p1
-  ID$pop1 <- factor(ID$pop1)
-  ID$pop2 <- factor(ID$pop2)
-  return(ID)
-}
-
-
 # Create ZZ matrix for mixed effects model
 ZZ.mat <- function(ID) {
   Zl <-
@@ -312,6 +289,7 @@ sv.cat <- function(levels, pop.size, min, max) {
 sv.cont.nG <- function(direction,
                        pop.size,
                        max,
+                       min.scale,
                        max.scale,
                        scale = NULL) {
   inc <- c(1, 3)
@@ -322,7 +300,7 @@ sv.cont.nG <- function(direction,
   if (!is.null(scale)) {
     cont.starts <- matrix(nrow = pop.size, ncol = 4)
     for (r in 1:pop.size) {
-      scale.parm <- runif(1, 1, max.scale)
+      scale.parm <- runif(1, min.scale, max.scale)
       if (runif(1) < .5 && direction == "Increase") {
         #       z1<-c(sample(inc,1)
         z <- Increase.starts.nG(sample(inc, 1))
@@ -361,6 +339,11 @@ sv.cont.nG <- function(direction,
       cont.starts[r,] <- z
     }
   }
+  if(ncol(cont.starts) == 4) {
+    rs <- sample(pop.size, floor(0.25 * pop.size), replace = F)
+    cont.starts[rs, 4] <- 0.25
+  }
+  
   cont.starts
 }
 
@@ -405,8 +388,8 @@ eq.set <- function(include.list) {
         Please see Details of the GA.prep."
       )
     }
-    }
   }
+}
 
 get.EQ <- function(equation) {
   # Apply specified transformation
@@ -633,4 +616,12 @@ Rev.Ricker <- function(r, parm) {
     rev.rast <- SCALE.vector((-1 * r), 0, 10)
     Ricker(rev.rast, parm)
   }
+}
+
+yn.question <- function(question, add_lines_before = TRUE) {
+  choices <- c("Yes", "No")
+  if(add_lines_before) cat("------------------------\n")   
+  the_answer <- menu(choices, title = question)            
+  
+  ifelse(the_answer == 1L, TRUE, FALSE)   # returns TRUE or FALSE
 }

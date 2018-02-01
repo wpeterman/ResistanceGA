@@ -55,13 +55,12 @@ Resistance.tran <- function(transformation,
   if (!is.null(scale)) {
     zmat <- as.matrix(R)
     # Note that sigma is in pixels, NOT map units!
-    f <- smoothie::kernel2dsmooth(
-      zmat,
-      kernel.type = "gauss",
-      nx = nrow(R),
-      ny = ncol(R),
-      sigma = scale
-    )
+    x <- spatstat::as.im(zmat)
+    
+    f <- spatstat::blur(x = x,
+                        sigma = sigma,
+                        normalise = TRUE,
+                        bleed = FALSE)
     R <- R
     values(R) <- f
   }

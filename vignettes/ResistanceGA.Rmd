@@ -7,15 +7,15 @@ output:
   html_document: rmarkdown::html_vignette
 vignette: |
   %\VignetteIndexEntry{ResistanceGA User Guide} 
-  %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown} 
 ---
 ```{r setup, include=FALSE}
-  knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
-  
-```{r, echo = FALSE}
-  library(ggplot2, warn.conflicts = F, quietly = T)
+
+```{r, echo = FALSE, warning=F}
+library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 ```
 
@@ -67,7 +67,7 @@ Setup
 ### Install necessary software and packages
 If you want to optimize using CIRCUITSCAPE, this package requires that you have [CIRCUITSCAPE v4.0](http://www.circuitscape.org/downloads "CS Downloads") or higher installed on your Windows machine. At this point in time, `ResistanceGA` can only execute CIRCUITSCAPE on *WINDOWS* operating systems. You will also need to have [R >= v3.0](http://www.r-project.org/ "R downloads") installed. I would highly recommend installing [R studio](https://www.rstudio.com/ide/download/ "R Studio download") when working with R.     
 
-__Because it has now been determined that `commuteDistance` is equivalent to CIRCUITSCAPE, it is highly recommended to to conduct all optimizations using this approach, run in parallel. Doing so allows for all processes to be conducted within R, and will not require execution of software outside of the R environment. If final current flow maps are desired, these can still be generated using the optimized resistance surface using CIRCUITSCAPE.__     
+__Because it has now been determined that `commuteDistance` is equivalent to CIRCUITSCAPE, it is highly recommended to conduct all optimizations using this approach, run in parallel. Doing so allows for all processes to be conducted within R, and will not require execution of software outside of the R environment. If final current flow maps are desired, these can still be generated using the optimized resistance surface using CIRCUITSCAPE.__     
 
 
 ### Running on Linux
@@ -184,7 +184,7 @@ GA.inputs <- GA.prep(ASCII.dir = write.dir,
                      max.cat = 500,
                      max.cont = 500,
                      select.trans = "M",
-                     method = "LL"
+                     method = "LL",
                      seed = 555) 
 
 CS.inputs <- CS.prep(n.Pops = length(sample.locales),
@@ -267,7 +267,7 @@ What the `SS_optim` function does:
 
 
 ### Minimum code for running ResistanceGA
-The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to to use the `r.tran` or `Run_CS` functions. You should only have to use the following functions (although you may want to change settings from defaults).
+The example above outlines how the functions can be used while simulating and generating data with known parameter values. When analyzing your own data, it is not necessary to use the `r.tran` or `Run_CS` functions. You should only have to use the following functions (although you may want to change settings from defaults).
 ```{r eval=FALSE}
 GA.inputs <- GA.prep(ASCII.dir = write.dir) 
 
@@ -326,7 +326,7 @@ t(SS_RESULTS.gdist$ContinuousResults[c(9:11)]))
 colnames(SS_table) <- c("Truth", "CS.Optimized", "commuteDist.Optimized")
 
 SS_table
-                  Truth     CS.Optimized   commuteDist.Optimized
+Truth     CS.Optimized   commuteDist.Optimized
 Equation Monomolecular    Monomolecular           Monomolecular
 shape                2        1.999999                1.999504
 max                275        274.9982                277.0668
@@ -672,7 +672,7 @@ Resist <- Combine_Surfaces(PARM = PARM,
 Resist$percent.contribution
 ```
 ```
-      surface      mean         l95       u95
+surface      mean         l95       u95
 1 categorical 0.7486327 0.043705035 0.9919852
 2  continuous 0.2513673 0.008014751 0.9562950
 ```
@@ -748,13 +748,13 @@ Multi.Surface_optim.gd2$percent.contribution
 ```
 ```
 > Multi.Surface_optim.gd$percent.contribution
-      surface      mean         l95       u95
+surface      mean         l95       u95
 1 categorical 0.7010857 0.020919088 0.9798840
 2  continuous 0.2632950 0.017292284 0.9468672
 3     feature 0.0356193 0.002216987 0.1878875
 > 
 > Multi.Surface_optim.gd2$percent.contribution
-      surface      mean        l95       u95
+surface      mean        l95       u95
 1 categorical 0.7174886 0.03268185 0.9841884
 2  continuous 0.2825114 0.01581160 0.9673181
 ```
@@ -803,14 +803,15 @@ response[lower.tri(response)] <- gd.response
 ```
 
 ```
-                         surface   avg.R2m   avg.weight avg.rank     n Percent.top     k
-                           <chr>     <dbl>        <dbl>    <dbl> <dbl>       <dbl> <dbl>
-1         categorical.continuous 0.4537753 4.674643e-01    1.436   569        56.9     6
-2 categorical.continuous.feature 0.4545434 4.441112e-01    1.643   404        40.4     8
-3                    categorical 0.4374701 8.842401e-02    2.921    27         2.7     4
-4                     continuous 0.1533399 1.430606e-07    4.578     0         0.0     4
-5                       Distance 0.1512606 1.676945e-07    5.147     0         0.0     2
-6                        feature 0.1493708 1.716814e-07    5.275     0         0.0     3
+# A tibble: 6 x 10
+  surface                  avg.AIC avg.AICc  avg.weight avg.rank avg.R2m avg.LL   n 	Percent.top  k
+  <fctr>                    <dbl>    <dbl>    <dbl>    	<dbl>  	 <dbl> 	 <dbl> 	 <dbl>   <dbl> 		<dbl>
+1 categorical.continuous    1110     1111 	 0.468      1.44   	0.452    -551 	 564     56.4   	6
+2 cat.cont.feature    		1110     1111 	 0.443      1.63   	0.453    -551 	 410     41.0   	8
+3 categorical               1115     1115 	 0.0892     2.93   	0.436    -553  	 26.0     2.60  	4
+4 continuous                1149     1149 	 0.0000    	4.58   	0.154    -571     0       0     	4
+5 Distance                  1150     1150 	 0.0000     5.16   	0.152    -571     0	      0     	2
+6 feature                   1150     1150 	 0.0000     5.27   	0.150    -571     0       0     	3
 ```
 You can see that there is decent support for the composite surface that (incorrectly) includes the feature surface, but that in 57% of bootstrap samples, the composite without the feature surface was the top model.   
 The model selection clearly suggests, correctly, that the multisurface combination with the categorical and continuous surface is the best. There was some ambiguity about whether the categorical.continuous composite was an improvement over the categorical surface alone, but the bootstrap analysis suggests virtually no support for the categorical surface.  Further, if you assess the optimized values from this analysis (below), you can see that each surface was parameterized fairly well. The optimized parameters do not perfectly match the true data generating parameters, but overall this resulted in a nearly perfectly correlated surface (r = 1.00). It is worth noting that the optimized surface resulted in a marginal R^2^ = 0.46, suggesting that optimization with 'noisy' genetic data may not result in the highest R^2^ values, but that optimization can nonetheless reliably determine the effects of the landscape on pairwise genetic distance. 
@@ -822,7 +823,7 @@ row.names(Summary.table)<-c("Category1", "Category2", "Category3",
 ```
 ```
 > Summary.table
-               Truth Optimized
+Truth Optimized
 Category1        1.0      1.00
 Category2      250.0    347.56
 Category3      100.0    123.80
@@ -849,12 +850,147 @@ pairs(r.stack)
 * If the optimization ends very quickly (e.g., <40 iterations), you may want to increase the probability of mutation (`pmutation`) and/or the probability of crossover (`pcrossover`). These can be adjusted using `GA.prep`. I have not extensively tested these settings to determine optimal values, but found that the current defaults (`pmutation = 0.125`, `pcrossover = 0.85`) have generally worked quite well with simulated data and produced reproducible estimates with real data. Alternatively, because this is a stochastic optimization, just rerun the optimization (**make sure you have not set a seed!**)\
 * Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.\
 * As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates/relative relationship among resistance surfaces. \
-* While there is no established framework for how optimization of resistances surface can or should be done, below is a flowchart of how an analysis might proceed:   
 
-![flowchart](figure/FlowChart_Narrow2b.png) \
+# Full Analysis: `all_comb`
+There is no established framework for how optimization of resistances surface can or should be done. In dealing with simulated and real data sets, it is often the case that a surface has little to no support when optimized in isolation. But when these 'poorly supported' surfaces are included in multisurface optimizations, they often result in the best fitting model. **As such, I think a step-wise (i.e. single surface followed by selective multi-surface) optimization should be discouraged.** Rather, all possible combinations of surfaces hypothesized to be of importance should be assessed. To facilitate such an analysis, you can use the `all_comb` function. This convenience function will conduct all single surface optimizations, followed by multisurface optimizations up to a specified complexity (i.e. number of surfaces to combine). Following all optimizations, a bootstrap analysis is conducted to assess the level of support for each of the fitted surfaces. The code below will complete the same analysis demonstrated above, but will include all possible combinations of the three resistance surfaces.
+
+```{r all_comb_demo, eval = F}
+# Run `gdist.prep` function as before
+gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
+                           response = gd.response,
+                           samples = sample.locales)
 
 
-### Summary   
+# GA.prep for all combinations analysis
+# NOTE: Specify "all.comb" for `Results.dir`
+GA.inputs <- GA.prep(method = "LL",
+                     ASCII.dir = resistance_surfaces,
+                     Results.dir =  "all.comb", 
+                     max.cat = 500,
+                     max.cont = 500,
+                     select.trans = list(NA, 
+                                         "M", # Only monomolecular considered
+                                         NA),
+                     parallel = 6)
+
+
+# Replicate optimization runs can completed by specifying
+# the a number for `replicate`
+all.comb_results <- all_comb(gdist.inputs = gdist.inputs,
+                             GA.inputs = GA.inputs,
+                             results.dir = "C:/ResistanceGA_Examples/all_comb/",
+                             max.combination = 3,
+                             replicate = 1
+                             )
+```
+
+```{r, eval = F}
+all.comb_results$summary.table
+```
+```
+> all.comb_results$summary.table
+	Surface	             obj.func_LL k	AIC	    AICc	 R2m  R2c	    LL	  delta.AICc weight
+1	categorical	            -1083.51  4	2175.01	2177.01	0.46  0.46	-1083.51	0.000	 0.792
+2	categorical.continuous	-1081.73  6	2171.46	2180.12	0.46  0.46	-1081.73	3.109	 0.167
+3	categorical.feature	    -1083.22  6	2174.44	2183.11	0.46  0.46	-1083.22	6.092	 0.038
+4	cat.cont.feature	    -1081.43  8	2170.87	2187.87	0.46  0.46	-1081.43	10.855	 0.003
+5	Distance	            -1114.83  2	2237.66	2234.20	0.16  0.38	-1114.83	57.190	 0.000
+6	feature	                -1114.82  3	2237.63	2236.78	0.15  0.37	-1114.82	59.763	 0.000
+7	continuous	            -1114.47  4	2236.93	2238.93	0.16  0.37	-1114.47	61.919	 0.000
+8	continuous.feature	    -1114.46  5	2236.92	2242.08	0.16  0.37	-1114.46	65.070	 0.000
+9	Null	                -1139.25  1	2284.50	2280.67	0.00  0.20	-1139.25	103.660	 0.000
+
+```
+
+
+```{r, eval = F}
+all.comb_results$boot.results
+```
+```
+> all.comb_results$boot.results
+# A tibble: 8 x 10
+	             surface	avg.AIC	avg.AICc avg.weight	avg.rank	avg.R2m	  n	    Percent.top	k
+	              <chr>	   <dbl>	 <dbl>	 <dbl>  	   <dbl>	  <dbl>	 <dbl>	  <dbl>	    <dbl>
+1	categorical.continuous  1110	1110  	 0.33	        1.70	  0.46	 457.0	  45.7	    6
+2	cat.cont.feature	    1109	1110  	 0.32	        2.02	  0.46	 390.0	  39.0	    8
+3	categorical	            1111	1112  	 0.18    	    3.13	  0.45   85.0	   8.5	    4
+4	categorical.feature   	1111	1112  	 0.17       	3.15      0.45   68.0	   6.8	    6
+5	continuous	            1149	1149  	 0.00       	5.63	  0.15   0.0	   0.0	    4
+6	continuous.feature    	1149	1149  	 0.00       	6.53      0.15   0.0	   0.0	    5
+7	Distance	            1149	1149  	 0.00       	6.88      0.15   0.0	   0.0	    2
+8	feature	                1149	1149  	 0.00       	6.96	  0.15   0.0	   0.0	    3
+
+```
+The results from the `all_comb` function are similar to the previous analysis. The frequency that categorical.continuous and categorical.continuous.feature is reduced some because of the addition of categorical.feature, which garnered some support. The preponderance of evidence is still in favor of the categorical.continuous surface as the best resistance surface explaining the observed patterns of genetic differentiation.     
+
+# Fitting MLPE models: `mlpe_rga`
+The function `mlpe_rga` can be used to flexibly fit mixed effects models using the MLPE parameterization. In `ResistanceGA`, there is only ever a single predictor variable (pairwise effective distance between sampled populations/individuals). The `mlpe_rga` function allows for the specification of multiple predictor variables. For instance, one may wish to fit pairwise Euclidean distance in addition to effective distance when fitting an MLPE model (e.g., [Row et al. 2017](http://onlinelibrary.wiley.com/doi/10.1002/ece3.2825/abstract?systemMessage=Please+be+advised+that+we+experienced+an+unexpected+issue+that+occurred+on+Saturday+and+Sunday+January+20th+and+21st+that+caused+the+site+to+be+down+for+an+extended+period+of+time+and+affected+the+ability+of+users+to+access+content+on+Wiley+Online+Library.+This+issue+has+now+been+fully+resolved.++We+apologize+for+any+inconvenience+this+may+have+caused+and+are+working+to+ensure+that+we+can+alert+you+immediately+of+any+unplanned+periods+of+downtime+or+disruption+in+the+future. "Row et al.")).    
+```{r, eval = F}
+# Recycling objects from the Example Analysis above:
+# Get pairwise Euclidean distances
+e.dist <- lower(as.matrix(dist(samples[,2:3])))
+
+# Generate to-from object
+id <- To.From.ID(nrow(samples))
+
+# Create data frame, be sure to add `pop1` from the object
+# made by running `To.From.ID` above
+df <- data.frame(g.dist = gd.response,
+                 resist.dist = gd.true,
+                 e.dist = e.dist,
+                 pop = id$pop1)
+
+# Fit/compare model with and without distance
+mod1 <- mlpe_rga(formula = g.dist ~ resist.dist + (1 | pop),
+                 data = df)
+
+mod2 <- mlpe_rga(formula = g.dist ~ resist.dist + e.dist + (1 | pop),
+                 data = df)
+
+summary(mod2)
+AIC(mod1, mod2)
+
+```
+```
+> summary(mod2)
+Linear mixed model fit by maximum likelihood  ['lmerMod']
+
+     AIC      BIC   logLik deviance df.resid 
+  2175.4   2193.9  -1082.7   2165.4      295 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.8649 -0.7295  0.0093  0.6209  2.7724 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ pop      (Intercept)  0.00    0.000   
+ Residual             79.85    8.936   
+Number of obs: 300, groups:  pop, 25
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)  0.48424    2.32249   0.208
+resist.dist  0.99594    0.06830  14.581
+e.dist       0.02051    0.15258   0.134
+
+Correlation of Fixed Effects:
+            (Intr) rsst.d
+resist.dist -0.829       
+e.dist      -0.149 -0.391
+
+> AIC(mod1, mod2)
+     df      AIC
+mod1  4 2173.429
+mod2  5 2175.411
+```
+
+**References**     
+Row, J. R., S. T. Knick, S. J. Oyler-McCance, S. C. Lougheed, and B. C. Fedy. 2017. Developing approaches for linear mixed modeling in landscape genetics through landscape-directed dispersal simulations. Ecology and Evolution 7:3751--3761.     
+
+
+
+# Summary   
 Hopefully this vignette/tutorial has demonstrated the functions present in this package and how they can be used together to optimize resistance surfaces in isolation or in combination. These methods require no *a priori* assumptions by the researcher. Optimization is conducted solely on the genetic distance data provided.  The goal of this package is to make these methods accessible and useful to others. Development and advancement will continue as long as there is interest and there remains a need. Please contact me (<bill.peterman@gmail.com>) if you encounter issues with any of these functions, need assistance with interpretation, or would like other features added.
 
 

@@ -1,8 +1,8 @@
 ## ----setup, include=FALSE------------------------------------------------
-  knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 
 ## ---- echo = FALSE-------------------------------------------------------
-  library(ggplot2, warn.conflicts = F, quietly = T)
+library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 
 ## ----install.package, eval=FALSE-----------------------------------------
@@ -377,17 +377,9 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  
 #  # The 'true' resistance surface will be the composite surface
 #  # Combine resistance surfaces, omitting the feature surface
-<<<<<<< HEAD
 #  # Use an Inverse-Reverse Monomolecular transformation of the continuous surface
 #  # Inverse-Reverse Monomolecular  = 1
 #  PARM <- c(1, 250, 100, 1, 1.5, 150)
-=======
-#  # Use an Reverse Monomolecular transformation of the continuous surface
-#  # Reverse Monomolecular  = 5
-#  PARM <- c(1, 250, 100, 1, 1.5, 150)
-#  # PARM <- c(1, 250, 100, 1, 1.5, 150) # GOOD
->>>>>>> 18eb1de80bf9b72ab953f640889493ec0c87b31e
-#  
 #  
 #  # Setting `p.contribution = TRUE` to see how each surface
 #  # contributes to the total resistance of the composite surface

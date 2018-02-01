@@ -4,7 +4,14 @@
 \alias{Plot.trans}
 \title{Plot continuous surface transformation}
 \usage{
-Plot.trans(PARM, Resistance, transformation, scale, print.dir, Name)
+Plot.trans(PARM, 
+                  Resistance, 
+                  transformation,
+                  scale, 
+                  print.dir,
+                  marginal.plot, 
+                  marg.type, 
+                  Name)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector of two parameters is required. The first term is the value of shape parameter (c), and the second term is the value of maximum scale parameter (b)}
@@ -17,6 +24,10 @@ Plot.trans(PARM, Resistance, transformation, scale, print.dir, Name)
 
 \item{print.dir}{Specify the directory where a .tiff of the transformation will be written (Default = NULL)}
 
+\item{marginal.plot}{Logical. Should distribution plots be added to the margins of the response plot (Default = TRUE). Requires that the resistance surface be specified for `Resistance`.}
+
+\item{marg.type}{Type of marginal plot to add. One of: [density, histogram, boxplot]. See \code{\link[ggExtra]{ggMarginal}}}
+
 \item{Name}{Name of resistance surface being transformed (optional). This will be added to the output file name.}
 }
 \value{
@@ -26,7 +37,7 @@ plot of transformed resistance values against original resistance values
 Plots a transformed continuous resistance surface against the original resistance values
 }
 \details{
-This function will create a ggplot object and plot, so it requires \pkg{ggplot2} to be installed.\cr 
+This function will create a ggplot object and plot, so it requires \pkg{ggplot2} to be installed.\cr
 Equation names can be:
 \tabular{ll}{
    \tab 1 = "Inverse-Reverse Monomolecular"\cr
@@ -39,7 +50,7 @@ Equation names can be:
    \tab 8 = "Inverse Ricker"\cr
    \tab 9 = "Distance"\cr
    }
-   
+
 The "Distance" equation sets all cell values equal to 1.
 Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverage of parameter space. This constraint has not been implemented in the \code{Plot.tans} function.
 }

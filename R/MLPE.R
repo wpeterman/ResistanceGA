@@ -1,7 +1,7 @@
-# Run Mixed effects models, recovery parameter estimates
+# Run Mixed effects models, recover parameter estimates
 #' Run maximum likelihood population effects mixed effects model (MLPE)
 #'
-#' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return glmer object
+#' Runs MLPE as detailed by Clarke et al. (2002). This function will run the model and return lmer object
 #'
 #' @param resistance Path to pairwise resistance distance matrix (resistances.out) from CS results. Alternatively, provide the pairwise resistances created from optimizing with `gdistance` (result of Run_gdistance).
 #' @param pairwise.genetic Lower half of pairwise genetic distance matrix
@@ -14,7 +14,12 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @usage MLPE.lmm(resistance, pairwise.genetic, REML, ID, ZZ)
+#' @usage MLPE.lmm(resistance, 
+#'                 pairwise.genetic, 
+#'                 REML = FALSE, 
+#'                 ID = NULL, 
+#'                 ZZ = NULL,
+#'                 scale = TRUE)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 
 MLPE.lmm <-

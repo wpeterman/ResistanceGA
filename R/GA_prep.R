@@ -3,13 +3,13 @@
 #' This function prepares and compiles objects and commands for optimization with the GA package
 #'
 #' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.
-#' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail.
+#' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all.comb".
 #' @param min.cat The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)
 #' @param max.cat The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)
-#' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 1)
-#' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.25 * nrows in the raster surface)
-#' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)
+#' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details
+#' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)
+#' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
 #' @param scale Logical. To optimize a kernel smoothing scaling parameter during optimization, set to TRUE (Default = FALSE). See Details below.
@@ -38,7 +38,7 @@
 #' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
 #' @param seed Integer random number seed to replicate \code{ga} optimization
-#' @param quiet Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE
+#' @param quiet Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)
 #' @return An R object that is a required input into optimization functions
 #'
 #' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
@@ -46,6 +46,8 @@
 #' When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 #' 
 #' \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. For example, \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled. The order of surfaces will match either the order of the raster stack, or alphabetical order when reading in from a directory.
+#' 
+#' \code{min.scale} defaults to a minimum of 0.01. During optimization, whenever the scaling factor (sigma) is less than 0.5, ResistanceGA will not apply scaling. In this way, it is possible for a surface to not be scaled.
 #' 
 #' The Default for \code{k.value} is 2, which sets k equal to the number of parameters optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 #'
@@ -122,7 +124,7 @@ GA.prep <- function(ASCII.dir,
     scale <- NULL
   }
   
-  if (!is.null(Results.dir)) {
+  if (!is.null(Results.dir) & (Results.dir != 'all.comb')) {
     TEST.dir <- !file_test("-d", Results.dir)
     if (TEST.dir == TRUE) {
       stop("The specified 'Results.dir' does not exist")
@@ -171,18 +173,26 @@ GA.prep <- function(ASCII.dir,
     stop("The 'scale.surfaces' vector is not the same length as the number of layers")
   }
   
-  if ("Results" %in% dir(Results.dir) == FALSE)
-    dir.create(file.path(Results.dir, "Results"))
-  #   dir.create(file.path(ASCII.dir, "Results"),showWarnings = FALSE)
-  Results.DIR <- paste0(Results.dir, "Results/")
-  if ("tmp" %in% dir(Results.dir) == FALSE)
-    dir.create(file.path(Results.dir, "tmp"))
-  #   dir.create(file.path(Results.dir, "tmp"),showWarnings = FALSE)
-  Write.dir <- paste0(Results.dir, "tmp/")
-  if ("Plots" %in% dir(Results.DIR) == FALSE)
-    dir.create(file.path(Results.DIR, "Plots"))
-  #   dir.create(file.path(Results.dir, "tmp"),showWarnings = FALSE)
-  Plots.dir <- paste0(Results.DIR, "Plots/")
+  if(Results.dir != 'all.comb') {
+    if ("Results" %in% dir(Results.dir) == FALSE)
+      dir.create(file.path(Results.dir, "Results"))
+    Results.DIR <- paste0(Results.dir, "Results/")
+    
+    if ("tmp" %in% dir(Results.dir) == FALSE)
+      dir.create(file.path(Results.dir, "tmp"))
+    Write.dir <- paste0(Results.dir, "tmp/")
+    
+    if ("Plots" %in% dir(Results.DIR) == FALSE)
+      dir.create(file.path(Results.DIR, "Plots"))
+    Plots.dir <- paste0(Results.DIR, "Plots/")
+  }
+  
+  if(Results.dir == 'all.comb') {
+    Results.DIR <- NULL
+    Write.dir <- NULL
+    Plots.dir <- NULL
+  }
+  
   
   # Determine total number of parameters and types of surfaces included
   parm.type <- data.frame()
@@ -202,17 +212,19 @@ GA.prep <- function(ASCII.dir,
       )
     }
     
-    if (n.levels == 2 & !is.null(scale) & scale.surfaces[i]==1) {
+    if (n.levels == 2 & 
+        !is.null(scale) & 
+        scale.surfaces[i]==1) {
       parm.type[i, 1] <- "cont"
       parm.type[i, 2] <- 4
       parm.type[i, 3] <- names[i]
       
       if (is.null(min.scale)) {
-        min.scale <- 0.3
-
+        min.scale <- 0.01
       }
+      
       if (is.null(max.scale)) {
-        max.scale <- max(dim(r[[i]])) / 4
+        max.scale <- floor(max(dim(r[[i]])) * 0.1)
       }
       
       min.list[[i]] <-
@@ -246,23 +258,23 @@ GA.prep <- function(ASCII.dir,
         parm.type[i, 2] <- 4
         
         if (is.null(min.scale)) {
-          min.scale <- 0.3
-
+          min.scale <- 0.01
+          
         }
         if (is.null(max.scale)) {
-          max.scale <- max(dim(r[[i]]))
+          max.scale <- floor(max(dim(r[[i]])) * 0.1)
         }
         
         min.list[[i]] <-
-          c(1, 0.001, 0.001, min.scale) # eq, shape/gaus.opt, max, gaus.sd
+          c(1, 0.5, 0.001, min.scale) # eq, shape/gaus.opt, max, gaus.sd
         max.list[[i]] <- c(9.99, 15, max.cont, max.scale)
         
       } else {
         parm.type[i, 2] <- 3
         min.list[[i]] <-
-          c(1, 0.001, 0.001) # eq, shape/gaus.opt, max
-
-        max.list[[i]] <- c(9.99, 15, max.cont)
+          c(1, 0.5, 0.001) # eq, shape/gaus.opt, max
+        
+        max.list[[i]] <- c(9.99, 14.5, max.cont)
       }
       
       parm.type[i, 3] <- names[i]
@@ -298,6 +310,7 @@ GA.prep <- function(ASCII.dir,
           pop.size = pop.size,
           max = max.cont,
           scale = scale,
+          min.scale = min.scale,
           max.scale = max.scale
         )
       
@@ -316,6 +329,7 @@ GA.prep <- function(ASCII.dir,
           pop.size = pop.size,
           max = max.cont,
           scale = scale,
+          min.scale = min.scale,
           max.scale = max.scale
         )
       cont.shape <- cont.shape#[-1]
@@ -332,6 +346,7 @@ GA.prep <- function(ASCII.dir,
           pop.size = pop.size,
           max = max.cont,
           scale = scale,
+          min.scale = min.scale,
           max.scale = max.scale
         )
     } else {
@@ -349,43 +364,117 @@ GA.prep <- function(ASCII.dir,
     Min.Max <- 'max'
   }
   
-  list(
-    parm.index = parm.index,
-    ga.min = ga.min,
-    ga.max = ga.max,
-    select.trans = eqs,
-    scale = scale,
-    scale.surfaces = scale.surfaces,
-    surface.type = surface.type,
-    parm.type = parm.type,
-    Resistance.stack = r,
-    n.layers = n.layers,
-    layer.names = names,
-    pop.size = pop.size,
-    min.list = min.list,
-    max.list = max.list,
-    SUGGESTS = SUGGESTS,
-    ASCII.dir = ASCII.dir,
-    Results.dir = Results.DIR,
-    Write.dir = Write.dir,
-    Plots.dir = Plots.dir,
-    type = type,
-    pcrossover = pcrossover,
-    pmutation = pmutation,
-    crossover = crossover,
-    maxiter = maxiter,
-    run = run,
-    keepBest = keepBest,
-    population = population,
-    selection = selection,
-    mutation = mutation,
-    parallel = parallel,
-    pop.mult = pop.mult,
-    percent.elite = percent.elite,
-    Min.Max = Min.Max,
-    method = method,
-    k.value = k.value,
-    seed = seed,
-    quiet = quiet
-  )
+  if(Results.dir != "all.comb") {
+    list(
+      parm.index = parm.index,
+      ga.min = ga.min,
+      ga.max = ga.max,
+      select.trans = eqs,
+      scale = scale,
+      scale.surfaces = scale.surfaces,
+      surface.type = surface.type,
+      parm.type = parm.type,
+      Resistance.stack = r,
+      n.layers = n.layers,
+      layer.names = names,
+      pop.size = pop.size,
+      min.list = min.list,
+      max.list = max.list,
+      SUGGESTS = SUGGESTS,
+      ASCII.dir = ASCII.dir,
+      Results.dir = Results.DIR,
+      Write.dir = Write.dir,
+      Plots.dir = Plots.dir,
+      type = type,
+      pcrossover = pcrossover,
+      pmutation = pmutation,
+      crossover = crossover,
+      maxiter = maxiter,
+      run = run,
+      keepBest = keepBest,
+      population = population,
+      selection = selection,
+      mutation = mutation,
+      parallel = parallel,
+      pop.mult = pop.mult,
+      percent.elite = percent.elite,
+      Min.Max = Min.Max,
+      method = method,
+      k.value = k.value,
+      seed = seed,
+      quiet = quiet
+    )
+  } else {
+    list(
+      parm.index = parm.index,
+      ga.min = ga.min,
+      ga.max = ga.max,
+      select.trans = eqs,
+      scale = scale,
+      scale.surfaces = scale.surfaces,
+      surface.type = surface.type,
+      parm.type = parm.type,
+      Resistance.stack = r,
+      n.layers = n.layers,
+      layer.names = names,
+      pop.size = pop.size,
+      min.list = min.list,
+      max.list = max.list,
+      SUGGESTS = SUGGESTS,
+      ASCII.dir = ASCII.dir,
+      Results.dir = Results.DIR,
+      Write.dir = Write.dir,
+      Plots.dir = Plots.dir,
+      type = type,
+      pcrossover = pcrossover,
+      pmutation = pmutation,
+      crossover = crossover,
+      maxiter = maxiter,
+      run = run,
+      keepBest = keepBest,
+      population = population,
+      selection = selection,
+      mutation = mutation,
+      parallel = parallel,
+      pop.mult = pop.mult,
+      percent.elite = percent.elite,
+      Min.Max = Min.Max,
+      method = method,
+      k.value = k.value,
+      seed = seed,
+      quiet = quiet,
+      inputs = list(
+        ASCII.dir = ASCII.dir,
+        Results.dir = Results.dir,
+        min.cat = min.cat,
+        max.cat = max.cat,
+        max.cont = max.cont,
+        min.scale = min.scale,
+        max.scale = max.scale,
+        cont.shape = cont.shape,
+        select.trans = select.trans,
+        method = method,
+        scale = scale,
+        scale.surfaces = scale.surfaces,
+        k.value = k.value,
+        pop.mult = pop.mult,
+        percent.elite = percent.elite,
+        type = type,
+        pcrossover = pcrossover,
+        pmutation = pmutation,
+        maxiter = maxiter,
+        run = run,
+        keepBest = keepBest,
+        population = population,
+        selection = selection,
+        crossover = crossover,
+        mutation = mutation,
+        pop.size = pop.size,
+        parallel = parallel,
+        seed = seed,
+        quiet = quiet
+      )
+    )
+  }
+  
 }

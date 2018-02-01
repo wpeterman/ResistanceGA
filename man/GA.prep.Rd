@@ -37,7 +37,7 @@ quiet = FALSE)
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.}
 
-\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail.}
+\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all.comb".}
 
 \item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)}
 
@@ -45,11 +45,11 @@ quiet = FALSE)
 
 \item{max.cont}{The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)}
 
-\item{min.scale}{The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 1)}
+\item{min.scale}{The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details}
 
-\item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.25 * nrows in the raster surface)}
+\item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)}
 
-\item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance reposnse (Default = NULL; see details)}
+\item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)}
 
 \item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.}
 
@@ -99,7 +99,7 @@ quiet = FALSE)
 
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
-\item{quiet}{Logical. If TRUE, AICc and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. Default = FALSE}
+\item{quiet}{Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)}
 }
 \value{
 An R object that is a required input into optimization functions
@@ -113,6 +113,8 @@ Only files that you wish to optimize, either in isolation or simultaneously, sho
 When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 
 \code{scale.surfaces} can be used to specify which surfaces to apply kernel smoothing to during multisurface optimization. For example, \code{scale.surfaces = c(1, 0, 1)} will result in the first and third surfaces being optimized with a kernel smoothing function, while the second surface will not be scaled. The order of surfaces will match either the order of the raster stack, or alphabetical order when reading in from a directory.
+
+\code{min.scale} defaults to a minimum of 0.01. During optimization, whenever the scaling factor (sigma) is less than 0.5, ResistanceGA will not apply scaling. In this way, it is possible for a surface to not be scaled.
 
 The Default for \code{k.value} is 2, which sets k equal to the number of parameters optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 

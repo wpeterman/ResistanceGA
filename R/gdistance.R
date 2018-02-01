@@ -14,7 +14,13 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 
-#' @usage gdist.prep(n.Pops, response, samples, transitionFunction, directions, longlat, method)
+#' @usage gdist.prep(n.Pops, 
+#'                   response = NULL,
+#'                   samples,
+#'                   transitionFunction = function(x)  1 / mean(x),
+#'                   directions = 8,
+#'                   longlat = FALSE,
+#'                   method = 'commuteDistance')
 
 gdist.prep <-
   function(n.Pops,
@@ -24,8 +30,7 @@ gdist.prep <-
              1 / mean(x),
            directions = 8,
            longlat = FALSE,
-           method = 'commuteDistance',
-           raster = NULL) {
+           method = 'commuteDistance') {
     
     if (method != 'commuteDistance') {
       method <- 'costDistance'

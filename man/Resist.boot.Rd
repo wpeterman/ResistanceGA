@@ -4,7 +4,13 @@
 \alias{Resist.boot}
 \title{Run bootstrap on optimized resistance surfaces}
 \usage{
-Resist.boot(mod.names, dist.mat, n.parameters, sample.prop, iters, obs, genetic.mat)
+Resist.boot(mod.names, 
+                   dist.mat, 
+                   n.parameters, 
+                   sample.prop, 
+                   iters, obs, 
+                   rank.method, 
+                   genetic.mat)
 }
 \arguments{
 \item{mod.names}{A vector of the model names to be assessed}
@@ -19,16 +25,18 @@ Resist.boot(mod.names, dist.mat, n.parameters, sample.prop, iters, obs, genetic.
 
 \item{obs}{Total number of observations (populations or individuals) in your original analysis}
 
+\item{rank.method}{What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL'). Default = 'AICc'}
+
 \item{genetic.mat}{Genetic distance matrix without row or column names.}
 }
 \value{
-A data frame reporting the average model weight, average rank, number of time a model was the top model in teh set, and the frequency a model was best.
+A data frame reporting the average model weight, average rank, number of time a model was the top model in the set, and the frequency a model was best.
 }
 \description{
 This is a 'pseudo' bootstrap procedure that will subsample a specified proportion of the sample locations/individuals, and will refit the MLPE model using the previously optimized resistance surface.
 }
 \details{
-This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface, and assesses the model AICc. AICc is calculated based on the number of parameters specified.
+This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surfaces that is top ranked across all bootstrap iterations.
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
