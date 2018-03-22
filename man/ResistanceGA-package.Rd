@@ -25,7 +25,7 @@ This package contains functions to optimize resistance surfaces using Genetic Al
 Please cite: 
 Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413. \href{http://goo.gl/RJb6Go}{Peterman et al.}
 
-Peterman, W.E. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. \href{http://biorxiv.org/content/early/2014/07/29/007575}{bioRxivdoi: dx.doi.org/10.1101/005127}
+Peterman, W. E. 2018. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. Methods in Ecology and Evolution doi:10.1111/2041-210X.12984. \href{https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12984}{"MEE Publication"}
 }
 \author{
 Bill Peterman \email{bill.peterman@gmail.com}

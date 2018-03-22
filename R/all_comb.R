@@ -72,6 +72,10 @@ all_comb <- function(gdist.inputs,
          force = T
   )
   
+  if(max.combination > GA.inputs$n.layers) {
+    return(cat("ERROR: Please specify a maximum combination that less than or equal to the number of raster layers in the analysis"))
+  }
+  
   # Create combination list -------------------------------------------------
   mc <- max.combination
   

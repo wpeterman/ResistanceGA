@@ -200,7 +200,14 @@ MLPE.lmm_coef <-
         gsub(pattern = "_distMat.csv",
              "",
              x = list.files(resistance, pattern = "*_distMat.csv"))
-      resist.names <- plyr::ldply(strsplit(resist.names, "_c"))[,1]
+      
+      if(length(agrep("_commuteDistance", resist.names)) > 0){
+        resist.names <- plyr::ldply(strsplit(resist.names, "_commuteDistance"))[,1]
+        
+      } else {
+        resist.names <- plyr::ldply(strsplit(resist.names, "_costDistance"))[,1]
+      }
+        
       
       COEF.Table <- array()
       for (i in 1:length(resist.mat)) {

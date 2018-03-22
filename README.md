@@ -38,4 +38,4 @@ This approach has been developed from the methods first utilized in Peterman et 
 
 Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402–2413. [**PDF**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/peterman_et_al._2014--mec.pdf "Peterman et al.")
 
-Peterman, W.E. 2014. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. bioRxiv doi: 10.1101/007575. [**PDF**](http://biorxiv.org/content/early/2014/07/29/007575 "Peterman bioRxiv")
+Peterman, W. E. 2018. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. Methods in Ecology and Evolution doi:10.1111/2041-210X.12984. [**PDF**](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12984 "MEE Publication")

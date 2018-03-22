@@ -1,3 +1,8 @@
+ResistanceGA 4.0-1
+--------
+* Minor bug fixes and error message updates.
+* Updated the citation
+
 ResistanceGA 4.0-0
 --------
 * This is the official release of the development version that includes the `all_comb` function, as well as a generic `mlpe_rga` function for flexibly fitting MLPE mixed effects models.
