@@ -291,7 +291,8 @@ sv.cont.nG <- function(direction,
                        max,
                        min.scale,
                        max.scale,
-                       scale = NULL) {
+                       scale = NULL, 
+                       eqs) {
   inc <- c(1, 3)
   dec <- c(7, 5)
   peak <- c(2, 4, 6, 8)
@@ -316,7 +317,8 @@ sv.cont.nG <- function(direction,
                runif(1, 1, max),
                scale.parm)
       } else {
-        z <- c(runif(1, 1, 9.99),
+        z <- c(sample(eqs, 1),
+               # runif(1, 1, 9.99),
                runif(1, .01, 10),
                runif(1, 1, max),
                scale.parm)
@@ -334,7 +336,10 @@ sv.cont.nG <- function(direction,
       } else if (runif(1) < .5 && direction == "Peaked") {
         z <- c(sample(peak, 1), runif(1, .01, 10), runif(1, 1, max))
       } else {
-        z <- c(runif(1, 1, 9.99), runif(1, .01, 10), runif(1, 1, max))
+        z <- c(sample(eqs, 1),
+               # runif(1, 1, 9.99), 
+               runif(1, .01, 10), 
+               runif(1, 1, max))
       }
       cont.starts[r,] <- z
     }

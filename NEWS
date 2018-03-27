@@ -1,3 +1,8 @@
+ResistanceGA 4.0-2
+--------
+* Fixed a bug with `GA.prep` when running `all_comb`
+* Fixed typos in documentation
+
 ResistanceGA 4.0-1
 --------
 * Minor bug fixes and error message updates.

@@ -37,13 +37,13 @@ quiet = FALSE)
 \arguments{
 \item{ASCII.dir}{Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.}
 
-\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all.comb".}
+\item{Results.dir}{If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all_comb".}
 
-\item{min.cat}{The minimum value to be assessed during optimization of of categorical resistance surfaces (Default = 1e-04)}
+\item{min.cat}{The minimum value to be assessed during optimization of categorical resistance surfaces (Default = 1e-04)}
 
-\item{max.cat}{The maximum value to be assessed during optimization of of categorical resistance surfaces (Default = 2500)}
+\item{max.cat}{The maximum value to be assessed during optimization of categorical resistance surfaces (Default = 2500)}
 
-\item{max.cont}{The maximum value to be assessed during optimization of of continuous resistance surfaces (Default = 2500)}
+\item{max.cont}{The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 2500)}
 
 \item{min.scale}{The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details}
 
@@ -95,7 +95,7 @@ quiet = FALSE)
 
 \item{pop.size}{Number of individuals to create each generation}
 
-\item{parallel}{A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specifiy the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.}
+\item{parallel}{A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specify the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.}
 
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
@@ -108,7 +108,7 @@ An R object that is a required input into optimization functions
 This function prepares and compiles objects and commands for optimization with the GA package
 }
 \details{
-Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories contaiing these surfaces must be created.
+Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories containing these surfaces must be created.
 
 When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 
@@ -118,11 +118,11 @@ When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothin
 
 The Default for \code{k.value} is 2, which sets k equal to the number of parameters optimized, plus 1 for the intercept term. Prior to version 3.0-0, \code{k.value} could not be specified by the user and followed setting 2, such that k was equal to the number of parameters optimized plus the intercept term.
 
-\code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relatiosnship. If unspecified (the Default), a completely random set of starting values will be generated.
+\code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relationship. If unspecified (the Default), a completely random set of starting values will be generated.
 
-If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, all transformations will be assessed for cntinuous surfaces unless otherwise specified. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
+If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, all transformations will be assessed for continuous surfaces unless otherwise specified. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
 \code{select.trans = list("M", "A", "R", c(5,6))}\cr
-will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NA} to accomodate this.
+will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NA} to accommodate this.
 
 It is recommended to first run GA optimization with the default settings
 }

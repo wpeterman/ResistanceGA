@@ -1,7 +1,7 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
-## ---- echo = FALSE-------------------------------------------------------
+## ---- echo = FALSE, warning=F--------------------------------------------
 library(ggplot2, warn.conflicts = F, quietly = T)
 library(raster, warn.conflicts = F, quietly = T)
 
@@ -76,7 +76,7 @@ plot(sample.locales, pch = 16, col = "blue", add = TRUE) # Add points
 #                       max.cat = 500,
 #                       max.cont = 500,
 #                       select.trans = "M",
-#                       method = "LL"
+#                       method = "LL",
 #                       seed = 555)
 #  
 #  CS.inputs <- CS.prep(n.Pops = length(sample.locales),
@@ -497,4 +497,65 @@ plot(sample.locales, pch=16, col="blue", add=TRUE)
 #  plot(r.stack)
 #  
 #  pairs(r.stack)
+
+## ----all_comb_demo, eval = F---------------------------------------------
+#  # Run `gdist.prep` function as before
+#  gdist.inputs <- gdist.prep(n.Pops = length(sample.locales),
+#                             response = gd.response,
+#                             samples = sample.locales)
+#  
+#  
+#  # GA.prep for all combinations analysis
+#  # NOTE: Specify "all.comb" for `Results.dir`
+#  GA.inputs <- GA.prep(method = "LL",
+#                       ASCII.dir = resistance_surfaces,
+#                       Results.dir =  "all.comb",
+#                       max.cat = 500,
+#                       max.cont = 500,
+#                       select.trans = list(NA,
+#                                           "M", # Only monomolecular considered
+#                                           NA),
+#                       parallel = 6)
+#  
+#  
+#  # Replicate optimization runs can completed by specifying
+#  # the number for `replicate`
+#  all.comb_results <- all_comb(gdist.inputs = gdist.inputs,
+#                               GA.inputs = GA.inputs,
+#                               results.dir = "C:/ResistanceGA_Examples/all_comb/",
+#                               max.combination = 3,
+#                               replicate = 1
+#                               )
+
+## ---- eval = F-----------------------------------------------------------
+#  all.comb_results$summary.table
+
+## ---- eval = F-----------------------------------------------------------
+#  all.comb_results$boot.results
+
+## ---- eval = F-----------------------------------------------------------
+#  # Recycling objects from the Example Analysis above:
+#  # Get pairwise Euclidean distances
+#  e.dist <- lower(as.matrix(dist(samples[,2:3])))
+#  
+#  # Generate to-from object
+#  id <- To.From.ID(nrow(samples))
+#  
+#  # Create data frame, be sure to add `pop1` from the object
+#  # made by running `To.From.ID` above
+#  df <- data.frame(g.dist = gd.response,
+#                   resist.dist = gd.true,
+#                   e.dist = e.dist,
+#                   pop = id$pop1)
+#  
+#  # Fit/compare model with and without distance
+#  mod1 <- mlpe_rga(formula = g.dist ~ resist.dist + (1 | pop),
+#                   data = df)
+#  
+#  mod2 <- mlpe_rga(formula = g.dist ~ resist.dist + e.dist + (1 | pop),
+#                   data = df)
+#  
+#  summary(mod2)
+#  AIC(mod1, mod2)
+#  
 

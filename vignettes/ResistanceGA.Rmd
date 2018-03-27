@@ -286,7 +286,7 @@ Gains in optimization speed when using CIRCUITSCAPE can be achieved in two ways 
 2.  In the `CS.prep` function, set `parallel = TRUE` and specify `cores` to the number of cores for CIRCUITSCAPE to use when quantifying current flow across a surface.          
 
 
-## Optimzation using `costDistance` (least cost paths) and `commuteDistance` (equivalent to CS resistance distance)
+## Optimization using `costDistance` (least cost paths) and `commuteDistance` (equivalent to CS resistance distance)
 The above optimization can also be done using functions in `gdistance`. This approach uses least cost paths or random walk commute times between points.  Optimization using `gdistance` can be substantially faster than optimization with CIRCUITSCAPE. This optimization took 49 iterations and 4 minutes to complete when run in parallel on 4 cores (`parallel = 4` in `GA.prep`). To demonstrate the equivalence of CIRCUITSCAPE and `commuteDistance`, the simulation below uses the CIRCUITSCAPE resistance distances generated above as the response.
 ```{r gdistance, eval=FALSE}
 # Import data
@@ -851,7 +851,8 @@ pairs(r.stack)
 * Any and all settings of the `ga` function can be adjusted or customized. The main change made from the default setting for optimization of resistance surfaces was to use the "gareal_blxCrossover" method. This greatly improved the search of parameter space.\
 * As mentioned above concerning single surface optimization: this is a stochastic optimization process and optimized values will likely differ from run to run. Despite the time involved, it is advised to run all optimizations at least twice to confirm parameter estimates/relative relationship among resistance surfaces. \
 
-# Full Analysis: `all_comb`
+     
+# Full Analysis
 There is no established framework for how optimization of resistances surface can or should be done. In dealing with simulated and real data sets, it is often the case that a surface has little to no support when optimized in isolation. But when these 'poorly supported' surfaces are included in multisurface optimizations, they often result in the best fitting model. **As such, I think a step-wise (i.e. single surface followed by selective multi-surface) optimization should be discouraged.** Rather, all possible combinations of surfaces hypothesized to be of importance should be assessed. To facilitate such an analysis, you can use the `all_comb` function. This convenience function will conduct all single surface optimizations, followed by multisurface optimizations up to a specified complexity (i.e. number of surfaces to combine). Following all optimizations, a bootstrap analysis is conducted to assess the level of support for each of the fitted surfaces. The code below will complete the same analysis demonstrated above, but will include all possible combinations of the three resistance surfaces.
 
 ```{r all_comb_demo, eval = F}
@@ -875,7 +876,7 @@ GA.inputs <- GA.prep(method = "LL",
 
 
 # Replicate optimization runs can completed by specifying
-# the a number for `replicate`
+# the number for `replicate`
 all.comb_results <- all_comb(gdist.inputs = gdist.inputs,
                              GA.inputs = GA.inputs,
                              results.dir = "C:/ResistanceGA_Examples/all_comb/",
@@ -921,7 +922,7 @@ all.comb_results$boot.results
 8	feature	                1149	1149  	 0.00       	6.96	  0.15   0.0	   0.0	    3
 
 ```
-The results from the `all_comb` function are similar to the previous analysis. The frequency that categorical.continuous and categorical.continuous.feature is reduced some because of the addition of categorical.feature, which garnered some support. The preponderance of evidence is still in favor of the categorical.continuous surface as the best resistance surface explaining the observed patterns of genetic differentiation.     
+The results from the `all_comb` function are similar to the previous analysis. The frequency that categorical.continuous and categorical.continuous.feature are the top model is reduced some because of the addition of categorical.feature, which garnered some support. The preponderance of evidence is still in favor of the categorical.continuous surface as the best resistance surface explaining the observed patterns of genetic differentiation.     
 
 # Fitting MLPE models: `mlpe_rga`
 The function `mlpe_rga` can be used to flexibly fit mixed effects models using the MLPE parameterization. In `ResistanceGA`, there is only ever a single predictor variable (pairwise effective distance between sampled populations/individuals). The `mlpe_rga` function allows for the specification of multiple predictor variables. For instance, one may wish to fit pairwise Euclidean distance in addition to effective distance when fitting an MLPE model (e.g., [Row et al. 2017](http://onlinelibrary.wiley.com/doi/10.1002/ece3.2825/abstract?systemMessage=Please+be+advised+that+we+experienced+an+unexpected+issue+that+occurred+on+Saturday+and+Sunday+January+20th+and+21st+that+caused+the+site+to+be+down+for+an+extended+period+of+time+and+affected+the+ability+of+users+to+access+content+on+Wiley+Online+Library.+This+issue+has+now+been+fully+resolved.++We+apologize+for+any+inconvenience+this+may+have+caused+and+are+working+to+ensure+that+we+can+alert+you+immediately+of+any+unplanned+periods+of+downtime+or+disruption+in+the+future. "Row et al.")).    
