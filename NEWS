@@ -1,3 +1,7 @@
+ResistanceGA 4.0-3
+--------
+* Fixed a bug that caused multi-surface and all combinations analyses to crash
+
 ResistanceGA 4.0-2
 --------
 * Fixed a bug with `GA.prep` when running `all_comb`

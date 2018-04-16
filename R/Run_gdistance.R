@@ -15,6 +15,7 @@ Run_gdistance <- function(gdist.inputs,
   if (class(r)[1] != 'RasterLayer') {
     r <- raster(r)
   }
+  
   tr <- transition(
     x = r,
     transitionFunction = gdist.inputs$transitionFunction,
