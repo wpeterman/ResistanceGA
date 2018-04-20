@@ -1,3 +1,7 @@
+ResistanceGA 4.0-4
+--------
+* Fixed a bug that prevented optimization summary when using CIRCUITSCAPE
+
 ResistanceGA 4.0-3
 --------
 * Fixed a bug that caused multi-surface and all combinations analyses to crash

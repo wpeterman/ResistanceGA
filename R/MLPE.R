@@ -49,7 +49,7 @@ MLPE.lmm <-
         cs.matrix <- mm
       }
       
-    } else if(nrow(resistance) == ncol(resistance)) {
+    } else if(!is.character(resistance)) {
       mm <- resistance
       m <- nrow(mm)
       mm <- lower(mm)

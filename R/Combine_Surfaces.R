@@ -98,11 +98,13 @@ Combine_Surfaces <-
         }
         
         if(is.na(parm[2])) {
-          SHAPE <- parm[2] <- 20
+          SHAPE <- parm[2] <- 1
+          equation <- parm[1] <- 9
         }
           
         if(is.na(parm[3])) {
           Max.SCALE <- parm[3] <- 2
+          equation <- parm[1] <- 9
         }
         
         # Set equation for continuous surface
