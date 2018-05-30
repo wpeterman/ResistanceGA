@@ -1,3 +1,9 @@
+ResistanceGA 4.0-5
+--------
+* Updated function syntax for ga
+* Added pipe operator
+* Updated transformation selection function for multisurface optimization
+
 ResistanceGA 4.0-4
 --------
 * Fixed a bug that prevented optimization summary when using CIRCUITSCAPE
