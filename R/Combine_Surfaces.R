@@ -124,8 +124,10 @@ Combine_Surfaces <-
         
         if (equation %in% select.trans[[i]]) {
           equation <- equation
+          keep <- 1
         } else {
           equation <- 9
+          keep <- 0
         }
         
         # Apply specified transformation
@@ -171,6 +173,11 @@ Combine_Surfaces <-
     File.name <- File.name
     
     ms.r <- multi_surface <- sum(r) # Add all surfaces together
+    
+    # If unused transformation applied, toss iteration
+    if(keep == 0) {
+      ms.r <- multi_surface <- (sum(r) * 0) + 1
+    }
     
     if (rescale == TRUE)
       multi_surface <-
