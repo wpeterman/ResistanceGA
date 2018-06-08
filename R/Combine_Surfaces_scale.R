@@ -72,6 +72,8 @@ Combine_Surfaces.scale <-
     ######
     select.trans <- GA.inputs$select.trans
     r <- GA.inputs$Resistance.stack
+    keep <- 1
+    
     for (i in 1:GA.inputs$n.layers) {
       
       if(GA.inputs$scale.surfaces[i] == 0) {
@@ -94,6 +96,23 @@ Combine_Surfaces.scale <-
           parm <-
             PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
           
+          # Prevent NAs and errors
+          if(is.na(parm[1])) {
+            equation <- parm[1] <- 9
+            keep <- 0
+          }
+          
+          if(is.na(parm[2])) {
+            SHAPE <- parm[2] <- 1
+            equation <- parm[1] <- 9
+            keep <- 0
+          }
+          
+          if(is.na(parm[3])) {
+            Max.SCALE <- parm[3] <- 2
+            equation <- parm[1] <- 9
+            keep <- 0
+          }
           
           # Set equation for continuous surface
           equation <- floor(parm[1]) # Parameter can range from 1-9.99
@@ -157,6 +176,29 @@ Combine_Surfaces.scale <-
         parm <-
           PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
         
+        # Prevent NAs and errors
+        if(is.na(parm[1])) {
+          equation <- parm[1] <- 9
+        }
+        
+        if(is.na(parm[2])) {
+          SHAPE <- parm[2] <- 1
+          equation <- parm[1] <- 9
+          keep <- 0
+        }
+        
+        if(is.na(parm[3])) {
+          Max.SCALE <- parm[3] <- 2
+          equation <- parm[1] <- 9
+          keep <- 0
+        }
+        
+        if(is.na(parm[4])) {
+          Max.SCALE <- parm[4] <- 1
+          equation <- parm[1] <- 9
+          keep <- 0
+        }
+        
         if(parm[4] < 0.5) {
           parm[4] <- 0.000123456543210
         }
@@ -181,12 +223,14 @@ Combine_Surfaces.scale <-
                       equation == 4 || equation == 6 || equation == 8)
         if (rick.eq == TRUE & SHAPE > 5) {
           equation <- 9
+          keep <- 0
         }
         
         if (equation %in% select.trans[[i]]) {
           equation <- equation
         } else {
           equation <- 9
+          keep <- 0
         }
         
         # Apply specified transformation
@@ -232,8 +276,13 @@ Combine_Surfaces.scale <-
     File.name <- File.name
     
     ms.r <- multi_surface <- sum(r) # Add all surfaces together
+    
+    # If unused transformation applied, toss iteration
+    if(keep == 0) {
+      ms.r <- multi_surface <- (sum(r) * 0)
+    }
 
-    if (rescale == TRUE)
+    if (rescale == TRUE & cellStats(multi_surface, "min") < 0)
       multi_surface <-
       multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
     
@@ -251,15 +300,22 @@ Combine_Surfaces.scale <-
         for (i in 1:GA.inputs$n.layers) {
           p.cont <- r[[i]] / ms.r
           mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
-          ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
           cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
-                                       mean = mean.cont,
-                                       l95 = ci.cont[[1]],
-                                       u95 = ci.cont[[2]])
+                                       mean = mean.cont)
+          # ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
+          # cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
+          #                              mean = mean.cont,
+          #                              l95 = ci.cont[[1]],
+          #                              u95 = ci.cont[[2]])
           
         }
         
         cont.df <- plyr::ldply(cont.list)
+        
+        ## Work around for NA raster surfaces
+        if(is.na(sum(multi_surface@data@values))) {
+          multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+        }
         
         list.out <- list(percent.contribution = cont.df,
                          combined.surface = multi_surface)

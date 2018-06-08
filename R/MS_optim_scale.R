@@ -70,7 +70,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parm <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
         
-        if(length(parm == 4) & parm[4] < 0.5) {
+        if(length(parm) == 4 & parm[4] < 0.5) {
           parm[4] <- 0.000123456543210
         }
         
@@ -168,11 +168,15 @@ MS_optim.scale <- function(CS.inputs = NULL,
     if (k.value == 1) {
       k <- 2
     } else if (k.value == 2) {
+      # k <-
+      #   sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1 # ver 4.0-5
       k <-
-        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
+        sum(GA.inputs$parm.type$n.parm) + 1 # ver 4.0-6
     } else if (k.value == 3) {
+      # k <-
+      #   sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1 # ver 4.0-5
       k <-
-        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+        sum(GA.inputs$parm.type$n.parm) + nrow(GA.inputs$parm.type) + 1 # ver 4.0-6
     } else {
       k <- length(GA.inputs$layer.names) + 1
     }
@@ -209,7 +213,12 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
-    # move(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # save(multi.GA_nG, 
+    #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+    
     unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
@@ -423,7 +432,12 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
-    # move(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # save(multi.GA_nG, 
+    #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+    
     unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)

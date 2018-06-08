@@ -5,7 +5,7 @@
 #' @param transformation Transformation equation to apply. Can be provided as the name of the transformation or its numeric equivalent (see details)
 #' @param shape Value of the shape parameter
 #' @param max Value of the maximum value parameter
-#' @param scale The standard deviation, in number of raster cells, to use when applying Gaussian kernel smoothing. This is the `sigma` parameter in the `kernel2dsmooth` function. (Default = NULL)
+#' @param scale The standard deviation, in number of raster cells, to use when applying Gaussian kernel smoothing. This is the `sigma` parameter in the `spatstat::blur` function. (Default = NULL)
 #' @param r Resistance surface to be transformed. Can be supplied as full path to .asc file or as a raster object
 #' @param out Directory to write transformed .asc file. Default is NULL, and will not export .asc file
 #' @usage Resistance.tran(transformation, shape, max, scale, r, out)
@@ -53,19 +53,23 @@ Resistance.tran <- function(transformation,
   
   
   if (!is.null(scale)) {
-    zmat <- as.matrix(R)
-    # Note that sigma is in pixels, NOT map units!
-    x <- spatstat::as.im(zmat)
+    R <- k.smooth(raster = R,
+                  sigma = scale,
+                  SCALE = TRUE)
     
-    f <- spatstat::blur(x = x,
-                        sigma = sigma,
-                        normalise = TRUE,
-                        bleed = FALSE)
-    R <- R
-    values(R) <- f
+    # zmat <- as.matrix(R)
+    # # Note that sigma is in pixels, NOT map units!
+    # x <- spatstat::as.im(zmat)
+    # 
+    # f <- spatstat::blur(x = x,
+    #                     sigma = scale,
+    #                     normalise = TRUE,
+    #                     bleed = FALSE)
+    # R <- R
+    # values(R) <- f$v
   }
   
-  r <- SCALE(data = R, MIN = 0, MAX = 10)
+  # r <- SCALE(data = R, MIN = 0, MAX = 10)
   
   # Set equation for continuous surface
   equation <- floor(parm[1]) # Parameter can range from 1-9.99
@@ -79,39 +83,39 @@ Resistance.tran <- function(transformation,
   
   # Apply specified transformation
   if (equation == 1) {
-    r <- Inv.Rev.Monomolecular(r, parm)
+    r <- Inv.Rev.Monomolecular(R, parm)
     EQ <- "Inverse-Reverse Monomolecular"
     
   } else if (equation == 5) {
-    r <- Rev.Monomolecular(r, parm)
+    r <- Rev.Monomolecular(R, parm)
     EQ <- "Reverse Monomolecular"
     
   } else if (equation == 3) {
-    r <- Monomolecular(r, parm)
+    r <- Monomolecular(R, parm)
     EQ <- "Monomolecular"
     
   } else if (equation == 7) {
-    r <- Inv.Monomolecular(r, parm)
+    r <- Inv.Monomolecular(R, parm)
     EQ <- "Inverse Monomolecular"
     
   } else if (equation == 8) {
-    r <- Inv.Ricker(r, parm)
+    r <- Inv.Ricker(R, parm)
     EQ <- "Inverse Ricker"
     
   } else if (equation == 4) {
-    r <- Ricker(r, parm)
+    r <- Ricker(R, parm)
     EQ <- "Ricker"
     
   } else if (equation == 6) {
-    r <- Rev.Ricker(r, parm)
+    r <- Rev.Ricker(R, parm)
     EQ <- "Reverse Ricker"
     
   } else if (equation == 2) {
-    r <- Inv.Rev.Ricker(r, parm)
+    r <- Inv.Rev.Ricker(R, parm)
     EQ <- "Inverse-Reverse Ricker"
     
   } else {
-    r <- (r * 0) + 1 #  Distance
+    r <- (R * 0) + 1 #  Distance
     EQ <- "Distance"
   } # End if-else
   File.name <- NAME

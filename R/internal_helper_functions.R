@@ -379,10 +379,10 @@ eq.set <- function(include.list) {
       out <- 1:9
       return(out)
     } else if (include.list[[i]] == "M") {
-      out <- c(1, 3, 5, 7)
+      out <- c(1, 3, 5, 7, 9)
       return(out)
     } else if (include.list[[i]] == "R") {
-      out <- c(2, 4, 6, 8)
+      out <- c(2, 4, 6, 8, 9)
       return(out)
     } else if (!is.na(match(include.list[[i]], 1:9))) {
       out <- include.list
@@ -624,9 +624,17 @@ Rev.Ricker <- function(r, parm) {
 }
 
 yn.question <- function(question, add_lines_before = TRUE) {
-  choices <- c("Yes", "No")
+  choices <- c("Yes", "No", "New Subdirectory")
   if(add_lines_before) cat("------------------------\n")   
-  the_answer <- menu(choices, title = question)            
+  the_answer <- menu(choices, title = question)
   
-  ifelse(the_answer == 1L, TRUE, FALSE)   # returns TRUE or FALSE
+  if(the_answer == 1L) {
+    return(TRUE)
+  } else if(the_answer == 2L) {
+    return(FALSE)
+  } else if(the_answer == 3L){
+    return(NA)
+  }
+  
+  # ifelse(the_answer == 1L, TRUE, FALSE)   # returns TRUE or FALSE
 }

@@ -1,3 +1,9 @@
+ResistanceGA 4.0-6
+--------
+* Numerous code updates
+* Fixed bug in function used to determine k (number of parameters used for calculating AICc) in multi surface and all combinations analyses. Was previously underestimating the number of parameters when using the default settings. NOTE: This should not substantively change results using previous versions.
+* Have updated code to be more robust when restricting optimization to specific transformations.
+
 ResistanceGA 4.0-5
 --------
 * Updated function syntax for ga

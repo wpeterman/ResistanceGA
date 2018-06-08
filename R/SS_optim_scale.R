@@ -105,6 +105,17 @@ SS_optim.scale <- function(CS.inputs = NULL,
           single.GA@solution[4] <- 0.000123456543210
         }
         
+        ## Adjust unused transformations
+        if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
+          EQ <- get.EQ(9)
+          c.names <- dimnames(single.GA@solution)
+          single.GA@solution <- t(as.matrix(rep(9, length(dimnames(single.GA@solution)[[2]]))))
+          dimnames(single.GA@solution) <- c.names
+          
+        } else {
+          EQ <- get.EQ(single.GA@solution[1])
+        }
+        
         r.tran <-
           Resistance.tran(
             transformation = single.GA@solution[1],
@@ -141,6 +152,9 @@ SS_optim.scale <- function(CS.inputs = NULL,
           print.dir = GA.inputs$Plots.dir,
           scale = single.GA@solution[4]
         )
+        
+        single.GA@solution[single.GA@solution == 0.000123456543210] <- 0
+        
       } else {
         single.GA <- ga(
           type = "real-valued",
@@ -169,7 +183,16 @@ SS_optim.scale <- function(CS.inputs = NULL,
         
         start.vals <- single.GA@solution[-1]
         
-        EQ <- get.EQ(single.GA@solution[1])
+        if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
+          EQ <- get.EQ(9)
+          c.names <- dimnames(single.GA@solution)
+          single.GA@solution <- t(as.matrix(rep(9, length(dimnames(single.GA@solution)[[2]]))))
+          dimnames(single.GA@solution) <- c.names
+          
+        } else {
+          EQ <- get.EQ(single.GA@solution[1])
+        }
+        
         
         r.tran <-
           Resistance.tran(
@@ -203,7 +226,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
           PARM = single.GA@solution[-1],
           Resistance = GA.inputs$Resistance.stack[[i]],
           transformation = single.GA@solution[1],
-          print.dir = GA.inputs$Plots.dir,
+          print.dir = GA.inputs$Plots.dir
         )
       }    
       
@@ -288,6 +311,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
       if(single.GA@solution[4] < 0.5) {
         single.GA@solution[4] <- 0
       }
+      
       
       if(GA.inputs$scale.surfaces[i] == 1) {
         RS <- data.frame(
@@ -568,6 +592,13 @@ SS_optim.scale <- function(CS.inputs = NULL,
           writeRaster(r,
                       paste0(GA.inputs$Results.dir, NAME, ".asc"),
                       overwrite = TRUE)
+          
+          # save(single.GA, 
+          #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+          
+          saveRDS(single.GA, 
+                  file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+          
           Diagnostic.Plots(
             resistance.mat = cd,
             genetic.dist = gdist.inputs$response,
@@ -710,9 +741,27 @@ SS_optim.scale <- function(CS.inputs = NULL,
       
       #!#!#!
       if(GA.inputs$surface.type[i] != 'cat'){
-        start.vals <- single.GA@solution[-1]
-        
-        EQ <- get.EQ(single.GA@solution[1])
+        if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
+          if(GA.inputs$scale.surfaces[i] == 1) {
+            
+            EQ <- get.EQ(9)
+            c.names <- dimnames(single.GA@solution)
+            single.GA@solution <- t(as.matrix(rep(9, length(dimnames(single.GA@solution)[[2]]))))
+            dimnames(single.GA@solution) <- c.names
+            
+          } else {
+            
+            EQ <- get.EQ(9)
+            c.names <- dimnames(single.GA@solution)
+            single.GA@solution <- t(as.matrix(rep(9, length(dimnames(single.GA@solution)[[2]]))))
+            dimnames(single.GA@solution) <- c.names
+          }
+          
+        } else {
+          start.vals <- single.GA@solution[-1]
+          
+          EQ <- get.EQ(single.GA@solution[1])
+        }
         
         if(GA.inputs$scale.surfaces[i] == 1) {
           if(single.GA@solution[4] < 0.5) {
@@ -770,6 +819,12 @@ SS_optim.scale <- function(CS.inputs = NULL,
         
         writeRaster(r.tran, paste0(GA.inputs$Results.dir, NAME, ".asc"), overwrite =
                       TRUE)
+        
+        # save(single.GA, 
+        #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+        
+        saveRDS(single.GA, 
+                file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
         
         Diagnostic.Plots(
           resistance.mat = cd,
@@ -878,7 +933,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
             NA
           )
         }
-
+        
         
         
         
@@ -952,7 +1007,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
         k <- 2
         
         if (GA.inputs$method == "AIC") {
-          dist.obj <- Dist.AIC
+          dist.obj <- -Dist.AIC
         } else if (GA.inputs$method == "R2") {
           dist.obj <- fit.stats[[1]]
         } else {
@@ -1004,7 +1059,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
         k <- 1
         
         if (GA.inputs$method == "AIC") {
-          null.obj <- Null.AIC
+          null.obj <- -Null.AIC
         } else if (GA.inputs$method == "R2") {
           null.obj <- fit.stats[[1]]
         } else {

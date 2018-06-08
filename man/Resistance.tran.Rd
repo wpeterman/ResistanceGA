@@ -13,7 +13,7 @@ Resistance.tran(transformation, shape, max, scale, r, out)
 
 \item{max}{Value of the maximum value parameter}
 
-\item{scale}{The standard deviation, in number of raster cells, to use when applying Gaussian kernel smoothing. This is the `sigma` parameter in the `kernel2dsmooth` function. (Default = NULL)}
+\item{scale}{The standard deviation, in number of raster cells, to use when applying Gaussian kernel smoothing. This is the `sigma` parameter in the `spatstat::blur` function. (Default = NULL)}
 
 \item{r}{Resistance surface to be transformed. Can be supplied as full path to .asc file or as a raster object}
 

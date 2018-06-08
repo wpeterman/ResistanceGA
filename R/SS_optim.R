@@ -342,7 +342,17 @@ SS_optim <- function(CS.inputs = NULL,
           names(cd.list)[i] <- GA.inputs$layer.names[i]          
 
         } else {
-          EQ <- get.EQ(single.GA@solution[1])
+          
+          if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
+            EQ <- get.EQ(9)
+            c.names <- dimnames(single.GA@solution)
+            single.GA@solution <- t(as.matrix(rep(9, 3)))
+            dimnames(single.GA@solution) <- c.names
+            
+          } else {
+            EQ <- get.EQ(single.GA@solution[1])
+          }
+          
           r.tran <-
             Resistance.tran(
               transformation = single.GA@solution[1],
@@ -695,6 +705,13 @@ SS_optim <- function(CS.inputs = NULL,
         writeRaster(r,
                     paste0(GA.inputs$Results.dir, NAME, ".asc"),
                     overwrite = TRUE)
+        
+        # save(single.GA, 
+        #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+        
+        saveRDS(single.GA, 
+                file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+        
         Diagnostic.Plots(
           resistance.mat = cd,
           genetic.dist = gdist.inputs$response,
@@ -833,6 +850,9 @@ SS_optim <- function(CS.inputs = NULL,
           iter = i,
           quiet = GA.inputs$quiet
         )
+
+# ** Second optim ---------------------------------------------------------
+
         
         # Using GA results, optimize with nlm
         start.vals <- single.GA@solution[-1]
@@ -877,6 +897,12 @@ SS_optim <- function(CS.inputs = NULL,
           writeRaster(r,
                       paste0(GA.inputs$Results.dir, NAME, ".asc"),
                       overwrite = TRUE)
+          
+          # save(single.GA, 
+          #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+          
+          saveRDS(single.GA, 
+                  file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
           
           Diagnostic.Plots(
             resistance.mat = cd,
@@ -940,7 +966,16 @@ SS_optim <- function(CS.inputs = NULL,
           # * Continuous -----------------------------------------------------------
 
         } else {
-          EQ <- get.EQ(single.GA@solution[1])
+          if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
+            EQ <- get.EQ(9)
+            c.names <- dimnames(single.GA@solution)
+            single.GA@solution <- t(as.matrix(rep(9, 3)))
+            dimnames(single.GA@solution) <- c.names
+            
+          } else {
+            EQ <- get.EQ(single.GA@solution[1])
+          }
+          
           r <-
             Resistance.tran(
               transformation = single.GA@solution[1],
@@ -966,6 +1001,11 @@ SS_optim <- function(CS.inputs = NULL,
                       paste0(GA.inputs$Results.dir, NAME, ".asc"),
                       overwrite = TRUE)
           
+          # save(single.GA, 
+          #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+          
+          saveRDS(single.GA, 
+                  file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
           
           Diagnostic.Plots(
             resistance.mat = cd,
@@ -1145,7 +1185,7 @@ SS_optim <- function(CS.inputs = NULL,
         names(k.list)[i + 1] <- 'Distance'
         
         if (GA.inputs$method == "AIC") {
-          dist.obj <- Dist.AIC
+          dist.obj <- -Dist.AIC
         } else if (GA.inputs$method == "R2") {
           dist.obj <- fit.stats[[1]]
         } else {
@@ -1198,7 +1238,7 @@ SS_optim <- function(CS.inputs = NULL,
         k <- 1
         
         if (GA.inputs$method == "AIC") {
-          null.obj <- Null.AIC
+          null.obj <- -Null.AIC
         } else if (GA.inputs$method == "R2") {
           null.obj <- fit.stats[[1]]
         } else {

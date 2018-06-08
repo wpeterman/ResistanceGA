@@ -26,7 +26,7 @@ Resistance.Opt_multi <- function(PARM,
   File.name = "resist_surface"
   # CIRCUITSCAPE ------------------------------------------------------------
   
-   if (!is.null(CS.inputs)) {
+  if (!is.null(CS.inputs)) {
     Combine_Surfaces(
       PARM = PARM,
       CS.inputs = CS.inputs,
@@ -36,33 +36,27 @@ Resistance.Opt_multi <- function(PARM,
       rescale = FALSE
     )
     
-    CS.resist <-
-      Run_CS2(
-        CS.inputs,
-        GA.inputs,
-        r = multi_surface,
-        EXPORT.dir = GA.inputs$Write.dir,
-        File.name = File.name
-      )
-    
-    # Replace NA with 0...a workaround for errors when two points fall within the same cell.
-    # CS.resist[is.na(CS.resist)] <- 0
-    
-    # Run mixed effect model on each Circuitscape effective resistance
-    if (method == "AIC") {
-      obj.func <- suppressWarnings(AIC(
-        MLPE.lmm2(
-          resistance = CS.resist,
-          response = CS.inputs$response,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ,
-          REML = FALSE
+    r <- raster(paste0(EXPORT.dir, File.name, ".asc"))
+    if(cellStats(r, "mean") == 0) { # Skip iteration
+      
+      obj.func.opt <- -99999
+      
+    } else { # Continue with iteration
+      CS.resist <-
+        Run_CS2(
+          CS.inputs,
+          GA.inputs,
+          r = multi_surface,
+          EXPORT.dir = GA.inputs$Write.dir,
+          File.name = File.name
         )
-      ))
-      obj.func.opt <- obj.func * -1
-    } else if (method == "R2") {
-      obj.func <-
-        suppressWarnings(r.squaredGLMM(
+      
+      # Replace NA with 0...a workaround for errors when two points fall within the same cell.
+      # CS.resist[is.na(CS.resist)] <- 0
+      
+      # Run mixed effect model on each Circuitscape effective resistance
+      if (method == "AIC") {
+        obj.func <- suppressWarnings(AIC(
           MLPE.lmm2(
             resistance = CS.resist,
             response = CS.inputs$response,
@@ -71,22 +65,36 @@ Resistance.Opt_multi <- function(PARM,
             REML = FALSE
           )
         ))
-      obj.func.opt <- obj.func[[1]]
-    } else {
-      obj.func <- suppressWarnings(logLik(
-        MLPE.lmm2(
-          resistance = CS.resist,
-          response = CS.inputs$response,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ,
-          REML = FALSE
-        )
-      ))
-
-      obj.func.opt <- obj.func[[1]]
+        obj.func.opt <- obj.func * -1
+      } else if (method == "R2") {
+        obj.func <-
+          suppressWarnings(r.squaredGLMM(
+            MLPE.lmm2(
+              resistance = CS.resist,
+              response = CS.inputs$response,
+              ID = CS.inputs$ID,
+              ZZ = CS.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+        obj.func.opt <- obj.func[[1]]
+      } else {
+        obj.func <- suppressWarnings(logLik(
+          MLPE.lmm2(
+            resistance = CS.resist,
+            response = CS.inputs$response,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        
+        obj.func.opt <- obj.func[[1]]
+      }
     }
-    
   }
+  
+  
   # gdistance ---------------------------------------------------------------
   
   if (!is.null(gdist.inputs)) {
@@ -99,52 +107,60 @@ Resistance.Opt_multi <- function(PARM,
         File.name = File.name,
         rescale = FALSE
       )
-    cd <- Run_gdistance(gdist.inputs, r)
     
-    if (method == "AIC") {
-      obj.func <- suppressWarnings(AIC(
-        MLPE.lmm2(
-          resistance = cd,
-          response = gdist.inputs$response,
-          ID = gdist.inputs$ID,
-          ZZ = gdist.inputs$ZZ,
-          REML = FALSE
-        )
-      ))
-      obj.func.opt <- obj.func * -1
-    } else if (method == "R2") {
-      obj.func <- suppressWarnings(r.squaredGLMM(
-        MLPE.lmm2(
-          resistance = cd,
-          response = gdist.inputs$response,
-          ID = gdist.inputs$ID,
-          ZZ = gdist.inputs$ZZ,
-          REML = FALSE
-        )
-      ))
-      obj.func.opt <- obj.func[[1]]
-    } else {
-      obj.func <- suppressWarnings(logLik(
-        MLPE.lmm2(
-          resistance = cd,
-          response = gdist.inputs$response,
-          ID = gdist.inputs$ID,
-          ZZ = gdist.inputs$ZZ,
-          REML = FALSE
-        )
-      ))
-
-      obj.func.opt <- obj.func[[1]]
+    if(cellStats(r, "mean") == 0) { # Skip iteration
+      
+      obj.func.opt <- -99999
+      
+    } else { # Continue with iteration
+      
+      cd <- Run_gdistance(gdist.inputs, r)
+      
+      if (method == "AIC") {
+        obj.func <- suppressWarnings(AIC(
+          MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func * -1
+      } else if (method == "R2") {
+        obj.func <- suppressWarnings(r.squaredGLMM(
+          MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func[[1]]
+      } else {
+        obj.func <- suppressWarnings(logLik(
+          MLPE.lmm2(
+            resistance = cd,
+            response = gdist.inputs$response,
+            ID = gdist.inputs$ID,
+            ZZ = gdist.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        
+        obj.func.opt <- obj.func[[1]]
+      }
     }
   }
   
   rt <- proc.time()[3] - t1
   if (quiet == FALSE) {
     cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
-    cat(paste0("\t", method, " = ", round(obj.func, 4)), "\n", "\n")
+    cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
   }
   
   return(obj.func.opt)
   # OPTIM.DIRECTION(Min.Max)*(obj.func) # Function to be minimized/maximized
-
+  
 }

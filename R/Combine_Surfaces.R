@@ -66,6 +66,8 @@ Combine_Surfaces <-
     ######
     select.trans <- GA.inputs$select.trans
     r <- GA.inputs$Resistance.stack
+    keep <- 1
+    
     
     for (i in 1:GA.inputs$n.layers) {
       if (GA.inputs$surface.type[i] == "cat") {
@@ -95,16 +97,19 @@ Combine_Surfaces <-
         # Prevent NAs and errors
         if(is.na(parm[1])) {
           equation <- parm[1] <- 9
+          keep <- 0
         }
         
         if(is.na(parm[2])) {
           SHAPE <- parm[2] <- 1
           equation <- parm[1] <- 9
+          keep <- 0
         }
           
         if(is.na(parm[3])) {
           Max.SCALE <- parm[3] <- 2
           equation <- parm[1] <- 9
+          keep <- 0
         }
         
         # Set equation for continuous surface
@@ -120,6 +125,7 @@ Combine_Surfaces <-
         
         if (rick.eq == TRUE & SHAPE > 5) {
           equation <- 9
+          keep <- 0
         }
         
         if (equation %in% select.trans[[i]]) {
@@ -176,10 +182,10 @@ Combine_Surfaces <-
     
     # If unused transformation applied, toss iteration
     if(keep == 0) {
-      ms.r <- multi_surface <- (sum(r) * 0) + 1
+      ms.r <- multi_surface <- (sum(r) * 0)
     }
     
-    if (rescale == TRUE)
+    if (rescale == TRUE & cellStats(multi_surface, "min") < 0)
       multi_surface <-
       multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
     
@@ -197,11 +203,13 @@ Combine_Surfaces <-
         for (i in 1:GA.inputs$n.layers) {
           p.cont <- r[[i]] / ms.r
           mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
-          ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
           cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
-                                       mean = mean.cont,
-                                       l95 = ci.cont[[1]],
-                                       u95 = ci.cont[[2]])
+                                       mean = mean.cont)
+          # ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
+          # cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
+          #                              mean = mean.cont,
+          #                              l95 = ci.cont[[1]],
+          #                              u95 = ci.cont[[2]])
           
         }
         
@@ -209,7 +217,7 @@ Combine_Surfaces <-
         
         ## Work around for NA raster surfaces
         if(is.na(sum(multi_surface@data@values))) {
-          multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0) + 1
+          multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
         }
         
         list.out <- list(percent.contribution = cont.df,

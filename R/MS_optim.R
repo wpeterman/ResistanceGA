@@ -158,11 +158,15 @@ MS_optim <- function(CS.inputs = NULL,
     if (k.value == 1) {
       k <- 2
     } else if (k.value == 2) {
+      # k <-
+      #   sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1 # ver 4.0-5
       k <-
-        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
+        sum(GA.inputs$parm.type$n.parm) + 1 # ver 4.0-6
     } else if (k.value == 3) {
+      # k <-
+      #   sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1 # ver 4.0-5
       k <-
-        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+        sum(GA.inputs$parm.type$n.parm) + nrow(GA.inputs$parm.type) + 1 # ver 4.0-6
     } else {
       k <- length(GA.inputs$layer.names) + 1
     }
@@ -198,7 +202,15 @@ MS_optim <- function(CS.inputs = NULL,
                 row.names = F,
                 col.names = T)
     
+    # save(multi.GA_nG, 
+    #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+    
     file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    
+    unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
@@ -403,6 +415,12 @@ MS_optim <- function(CS.inputs = NULL,
     write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
                 row.names = F,
                 col.names = T)
+    
+    # save(multi.GA_nG, 
+    #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
     
     unlink(GA.inputs$Write.dir, recursive = T, force = T)
     

@@ -35,17 +35,20 @@ Resistance.Opt_single.scale <- function(PARM,
   
   r <- Resistance
   
-  ## Scale surface
-  if(PARM[4] < 0.5) {
-    PARM[4] <- 0.000123456543210
-  }
+  keep <- 1 # Indicator to keep or drop transformation
   
-  r <- k.smooth(raster = r,
-                sigma = PARM[4],
-                SCALE = TRUE)
   
   # Set equation for continuous surface
   equation <- floor(PARM[1]) # Parameter can range from 1-9.99
+
+    ## Scale surface
+    if(PARM[4] < 0.5) {
+      PARM[4] <- 0.000123456543210
+    }
+    
+    r <- k.smooth(raster = r,
+                  sigma = PARM[4],
+                  SCALE = TRUE)
   
   # Read in resistance surface to be optimized
   SHAPE <- (PARM[2])
@@ -68,15 +71,8 @@ Resistance.Opt_single.scale <- function(PARM,
     ## Else continuous surface
     r <- SCALE(r, 0, 10)
     
-    # Set equation for continuous surface
-    equation <- floor(PARM[1]) # Parameter can range from 1-9.99
-    
-    # Read in resistance surface to be optimized
-    SHAPE <- (PARM[2])
-    Max.SCALE <- (PARM[3])
-    
     ## If selected transformation is not in list, assign very large AIC
-    ## Use 99999 as 'ga' maximizes and the inverse of the calculated objective function is used
+    ## Use -99999 as 'ga' maximizes and the inverse of the calculated objective function is used
     
     if (equation %in% select.trans[[iter]]) {
       # Apply specified transformation
@@ -84,6 +80,7 @@ Resistance.Opt_single.scale <- function(PARM,
                     equation == 4 || equation == 6 || equation == 8)
       if (rick.eq == TRUE & SHAPE > 5) {
         equation <- 9
+        keep <- 0 # Drop transformation
       }
       
       if (equation == 1) {
@@ -126,122 +123,130 @@ Resistance.Opt_single.scale <- function(PARM,
   } # Close surface type if-else
   
   ## If a surface was reclassified or transformed, apply the following
+  
   if ((GA.inputs$surface.type[iter] == "cat") ||
       (equation %in% select.trans[[iter]])) {
-    File.name <- "resist_surface"
     
-    rclmat <- matrix(c(1e-100, 1e-6, 1e-06, 1e6, Inf, 1e6),
-                     ncol = 3,
-                     byrow = TRUE)
-    
-    r <- reclassify(r, rclmat)
-    
-    # if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
-    # r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
-    
-    
-    # CIRCUITSCAPE ------------------------------------------------------------
-    
-    if (!is.null(CS.inputs)) {
-      writeRaster(
-        x = r,
-        filename = paste0(EXPORT.dir, File.name, ".asc"),
-        overwrite = TRUE
-      )
-      CS.resist <-
-        Run_CS2(
-          CS.inputs,
-          GA.inputs,
-          r = r,
-          EXPORT.dir = GA.inputs$Write.dir,
-          File.name = File.name
-        )
+    if(keep == 0) {
+      ## Use -99999 as 'ga' maximizes
+      obj.func.opt <- -99999
+    } else {
       
-      # Run mixed effect model on each Circuitscape effective resistance
-      if (method == "AIC") {
-        obj.func <- suppressWarnings(AIC(
-          MLPE.lmm2(
-            resistance = CS.resist,
-            response = CS.inputs$response,
-            ID = CS.inputs$ID,
-            ZZ = CS.inputs$ZZ,
-            REML = FALSE
+      File.name <- "resist_surface"
+      
+      rclmat <- matrix(c(1e-100, 1e-6, 1e-06, 1e6, Inf, 1e6),
+                       ncol = 3,
+                       byrow = TRUE)
+      
+      r <- reclassify(r, rclmat)
+      
+      # if(cellStats(r,"max")>1e6)  r<-SCALE(r,1,1e6) # Rescale surface in case resistance are too high
+      # r <- reclassify(r, c(-Inf,1e-06, 1e-06,1e6,Inf,1e6))
+      
+      
+      # CIRCUITSCAPE ------------------------------------------------------------
+      
+      if (!is.null(CS.inputs)) {
+        writeRaster(
+          x = r,
+          filename = paste0(EXPORT.dir, File.name, ".asc"),
+          overwrite = TRUE
+        )
+        CS.resist <-
+          Run_CS2(
+            CS.inputs,
+            GA.inputs,
+            r = r,
+            EXPORT.dir = GA.inputs$Write.dir,
+            File.name = File.name
           )
-        ))
-        obj.func.opt <- obj.func * -1
-      } else if (method == "R2") {
-        obj.func <-
-          suppressWarnings(r.squaredGLMM(
+        
+        # Run mixed effect model on each Circuitscape effective resistance
+        if (method == "AIC") {
+          obj.func <- suppressWarnings(AIC(
             MLPE.lmm2(
               resistance = CS.resist,
-              response =
-                CS.inputs$response,
+              response = CS.inputs$response,
               ID = CS.inputs$ID,
               ZZ = CS.inputs$ZZ,
               REML = FALSE
             )
           ))
-        obj.func.opt <- obj.func[[1]]
-      } else {
-        obj.func <- suppressWarnings(logLik(
-          MLPE.lmm2(
-            resistance = CS.resist,
-            response = CS.inputs$response,
-            ID = CS.inputs$ID,
-            ZZ = CS.inputs$ZZ,
-            REML = FALSE
-          )
-        ))
-        obj.func.opt <- obj.func[[1]]
-      }
-    }
-    ##
-    
-    # gdistance ---------------------------------------------------------------
-    
-    
-    if (!is.null(gdist.inputs)) {
+          obj.func.opt <- obj.func * -1
+        } else if (method == "R2") {
+          obj.func <-
+            suppressWarnings(r.squaredGLMM(
+              MLPE.lmm2(
+                resistance = CS.resist,
+                response =
+                  CS.inputs$response,
+                ID = CS.inputs$ID,
+                ZZ = CS.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+          obj.func.opt <- obj.func[[1]]
+        } else {
+          obj.func <- suppressWarnings(logLik(
+            MLPE.lmm2(
+              resistance = CS.resist,
+              response = CS.inputs$response,
+              ID = CS.inputs$ID,
+              ZZ = CS.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func[[1]]
+        }
+      } # End CS Loop
+      ##
       
-      cd <- Run_gdistance(gdist.inputs, r)
-      
-      if (method == "AIC") {
-        obj.func <- suppressWarnings(AIC(
-          MLPE.lmm2(
-            resistance = cd,
-            response = gdist.inputs$response,
-            ID = gdist.inputs$ID,
-            ZZ = gdist.inputs$ZZ,
-            REML = FALSE
-          )
-        ))
-        obj.func.opt <- obj.func * -1
-      } else if (method == "R2") {
-        obj.func <- suppressWarnings(r.squaredGLMM(
-          MLPE.lmm2(
-            resistance = cd,
-            response =
-              gdist.inputs$response,
-            ID = gdist.inputs$ID,
-            ZZ = gdist.inputs$ZZ,
-            REML = FALSE
-          )
-        ))
-        obj.func.opt <- obj.func[[1]]
-      } else {
-        obj.func <- suppressWarnings(logLik(
-          MLPE.lmm2(
-            resistance = cd,
-            response = gdist.inputs$response,
-            ID = gdist.inputs$ID,
-            ZZ = gdist.inputs$ZZ,
-            REML = FALSE
-          )
-        ))
-        obj.func.opt <- obj.func[[1]]
-      }
+      # gdistance ---------------------------------------------------------------
       
       
-    }
+      if (!is.null(gdist.inputs)) {
+        
+        cd <- Run_gdistance(gdist.inputs, r)
+        
+        if (method == "AIC") {
+          obj.func <- suppressWarnings(AIC(
+            MLPE.lmm2(
+              resistance = cd,
+              response = gdist.inputs$response,
+              ID = gdist.inputs$ID,
+              ZZ = gdist.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func * -1
+        } else if (method == "R2") {
+          obj.func <- suppressWarnings(r.squaredGLMM(
+            MLPE.lmm2(
+              resistance = cd,
+              response =
+                gdist.inputs$response,
+              ID = gdist.inputs$ID,
+              ZZ = gdist.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func[[1]]
+        } else {
+          obj.func <- suppressWarnings(logLik(
+            MLPE.lmm2(
+              resistance = cd,
+              response = gdist.inputs$response,
+              ID = gdist.inputs$ID,
+              ZZ = gdist.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func[[1]]
+        }
+        
+        
+      } # End gdistance loop
+    } # End drop Loop
     
     rt <- proc.time()[3] - t1
     if (quiet == FALSE) {
@@ -249,7 +254,8 @@ Resistance.Opt_single.scale <- function(PARM,
       cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
     }
   } else {
-    obj.func.opt <- -99999
+   
+     obj.func.opt <- -99999
     
     rt <- proc.time()[3] - t1
     if (quiet == FALSE) {

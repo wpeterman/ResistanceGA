@@ -61,20 +61,33 @@ all_comb <- function(gdist.inputs,
     q <- yn.question(cat(
       paste0("This function is about to delete all files and folders in '", results.dir, "'"),
       '\n', '\n',
-      paste0("Do you want to proceed? Select 1 (Yes) or 2 (No), then press [Enter]")))
+      paste0("Do you want to proceed? Select 1 (Yes), 2 (No), or 3 (create a new subdirectory),  then press [Enter]")))
     
-    if(q == FALSE) return(cat("Function stopped"))
+    # if(q == FALSE) return(cat("Function stopped"))
+    
+    if(is.na(q)) { # Create subdir
+      dir.NAME <- floor(as.numeric(as.POSIXct(Sys.time())))
+      dir.create(path = paste0(results.dir, "all_comb_", dir.NAME))
+      results.dir <- paste0(results.dir, "all_comb_", dir.NAME, "/")
+    } else if(q == FALSE) { # Stop function
+      return(cat("Function stopped"))
+    } else { # Remove exisiting folder
+      unlink(dir(results.dir, 
+                 full.names = TRUE),
+             recursive = TRUE,
+             force = T
+      )
+    }
   }
   
-  unlink(dir(results.dir, 
-             full.names = TRUE),
-         recursive = TRUE,
-         force = T
-  )
+ 
   
-  if(max.combination > GA.inputs$n.layers) {
-    return(cat("ERROR: Please specify a maximum combination that less than or equal to the number of raster layers in the analysis"))
-  }
+  # if(length(max.combination) == 2) {
+  #   if(max.combination[2] > GA.inputs$n.layers) {
+  #     return(cat("ERROR: Please specify a maximum combination that is less than or equal to the number of raster layers in the analysis"))
+  #   }
+  # }
+
   
   # Create combination list -------------------------------------------------
   mc <- max.combination

@@ -54,35 +54,50 @@ Plot.trans <- function(PARM,
     
     r <- Resistance
     if (!is.null(scale)) {
-      zmat <- as.matrix(r)
-      
-      x <- spatstat::as.im(zmat)
-      
-      r <- spatstat::blur(x = x,
-                          sigma = sigma,
-                          normalise = TRUE,
-                          bleed = FALSE)
+      stop(
+        "You must provide a raster surface if you wish to plot a scaled transformation"
+      )
+      # r <- k.smooth(raster = r,
+      #               sigma = scale,
+      #               SCALE = FALSE)
+    #   zmat <- as.matrix(r)
+    #   
+    #   x <- spatstat::as.im(zmat)
+    #   
+    #   r <- spatstat::blur(x = x,
+    #                       sigma = sigma,
+    #                       normalise = TRUE,
+    #                       bleed = FALSE)
     }
     Mn = min(r)
     Mx = max(r)
+    # Mn = cellStats(r, stat = 'min')
+    # Mx = cellStats(r, stat = 'max')
     NAME <- Name
   } else if (class(Resistance)[1] != 'RasterLayer') {
     r <- raster(Resistance)
     NAME <- basename(Resistance)
     NAME <- sub("^([^.]*).*", "\\1", NAME)
     names(r) <- NAME
+    
     if (!is.null(scale)) {
-      zmat <- as.matrix(r)
+      r <- k.smooth(raster = r,
+                    sigma = scale,
+                    SCALE = FALSE)
       
-      x <- spatstat::as.im(zmat)
+      # zmat <- as.matrix(r)
+      # 
+      # x <- spatstat::as.im(zmat)
+      # 
+      # r <- spatstat::blur(x = x,
+      #                     sigma = sigma,
+      #                     normalise = TRUE,
+      #                     bleed = FALSE)
       
-      r <- spatstat::blur(x = x,
-                          sigma = sigma,
-                          normalise = TRUE,
-                          bleed = FALSE)
-      
-      Mn = min(r)
-      Mx = max(r)
+      # Mn = min(r)
+      # Mx = max(r)
+      Mn = cellStats(r, stat = 'min')
+      Mx = cellStats(r, stat = 'max')
     } else {
       Mn = cellStats(r, stat = 'min')
       Mx = cellStats(r, stat = 'max')
@@ -95,16 +110,22 @@ Plot.trans <- function(PARM,
     # names(r) <- NAME
     
     if (!is.null(scale)) {
-      zmat <- as.matrix(r)
+      r <- k.smooth(raster = r,
+                    sigma = scale,
+                    SCALE = FALSE)
       
-      x <- spatstat::as.im(zmat)
-      
-      r <- spatstat::blur(x = x,
-                          sigma = sigma,
-                          normalise = TRUE,
-                          bleed = FALSE)
-      Mn = min(r)
-      Mx = max(r)
+      # zmat <- as.matrix(r)
+      # 
+      # x <- spatstat::as.im(zmat)
+      # 
+      # r <- spatstat::blur(x = x,
+      #                     sigma = sigma,
+      #                     normalise = TRUE,
+      #                     bleed = FALSE)
+      # Mn = min(r)
+      # Mx = max(r)
+      Mn = cellStats(r, stat = 'min')
+      Mx = cellStats(r, stat = 'max')
     } else {
       Mn = cellStats(r, stat = 'min')
       Mx = cellStats(r, stat = 'max')
