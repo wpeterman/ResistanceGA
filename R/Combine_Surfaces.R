@@ -76,7 +76,8 @@ Combine_Surfaces <-
         
         ## Prevent NaN in parm
         if(is.na(sum(parm))) {
-        parm <- replace(parm, values = rep(1,length(parm)))  
+          parm <- replace(parm, values = rep(1,length(parm)))
+          keep <- 0
         }
         
         parm <- parm / min(parm)
@@ -105,7 +106,7 @@ Combine_Surfaces <-
           equation <- parm[1] <- 9
           keep <- 0
         }
-          
+        
         if(is.na(parm[3])) {
           Max.SCALE <- parm[3] <- 2
           equation <- parm[1] <- 9
@@ -128,7 +129,7 @@ Combine_Surfaces <-
           keep <- 0
         }
         
-        if (equation %in% select.trans[[i]]) {
+        if (equation %in% select.trans[[i]] & keep == 1) {
           equation <- equation
           keep <- 1
         } else {
@@ -185,7 +186,7 @@ Combine_Surfaces <-
       ms.r <- multi_surface <- (sum(r) * 0)
     }
     
-    if (rescale == TRUE & cellStats(multi_surface, "min") < 0)
+    if (rescale == TRUE & cellStats(multi_surface, "mean") != 0)
       multi_surface <-
       multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
     
