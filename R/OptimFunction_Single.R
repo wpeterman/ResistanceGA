@@ -177,8 +177,8 @@ Resistance.Opt_single <-
         # gdistance ------------------------------------------------------------
         if (!is.null(gdist.inputs)) {
           
-            cd <- Run_gdistance(gdist.inputs, r)
-         
+          cd <- Run_gdistance(gdist.inputs, r)
+          
           
           l.cd <- as.vector(cd)
           
@@ -227,8 +227,8 @@ Resistance.Opt_single <-
         
         if (!is.null(jl.inputs)) {
           
-            cd <- Run_CS.jl(jl.inputs, r)
-         
+          cd <- Run_CS.jl(jl.inputs, r)
+          
           
           if (method == "AIC") {
             obj.func <- suppressWarnings(AIC(
@@ -265,7 +265,7 @@ Resistance.Opt_single <-
             ))
             obj.func.opt <- obj.func[[1]]
           }
-        } # End gdistance Loop
+        } # End Julia Loop
         
       } # End drop Loop
       

@@ -109,7 +109,7 @@ Resistance.Opt_multi.scale <-
     # Run gdistance -----------------------------------------------------------
     
     
-    if (!is.null(gdist.inputs) || !is.null(jl.inputs)) {
+    if (!is.null(gdist.inputs)) {
       
       r <-
         Combine_Surfaces(
@@ -127,13 +127,7 @@ Resistance.Opt_multi.scale <-
         
       } else { # Continue with iteration
         
-        if(!is.null(gdist.inputs)) {
-          cd <- Run_gdistance(gdist.inputs, r)
-          
-        } else {
-          cd <- Run_CS.jl(jl.inputs, r)
-          
-        } 
+        cd <- Run_gdistance(gdist.inputs, r)
         
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(
@@ -164,6 +158,68 @@ Resistance.Opt_multi.scale <-
               response = gdist.inputs$response,
               ID = gdist.inputs$ID,
               ZZ = gdist.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func[[1]]
+        }
+      }
+    }
+    
+    # Julia -----------------------------------------------------------
+    
+    
+    if (!is.null(jl.inputs)) {
+      
+      r <-
+        Combine_Surfaces(
+          PARM = PARM,
+          gdist.inputs = gdist.inputs,
+          GA.inputs = GA.inputs,
+          out = NULL,
+          File.name = File.name,
+          rescale = FALSE
+        )
+      
+      if(cellStats(r, "mean") == 0) { # Skip iteration
+        
+        obj.func.opt <- -99999
+        
+      } else { # Continue with iteration
+        
+        cd <- Run_CS.jl(jl.inputs, r)
+        
+        
+        if (method == "AIC") {
+          obj.func <- suppressWarnings(AIC(
+            MLPE.lmm2(
+              resistance = cd,
+              response = jl.inputs$response,
+              ID = jl.inputs$ID,
+              ZZ = jl.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func * -1
+        } else if (method == "R2") {
+          obj.func <- suppressWarnings(r.squaredGLMM(
+            MLPE.lmm2(
+              resistance = cd,
+              response =
+                jl.inputs$response,
+              ID = jl.inputs$ID,
+              ZZ = jl.inputs$ZZ,
+              REML = FALSE
+            )
+          ))
+          obj.func.opt <- obj.func[[1]]
+        } else {
+          obj.func <- suppressWarnings(logLik(
+            MLPE.lmm2(
+              resistance = cd,
+              response = jl.inputs$response,
+              ID = jl.inputs$ID,
+              ZZ = jl.inputs$ZZ,
               REML = FALSE
             )
           ))
