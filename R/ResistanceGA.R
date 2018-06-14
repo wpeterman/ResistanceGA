@@ -31,11 +31,12 @@
 #' @importFrom graphics abline filled.contour par
 #' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif as.formula sigma
 #' @importFrom utils file_test read.csv read.delim read.table write.table
+#' @importFrom JuliaCall julia_setup julia_library julia_call julia_installed_package julia_install_package
 #' 
 #' @references Please cite: 
 #' Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413. \href{http://goo.gl/RJb6Go}{Peterman et al.}
 #' 
-#' Peterman, W. E. 2018. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. Methods in Ecology and Evolution doi:10.1111/2041-210X.12984. \href{https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12984}{"MEE Publication"}
+#' Peterman, W. E. 2018. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. Methods in Ecology and Evolution 9:1638--1647. \href{https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12984}{"MEE Publication"}
 #' 
 #' @author Bill Peterman \email{bill.peterman@@gmail.com}
 #' 

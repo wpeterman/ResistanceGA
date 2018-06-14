@@ -5,8 +5,8 @@
 \title{Optimize resistance surfaces individually with kernel smoothing}
 \usage{
 Resistance.Opt_single.scale(PARM, Resistance, CS.inputs = NULL,
-  gdist.inputs = NULL, GA.inputs, Min.Max = "max", iter = NULL,
-  quiet = TRUE)
+  gdist.inputs = NULL, jl.inputs = NULL, GA.inputs, Min.Max = "max",
+  iter = NULL, quiet = TRUE)
 }
 \arguments{
 \item{PARM}{Parameters to transform continuous surface or resistance values of binary categorical surface. A vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.}
@@ -16,6 +16,8 @@ Resistance.Opt_single.scale(PARM, Resistance, CS.inputs = NULL,
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
+
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 

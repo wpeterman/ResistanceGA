@@ -5,8 +5,8 @@
 \title{Optimize resistance surfaces individually}
 \usage{
 Resistance.Opt_single(PARM, Resistance, CS.inputs = NULL,
-  gdist.inputs = NULL, GA.inputs, Min.Max = "max", iter = NULL,
-  quiet = FALSE)
+  gdist.inputs = NULL, jl.inputs = NULL, GA.inputs, Min.Max = "max",
+  iter = NULL, quiet = FALSE)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. A vector with parameters specified in the order of resistance surfaces.These values are selected during optimization if called within GA function.}
@@ -17,6 +17,8 @@ Resistance.Opt_single(PARM, Resistance, CS.inputs = NULL,
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
+
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max'). Default in 'max'}
@@ -26,7 +28,7 @@ Resistance.Opt_single(PARM, Resistance, CS.inputs = NULL,
 \item{quiet}{Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.}
 }
 \value{
-AIC value from mixed effect model
+Objective function value (either AIC, R2, or LL) from mixed effect model
 }
 \description{
 Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA

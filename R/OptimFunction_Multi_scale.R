@@ -5,16 +5,17 @@
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
+#' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
-#' @return AIC value from mixed effect model
-#' @export
+#' @return Objective function value (either AIC, R2, or LL) from mixed effect model
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_multi.scale <-
   function(PARM,
            CS.inputs = NULL,
            gdist.inputs = NULL,
+           jl.inputs = NULL,
            GA.inputs,
            Min.Max,
            quiet = FALSE) {
@@ -108,9 +109,10 @@ Resistance.Opt_multi.scale <-
     # Run gdistance -----------------------------------------------------------
     
     
-    if (!is.null(gdist.inputs)) {
+    if (!is.null(gdist.inputs) || !is.null(jl.inputs)) {
+      
       r <-
-        Combine_Surfaces.scale(
+        Combine_Surfaces(
           PARM = PARM,
           gdist.inputs = gdist.inputs,
           GA.inputs = GA.inputs,
@@ -125,7 +127,13 @@ Resistance.Opt_multi.scale <-
         
       } else { # Continue with iteration
         
-        cd <- Run_gdistance(gdist.inputs, r)
+        if(!is.null(gdist.inputs)) {
+          cd <- Run_gdistance(gdist.inputs, r)
+          
+        } else {
+          cd <- Run_CS.jl(jl.inputs, r)
+          
+        } 
         
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(

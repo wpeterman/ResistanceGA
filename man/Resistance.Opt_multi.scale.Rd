@@ -5,7 +5,7 @@
 \title{Optimize multiple resistance surfaces simultaneously with kernel smoothing}
 \usage{
 Resistance.Opt_multi.scale(PARM, CS.inputs = NULL, gdist.inputs = NULL,
-  GA.inputs, Min.Max, quiet = FALSE)
+  jl.inputs = NULL, GA.inputs, Min.Max, quiet = FALSE)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.}
@@ -14,6 +14,8 @@ Resistance.Opt_multi.scale(PARM, CS.inputs = NULL, gdist.inputs = NULL,
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
+
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{Min.Max}{Define whether the optimization function should minimized ('min') or maximized ('max')}
@@ -21,7 +23,7 @@ Resistance.Opt_multi.scale(PARM, CS.inputs = NULL, gdist.inputs = NULL,
 \item{quiet}{Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE}
 }
 \value{
-AIC value from mixed effect model
+Objective function value (either AIC, R2, or LL) from mixed effect model
 }
 \description{
 Create composite resistance surface by simultaneously optimizing multiple binary and continuous surfaces to optimized with a kernel smoothing parameter. This optimization function is designed to be called from GA

@@ -2,20 +2,36 @@ write.CS_4.0 <- function(BATCH,
                          OUT,
                          HABITAT,
                          LOCATION.FILE,
-                         CONNECTION,
+                         CONNECTION = 'connect_four_neighbors_only = FALSE',
                          CURRENT.MAP = "write_cur_maps = False",
                          MAP = "write_cum_cur_map_only = False",
                          PARALLELIZE = FALSE,
                          CORES = NULL,
-                         PAIRS_TO_INCLUDE,
-                         PAIRS){
+                         solver = NULL,
+                         precision = NULL,
+                         PAIRS_TO_INCLUDE = "included_pairs_file = (Browse for a file with pairs to include or exclude)",
+                         PAIRS = "use_included_pairs = False"){
   if(PARALLELIZE == TRUE && !is.null(CORES)) {
-    PARALLELIZE = "parallelize = True"
-    CORES = paste0("max_parallel = ", CORES)
+    PARALLELIZE <- "parallelize = True"
+    CORES <- paste0("max_parallel = ", CORES)
   } else {
     PARALLELIZE = "parallelize = False"
-    CORES = "max_parallel = 0"
+    CORES <- "max_parallel = 0"
   }
+  
+  if(is.null(solver)) {
+    solver <- "solver = cg+amg"
+  } else {
+    solver <- "solver = cholmod"
+  }
+  
+ if(is.null(precision)) {
+   precision <- "precision = None"
+ }
+  
+ if(precision == 'single') {
+   precision <- "precision = single"
+ } 
   
   sink(BATCH)
   cat("[Options for advanced mode]")
@@ -48,7 +64,7 @@ write.CS_4.0 <- function(BATCH,
   cat("\n")
   cat(CORES)
   cat("\n")
-  cat("solver = cg+amg")
+  cat(solver)
   cat("\n")
   cat("print_timings = False")
   cat("\n")
@@ -90,6 +106,7 @@ write.CS_4.0 <- function(BATCH,
   cat(MAP)
   cat("\n")
   cat("log_transform_maps = False")
+  cat("\n")
   cat("write_max_cur_maps = False")
   cat("\n")
   cat("\n")
@@ -143,5 +160,7 @@ write.CS_4.0 <- function(BATCH,
   cat("data_type = raster")
   cat("\n")
   cat("scenario = pairwise")
+  cat("\n")
+  cat(precision)
   sink()
 }

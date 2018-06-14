@@ -4,6 +4,7 @@
 #'
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
+#' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.
 #' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)
@@ -40,12 +41,12 @@ SS_optim <- function(CS.inputs = NULL,
   MLPE.list <- list()
   cd.list <- list()
   k.list <- list()
-
+  
   # Optimize each surface in turn
   for (i in 1:GA.inputs$n.layers) {
     r <- GA.inputs$Resistance.stack[[i]]
     names(r) <- GA.inputs$layer.names[i]
-
+    
     # CIRCUITSCAPE ------------------------------------------------------------
     
     
@@ -340,7 +341,7 @@ SS_optim <- function(CS.inputs = NULL,
           
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           names(cd.list)[i] <- GA.inputs$layer.names[i]          
-
+          
         } else {
           
           if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
@@ -497,14 +498,14 @@ SS_optim <- function(CS.inputs = NULL,
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           names(cd.list)[i] <- GA.inputs$layer.names[i]
           
-
+          
         }
       } # Close if-else
       if (dist_mod == TRUE) {
         r <- reclassify(r, c(-Inf, Inf, 1))
         names(r) <- "dist"
         cd <- Run_CS(CS.inputs, GA.inputs, r, full.mat = T)
-
+        
         Dist.AIC <-
           AIC(
             MLPE.lmm(
@@ -550,7 +551,7 @@ SS_optim <- function(CS.inputs = NULL,
         # (read.table(paste0(GA.inputs$Write.dir, "dist_resistances.out"))[-1, -1])
         
         names(cd.list)[i + 1] <- 'Distance'
-
+        
         names(MLPE.list)[i + 1] <- "Distance"
         
         if (GA.inputs$method == "AIC") {
@@ -564,7 +565,7 @@ SS_optim <- function(CS.inputs = NULL,
         k <- 2
         k.list[[i + 1]] <- k
         names(k.list)[i + 1] <- 'Distance'
-
+        
         n <- CS.inputs$n.Pops
         AICc <-
           (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
@@ -649,12 +650,12 @@ SS_optim <- function(CS.inputs = NULL,
       
     }
     
-
+    
     # Optimize with gdistance -------------------------------------------------
     
     if (!is.null(gdist.inputs)) {
       # * Categorical -----------------------------------------------------------
-
+      
       if (GA.inputs$surface.type[i] == 'cat') {
         cnt1 <- cnt1 + 1
         names(r) <- GA.inputs$layer.names[i]
@@ -697,7 +698,7 @@ SS_optim <- function(CS.inputs = NULL,
         write.table(
           as.matrix(cd),
           file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,  "_distMat.csv"),
-
+          
           sep = ",",
           row.names = F,
           col.names = F
@@ -764,7 +765,7 @@ SS_optim <- function(CS.inputs = NULL,
         
         k.list[[i]] <- k
         names(k.list)[i] <- GA.inputs$layer.names[i]
-
+        
         n <- gdist.inputs$n.Pops
         AICc <-
           (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
@@ -813,10 +814,10 @@ SS_optim <- function(CS.inputs = NULL,
           ID = gdist.inputs$ID,
           ZZ = gdist.inputs$ZZ
         )
-
+        
         cd.list[[i]] <- as.matrix(cd)
         names(cd.list)[i] <- GA.inputs$layer.names[i]
-
+        
         names(MLPE.list)[i] <- GA.inputs$layer.names[i]
         
       } else {
@@ -850,9 +851,9 @@ SS_optim <- function(CS.inputs = NULL,
           iter = i,
           quiet = GA.inputs$quiet
         )
-
-# ** Second optim ---------------------------------------------------------
-
+        
+        # ** Second optim ---------------------------------------------------------
+        
         
         # Using GA results, optimize with nlm
         start.vals <- single.GA@solution[-1]
@@ -889,7 +890,7 @@ SS_optim <- function(CS.inputs = NULL,
           write.table(
             as.matrix(cd),
             file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method,  "_distMat.csv"),
-
+            
             sep = ",",
             row.names = F,
             col.names = F
@@ -964,7 +965,7 @@ SS_optim <- function(CS.inputs = NULL,
           RESULTS.cont[[cnt2]] <- RS
           
           # * Continuous -----------------------------------------------------------
-
+          
         } else {
           if(single.GA@fitnessValue == -99999 | dim(single.GA@solution)[1] > 1) {
             EQ <- get.EQ(9)
@@ -991,7 +992,7 @@ SS_optim <- function(CS.inputs = NULL,
           write.table(
             as.matrix(cd),
             file = paste0(GA.inputs$Results.dir, NAME, "_", gdist.inputs$method, "_distMat.csv"),
-
+            
             sep = ",",
             row.names = F,
             col.names = F
@@ -1068,7 +1069,7 @@ SS_optim <- function(CS.inputs = NULL,
           
           cd.list[[i]] <- as.matrix(cd)
           names(cd.list)[i] <- GA.inputs$layer.names[i]
-
+          
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           
           if (k.value == 1) {
@@ -1083,7 +1084,7 @@ SS_optim <- function(CS.inputs = NULL,
           
           k.list[[i]] <- k
           names(k.list)[i] <- GA.inputs$layer.names[i]
-
+          
           n <- gdist.inputs$n.Pops
           AICc <-
             (-2 * LL) + (2 * k) + (((2 * k) * (k + 1)) / (n - k - 1))
@@ -1175,7 +1176,7 @@ SS_optim <- function(CS.inputs = NULL,
         
         cd.list[[i + 1]] <- as.matrix(cd)
         names(cd.list)[i + 1] <- "Distance"
-
+        
         names(MLPE.list)[i + 1] <- "Distance"
         
         ROW <- nrow(gdist.inputs$ID)
@@ -1367,7 +1368,7 @@ SS_optim <- function(CS.inputs = NULL,
   write.table(
     Results.All,
     paste0(GA.inputs$Results.dir, "All_Results_Table_", gdist.inputs$method,".csv"),
-
+    
     sep = ",",
     col.names = T,
     row.names = F
@@ -1412,7 +1413,7 @@ SS_optim <- function(CS.inputs = NULL,
         cd = cd.list,
         k = k.list
       )
-
+    
   } else if (nrow(Results.cat) < 1 & nrow(Results.cont) > 0) {
     RESULTS <-
       list(
@@ -1425,7 +1426,7 @@ SS_optim <- function(CS.inputs = NULL,
         cd = cd.list,
         k = k.list
       )
-
+    
   } else if (nrow(Results.cat) > 0 & nrow(Results.cont) < 1) {
     RESULTS <-
       list(

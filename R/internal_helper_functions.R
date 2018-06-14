@@ -4,6 +4,7 @@ Resistance.Opt_AICc <-
            Resistance,
            CS.inputs = NULL,
            gdist.inputs = NULL,
+           jl.inputs = NULL,
            GA.inputs,
            Min.Max = 'max',
            iter = NULL,
@@ -167,6 +168,26 @@ Resistance.Opt_AICc <-
         )
       ))
       ROW <- nrow(CS.inputs$ID)
+      
+    }
+    
+    if (!is.null(jl.inputs)) {
+      cd <- Run_CS.jl(jl.inputs = jl.inputs,
+                      r = r,
+                      CurrentMap = FALSE,
+                      full.mat = FALSE)
+      
+      # Run mixed effect model on each Circuitscape effective resistance
+      AIC.stat <- suppressWarnings(AIC(
+        MLPE.lmm2(
+          resistance = cd,
+          response = jl.inputs$response,
+          ID = jl.inputs$ID,
+          ZZ = jl.inputs$ZZ,
+          REML = FALSE
+        )
+      ))
+      ROW <- nrow(jl.inputs$ID)
       
     }
     
