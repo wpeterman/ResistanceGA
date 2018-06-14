@@ -8,6 +8,7 @@ Combine_Surfaces(PARM,
                         CS.inputs, 
                         gdist.inputs, 
                         GA.inputs, 
+                        jl.inputs,
                         out, 
                         File.name, 
                         rescale, 
@@ -19,6 +20,8 @@ Combine_Surfaces(PARM,
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
+
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function.}
 

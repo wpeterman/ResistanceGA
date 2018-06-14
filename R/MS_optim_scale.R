@@ -4,14 +4,19 @@
 #'
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
+#' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @return This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.
-#' @usage MS_optim.scale(CS.inputs, gdist.inputs, GA.inputs)
+#' @usage MS_optim.scale(CS.inputs, 
+#'                    gdist.inputs, 
+#'                    jl.inputs,
+#'                    GA.inputs)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,
+                           jl.inputs = NULL,
                            GA.inputs) {
   
   if (is.null(GA.inputs$scale)) {
@@ -21,6 +26,10 @@ MS_optim.scale <- function(CS.inputs = NULL,
   }
   
   k.value <- GA.inputs$k.value
+  
+
+# Circuitscape ------------------------------------------------------------
+
   
   if (!is.null(CS.inputs)) {
     if (GA.inputs$parallel != FALSE) {
@@ -256,8 +265,11 @@ MS_optim.scale <- function(CS.inputs = NULL,
     return(out)
   }
   
-  #### Optimize using gdistance ####
-  if (!is.null(gdist.inputs)) {
+
+# gdistance ---------------------------------------------------------------
+
+
+    if (!is.null(gdist.inputs)) {
     t1 <- proc.time()[3]
     multi.GA_nG <- ga(
       type = "real-valued",
@@ -419,6 +431,229 @@ MS_optim.scale <- function(CS.inputs = NULL,
       GA.results = multi.GA_nG,
       GA.inputs = GA.inputs,
       method = gdist.inputs$method,
+      Run.Time = rt,
+      fit.stats = fit.stats,
+      optim = GA.inputs$method,
+      k = k,
+      aic = aic,
+      AICc = AICc,
+      LL = LL[[1]]
+    )
+    
+    write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
+                row.names = F,
+                col.names = T)
+    
+    # save(multi.GA_nG, 
+    #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+    
+    unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    
+    k.df <- data.frame(surface = NAME, k = k)
+    
+    cd.list <- list(as.matrix(cd))
+    names(cd.list) <- NAME
+    
+    AICc.tab <- data.frame(surface = NAME,
+                           obj = multi.GA_nG@fitnessValue,
+                           k = k,
+                           AIC = aic,
+                           AICc = AICc,
+                           R2m = fit.stats[[1]],
+                           R2c = fit.stats[[2]],
+                           LL = LL)
+    
+    colnames(AICc.tab) <-
+      c(
+        "Surface",
+        paste0("obj.func_", GA.inputs$method),
+        "k",
+        "AIC",
+        "AICc",
+        "R2m",
+        "R2c",
+        "LL"
+      )
+    
+    out <- list(GA.summary = multi.GA_nG,
+                MLPE.model = MLPE.model,
+                AICc.tab = AICc.tab,
+                cd = cd.list,
+                percent.contribution = p.cont,
+                k = k.df)
+    return(out)
+    }
+  
+  # Julia ---------------------------------------------------------------
+  
+  
+  if (!is.null(jl.inputs)) {
+    t1 <- proc.time()[3]
+    multi.GA_nG <- ga(
+      type = "real-valued",
+      fitness = Resistance.Opt_multi.scale,
+      population = GA.inputs$population,
+      selection = GA.inputs$selection,
+      mutation = GA.inputs$mutation,
+      pcrossover = GA.inputs$pcrossover,
+      crossover = GA.inputs$crossover,
+      pmutation = GA.inputs$pmutation,
+      Min.Max = GA.inputs$Min.Max,
+      GA.inputs = GA.inputs,
+      jl.inputs = jl.inputs,
+      lower = GA.inputs$ga.min,
+      upper = GA.inputs$ga.max,
+      popSize = GA.inputs$pop.size,
+      maxiter = GA.inputs$maxiter,
+      parallel = GA.inputs$parallel,
+      run = GA.inputs$run,
+      keepBest = GA.inputs$keepBest,
+      seed = GA.inputs$seed,
+      suggestions = GA.inputs$SUGGESTS,
+      quiet = GA.inputs$quiet
+    )
+    rt <- proc.time()[3] - t1
+    
+    Opt.parm <- GA.opt <- multi.GA_nG@solution
+    for (i in 1:GA.inputs$n.layers) {
+      if (GA.inputs$surface.type[i] == "cat") {
+        ga.p <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        parm <- ga.p / min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+        
+      } else {
+        parm <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        
+        if(length(parm == 4) & parm[4] < 0.5) {
+          parm[4] <- 0.000123456543210
+        }
+        
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+      }
+    }
+    multi.GA_nG@solution <- Opt.parm
+    
+    RAST <-
+      Combine_Surfaces.scale(
+        PARM = multi.GA_nG@solution,
+        jl.inputs = jl.inputs,
+        GA.inputs = GA.inputs,
+        rescale = TRUE,
+        p.contribution = TRUE
+      )
+    
+    p.cont <- RAST$percent.contribution
+    RAST <- RAST$combined.surface
+    
+    NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
+    names(RAST) <- NAME
+    cd <- Run_CS.jl(jl.inputs, RAST, full.mat = TRUE)
+    
+    write.table(
+      cd,
+      file = paste0(GA.inputs$Results.dir, NAME, "_jlResistMat.csv"),
+      sep = ",",
+      row.names = F,
+      col.names = F
+    )
+    
+    writeRaster(RAST,
+                paste0(GA.inputs$Results.dir, NAME, ".asc"),
+                overwrite = TRUE)
+    
+    ifelse(length(unique(RAST)) > 15,
+           type <- "continuous",
+           type <- "categorical")
+    
+    # type <- "continuous"
+    
+    
+    Diagnostic.Plots(
+      resistance.mat = cd,
+      genetic.dist = jl.inputs$response,
+      plot.dir = GA.inputs$Plots.dir,
+      type = type,
+      name = NAME,
+      ID = jl.inputs$ID,
+      ZZ = jl.inputs$ZZ
+    )
+    
+    multi.GA_nG@solution[multi.GA_nG@solution == 0.000123456543210] <- 0
+    
+    # Get parameter estimates
+    MLPE.results <- MLPE.lmm_coef(
+      resistance = GA.inputs$Results.dir,
+      genetic.dist = jl.inputs$response,
+      out.dir = GA.inputs$Results.dir,
+      method = "jl",
+      ID = jl.inputs$ID,
+      ZZ = jl.inputs$ZZ
+    )
+    
+    fit.stats <- r.squaredGLMM(
+      MLPE.lmm(
+        resistance = lower(cd),
+        pairwise.genetic = jl.inputs$response,
+        REML = F,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    )
+    
+    aic <- AIC(
+      MLPE.lmm(
+        resistance = lower(cd),
+        pairwise.genetic = jl.inputs$response,
+        REML = F,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    )
+    
+    LL <- logLik(
+      MLPE.lmm(
+        resistance = lower(cd),
+        pairwise.genetic = jl.inputs$response,
+        REML = F,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    )
+    
+    MLPE.model <- MLPE.lmm(
+      resistance = lower(cd),
+      pairwise.genetic = jl.inputs$response,
+      REML = F,
+      ID = jl.inputs$ID,
+      ZZ = jl.inputs$ZZ
+    )
+    
+    if (k.value == 1) {
+      k <- 2
+    } else if (k.value == 2) {
+      k <-
+        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
+    } else if (k.value == 3) {
+      k <-
+        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+    } else {
+      k <- length(GA.inputs$layer.names) + 1
+    }
+    
+    n <- jl.inputs$n.Pops
+    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
+    
+    Result.txt(
+      GA.results = multi.GA_nG,
+      GA.inputs = GA.inputs,
+      method = "CIRCUITSCAPE.jl",
       Run.Time = rt,
       fit.stats = fit.stats,
       optim = GA.inputs$method,

@@ -5,6 +5,7 @@
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
+#' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function.
 #' @param out Directory to write combined .asc file. Default = NULL and no files are exported
 #' @param File.name Name of output .asc file. Default is the combination of all surfaces combined, separated by "."
@@ -28,6 +29,7 @@
 #' @usage Combine_Surfaces.scale(PARM,
 #'                               CS.inputs, 
 #'                               gdist.inputs, 
+#'                               jl.inputs,
 #'                               GA.inputs, 
 #'                               out, 
 #'                               File.name, 
@@ -39,6 +41,7 @@ Combine_Surfaces.scale <-
   function(PARM,
            CS.inputs = NULL,
            gdist.inputs = NULL,
+           jl.inputs = NULL,
            GA.inputs,
            out = NULL,
            File.name = paste(GA.inputs$parm.type$name, collapse = "."),
@@ -65,6 +68,14 @@ Combine_Surfaces.scale <-
       ZZ <- gdist.inputs$ZZ
       response <- gdist.inputs$response
       samples <- gdist.inputs$samples
+      EXPORT.dir <- out
+    }
+    
+    if (!is.null(jl.inputs)) {
+      ID <- jl.inputs$ID
+      ZZ <- jl.inputs$ZZ
+      response <- jl.inputs$response
+      samples <- jl.inputs$samples
       EXPORT.dir <- out
     }
     
@@ -133,6 +144,7 @@ Combine_Surfaces.scale <-
                         equation == 4 || equation == 6 || equation == 8)
           if (rick.eq == TRUE & SHAPE > 5) {
             equation <- 9
+            keep <- 0
           }
           
           if (equation %in% select.trans[[i]] & keep == 1) {
@@ -188,6 +200,7 @@ Combine_Surfaces.scale <-
         # Prevent NAs and errors
         if(is.na(parm[1])) {
           equation <- parm[1] <- 9
+          keep <- 0
         }
         
         if(is.na(parm[2])) {
@@ -235,7 +248,7 @@ Combine_Surfaces.scale <-
           keep <- 0
         }
         
-        if (equation %in% select.trans[[i]]) {
+        if (equation %in% select.trans[[i]] & keep == 1) {
           equation <- equation
         } else {
           equation <- 9
