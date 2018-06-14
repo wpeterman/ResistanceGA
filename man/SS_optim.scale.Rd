@@ -4,14 +4,21 @@
 \alias{SS_optim.scale}
 \title{Single surface optimization with kernel smoothing}
 \usage{
-SS_optim.scale(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
+SS_optim.scale(CS.inputs, 
+  gdist.inputs, 
+  jl.inputs,
+  GA.inputs,
+  nlm,
+  dist_mod, 
+  null_mod)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
-\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{nlm}{Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.}
 

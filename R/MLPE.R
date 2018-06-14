@@ -50,10 +50,16 @@ MLPE.lmm <-
       }
       
     } else if(!is.character(resistance)) {
-      mm <- resistance
-      m <- nrow(mm)
-      mm <- lower(mm)
-      mm <- mm[which(mm != -1)]
+      if(is.vector(resistance)) {
+        mm <- resistance
+        m <- 0.5 * (sqrt((8 * length(mm)) + 1) + 1)
+        mm <- mm[which(mm != -1)]
+      } else {
+        mm <- resistance
+        m <- nrow(mm)
+        mm <- lower(mm)
+        mm <- mm[which(mm != -1)]
+      }
       
       if (is.null(ID)) {
         ID <- To.From.ID(POPS = m)
@@ -181,6 +187,45 @@ MLPE.lmm_coef <-
         # Fit model
         mod <-
           lFormula(response ~ resistance + (1 | pop1),
+                   data = dat,
+                   REML = TRUE)
+        mod$reTrms$Zt <- ZZ
+        dfun <- do.call(mkLmerDevfun, mod)
+        opt <- optimizeLmer(dfun)
+        Mod.Summary <-
+          summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+        COEF <- Mod.Summary$coefficients
+        row.names(COEF) <- c("Intercept", resist.names[i])
+        COEF.Table <- rbind(COEF.Table, COEF)
+      }
+    } else if(method == "jl") {
+      response <- genetic.dist
+      resist.mat <-
+        list.files(resistance, pattern = "*_jlResistMat.csv", full.names = TRUE)
+      resist.names <-
+        gsub(pattern = "_jlResistMat.csv",
+             "",
+             x = list.files(resistance, pattern = "*_jlResistMat.csv"))
+      
+      
+      COEF.Table <- array()
+      for (i in 1:length(resist.mat)) {
+        cd <- read.csv(resist.mat[i], header = F)
+        mm <- lower(cd)
+        # mm <- lower(cd)
+        m <- dim(cd)[1]
+        ID <- To.From.ID(POPS = m)
+        ZZ <- ZZ.mat(ID = ID)
+        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+        cs.unscale <- mm
+        dat <- cbind(ID, cs.matrix, response)
+        
+        # Assign value to layer
+        LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+        
+        # Fit model
+        mod <-
+          lFormula(response ~ LAYER + (1 | pop1),
                    data = dat,
                    REML = TRUE)
         mod$reTrms$Zt <- ZZ

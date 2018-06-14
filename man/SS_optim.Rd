@@ -4,7 +4,13 @@
 \alias{SS_optim}
 \title{Single surface optimization}
 \usage{
-SS_optim(CS.inputs, gdist.inputs, GA.inputs, nlm, dist_mod, null_mod)
+SS_optim(CS.inputs, 
+ gdist.inputs, 
+ jl.inputs,
+ GA.inputs,
+ nlm, 
+ dist_mod, 
+ null_mod)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}

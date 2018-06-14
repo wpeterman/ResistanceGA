@@ -73,8 +73,8 @@ Diagnostic.Plots <-
         stop("Output file 'name' must be specified!!!")
       }
       NAME <- name
-      mm <- lower(as.matrix(resistance.mat))
-      m <- attr(resistance.mat, "Size")
+      mm <- as.vector(resistance.mat)
+      m <- 0.5 * (sqrt((8 * length(mm)) + 1) + 1)
       mm <- mm[which(mm != -1)]
       
       if (is.null(ID)) {

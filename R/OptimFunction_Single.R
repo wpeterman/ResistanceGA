@@ -175,15 +175,10 @@ Resistance.Opt_single <-
         
         
         # gdistance ------------------------------------------------------------
-        if (!is.null(gdist.inputs) || !is.null(jl.inputs)) {
+        if (!is.null(gdist.inputs)) {
           
-          if(!is.null(gdist.inputs)) {
             cd <- Run_gdistance(gdist.inputs, r)
-            
-          } else {
-            cd <- Run_CS.jl(jl.inputs, r)
-            
-          }
+         
           
           l.cd <- as.vector(cd)
           
@@ -227,6 +222,51 @@ Resistance.Opt_single <-
             obj.func.opt <- obj.func[[1]]
           }
         } # End gdistance Loop
+        
+        # CS jl ------------------------------------------------------------
+        
+        if (!is.null(jl.inputs)) {
+          
+            cd <- Run_CS.jl(jl.inputs, r)
+         
+          
+          if (method == "AIC") {
+            obj.func <- suppressWarnings(AIC(
+              MLPE.lmm2(
+                resistance = cd,
+                response = jl.inputs$response,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func * -1
+          } else if (method == "R2") {
+            obj.func <- suppressWarnings(r.squaredGLMM(
+              MLPE.lmm2(
+                resistance = cd,
+                response =
+                  jl.inputs$response,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          } else {
+            obj.func <- suppressWarnings(logLik(
+              MLPE.lmm2(
+                resistance = cd,
+                response = jl.inputs$response,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          }
+        } # End gdistance Loop
+        
       } # End drop Loop
       
       rt <- proc.time()[3] - t1
@@ -243,22 +283,22 @@ Resistance.Opt_single <-
         }
       } 
     } else { # End transformation loop
-        
-        ## Use -99999 as 'ga' maximizes
-        obj.func.opt <- -99999
-        
-        rt <- proc.time()[3] - t1
-        if (quiet == FALSE) {
-          cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
-          cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
-          if (!is.null(iter)) {
-            if (GA.inputs$surface.type[iter] != "cat") {
-              cat(paste0("EXCLUDED TRANSFORMATION", "\n", "\n"))
-            }
+      
+      ## Use -99999 as 'ga' maximizes
+      obj.func.opt <- -99999
+      
+      rt <- proc.time()[3] - t1
+      if (quiet == FALSE) {
+        cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
+        cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
+        if (!is.null(iter)) {
+          if (GA.inputs$surface.type[iter] != "cat") {
+            cat(paste0("EXCLUDED TRANSFORMATION", "\n", "\n"))
           }
         }
       }
-      rm(r)
-      gc()
-      return(obj.func.opt)
     }
+    rm(r)
+    gc()
+    return(obj.func.opt)
+  }
