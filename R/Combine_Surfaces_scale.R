@@ -82,6 +82,13 @@ Combine_Surfaces.scale <-
           parm <-
             PARM[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
           parm <- parm / min(parm)
+          
+          ## Prevent NaN in parm
+          if(is.na(sum(parm))) {
+            parm <- replace(parm, values = rep(1,length(parm)))
+            keep <- 0
+          }
+          
           df <-
             data.frame(id = unique(r[[i]]), parm) # Data frame with original raster values and replacement values
           r[[i]] <- subs(r[[i]], df)
@@ -126,12 +133,15 @@ Combine_Surfaces.scale <-
                         equation == 4 || equation == 6 || equation == 8)
           if (rick.eq == TRUE & SHAPE > 5) {
             equation <- 9
+            keep <- 0
           }
           
-          if (equation %in% select.trans[[i]]) {
+          if (equation %in% select.trans[[i]] & keep == 1) {
             equation <- equation
+            keep <- 1
           } else {
             equation <- 9
+            keep <- 0
           }
           
           # Apply specified transformation
@@ -179,6 +189,7 @@ Combine_Surfaces.scale <-
         # Prevent NAs and errors
         if(is.na(parm[1])) {
           equation <- parm[1] <- 9
+          keep <- 0
         }
         
         if(is.na(parm[2])) {
@@ -226,8 +237,9 @@ Combine_Surfaces.scale <-
           keep <- 0
         }
         
-        if (equation %in% select.trans[[i]]) {
+        if (equation %in% select.trans[[i]] & keep == 1) {
           equation <- equation
+          keep <- 1
         } else {
           equation <- 9
           keep <- 0
@@ -282,7 +294,7 @@ Combine_Surfaces.scale <-
       ms.r <- multi_surface <- (sum(r) * 0)
     }
 
-    if (rescale == TRUE & cellStats(multi_surface, "min") < 0)
+    if (rescale == TRUE & cellStats(multi_surface, "mean") != 0)
       multi_surface <-
       multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
     
