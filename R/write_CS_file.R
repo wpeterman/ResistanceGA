@@ -8,7 +8,7 @@ write.CS_4.0 <- function(BATCH,
                          PARALLELIZE = FALSE,
                          CORES = NULL,
                          solver = NULL,
-                         precision = NULL,
+                         precision = FALSE,
                          PAIRS_TO_INCLUDE = "included_pairs_file = (Browse for a file with pairs to include or exclude)",
                          PAIRS = "use_included_pairs = False"){
   if(PARALLELIZE == TRUE && !is.null(CORES)) {
@@ -25,7 +25,7 @@ write.CS_4.0 <- function(BATCH,
     solver <- "solver = cholmod"
   }
   
- if(is.null(precision)) {
+ if(isFALSE(precision)) {
    precision <- "precision = None"
  }
   

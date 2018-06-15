@@ -13,6 +13,7 @@
 #' @param cholmod (Logical; Default = TRUE). Should the cholmod solver be used? See details.
 #' @param precision (Logical; Default = FALSE). Should experimental single precision method be used? See details.
 #' @param run_test (Logical; Default = TRUE). Should a test of Julia Circuitscape be conducted? (This can take several seconds to complete)
+#' @param write.files (Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.
 
 #' @return An R object that is a required input into optimization functions
 
@@ -29,7 +30,8 @@
 #' cores,
 #' cholmod,
 #' precision, 
-#' run_test)
+#' run_test,
+#' write.files = NULL)
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
@@ -52,7 +54,8 @@ jl.prep <- function(n.Pops,
                     cores = NULL,
                     cholmod = TRUE,
                     precision = FALSE,
-                    run_test = TRUE) {
+                    run_test = TRUE,
+                    write.files = NULL) {
   
   
   # Setup Julia -------------------------------------------------------------
@@ -103,7 +106,7 @@ jl.prep <- function(n.Pops,
                    PARALLELIZE = FALSE,
                    CORES = NULL,
                    solver = 'cholmod',
-                   precision = NULL
+                   precision = FALSE
       )
       
       out <- julia_call('compute', temp.ini)[-1,-1]
@@ -152,7 +155,7 @@ jl.prep <- function(n.Pops,
   
   
   # Format inputs -----------------------------------------------------------
-  if(precision == TRUE) {
+  if(isTRUE(precision)) {
     precision <- 'single'
   } 
   
@@ -281,6 +284,7 @@ jl.prep <- function(n.Pops,
     cores = cores,
     solver = solver,
     precision = precision,
-    JULIA_HOME = JULIA_HOME
+    JULIA_HOME = JULIA_HOME,
+    write.files = write.files
   )
 }

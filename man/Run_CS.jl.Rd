@@ -20,7 +20,7 @@ output = "matrix")
 
 \item{full.mat}{Logical (Default = FALSE). If TRUE, the full distance matrix will be generated as an R object, rather than just the lower half of the distance matrix.}
 
-\item{EXPORT.dir}{Directory where CS results will be written. Only specify if CIrcuitscape current map outputs are requested. It is critical that there are NO SPACES in the directory, as this may cause the function to fail.}
+\item{EXPORT.dir}{Directory where CS results will be written. Only specify if Circuitscape current map outputs are requested. It is critical that there are NO SPACES in the directory, as this may cause the function to fail.}
 
 \item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}}
 }

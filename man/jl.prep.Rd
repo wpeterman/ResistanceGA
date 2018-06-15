@@ -15,7 +15,8 @@ parallel,
 cores,
 cholmod,
 precision, 
-run_test)
+run_test,
+write.files = NULL)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -39,6 +40,8 @@ run_test)
 \item{precision}{(Logical; Default = FALSE). Should experimental single precision method be used? See details.}
 
 \item{run_test}{(Logical; Default = TRUE). Should a test of Julia Circuitscape be conducted? (This can take several seconds to complete)}
+
+\item{write.files}{(Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.}
 }
 \value{
 An R object that is a required input into optimization functions
