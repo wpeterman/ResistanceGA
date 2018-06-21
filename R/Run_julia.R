@@ -11,8 +11,10 @@
 #' @param full.mat Logical (Default = FALSE). If TRUE, the full distance matrix will be generated as an R object, rather than just the lower half of the distance matrix.
 #' @param EXPORT.dir Directory where CS results will be written. Only specify if Circuitscape current map outputs are requested. It is critical that there are NO SPACES in the directory, as this may cause the function to fail.
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
-#' @return Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out") OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
-#' @usage Run_CS.jl(CS.inputs, 
+#' #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
+#' #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
+#' @usage Run_CS.jl(jl.inputs = NULL, 
 #' r, 
 #' CurrentMap = FALSE, 
 #' full.mat = FALSE,
@@ -22,21 +24,45 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Run_CS.jl <-
-  function(jl.inputs,
+  function(jl.inputs = NULL,
            r,
            CurrentMap = FALSE,
            full.mat = FALSE,
            EXPORT.dir = NULL,
-           output = "matrix") {
+           output = "matrix",
+           CS_Point.File = NULL,
+           JULIA_HOME = NULL) {
     
-    if(is.null(jl.inputs$write.files)) {
-      write.files <- NULL
-    } else {
-      write.files <- jl.inputs$write.files
+    if(is.null(jl.inputs) & is.null(JULIA_HOME)) {
+      stop("Specify either `jl.inputs` or `JULIA_HOME` and `CS_Point.File`!")
+    }
+    
+    if((is.null(CS_Point.File) | is.null(JULIA_HOME)) & is.null(jl.inputs)) {
+      stop("Both `JULIA_HOME` and `CS_Point.File` must be specified!")
+    }
+    
+    if(is.null(jl.inputs)) {
+      jl.inputs <- jl.prep(n.Pops = length(CS_Point.File),
+                           CS_Point.File = CS_Point.File,
+                           JULIA_HOME = JULIA_HOME,
+                           run_test = FALSE)
+    }
+    
+    if(!is.null(jl.inputs)) {
+      if(is.null(jl.inputs$write.files)) {
+        write.files <- NULL
+      } else {
+        write.files <- jl.inputs$write.files
+      }
+      JULIA_HOME <- jl.inputs$JULIA_HOME
     }
     
     julia_setup(JULIA_HOME = JULIA_HOME)
     julia_library("Circuitscape")
+    
+    if(!exists('r')) {
+      stop("Missing variable r: Please specify a 'RasterLayer' object or provide the path a raster file!")
+    }
     
     if (class(r)[1] != 'RasterLayer') {
       R <- raster(r)
@@ -73,7 +99,7 @@ Run_CS.jl <-
     
     if (cellStats(R, "max") > 1e6)
       R <-
-        SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
+      SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
     R <- reclassify(R, c(-Inf, 0, 1))
     
     temp_rast <- tempfile(pattern = "raster_", 
@@ -162,14 +188,14 @@ Run_CS.jl <-
                            temp_rast)
         file.copy(copy.files, write.files)
       }
-    
-        unlink.list <- list.files(EXPORT.dir, 
-                                  pattern = tmp.name,
-                                  all.files = TRUE,
-                                  full.names = TRUE)
-        
-        del.files <- sapply(unlink.list, unlink)
-        
-        return(cs.matrix)
+      
+      unlink.list <- list.files(EXPORT.dir, 
+                                pattern = tmp.name,
+                                all.files = TRUE,
+                                full.names = TRUE)
+      
+      del.files <- sapply(unlink.list, unlink)
+      
+      return(cs.matrix)
     }
   } # End Julia function

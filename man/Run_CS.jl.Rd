@@ -4,7 +4,7 @@
 \alias{Run_CS.jl}
 \title{Run Julia version of CIRCUITSCAPE from R}
 \usage{
-Run_CS.jl(CS.inputs, 
+Run_CS.jl(jl.inputs = NULL, 
 r, 
 CurrentMap = FALSE, 
 full.mat = FALSE,
@@ -22,10 +22,11 @@ output = "matrix")
 
 \item{EXPORT.dir}{Directory where CS results will be written. Only specify if Circuitscape current map outputs are requested. It is critical that there are NO SPACES in the directory, as this may cause the function to fail.}
 
-\item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}}
-}
-\value{
-Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out") OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
+\item{output}{Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
+#' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
+#' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.}
 }
 \description{
 Execute julia CS from R
