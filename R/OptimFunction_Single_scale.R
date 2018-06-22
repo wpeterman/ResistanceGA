@@ -41,15 +41,15 @@ Resistance.Opt_single.scale <- function(PARM,
   
   # Set equation for continuous surface
   equation <- floor(PARM[1]) # Parameter can range from 1-9.99
-
-    ## Scale surface
-    if(PARM[4] < 0.5) {
-      PARM[4] <- 0.000123456543210
-    }
-    
-    r <- k.smooth(raster = r,
-                  sigma = PARM[4],
-                  SCALE = TRUE)
+  
+  ## Scale surface
+  if(PARM[4] < 0.5) {
+    PARM[4] <- 0.000123456543210
+  }
+  
+  r <- k.smooth(raster = r,
+                sigma = PARM[4],
+                SCALE = TRUE)
   
   # Read in resistance surface to be optimized
   SHAPE <- (PARM[2])
@@ -203,56 +203,121 @@ Resistance.Opt_single.scale <- function(PARM,
       ##
       
       # gdistance ---------------------------------------------------------------
-      
-      
-      if (!is.null(gdist.inputs) || !is.null(jl.inputs)) {
+      if (!is.null(gdist.inputs)) {
         
-        if(!is.null(gdist.inputs)) {
-          cd <- Run_gdistance(gdist.inputs, r)
+        if(cellStats(r, "mean") == 0) { # Skip iteration
           
-        } else {
-          cd <- Run_CS.jl(jl.inputs, r)
+          obj.func.opt <- -99999
+          
+        } 
+        
+        cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+        
+        if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+          
+          obj.func.opt <- -99999
+          
+        } else { # Continue with iteration
+          
+          # l.cd <- as.vector(cd)
+          # 
+          # if(length(l.cd) != length(gdist.inputs$response)) {
+          #   cd <- Run_gdistance(gdist.inputs, r)
+          # }
+          
+          if (method == "AIC") {
+            obj.func <- suppressWarnings(AIC(
+              MLPE.lmm2(
+                resistance = cd,
+                response = gdist.inputs$response,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func * -1
+          } else if (method == "R2") {
+            obj.func <- suppressWarnings(r.squaredGLMM(
+              MLPE.lmm2(
+                resistance = cd,
+                response =
+                  gdist.inputs$response,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          } else {
+            obj.func <- suppressWarnings(logLik(
+              MLPE.lmm2(
+                resistance = cd,
+                response = gdist.inputs$response,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          }
+        } # Keep loop
+      } # End gdistance Loop
+      
+      # CS jl ------------------------------------------------------------
+      
+      if (!is.null(jl.inputs)) {
+        
+        if(cellStats(r, "mean") == 0) { # Skip iteration
+          
+          obj.func.opt <- -99999
           
         }
         
-        if (method == "AIC") {
-          obj.func <- suppressWarnings(AIC(
-            MLPE.lmm2(
-              resistance = cd,
-              response = gdist.inputs$response,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func * -1
-        } else if (method == "R2") {
-          obj.func <- suppressWarnings(r.squaredGLMM(
-            MLPE.lmm2(
-              resistance = cd,
-              response =
-                gdist.inputs$response,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
-        } else {
-          obj.func <- suppressWarnings(logLik(
-            MLPE.lmm2(
-              resistance = cd,
-              response = gdist.inputs$response,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
-        }
+        cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
         
-        
-      } # End gdistance loop
+        if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+          
+          obj.func.opt <- -99999
+          
+        } else { # Continue with iteration          
+          
+          if (method == "AIC") {
+            obj.func <- suppressWarnings(AIC(
+              MLPE.lmm2(
+                resistance = cd,
+                response = jl.inputs$response,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func * -1
+          } else if (method == "R2") {
+            obj.func <- suppressWarnings(r.squaredGLMM(
+              MLPE.lmm2(
+                resistance = cd,
+                response =
+                  jl.inputs$response,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          } else {
+            obj.func <- suppressWarnings(logLik(
+              MLPE.lmm2(
+                resistance = cd,
+                response = jl.inputs$response,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          }
+        } # End Keep loop
+      } # End Julia Loop
     } # End drop Loop
     
     rt <- proc.time()[3] - t1
@@ -261,8 +326,8 @@ Resistance.Opt_single.scale <- function(PARM,
       cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
     }
   } else {
-   
-     obj.func.opt <- -99999
+    
+    obj.func.opt <- -99999
     
     rt <- proc.time()[3] - t1
     if (quiet == FALSE) {

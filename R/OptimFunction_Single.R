@@ -177,94 +177,118 @@ Resistance.Opt_single <-
         # gdistance ------------------------------------------------------------
         if (!is.null(gdist.inputs)) {
           
-          cd <- Run_gdistance(gdist.inputs, r)
+          if(cellStats(r, "mean") == 0) { # Skip iteration
+            
+            obj.func.opt <- -99999
+            
+          } 
           
+          cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
           
-          l.cd <- as.vector(cd)
-          
-          if(length(l.cd) != length(gdist.inputs$response)) {
-            cd <- Run_gdistance(gdist.inputs, r)
-          }
-          
-          if (method == "AIC") {
-            obj.func <- suppressWarnings(AIC(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func * -1
-          } else if (method == "R2") {
-            obj.func <- suppressWarnings(r.squaredGLMM(
-              MLPE.lmm2(
-                resistance = cd,
-                response =
-                  gdist.inputs$response,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
-          } else {
-            obj.func <- suppressWarnings(logLik(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
-          }
+          if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+            
+            obj.func.opt <- -99999
+            
+          } else { # Continue with iteration
+            
+            # l.cd <- as.vector(cd)
+            # 
+            # if(length(l.cd) != length(gdist.inputs$response)) {
+            #   cd <- Run_gdistance(gdist.inputs, r)
+            # }
+            
+            if (method == "AIC") {
+              obj.func <- suppressWarnings(AIC(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response = gdist.inputs$response,
+                  ID = gdist.inputs$ID,
+                  ZZ = gdist.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func * -1
+            } else if (method == "R2") {
+              obj.func <- suppressWarnings(r.squaredGLMM(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response =
+                    gdist.inputs$response,
+                  ID = gdist.inputs$ID,
+                  ZZ = gdist.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            } else {
+              obj.func <- suppressWarnings(logLik(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response = gdist.inputs$response,
+                  ID = gdist.inputs$ID,
+                  ZZ = gdist.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            }
+          } # Keep loop
         } # End gdistance Loop
         
         # CS jl ------------------------------------------------------------
         
         if (!is.null(jl.inputs)) {
           
-          cd <- Run_CS.jl(jl.inputs, r)
-          
-          
-          if (method == "AIC") {
-            obj.func <- suppressWarnings(AIC(
-              MLPE.lmm2(
-                resistance = cd,
-                response = jl.inputs$response,
-                ID = jl.inputs$ID,
-                ZZ = jl.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func * -1
-          } else if (method == "R2") {
-            obj.func <- suppressWarnings(r.squaredGLMM(
-              MLPE.lmm2(
-                resistance = cd,
-                response =
-                  jl.inputs$response,
-                ID = jl.inputs$ID,
-                ZZ = jl.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
-          } else {
-            obj.func <- suppressWarnings(logLik(
-              MLPE.lmm2(
-                resistance = cd,
-                response = jl.inputs$response,
-                ID = jl.inputs$ID,
-                ZZ = jl.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
+          if(cellStats(r, "mean") == 0) { # Skip iteration
+            
+            obj.func.opt <- -99999
+            
           }
+          
+          cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+          
+          if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+            
+            obj.func.opt <- -99999
+            
+          } else { # Continue with iteration          
+            
+            if (method == "AIC") {
+              obj.func <- suppressWarnings(AIC(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response = jl.inputs$response,
+                  ID = jl.inputs$ID,
+                  ZZ = jl.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func * -1
+            } else if (method == "R2") {
+              obj.func <- suppressWarnings(r.squaredGLMM(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response =
+                    jl.inputs$response,
+                  ID = jl.inputs$ID,
+                  ZZ = jl.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            } else {
+              obj.func <- suppressWarnings(logLik(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response = jl.inputs$response,
+                  ID = jl.inputs$ID,
+                  ZZ = jl.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            }
+          } # End Keep loop
         } # End Julia Loop
         
       } # End drop Loop

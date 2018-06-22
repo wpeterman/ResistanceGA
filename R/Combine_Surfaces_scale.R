@@ -10,7 +10,7 @@
 #' @param out Directory to write combined .asc file. Default = NULL and no files are exported
 #' @param File.name Name of output .asc file. Default is the combination of all surfaces combined, separated by "."
 #' @param rescale Locical. If TRUE (default), the values of the combined raster surface will be divided by the minimum value to create a resistance surface with a minimum value = 1.
-#' @param p.contribution Logical. If TRUE, the function will return a list object containing (1) the combined raster surface and (2) the average and 95 percent confidence interval that each surface contributes to the resistance values of the combined surface.
+#' @param p.contribution Logical. If TRUE, the function will return a list object containing (1) the combined raster surface and (2) the average contribution of each surface to the resistance values of the combined surface.
 #' @details \code{PARM} is designed to accept the output of \code{MS_optim}. For continuous surfaces, there are three terms: 1) Transformation, 2) shape, and 3) maximum value. Transformation must be provided as a numeric value:\cr
 #' \tabular{ll}{
 #'    \tab 1 = "Inverse-Reverse Monomolecular"\cr

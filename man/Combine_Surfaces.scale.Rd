@@ -31,7 +31,7 @@ Combine_Surfaces.scale(PARM,
 
 \item{rescale}{Locical. If TRUE (default), the values of the combined raster surface will be divided by the minimum value to create a resistance surface with a minimum value = 1.}
 
-\item{p.contribution}{Logical. If TRUE, the function will return a list object containing (1) the combined raster surface and (2) the average and 95 percent confidence interval that each surface contributes to the resistance values of the combined surface.}
+\item{p.contribution}{Logical. If TRUE, the function will return a list object containing (1) the combined raster surface and (2) the average contribution of each surface to the resistance values of the combined surface.}
 }
 \value{
 R raster object that is the sum all transformed and/or reclassified resistance surfaces provided

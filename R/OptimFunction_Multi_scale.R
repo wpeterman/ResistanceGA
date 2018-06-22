@@ -38,7 +38,7 @@ Resistance.Opt_multi.scale <-
     
     
     if (!is.null(CS.inputs)) {
-      Combine_Surfaces.scale(
+      Combine_Surfaces(
         PARM = PARM,
         CS.inputs = CS.inputs,
         GA.inputs = GA.inputs,
@@ -48,19 +48,26 @@ Resistance.Opt_multi.scale <-
       )
       
       r <- raster(paste0(EXPORT.dir, File.name, ".asc"))
+      
       if(cellStats(r, "mean") == 0) { # Skip iteration
         
         obj.func.opt <- -99999
         
+      }
+      
+      CS.resist <- try(Run_CS2(
+        CS.inputs,
+        GA.inputs,
+        r = multi_surface,
+        EXPORT.dir = GA.inputs$Write.dir,
+        File.name = File.name
+      ), TRUE)
+      
+      if(isTRUE(class(CS.resist) == 'try-error') || obj.func.opt == -99999) {
+        
+        obj.func.opt <- -99999
+        
       } else { # Continue with iteration
-        CS.resist <-
-          Run_CS2(
-            CS.inputs,
-            GA.inputs,
-            r = multi_surface,
-            EXPORT.dir = GA.inputs$Write.dir,
-            File.name = File.name
-          )
         
         # Replace NA with 0...a workaround for errors when two points fall within the same cell.
         # CS.resist[is.na(CS.resist)] <- 0
@@ -125,9 +132,15 @@ Resistance.Opt_multi.scale <-
         
         obj.func.opt <- -99999
         
-      } else { # Continue with iteration
+      } 
+      
+      cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+      
+      if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
         
-        cd <- Run_gdistance(gdist.inputs, r)
+        obj.func.opt <- -99999
+        
+      } else { # Continue with iteration
         
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(
@@ -185,9 +198,15 @@ Resistance.Opt_multi.scale <-
         
         obj.func.opt <- -99999
         
-      } else { # Continue with iteration
+      }
+      
+      cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+      
+      if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
         
-        cd <- Run_CS.jl(jl.inputs, r)
+        obj.func.opt <- -99999
+        
+      } else { # Continue with iteration
         
         
         if (method == "AIC") {

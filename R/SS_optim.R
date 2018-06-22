@@ -1992,7 +1992,7 @@ SS_optim <- function(CS.inputs = NULL,
   cat("\n")
   write.table(
     Results.All,
-    paste0(GA.inputs$Results.dir, "All_Results_Table_jl.csv"),
+    paste0(GA.inputs$Results.dir, "All_Results_Table.csv"),
     
     sep = ",",
     col.names = T,

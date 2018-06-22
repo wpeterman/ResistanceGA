@@ -1755,7 +1755,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
   cat("\n")
   write.table(
     Results.All,
-    paste0(GA.inputs$Results.dir, "All_Results_Table_smooth_jl.csv"),
+    paste0(GA.inputs$Results.dir, "All_Results_Table_smooth.csv"),
     sep = ",",
     col.names = T,
     row.names = F
