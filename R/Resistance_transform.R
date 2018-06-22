@@ -69,7 +69,7 @@ Resistance.tran <- function(transformation,
     # values(R) <- f$v
   }
   
-  # r <- SCALE(data = R, MIN = 0, MAX = 10)
+  R <- SCALE(data = R, MIN = 0, MAX = 10)
   
   # Set equation for continuous surface
   equation <- floor(parm[1]) # Parameter can range from 1-9.99
