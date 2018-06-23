@@ -123,9 +123,15 @@ Resistance.Opt_multi.scale <-
         
         obj.func.opt <- -99999
         
-      } else { # Continue with iteration
+      } 
+      
+      cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+      
+      if(isTRUE(class(cd) == 'try-error') || isTrue(exists('obj.func.opt'))) {
         
-        cd <- Run_gdistance(gdist.inputs, r)
+        obj.func.opt <- -99999
+        
+      } else { # Continue with iteration
         
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(

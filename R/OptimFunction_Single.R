@@ -175,49 +175,56 @@ Resistance.Opt_single <-
         
         # gdistance ------------------------------------------------------------
         if (!is.null(gdist.inputs)) {
-          cd <- Run_gdistance(gdist.inputs, r)
+          if(cellStats(r, "mean") == 0) { # Skip iteration
+            
+            obj.func.opt <- -99999
+            
+          } 
           
-          l.cd <- as.vector(cd)
+          cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
           
-          if(length(l.cd) != length(gdist.inputs$response)) {
-            cd <- Run_gdistance(gdist.inputs, r)
-          }
-          
-          if (method == "AIC") {
-            obj.func <- suppressWarnings(AIC(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func * -1
-          } else if (method == "R2") {
-            obj.func <- suppressWarnings(r.squaredGLMM(
-              MLPE.lmm2(
-                resistance = cd,
-                response =
-                  gdist.inputs$response,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
-          } else {
-            obj.func <- suppressWarnings(logLik(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
-          }
+          if(isTRUE(class(cd) == 'try-error') || isTrue(exists('obj.func.opt'))) {
+            
+            obj.func.opt <- -99999
+            
+          } else { # Continue with iteration
+            
+            if (method == "AIC") {
+              obj.func <- suppressWarnings(AIC(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response = gdist.inputs$response,
+                  ID = gdist.inputs$ID,
+                  ZZ = gdist.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func * -1
+            } else if (method == "R2") {
+              obj.func <- suppressWarnings(r.squaredGLMM(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response =
+                    gdist.inputs$response,
+                  ID = gdist.inputs$ID,
+                  ZZ = gdist.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            } else {
+              obj.func <- suppressWarnings(logLik(
+                MLPE.lmm2(
+                  resistance = cd,
+                  response = gdist.inputs$response,
+                  ID = gdist.inputs$ID,
+                  ZZ = gdist.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            }
+          } # Keep loop
         } # End gdistance Loop
       } # End drop Loop
       
@@ -235,22 +242,22 @@ Resistance.Opt_single <-
         }
       } 
     } else { # End transformation loop
-        
-        ## Use -99999 as 'ga' maximizes
-        obj.func.opt <- -99999
-        
-        rt <- proc.time()[3] - t1
-        if (quiet == FALSE) {
-          cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
-          cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
-          if (!is.null(iter)) {
-            if (GA.inputs$surface.type[iter] != "cat") {
-              cat(paste0("EXCLUDED TRANSFORMATION", "\n", "\n"))
-            }
+      
+      ## Use -99999 as 'ga' maximizes
+      obj.func.opt <- -99999
+      
+      rt <- proc.time()[3] - t1
+      if (quiet == FALSE) {
+        cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
+        cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
+        if (!is.null(iter)) {
+          if (GA.inputs$surface.type[iter] != "cat") {
+            cat(paste0("EXCLUDED TRANSFORMATION", "\n", "\n"))
           }
         }
       }
-      rm(r)
-      gc()
-      return(obj.func.opt)
     }
+    rm(r)
+    gc()
+    return(obj.func.opt)
+  }

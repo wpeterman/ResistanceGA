@@ -1,3 +1,7 @@
+ResistanceGA 4.0-8
+--------
+* Added error catch to optimization functions
+
 ResistanceGA 4.0-7
 --------
 * Bug fix in Resistance.tran

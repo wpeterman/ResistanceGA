@@ -206,7 +206,19 @@ Resistance.Opt_single.scale <- function(PARM,
       
       if (!is.null(gdist.inputs)) {
         
-        cd <- Run_gdistance(gdist.inputs, r)
+        if(cellStats(r, "mean") == 0) { # Skip iteration
+          
+          obj.func.opt <- -99999
+          
+        } 
+        
+        cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+        
+        if(isTRUE(class(cd) == 'try-error') || isTrue(exists('obj.func.opt'))) {
+          
+          obj.func.opt <- -99999
+          
+        } else { # Continue with iteration
         
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(
@@ -243,9 +255,8 @@ Resistance.Opt_single.scale <- function(PARM,
           ))
           obj.func.opt <- obj.func[[1]]
         }
-        
-        
-      } # End gdistance loop
+        } # Keep loop
+      } # End gdistance Loop
     } # End drop Loop
     
     rt <- proc.time()[3] - t1
