@@ -63,7 +63,7 @@ Resistance.Opt_multi.scale <-
         File.name = File.name
       ), TRUE)
       
-      if(isTRUE(class(CS.resist) == 'try-error') || obj.func.opt == -99999) {
+      if(isTRUE(class(CS.resist) == 'try-error') || isTrue(exists('obj.func.opt'))) {
         
         obj.func.opt <- -99999
         
@@ -136,7 +136,7 @@ Resistance.Opt_multi.scale <-
       
       cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
       
-      if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+      if(isTRUE(class(cd) == 'try-error') || isTrue(exists('obj.func.opt'))) {
         
         obj.func.opt <- -99999
         
@@ -202,7 +202,7 @@ Resistance.Opt_multi.scale <-
       
       cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
       
-      if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+      if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
         
         obj.func.opt <- -99999
         

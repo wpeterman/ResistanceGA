@@ -228,9 +228,9 @@ Combine_Surfaces <-
         cont.df <- plyr::ldply(cont.list)
         
         ## Work around for NA raster surfaces
-        if(is.na(sum(multi_surface@data@values))) {
-          multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
-        }
+        # if(is.na(sum(multi_surface@data@values))) {
+        #   multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+        # }
         
         list.out <- list(percent.contribution = cont.df,
                          combined.surface = multi_surface)

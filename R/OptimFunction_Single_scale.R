@@ -213,7 +213,7 @@ Resistance.Opt_single.scale <- function(PARM,
         
         cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
         
-        if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+        if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
           
           obj.func.opt <- -99999
           
@@ -275,7 +275,7 @@ Resistance.Opt_single.scale <- function(PARM,
         
         cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
         
-        if(isTRUE(class(cd) == 'try-error') || obj.func.opt == -99999) {
+        if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
           
           obj.func.opt <- -99999
           
