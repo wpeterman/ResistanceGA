@@ -1,3 +1,7 @@
+ResistanceGA 4.0-9
+--------
+* Updated combine surfaces function
+
 ResistanceGA 4.0-8
 --------
 * Added error catch to optimization functions
