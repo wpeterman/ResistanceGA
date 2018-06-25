@@ -108,6 +108,9 @@ Run_CS.jl <-
     
     tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
     
+    # Round raster to facilitate julia solver convergence
+    R <- round(R, 5)
+    
     if(CurrentMap == FALSE) {
       writeRaster(
         x = R,
