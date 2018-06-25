@@ -183,7 +183,7 @@ Resistance.Opt_single <-
           
           cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
           
-          if(isTRUE(class(cd) == 'try-error') || isTrue(exists('obj.func.opt'))) {
+          if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
             
             obj.func.opt <- -99999
             
