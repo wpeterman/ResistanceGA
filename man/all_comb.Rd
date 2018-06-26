@@ -4,7 +4,8 @@
 \alias{all_comb}
 \title{Analyze all combinations}
 \usage{
-all_comb(gdist.inputs, 
+all_comb(gdist.inputs = NULL, 
+                jl.inputs = NULL,
                 GA.inputs, 
                 results.dir,
                 max.combination = 4,
@@ -17,6 +18,8 @@ all_comb(gdist.inputs,
 }
 \arguments{
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
+
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{Results.dir} has been been correctly specified as "all.comb"}
 
