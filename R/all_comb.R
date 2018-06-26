@@ -3,6 +3,7 @@
 #' A wrapper function to run both \code{\link[ResistanceGA]{SS_optim}} and \code{\link[ResistanceGA]{MS_optim}} to optimize all combinations of resistance surfaces with the Genetic Algorithms package \pkg{GA}. Following optimization, \code{\link[ResistanceGA]{Resist.boot}} is run to conduct a bootstrap analysis.  This function can only be used when optimizing resistance surface with least cost path or commute distance (\pkg{gdistance}).
 #'
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
+#' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{Results.dir} has been been correctly specified as "all.comb"
 #' @param results.dir Directory to write and save analysis results. This should be an empty directory. Any existing files located in this directory will be deleted!
 #' @param max.combination The maximum number of surfaces to include in the all combinations analysis (Default = 4). Alternatively, specify a vector with the minimum and maximum number of surfaces to combine (e.g., c(2,4). If the minimum > 1, then the single surface optimization will be skipped.
@@ -14,7 +15,8 @@
 #' @param null_mod Logical, if TRUE, an intercept-only model will be calculated and added to the output table (Default = TRUE)
 
 #' @return This function optimizes resistance surfaces in isolation using \code{\link[ResistanceGA]{SS_optim}}, followed by multisurface optimization using \code{\link[ResistanceGA]{MS_optim}}, and then conducts a bootstrap analysis.
-#' @usage all_comb(gdist.inputs, 
+#' @usage all_comb(gdist.inputs = NULL, 
+#'                 jl.inputs = NULL,
 #'                 GA.inputs, 
 #'                 results.dir,
 #'                 max.combination = 4,
@@ -26,7 +28,8 @@
 #'                 null_mod = TRUE)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
-all_comb <- function(gdist.inputs,
+all_comb <- function(gdist.inputs = NULL,
+                     jl.inputs = NULL,
                      GA.inputs,
                      results.dir,
                      max.combination = 4,
@@ -80,14 +83,14 @@ all_comb <- function(gdist.inputs,
     }
   }
   
- 
+  
   
   # if(length(max.combination) == 2) {
   #   if(max.combination[2] > GA.inputs$n.layers) {
   #     return(cat("ERROR: Please specify a maximum combination that is less than or equal to the number of raster layers in the analysis"))
   #   }
   # }
-
+  
   
   # Create combination list -------------------------------------------------
   mc <- max.combination
@@ -178,11 +181,23 @@ all_comb <- function(gdist.inputs,
                                         "/", 
                                         "single.surface/")
         
-        ss.results <- SS_optim.scale(gdist.inputs = gdist.inputs,
-                                     GA.inputs = GA.inputs,
-                                     nlm = nlm,
-                                     dist_mod = dist_mod,
-                                     null_mod = null_mod)
+        if(!is.null(gdist.inputs)) {
+          ss.results <- SS_optim.scale(gdist.inputs = gdist.inputs,
+                                       GA.inputs = GA.inputs,
+                                       nlm = nlm,
+                                       dist_mod = dist_mod,
+                                       null_mod = null_mod)
+        } else if(!is.null(jl.inputs)) {
+          ss.results <- SS_optim.scale(jl.inputs = jl.inputs,
+                                       GA.inputs = GA.inputs,
+                                       nlm = nlm,
+                                       dist_mod = dist_mod,
+                                       null_mod = null_mod)
+        } else {
+          stop("`gdist.inputs` or `jl.inputs` must be specified!!!")
+        }
+        
+        
         
         AICc.tab <- ss.results$AICc 
       } else {
@@ -200,11 +215,21 @@ all_comb <- function(gdist.inputs,
                                         "/", 
                                         "single.surface/")
         
-        ss.results <- SS_optim(gdist.inputs = gdist.inputs,
-                               GA.inputs = GA.inputs,
-                               nlm = nlm,
-                               dist_mod = dist_mod,
-                               null_mod = null_mod)
+        if(!is.null(gdist.inputs)) {
+          ss.results <- SS_optim(gdist.inputs = gdist.inputs,
+                                 GA.inputs = GA.inputs,
+                                 nlm = nlm,
+                                 dist_mod = dist_mod,
+                                 null_mod = null_mod)
+        } else if(!is.null(jl.inputs)) {
+          ss.results <- SS_optim(jl.inputs = jl.inputs,
+                                 GA.inputs = GA.inputs,
+                                 nlm = nlm,
+                                 dist_mod = dist_mod,
+                                 null_mod = null_mod)
+        } else {
+          stop("`gdist.inputs` or `jl.inputs` must be specified!!!")
+        }
         
         AICc.tab <- ss.results$AICc
       }
@@ -312,8 +337,17 @@ all_comb <- function(gdist.inputs,
                                         comb.names[[j]],
                                         "/")
         
-        ms.results[[j]] <- MS_optim.scale(gdist.inputs = gdist.inputs,
-                                          GA.inputs = GA.inputs)
+        if(!is.null(gdist.inputs)) {
+          ms.results[[j]] <- MS_optim.scale(gdist.inputs = gdist.inputs,
+                                            GA.inputs = GA.inputs)
+        } else if(!is.null(jl.inputs)) {
+          ms.results[[j]] <- MS_optim.scale(jl.inputs = jl.inputs,
+                                            GA.inputs = GA.inputs)
+        } else {
+          stop("`gdist.inputs` or `jl.inputs` must be specified!!!")
+        }
+        
+        
         
         all.cd[[(j + n_ss.cd)]] <- ms.results[[j]]$cd[[1]]
         
@@ -451,8 +485,15 @@ all_comb <- function(gdist.inputs,
                                         comb.names[[j]],
                                         "/")
         
-        ms.results[[j]] <- MS_optim(gdist.inputs = gdist.inputs,
-                                    GA.inputs = GA.inputs)
+        if(!is.null(gdist.inputs)) {
+          ms.results[[j]] <- MS_optim(gdist.inputs = gdist.inputs,
+                                      GA.inputs = GA.inputs)
+        } else if(!is.null(jl.inputs)) {
+          ms.results[[j]] <- MS_optim(jl.inputs = jl.inputs,
+                                      GA.inputs = GA.inputs)
+        } else {
+          stop("`gdist.inputs` or `jl.inputs` must be specified!!!")
+        }
         
         all.cd[[(j + n_ss.cd)]] <- ms.results[[j]]$cd[[1]]
         
@@ -520,7 +561,7 @@ all_comb <- function(gdist.inputs,
                            genetic.dist_mat = genetic.mat,
                            ss.results = ss.results,
                            ms.results = ms.results
-                           )
+      )
       names(Results)[i] <- paste0('rep_',i)
       
     } else {
@@ -531,7 +572,7 @@ all_comb <- function(gdist.inputs,
                       genetic.dist_mat = genetic.mat,
                       ss.results = ss.results,
                       ms.results = ms.results
-                      )
+      )
     }
     
   } # Close replicate loop
