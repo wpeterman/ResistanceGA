@@ -16,6 +16,8 @@ Run_gdistance <- function(gdist.inputs,
     r <- raster(r)
   }
   
+  # r <- round(r, 5)
+  
   tr <- transition(
     x = r,
     transitionFunction = gdist.inputs$transitionFunction,

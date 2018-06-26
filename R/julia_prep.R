@@ -159,7 +159,7 @@ jl.prep <- function(n.Pops,
     precision <- 'single'
   } 
   
-  if((cholmod == TRUE) && (precision == 'single')) {
+  if(isTRUE(cholmod) && (precision == 'single')) {
     stop(cat(paste0('\n', 
                     "jl.prep ERROR:", '\n',
          "CHOLMOD solver only works when using double precision. Set either `cholmod = FALSE` OR `precision = FALSE` to proceed", 
@@ -167,7 +167,7 @@ jl.prep <- function(n.Pops,
     )
   }
   
-  if(cholmod == TRUE) {
+  if(isTRUE(cholmod)) {
     solver <- 'cholmod'
   } else {
     solver <- NULL

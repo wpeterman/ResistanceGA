@@ -62,6 +62,8 @@ Run_CS <-
         SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
     R <- reclassify(R, c(-Inf, 0, 1))
     
+    # R <- round(R, 5)
+    
     writeRaster(
       x = R,
       filename = paste0(EXPORT.dir, File.name, ".asc"),
