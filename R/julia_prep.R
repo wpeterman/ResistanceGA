@@ -80,7 +80,12 @@ jl.prep <- function(n.Pops,
     
     if(run_test == TRUE) {
       print("Running test #1: Run Circuitscape from Julia")
-      td <- paste0(tempdir(),"\\")
+      
+      if(Sys.info()[['sysname']] == "Windows") {
+        td <- paste0(tempdir(),"\\")
+      } else {
+        td <- paste0(tempdir(),"/")
+      }
       write.table(samples, 
                   paste0(td,'samples.txt'), 
                   quote = FALSE,
