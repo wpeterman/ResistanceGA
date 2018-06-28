@@ -25,7 +25,7 @@ write.CS_4.0 <- function(BATCH,
     solver <- "solver = cholmod"
   }
   
- if(isFALSE(precision)) {
+ if(!isTRUE(precision)) {
    precision <- "precision = None"
  }
   
