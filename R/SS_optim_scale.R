@@ -97,6 +97,10 @@ SS_optim.scale <- function(CS.inputs = NULL,
           quiet = GA.inputs$quiet
         )
         
+        if(dim(single.GA@solution)[1] > 1) {
+          single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
+        }
+        
         start.vals <- single.GA@solution[-1]
         
         EQ <- get.EQ(single.GA@solution[1])
@@ -571,6 +575,10 @@ SS_optim.scale <- function(CS.inputs = NULL,
             iter = i,
             quiet = GA.inputs$quiet
           )
+          
+          if(dim(single.GA@solution)[1] > 1) {
+            single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
+          }
           
           single.GA@solution <-
             single.GA@solution / min(single.GA@solution)

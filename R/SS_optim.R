@@ -88,6 +88,10 @@ SS_optim <- function(CS.inputs = NULL,
           quiet = GA.inputs$quiet
         )
         
+        if(dim(single.GA@solution)[1] > 1) {
+          single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
+        }
+        
         single.GA@solution <-
           single.GA@solution / min(single.GA@solution)
         df <- data.frame(id = unique(r), t(single.GA@solution))
@@ -255,6 +259,10 @@ SS_optim <- function(CS.inputs = NULL,
           iter = i,
           quiet = GA.inputs$quiet
         )
+        
+        if(dim(single.GA@solution)[1] > 1) {
+          single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
+        }
         
         # Using GA results, optimize with nlm
         start.vals <- single.GA@solution[-1]
@@ -684,6 +692,10 @@ SS_optim <- function(CS.inputs = NULL,
           iter = i,
           quiet = GA.inputs$quiet
         )
+        
+        if(dim(single.GA@solution)[1] > 1) {
+          single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
+        }
         
         single.GA@solution <-
           single.GA@solution / min(single.GA@solution)

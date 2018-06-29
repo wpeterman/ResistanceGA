@@ -1,3 +1,7 @@
+ResistanceGA 4.0-10
+--------
+* Fix for instances where identical solutions are found
+
 ResistanceGA 4.0-9
 --------
 * Updated combine surfaces function
