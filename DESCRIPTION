@@ -1,6 +1,6 @@
 Package: ResistanceGA
 Title: Optimize resistance surfaces using genetic algorithms
-Version: 4.1-0
+Version: 4.1-0.1
 Author: Bill Peterman <Bill.Peterman@gmail.com>
 Maintainer: Bill Peterman <bill.peterman@gmail.com>
 Description: This package contains functions to optimize
@@ -24,7 +24,8 @@ Imports:
     lme4 (>= 1.0),
     Matrix,
     MuMIn,
-    spatstat
+    spatstat,
+    Julia
 Suggests:
     knitr,
     rmarkdown

@@ -63,6 +63,10 @@ MS_optim <- function(CS.inputs = NULL,
     )
     rt <- proc.time()[3] - t1
     
+    if(dim(multi.GA_nG@solution)[1] > 1) {
+      multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
+    }
+    
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     for (i in 1:GA.inputs$n.layers) {
       if (GA.inputs$surface.type[i] == "cat") {
@@ -289,7 +293,11 @@ MS_optim <- function(CS.inputs = NULL,
     )
     rt <- proc.time()[3] - t1
     
+    if(dim(multi.GA_nG@solution)[1] > 1) {
+      multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
+    }
     Opt.parm <- GA.opt <- multi.GA_nG@solution
+    
     for (i in 1:GA.inputs$n.layers) {
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
@@ -503,6 +511,10 @@ if (!is.null(jl.inputs)) {
     quiet = GA.inputs$quiet
   )
   rt <- proc.time()[3] - t1
+  
+  if(dim(multi.GA_nG@solution)[1] > 1) {
+    multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
+  }
   
   Opt.parm <- GA.opt <- multi.GA_nG@solution
   for (i in 1:GA.inputs$n.layers) {

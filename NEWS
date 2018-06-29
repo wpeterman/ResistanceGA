@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.1
+--------
+* Continued debugging and upgrading of functions
+
 ResistanceGA 4.1-0
 --------
 * It is now possible to optimize with Circuitscape run through Julia. This requires that Julia is properly installed on your system. Potential benefits of this approach include (i) ability to run CS in parallel; (ii) ability to run genetic algorithm in parallel; (iii) ability to run both CS and genetic algorithm in parallel; (iv) Julia implementation of CS is slightly faster than original CS program. This has only been tested on a Windows machine to date. Features of the Julia implementation that are supposed to improve speed (e.g., cholmod solver, parallelization when solving large rasters does not seem to scale).
