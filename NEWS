@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.2
+--------
+* Extensive updates. Have now fully implemented the Islands optimization approach from the GA package (gaisl), as well as the hybrid local optimization features. Setting `gaisl = TRUE` has great potential to vastly speed up optimization.
+
 ResistanceGA 4.1-0.1
 --------
 * Continued debugging and upgrading of functions

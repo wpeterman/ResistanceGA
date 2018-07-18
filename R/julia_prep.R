@@ -14,6 +14,7 @@
 #' @param precision (Logical; Default = FALSE). Should experimental single precision method be used? See details.
 #' @param run_test (Logical; Default = TRUE). Should a test of Julia Circuitscape be conducted? (This can take several seconds to complete)
 #' @param write.files (Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.
+#' @param write.criteria Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.
 
 #' @return An R object that is a required input into optimization functions
 
@@ -31,7 +32,8 @@
 #' cholmod,
 #' precision, 
 #' run_test,
-#' write.files = NULL)
+#' write.files = NULL,
+#' write.criteria = NULL)
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
@@ -55,7 +57,8 @@ jl.prep <- function(n.Pops,
                     cholmod = TRUE,
                     precision = FALSE,
                     run_test = TRUE,
-                    write.files = NULL) {
+                    write.files = NULL,
+                    write.criteria = NULL) {
   
   
   # Setup Julia -------------------------------------------------------------
@@ -290,6 +293,7 @@ jl.prep <- function(n.Pops,
     solver = solver,
     precision = precision,
     JULIA_HOME = JULIA_HOME,
-    write.files = write.files
+    write.files = write.files,
+    write.criteria = write.criteria
   )
 }

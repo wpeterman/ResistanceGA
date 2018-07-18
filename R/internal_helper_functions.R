@@ -495,71 +495,106 @@ Result.txt <-
            aic,
            AICc,
            LL) {
-    summary.file <-
-      paste0(GA.inputs$Results.dir, "Multisurface_Optim_Summary.txt")
-    # AICc<-GA.results@fitnessValue
-    # AICc<-round(AICc,digits=4)
-    ELITE <- floor(GA.inputs$percent.elite * GA.inputs$pop.size)
-    #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
-    
-    sink(summary.file)
-    cat(paste0(
-      "Summary from multisurface optimization run conducted on ",
-      Sys.Date()
-    ),
-    "\n")
-    cat("\n")
-    cat(paste0("Optimized using: ", method), "\n")
-    cat("\n")
-    cat(paste0("Objective function: ", optim), "\n")
-    cat("\n")
-    cat(paste0("Surfaces included in optimization:"), "\n")
-    cat(GA.inputs$parm.type$name, "\n")
-    cat("\n")
-    cat("Genetic Algorithm optimization settings:")
-    cat("\n")
-    cat(paste0("Type of genetic algorithm used: ", GA.results@type),
-        "\n")
-    cat(paste0("popSize at each iteration: ", GA.results@popSize),
-        "\n")
-    cat(paste0("Maximum number of iterations: ", GA.results@maxiter),
-        "\n")
-    cat(paste0(
-      "Number individuals retained each generation (elistism): ",
-      ELITE
-    ),
-    "\n")
-    cat(paste0("Crossover probability: ", GA.results@pcrossover),
-        "\n")
-    cat(paste0("Mutation probability: ", GA.results@pmutation), "\n")
-    cat("\n")
-    cat(
-      paste0(
-        "The Genetic Algorithm completed after ",
-        GA.results@iter,
-        " iterations"
+    if(class(GA.results) == 'ga') {
+      summary.file <-
+        paste0(GA.inputs$Results.dir, "Multisurface_Optim_Summary.txt")
+      # AICc<-GA.results@fitnessValue
+      # AICc<-round(AICc,digits=4)
+      ELITE <- floor(GA.inputs$percent.elite * GA.inputs$pop.size)
+      #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
+      
+      sink(summary.file)
+      cat(paste0(
+        "Summary from multisurface optimization run conducted on ",
+        Sys.Date()
       ),
-      "\n"
-    )
-    cat("\n")
-    cat(paste0("k =  ", k), "\n")
-    cat("\n")
-    cat(paste0("Minimum AIC: ", aic), "\n")
-    cat("\n")
-    cat(paste0("AICc: ", AICc), "\n")
-    cat("\n")
-    cat(paste0("Pseudo marginal R-square (R2m): ", fit.stats[[1]]), "\n")
-    cat(paste0("Pseudo conditional R-square (R2c): ", fit.stats[[2]]),
-        "\n")
-    cat("\n")
-    cat(paste0("Log Likelihood: ", LL), "\n")
-    cat("\n")
-    cat(paste0("Optimized values for each surface:"), "\n")
-    cat(GA.results@solution, "\n")
-    cat("\n")
-    cat(paste0("Optimization took ", Run.Time, " seconds to complete"),
-        "\n")
-    sink()
+      "\n")
+      cat(paste0(" --- GA package summary output --- "), "\n")
+      cat("\n")
+      cat("\n")
+      print(summary(GA.results))
+      cat("\n")
+      
+      cat(paste0(" --- ResistanceGA summary output --- "), "\n")
+      cat("\n")
+      
+      cat(paste0("Optimized using: ", method), "\n")
+      cat("\n")
+      cat(paste0("Objective function: ", optim), "\n")
+      cat("\n")
+      cat(paste0("Surfaces included in optimization:"), "\n")
+      cat(GA.inputs$parm.type$name, "\n")
+      cat("\n")
+      cat(paste0("k =  ", k), "\n")
+      cat("\n")
+      cat(paste0("Minimum AIC: ", aic), "\n")
+      cat("\n")
+      cat(paste0("AICc: ", AICc), "\n")
+      cat("\n")
+      cat(paste0("Pseudo marginal R-square (R2m): ", fit.stats[[1]]), "\n")
+      cat(paste0("Pseudo conditional R-square (R2c): ", fit.stats[[2]]),
+          "\n")
+      cat("\n")
+      cat(paste0("Log Likelihood: ", LL), "\n")
+      cat("\n")
+      cat(paste0("Optimized values for each surface:"), "\n")
+      cat(GA.results@solution, "\n")
+      cat("\n")
+      cat(paste0("Optimization took ", Run.Time, " seconds to complete"),
+          "\n")
+      sink()
+    } else {
+      sum.out <- summary(GA.results)
+      summary.file <-
+        paste0(GA.inputs$Results.dir, "Multisurface_Optim_Summary.txt")
+      # AICc<-GA.results@fitnessValue
+      # AICc<-round(AICc,digits=4)
+      ELITE <- floor(GA.inputs$percent.elite * GA.inputs$pop.size)
+      #   mlpe.results<-MLPE.lmm_coef(GA.inputs$Results.dir,genetic.dist=CS.inputs$response)
+      
+      sink(summary.file)
+      cat(paste0(
+        "Summary from multisurface optimization run conducted on ",
+        Sys.Date()
+      ),
+      "\n")
+      cat(paste0(" --- GA package summary output --- "), "\n")
+      cat("\n")
+      cat("\n")
+      print(summary(GA.results))
+      cat("\n")
+      
+      cat(paste0(" --- ResistanceGA summary output --- "), "\n")
+      cat("\n")
+      
+      cat(paste0("Optimized using: ", method), "\n")
+      cat("\n")
+      cat(paste0("Objective function: ", optim), "\n")
+      cat("\n")
+      cat(paste0("Surfaces included in optimization:"), "\n")
+      cat(GA.inputs$parm.type$name, "\n")
+      cat("\n")
+      
+      cat(paste0("k =  ", k), "\n")
+      cat("\n")
+      cat(paste0("Minimum AIC: ", aic), "\n")
+      cat("\n")
+      cat(paste0("AICc: ", AICc), "\n")
+      cat("\n")
+      cat(paste0("Pseudo marginal R-square (R2m): ", fit.stats[[1]]), "\n")
+      cat(paste0("Pseudo conditional R-square (R2c): ", fit.stats[[2]]),
+          "\n")
+      cat("\n")
+      cat(paste0("Log Likelihood: ", LL), "\n")
+      cat("\n")
+      cat(paste0("Optimized values for each surface:"), "\n")
+      cat(GA.results@solution, "\n")
+      cat("\n")
+      cat(paste0("Optimization took ", Run.Time, " seconds to complete"),
+          "\n")
+      sink()
+    }
+    
   }
 
 ##########################################################################################
@@ -643,7 +678,6 @@ Rev.Ricker <- function(r, parm) {
     Ricker(rev.rast, parm)
   }
 }
-
 yn.question <- function(question, add_lines_before = TRUE) {
   choices <- c("Yes", "No", "New Subdirectory")
   if(add_lines_before) cat("------------------------\n")   

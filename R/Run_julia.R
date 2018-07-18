@@ -54,6 +54,13 @@ Run_CS.jl <-
       } else {
         write.files <- jl.inputs$write.files
       }
+      
+      if(is.null(jl.inputs$write.criteria)) {
+        write.criteria <- NULL
+      } else {
+        write.criteria <- jl.inputs$write.criteria
+      }
+      
       JULIA_HOME <- jl.inputs$JULIA_HOME
     }
     
@@ -163,8 +170,15 @@ Run_CS.jl <-
     
     
     # Run CIRCUITSCAPE.jl -----------------------------------------------------
+    rt <- NULL
+    if(!is.null(write.criteria)) {
+      t1 <- proc.time()[3]
+      out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+      rt <- proc.time()[3] - t1
+    } else {
+      out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+    }
     
-    out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
     
     if (output == "raster" & CurrentMap == TRUE) {
       rast <- raster(paste0(EXPORT.dir, tmp.name, "_cum_curmap.asc"))
@@ -187,10 +201,19 @@ Run_CS.jl <-
       }
       
       if(!is.null(write.files)) {
+        if(!is.null(rt)) {
+          if(rt > write.criteria){
+            copy.files <- list(paste0(EXPORT.dir, tmp.name, ".ini"),
+                               temp_rast)
+            file.copy(copy.files, write.files)
+          }
+        } else {
         copy.files <- list(paste0(EXPORT.dir, tmp.name, ".ini"),
                            temp_rast)
         file.copy(copy.files, write.files)
+        }
       }
+        
       
       unlink.list <- list.files(EXPORT.dir, 
                                 pattern = tmp.name,

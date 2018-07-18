@@ -27,9 +27,9 @@ MS_optim.scale <- function(CS.inputs = NULL,
   
   k.value <- GA.inputs$k.value
   
-
-# Circuitscape ------------------------------------------------------------
-
+  
+  # Circuitscape ------------------------------------------------------------
+  
   
   if (!is.null(CS.inputs)) {
     if (GA.inputs$parallel != FALSE) {
@@ -57,6 +57,8 @@ MS_optim.scale <- function(CS.inputs = NULL,
       popSize = GA.inputs$pop.size,
       maxiter = GA.inputs$maxiter,
       run = GA.inputs$run,
+      optim = GA.inputs$optim,
+      optimArgs = GA.inputs$optimArgs,
       parallel = FALSE,
       keepBest = GA.inputs$keepBest,
       seed = GA.inputs$seed,
@@ -232,7 +234,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     saveRDS(multi.GA_nG, 
             file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
     
-    unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    # unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
@@ -269,36 +271,79 @@ MS_optim.scale <- function(CS.inputs = NULL,
     return(out)
   }
   
-
-# gdistance ---------------------------------------------------------------
-
-
-    if (!is.null(gdist.inputs)) {
-    t1 <- proc.time()[3]
-    multi.GA_nG <- ga(
-      type = "real-valued",
-      fitness = Resistance.Opt_multi.scale,
-      population = GA.inputs$population,
-      selection = GA.inputs$selection,
-      mutation = GA.inputs$mutation,
-      pcrossover = GA.inputs$pcrossover,
-      crossover = GA.inputs$crossover,
-      pmutation = GA.inputs$pmutation,
-      Min.Max = GA.inputs$Min.Max,
-      GA.inputs = GA.inputs,
-      gdist.inputs = gdist.inputs,
-      lower = GA.inputs$ga.min,
-      upper = GA.inputs$ga.max,
-      popSize = GA.inputs$pop.size,
-      maxiter = GA.inputs$maxiter,
-      parallel = GA.inputs$parallel,
-      run = GA.inputs$run,
-      keepBest = GA.inputs$keepBest,
-      seed = GA.inputs$seed,
-      suggestions = GA.inputs$SUGGESTS,
-      quiet = GA.inputs$quiet
-    )
-    rt <- proc.time()[3] - t1
+  
+  # gdistance ---------------------------------------------------------------
+  
+  
+  if (!is.null(gdist.inputs)) {
+    
+    # * Island GA -------------------------------------------------------------
+    if(isTRUE(GA.inputs$gaisl)) {
+      t1 <- proc.time()[3]
+      multi.GA_nG <- gaisl(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi.scale,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        gdist.inputs = gdist.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        numIslands = GA.inputs$numIslands,
+        migrationRate = GA.inputs$migrationRate,
+        migrationInterval = GA.inputs$migrationInterval,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+      
+    } else { # * Standard GA ------------
+      
+      t1 <- proc.time()[3]
+      multi.GA_nG <- ga(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi.scale,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        gdist.inputs = gdist.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        keepBest = GA.inputs$keepBest,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+    }
+    
+    multi.GA_nG.o <- multi.GA_nG
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, paste(GA.inputs$parm.type$name, collapse = "."), "_full.rds"))
     
     if(dim(multi.GA_nG@solution)[1] > 1) {
       multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
@@ -436,7 +481,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
     
     Result.txt(
-      GA.results = multi.GA_nG,
+      GA.results = multi.GA_nG.o,
       GA.inputs = GA.inputs,
       method = gdist.inputs$method,
       Run.Time = rt,
@@ -458,7 +503,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     saveRDS(multi.GA_nG, 
             file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
     
-    unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    # unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
@@ -486,44 +531,86 @@ MS_optim.scale <- function(CS.inputs = NULL,
         "LL"
       )
     
-    out <- list(GA.summary = multi.GA_nG,
+    out <- list(GA.summary = multi.GA_nG.o,
                 MLPE.model = MLPE.model,
                 AICc.tab = AICc.tab,
                 cd = cd.list,
                 percent.contribution = p.cont,
                 k = k.df)
     return(out)
-    }
+  }
   
   # Julia ---------------------------------------------------------------
   
   
   if (!is.null(jl.inputs)) {
-    t1 <- proc.time()[3]
-    multi.GA_nG <- ga(
-      type = "real-valued",
-      fitness = Resistance.Opt_multi.scale,
-      population = GA.inputs$population,
-      selection = GA.inputs$selection,
-      mutation = GA.inputs$mutation,
-      pcrossover = GA.inputs$pcrossover,
-      crossover = GA.inputs$crossover,
-      pmutation = GA.inputs$pmutation,
-      Min.Max = GA.inputs$Min.Max,
-      GA.inputs = GA.inputs,
-      jl.inputs = jl.inputs,
-      lower = GA.inputs$ga.min,
-      upper = GA.inputs$ga.max,
-      popSize = GA.inputs$pop.size,
-      maxiter = GA.inputs$maxiter,
-      parallel = GA.inputs$parallel,
-      run = GA.inputs$run,
-      keepBest = GA.inputs$keepBest,
-      seed = GA.inputs$seed,
-      suggestions = GA.inputs$SUGGESTS,
-      quiet = GA.inputs$quiet
-    )
-    rt <- proc.time()[3] - t1
+    # * Island GA -------------------------------------------------------------
+    if(isTRUE(GA.inputs$gaisl)) {
+      t1 <- proc.time()[3]
+      multi.GA_nG <- gaisl(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi.scale,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        jl.inputs = jl.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        numIslands = GA.inputs$numIslands,
+        migrationRate = GA.inputs$migrationRate,
+        migrationInterval = GA.inputs$migrationInterval,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+      
+    } else { # * Standard GA ------------
+      
+      t1 <- proc.time()[3]
+      multi.GA_nG <- ga(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi.scale,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        jl.inputs = jl.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        keepBest = GA.inputs$keepBest,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+    }
+    
+    multi.GA_nG.o <- multi.GA_nG
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, paste(GA.inputs$parm.type$name, collapse = "."), "_full.rds"))
     
     if(dim(multi.GA_nG@solution)[1] > 1) {
       multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
@@ -663,7 +750,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
     
     Result.txt(
-      GA.results = multi.GA_nG,
+      GA.results = multi.GA_nG.o,
       GA.inputs = GA.inputs,
       method = "CIRCUITSCAPE.jl",
       Run.Time = rt,
@@ -685,7 +772,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     saveRDS(multi.GA_nG, 
             file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
     
-    unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    # unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
@@ -713,7 +800,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         "LL"
       )
     
-    out <- list(GA.summary = multi.GA_nG,
+    out <- list(GA.summary = multi.GA_nG.o,
                 MLPE.model = MLPE.model,
                 AICc.tab = AICc.tab,
                 cd = cd.list,

@@ -123,11 +123,15 @@ Resistance.Opt_multi <- function(PARM,
       
     } 
     
-    cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+    cd <- Run_gdistance(gdist.inputs, r)
     
-    if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+    
+    # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+    if((cd == -99999) || isTRUE(exists('obj.func.opt'))) {
       
       obj.func.opt <- -99999
+      rm(cd, r)
+      gc()
       
     } else { # Continue with iteration
       
@@ -163,11 +167,11 @@ Resistance.Opt_multi <- function(PARM,
             REML = FALSE
           )
         ))
-        
+        gc()
         obj.func.opt <- obj.func[[1]]
       }
-    }
-  }
+    } # End objective fun iteration
+  } # End gdistance
   
   # Julia ---------------------------------------------------------------
   
@@ -240,8 +244,7 @@ Resistance.Opt_multi <- function(PARM,
     cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
     cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
   }
-  
+  gc()
   return(obj.func.opt)
   # OPTIM.DIRECTION(Min.Max)*(obj.func) # Function to be minimized/maximized
-  
 }

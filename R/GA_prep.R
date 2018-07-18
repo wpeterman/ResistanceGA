@@ -4,13 +4,13 @@
 #'
 #' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.
 #' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all_comb".
-#' @param min.cat The minimum value to be assessed during optimization of categorical resistance surfaces (Default = 1e-04)
+#' @param min.cat The minimum value to be assessed during optimization of categorical resistance surfaces (Default = 1 / max.cat)
 #' @param max.cat The maximum value to be assessed during optimization of categorical resistance surfaces (Default = 2500)
 #' @param max.cont The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 2500)
 #' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details
 #' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)
-#' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. See Details.
+#' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. Default = "M"; see Details.
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
 #' @param scale Logical. To optimize a kernel smoothing scaling parameter during optimization, set to TRUE (Default = FALSE). See Details below.
 #' @param scale.surfaces (Optional) If doing multisurface optimization with kernel smoothing, indicate which surfaces should be smoothed. A vector equal in length to the number of resistance surfaces to be optimized using MS_optim.scale that is used to indicate whether a surface should (1) or should not (0) have kernel smoothing applied. See details.
@@ -32,11 +32,22 @@
 #' @param pcrossover Probability of crossover. Default = 0.85
 #' @param pmutation Probability of mutation. Default = 0.125
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
-#' @param maxiter Maximum number of iterations to run before the GA search is halted (Default = 1000)
-#' @param pop.size Number of individuals to create each generation
+#' @param maxiter Maximum number of iterations to run before the GA search is halted. If using standard \code{ga} optimizer, the default = 1000. If using \code{gaisl = TRUE}, then this is set to 15x the \code{migrationInterval}
+#' @param pop.size Number of individuals to create each generation. If \code{gaisl = TRUE}, then this number is automatically calculated as \code{numIslands} * \code{island.pop} 
 #' @param parallel A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specify the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.
-#' @param run Number of consecutive generations without any improvement in AICc before the GA is stopped (Default = 25)
+#' @param gaisl Should the genetic algorithm use the islands parallel optimization? (Default = FALSE)
+#' @param island.pop The number of individuals to populate each island. (Default = 20)
+#' @param numIslands If \code{gaisl = TRUE}, an integer value which specifies the number of islands to use in the genetic evolution (by default will be set to 4)
+#' @param migrationRate If \code{gaisl = TRUE}, a value in the range (0, 1) which gives the proportion of individuals that undergo migration between islands in every exchange (by default equal to 0.10).
+#' @param migrationInterval If \code{gaisl = TRUE}, an integer value specifying the number of iterations at which exchange of individuals takes place. This interval between migrations is called an epoch, and it is set at 10 by default.
+#' @param run Number of consecutive generations or epochs without any improvement in objective function before the GA is stopped. If using standard \code{ga}, the default = 25. If using \code{gaisl = TRUE}, then the default \code{run} value will be calculated as \code{migrationInterval} * 5
 #' @param keepBest A logical argument specifying if best solutions at each iteration should be saved (Default = TRUE)
+#' @param optim A logical defaulting to \code{FALSE} determining whether or not a local search using general-purpose optimisation algorithms should be used. See argument \code{optimArgs} for further details and finer control. Setting to TRUE has the potential to improve optimization accuracy, but will increase optimization time.
+#' @param optim.method The method to be used among those available in \code{\link[stats]{optim}} function. By default, the BFGS algorithm with box constraints is used, where the bounds are those provided in the \code{ga()} function call. Further methods are available as described in the Details section in help(optim).
+#' @param poptim A value in the range [0,1] specifying the probability of performing a local search at each iteration of GA (default 0.0). Only change if your optimization is relatively fast.
+#' @param pressel A value in the range [0,1] specifying the pressure selection (default 1.00). The local search is started from a random solution selected with probability proportional to fitness. High values of pressel tend to select the solutions with the largest fitness, whereas low values of pressel assign quasi-uniform probabilities to any solution.
+#' @param control A list of control parameters. See 'Details' section in \code{\link[stats]{optim}}
+#' @param hessian	Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on paramter estimates (not yet implemented). Default = FALSE
 #' @param seed Integer random number seed to replicate \code{ga} optimization
 #' @param quiet Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)
 #' @return An R object that is a required input into optimization functions
@@ -53,9 +64,11 @@
 #'
 #' \code{cont.shape} can take values of "Increase", "Decrease", or "Peaked". If you believe a resistance surface is related to your response in a particular way, specifying this here may decrease the time to optimization. \code{cont.shape} is used to generate an initial set of parameter values to test during optimization. If specified, a greater proportion of the starting values will include your believed relationship. If unspecified (the Default), a completely random set of starting values will be generated.
 #'
-#' If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, all transformations will be assessed for continuous surfaces unless otherwise specified. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
+#' If it is desired that only certain transformations be assessed for continuous surfaces, then this can be specified using \code{select.trans}. By default, only monomolecular transformations will be assessed for continuous surfaces unless otherwise specified. Specific transformations can be specified by providing a vector of values (e.g., \code{c(1,3,5)}), with values corresponding to the equation numbers as detailed in \code{\link[ResistanceGA]{Resistance.tran}}. If multiple rasters are to be optimized from the same directory, then a list of transformations must be provided in the order that the raster surfaces will be assessed. For example:\cr
 #' \code{select.trans = list("M", "A", "R", c(5,6))}\cr
 #' will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NA} to accommodate this.
+#' 
+#' Setting \code{gaisl = TRUE} has the potential greatly reduce the optimization run time, potentially with greater accuracy. This is a distributed multiple-population GA, where the population is partitioned into several subpopulations and assigned to separated islands. Independent GAs are executed in each island, and only occasionally sparse exchanges of individuals are performed among the islands. 
 #'
 #' It is recommended to first run GA optimization with the default settings
 
@@ -63,7 +76,7 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
 #' Results.dir = NULL,
-#' min.cat = 1e-04,
+#' min.cat = NULL,
 #' max.cat = 2500,
 #' max.cont = 2500,
 #' min.scale = NULL,
@@ -80,7 +93,7 @@
 #' pcrossover = 0.85,
 #' pmutation = 0.125,
 #' maxiter = 1000,
-#' run = 25,
+#' run = NULL,
 #' keepBest = TRUE,
 #' population = gaControl(type)$population,
 #' selection = gaControl(type)$selection,
@@ -88,12 +101,23 @@
 #' mutation = gaControl(type)$mutation,
 #' pop.size = NULL,
 #' parallel = FALSE,
+#' gaisl = FALSE,
+#' island.pop = 20,
+#' numIslands = NULL,
+#' migrationRate = NULL,
+#' migrationInterval = NULL,
+#' optim = FALSE,
+#' optim.method = "L-BFGS-B", 
+#' poptim = 0.0,
+#' pressel = 1.00,
+#' control = list(fnscale = -1, maxit = 100),
+#' hessian = FALSE,
 #' seed = NULL,
 #' quiet = FALSE)
 
 GA.prep <- function(ASCII.dir,
                     Results.dir = NULL,
-                    min.cat = 0.0001,
+                    min.cat = NULL,
                     max.cat = 2500,
                     max.cont = 2500,
                     min.scale = NULL,
@@ -110,7 +134,7 @@ GA.prep <- function(ASCII.dir,
                     pcrossover = 0.85,
                     pmutation = 0.125,
                     maxiter = 1000,
-                    run = 25,
+                    run = NULL,
                     keepBest = TRUE,
                     population = gaControl(type)$population,
                     selection = gaControl(type)$selection,
@@ -118,8 +142,76 @@ GA.prep <- function(ASCII.dir,
                     mutation = gaControl(type)$mutation,
                     pop.size = NULL,
                     parallel = FALSE,
+                    gaisl = FALSE,
+                    island.pop = 20,
+                    numIslands = NULL,
+                    migrationRate = NULL,
+                    migrationInterval = NULL,
+                    optim = FALSE,
+                    optim.method = "L-BFGS-B", 
+                    poptim = 0.0,
+                    pressel = 1.00,
+                    control = list(fnscale = -1, maxit = 100),
+                    hessian = FALSE,
                     seed = NULL,
                     quiet = FALSE) {
+  
+  
+  
+  # Hybrid GA ---------------------------------------------------------------
+  if(isTRUE(optim)) {
+    optimArgs <- list(method = optim.method,
+                      poptim = poptim,
+                      pressel = pressel,
+                      control = control,
+                      hessian = hessian)
+  } else {
+    optimArgs <- NULL
+  }
+  
+  
+  # Island model ------------------------------------------------------------
+  
+  if(isTRUE(gaisl)) {
+    if(is.numeric(parallel)) {
+      parallel <- parallel
+    } else {
+      parallel <- TRUE
+    }
+    
+    if(is.null(numIslands)) {
+      numIslands <- 4
+    }
+    
+    if(is.null(migrationRate)) {
+      migrationRate <- 0.10
+    }
+    
+    if(is.null(migrationInterval)) {
+      migrationInterval <- 10
+    }
+    
+    if(is.null(maxiter)) {
+      maxiter <- migrationInterval * 15
+    }
+    
+    if(is.null(pop.size)) {
+      pop.size <- island.pop * numIslands
+    }
+    
+    if(is.null(run)) {
+      run <- migrationInterval * 5
+    }
+  } # End island set up
+  
+  if(is.null(run)) {
+    run <- 25
+  }
+  
+  if(is.null(min.cat)){
+    min.cat <- 1 / max.cat
+  }
+  
   if(scale == FALSE) {
     scale <- NULL
   }
@@ -178,9 +270,11 @@ GA.prep <- function(ASCII.dir,
       dir.create(file.path(Results.dir, "Results"))
     Results.DIR <- paste0(Results.dir, "Results/")
     
-    if ("tmp" %in% dir(Results.dir) == FALSE)
-      dir.create(file.path(Results.dir, "tmp"))
-    Write.dir <- paste0(Results.dir, "tmp/")
+    # if ("tmp" %in% dir(Results.dir) == FALSE)
+    #   dir.create(file.path(Results.dir, "tmp"))
+    # Write.dir <- paste0(Results.dir, "tmp/")
+    Write.dir <- paste0(tempdir(),'\\')
+    
     
     if ("Plots" %in% dir(Results.DIR) == FALSE)
       dir.create(file.path(Results.DIR, "Plots"))
@@ -237,7 +331,7 @@ GA.prep <- function(ASCII.dir,
       # }
       
       if (is.null(select.trans)) {
-        eqs[[i]] <- eq.set("A")
+        eqs[[i]] <- eq.set("M")
       } else {
         eqs[[i]] <- eq.set(select.trans[[i]])
       }
@@ -280,7 +374,7 @@ GA.prep <- function(ASCII.dir,
       parm.type[i, 3] <- names[i]
       
       if (is.null(select.trans)) {
-        eqs[[i]] <- eq.set("A")
+        eqs[[i]] <- eq.set("M")
       } else {
         eqs[[i]] <- eq.set(select.trans[[i]])
       }
@@ -399,6 +493,12 @@ GA.prep <- function(ASCII.dir,
       selection = selection,
       mutation = mutation,
       parallel = parallel,
+      gaisl = gaisl,
+      numIslands = numIslands,
+      migrationRate = migrationRate,
+      migrationInterval = migrationInterval,
+      optim = optim,
+      optimArgs = optimArgs,
       pop.mult = pop.mult,
       percent.elite = percent.elite,
       Min.Max = Min.Max,
@@ -439,6 +539,12 @@ GA.prep <- function(ASCII.dir,
       selection = selection,
       mutation = mutation,
       parallel = parallel,
+      gaisl = gaisl,
+      numIslands = numIslands,
+      migrationRate = migrationRate,
+      migrationInterval = migrationInterval,
+      optim = optim,
+      optimArgs = optimArgs,
       pop.mult = pop.mult,
       percent.elite = percent.elite,
       Min.Max = Min.Max,
@@ -474,6 +580,17 @@ GA.prep <- function(ASCII.dir,
         mutation = mutation,
         pop.size = pop.size,
         parallel = parallel,
+        gaisl = gaisl,
+        island.pop = island.pop,
+        numIslands = numIslands,
+        migrationRate = migrationRate,
+        migrationInterval = migrationInterval,
+        optim = optim,
+        optim.method = optim.method,
+        poptim = poptim,
+        pressel = pressel,
+        control = control,
+        hessian = hessian,
         seed = seed,
         quiet = quiet
       )

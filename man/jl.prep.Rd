@@ -16,7 +16,8 @@ cores,
 cholmod,
 precision, 
 run_test,
-write.files = NULL)
+write.files = NULL,
+write.criteria = NULL)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -42,6 +43,8 @@ write.files = NULL)
 \item{run_test}{(Logical; Default = TRUE). Should a test of Julia Circuitscape be conducted? (This can take several seconds to complete)}
 
 \item{write.files}{(Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.}
+
+\item{write.criteria}{Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.}
 }
 \value{
 An R object that is a required input into optimization functions

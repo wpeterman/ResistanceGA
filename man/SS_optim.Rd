@@ -8,7 +8,6 @@ SS_optim(CS.inputs,
  gdist.inputs, 
  jl.inputs,
  GA.inputs,
- nlm, 
  dist_mod, 
  null_mod)
 }
@@ -20,8 +19,6 @@ SS_optim(CS.inputs,
 \item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
-
-\item{nlm}{Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. Default = FALSE.}
 
 \item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)}
 

@@ -25,9 +25,9 @@ MS_optim <- function(CS.inputs = NULL,
   }
   k.value <- GA.inputs$k.value
   
-
-# Circuitscape ------------------------------------------------------------
-
+  
+  # Circuitscape ------------------------------------------------------------
+  
   
   if (!is.null(CS.inputs)) {
     if (GA.inputs$parallel != FALSE) {
@@ -55,6 +55,8 @@ MS_optim <- function(CS.inputs = NULL,
       popSize = GA.inputs$pop.size,
       maxiter = GA.inputs$maxiter,
       run = GA.inputs$run,
+      optim = GA.inputs$optim,
+      optimArgs = GA.inputs$optimArgs,
       parallel = FALSE,
       keepBest = GA.inputs$keepBest,
       seed = GA.inputs$seed,
@@ -223,7 +225,7 @@ MS_optim <- function(CS.inputs = NULL,
     
     file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
     
-    unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    # unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
@@ -260,42 +262,87 @@ MS_optim <- function(CS.inputs = NULL,
     
     return(out)
   }
- 
-
-# gdistance ---------------------------------------------------------------
-
-   
-  #### Optimize using gdistance ####
+  
+  
+  # gdistance ---------------------------------------------------------------
+  
   if (!is.null(gdist.inputs)) {
-    t1 <- proc.time()[3]
-    multi.GA_nG <- ga(
-      type = "real-valued",
-      fitness = Resistance.Opt_multi,
-      population = GA.inputs$population,
-      selection = GA.inputs$selection,
-      mutation = GA.inputs$mutation,
-      pcrossover = GA.inputs$pcrossover,
-      crossover = GA.inputs$crossover,
-      pmutation = GA.inputs$pmutation,
-      Min.Max = GA.inputs$Min.Max,
-      GA.inputs = GA.inputs,
-      gdist.inputs = gdist.inputs,
-      lower = GA.inputs$ga.min,
-      upper = GA.inputs$ga.max,
-      popSize = GA.inputs$pop.size,
-      maxiter = GA.inputs$maxiter,
-      parallel = GA.inputs$parallel,
-      run = GA.inputs$run,
-      keepBest = GA.inputs$keepBest,
-      seed = GA.inputs$seed,
-      suggestions = GA.inputs$SUGGESTS,
-      quiet = GA.inputs$quiet
-    )
-    rt <- proc.time()[3] - t1
+    
+    #  * Island GA -------------------------------------------------------------
+    if(isTRUE(GA.inputs$gaisl)) {
+      t1 <- proc.time()[3]
+      multi.GA_nG <- gaisl(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        gdist.inputs = gdist.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        numIslands = GA.inputs$numIslands,
+        migrationRate = GA.inputs$migrationRate,
+        migrationInterval = GA.inputs$migrationInterval,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        # keepBest = GA.inputs$keepBest,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+      
+    } else {
+      # * Standard GA -------------------------------------------------------------
+      
+      t1 <- proc.time()[3]
+      multi.GA_nG <- ga(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        gdist.inputs = gdist.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        keepBest = GA.inputs$keepBest,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+      
+    }
+    
+    multi.GA_nG.o <- multi.GA_nG
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, paste(GA.inputs$parm.type$name, collapse = "."), "_full.rds"))
     
     if(dim(multi.GA_nG@solution)[1] > 1) {
       multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
     }
+    
     Opt.parm <- GA.opt <- multi.GA_nG@solution
     
     for (i in 1:GA.inputs$n.layers) {
@@ -421,7 +468,7 @@ MS_optim <- function(CS.inputs = NULL,
     AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
     
     Result.txt(
-      GA.results = multi.GA_nG,
+      GA.results = multi.GA_nG.o,
       GA.inputs = GA.inputs,
       method = gdist.inputs$method,
       Run.Time = rt,
@@ -443,7 +490,7 @@ MS_optim <- function(CS.inputs = NULL,
     saveRDS(multi.GA_nG, 
             file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
     
-    unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    # unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
     k.df <- data.frame(surface = NAME, k = k)
     
@@ -471,7 +518,7 @@ MS_optim <- function(CS.inputs = NULL,
         "LL"
       )
     
-    out <- list(GA.summary = multi.GA_nG,
+    out <- list(GA.summary = multi.GA_nG.o,
                 MLPE.model = MLPE.model,
                 AICc.tab = AICc.tab,
                 cd = cd.list,
@@ -480,224 +527,269 @@ MS_optim <- function(CS.inputs = NULL,
     
     return(out)
   }
-
-
-# Julia ---------------------------------------------------------------
-
-
-if (!is.null(jl.inputs)) {
-  t1 <- proc.time()[3]
-  multi.GA_nG <- ga(
-    type = "real-valued",
-    fitness = Resistance.Opt_multi,
-    population = GA.inputs$population,
-    selection = GA.inputs$selection,
-    mutation = GA.inputs$mutation,
-    pcrossover = GA.inputs$pcrossover,
-    crossover = GA.inputs$crossover,
-    pmutation = GA.inputs$pmutation,
-    Min.Max = GA.inputs$Min.Max,
-    GA.inputs = GA.inputs,
-    jl.inputs = jl.inputs,
-    lower = GA.inputs$ga.min,
-    upper = GA.inputs$ga.max,
-    popSize = GA.inputs$pop.size,
-    maxiter = GA.inputs$maxiter,
-    parallel = GA.inputs$parallel,
-    run = GA.inputs$run,
-    keepBest = GA.inputs$keepBest,
-    seed = GA.inputs$seed,
-    suggestions = GA.inputs$SUGGESTS,
-    quiet = GA.inputs$quiet
-  )
-  rt <- proc.time()[3] - t1
   
-  if(dim(multi.GA_nG@solution)[1] > 1) {
-    multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
-  }
   
-  Opt.parm <- GA.opt <- multi.GA_nG@solution
-  for (i in 1:GA.inputs$n.layers) {
-    if (GA.inputs$surface.type[i] == "cat") {
-      ga.p <-
-        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      parm <- ga.p / min(ga.p)
-      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                     1])] <- parm
+  # Julia ---------------------------------------------------------------
+  
+  
+  if (!is.null(jl.inputs)) {
+    #  * Island GA -------------------------------------------------------------
+    if(isTRUE(GA.inputs$gaisl)) {
+      t1 <- proc.time()[3]
+      multi.GA_nG <- gaisl(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        jl.inputs = jl.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        numIslands = GA.inputs$numIslands,
+        migrationRate = GA.inputs$migrationRate,
+        migrationInterval = GA.inputs$migrationInterval,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        # keepBest = GA.inputs$keepBest,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
       
     } else {
-      parm <-
-        GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-      Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
-                                                                     1])] <- parm
+      # * Standard GA -------------------------------------------------------------
+      
+      t1 <- proc.time()[3]
+      multi.GA_nG <- ga(
+        type = "real-valued",
+        fitness = Resistance.Opt_multi,
+        population = GA.inputs$population,
+        selection = GA.inputs$selection,
+        mutation = GA.inputs$mutation,
+        pcrossover = GA.inputs$pcrossover,
+        crossover = GA.inputs$crossover,
+        pmutation = GA.inputs$pmutation,
+        Min.Max = GA.inputs$Min.Max,
+        GA.inputs = GA.inputs,
+        jl.inputs = jl.inputs,
+        lower = GA.inputs$ga.min,
+        upper = GA.inputs$ga.max,
+        popSize = GA.inputs$pop.size,
+        maxiter = GA.inputs$maxiter,
+        optim = GA.inputs$optim,
+        optimArgs = GA.inputs$optimArgs,
+        parallel = GA.inputs$parallel,
+        run = GA.inputs$run,
+        keepBest = GA.inputs$keepBest,
+        seed = GA.inputs$seed,
+        suggestions = GA.inputs$SUGGESTS,
+        quiet = GA.inputs$quiet
+      )
+      rt <- proc.time()[3] - t1
+      
     }
-  }
-  multi.GA_nG@solution <- Opt.parm
-  
-  RAST <-
-    Combine_Surfaces(
-      PARM = multi.GA_nG@solution,
-      jl.inputs = jl.inputs,
+    
+    multi.GA_nG.o <- multi.GA_nG
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, paste(GA.inputs$parm.type$name, collapse = "."), "_full.rds"))
+    
+    if(dim(multi.GA_nG@solution)[1] > 1) {
+      multi.GA_nG@solution <- t(as.matrix(multi.GA_nG@solution[1,]))
+    }
+    
+    Opt.parm <- GA.opt <- multi.GA_nG@solution
+    for (i in 1:GA.inputs$n.layers) {
+      if (GA.inputs$surface.type[i] == "cat") {
+        ga.p <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        parm <- ga.p / min(ga.p)
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+        
+      } else {
+        parm <-
+          GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
+        Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
+                                                                       1])] <- parm
+      }
+    }
+    multi.GA_nG@solution <- Opt.parm
+    
+    RAST <-
+      Combine_Surfaces(
+        PARM = multi.GA_nG@solution,
+        jl.inputs = jl.inputs,
+        GA.inputs = GA.inputs,
+        rescale = TRUE,
+        p.contribution = TRUE
+      )
+    
+    p.cont <- RAST$percent.contribution
+    RAST <- RAST$combined.surface
+    
+    NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
+    names(RAST) <- NAME
+    cd <- Run_CS.jl(jl.inputs, RAST, full.mat = TRUE)
+    
+    write.table(
+      cd,
+      file = paste0(GA.inputs$Results.dir, NAME, "_jlResistMat.csv"),
+      sep = ",",
+      row.names = F,
+      col.names = F
+    )
+    writeRaster(RAST,
+                paste0(GA.inputs$Results.dir, NAME, ".asc"),
+                overwrite = TRUE)
+    
+    ifelse(length(unique(RAST)) > 15,
+           type <- "continuous",
+           type <- "categorical")
+    
+    #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
+    
+    Diagnostic.Plots(
+      resistance.mat = lower(cd),
+      genetic.dist = jl.inputs$response,
+      plot.dir = GA.inputs$Plots.dir,
+      type = type,
+      name = NAME,
+      ID = jl.inputs$ID,
+      ZZ = jl.inputs$ZZ
+    )
+    
+    # Get parameter estimates
+    MLPE.results <- MLPE.lmm_coef(
+      resistance = GA.inputs$Results.dir,
+      genetic.dist = jl.inputs$response,
+      out.dir = GA.inputs$Results.dir,
+      method = "jl",
+      ID = jl.inputs$ID,
+      ZZ = jl.inputs$ZZ
+    )
+    
+    fit.stats <- r.squaredGLMM(
+      MLPE.lmm(
+        resistance = lower(cd),
+        pairwise.genetic = jl.inputs$response,
+        REML = F,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    )
+    
+    aic <- AIC(
+      MLPE.lmm(
+        resistance = lower(cd),
+        pairwise.genetic = jl.inputs$response,
+        REML = F,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    )
+    
+    LL <- logLik(
+      MLPE.lmm(
+        resistance = lower(cd),
+        pairwise.genetic = jl.inputs$response,
+        REML = F,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    )
+    
+    MLPE.model <- MLPE.lmm(
+      resistance = lower(cd),
+      pairwise.genetic = jl.inputs$response,
+      REML = F,
+      ID = jl.inputs$ID,
+      ZZ = jl.inputs$ZZ
+    )
+    
+    if (k.value == 1) {
+      k <- 2
+    } else if (k.value == 2) {
+      k <-
+        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
+    } else if (k.value == 3) {
+      k <-
+        sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
+    } else {
+      k <- length(GA.inputs$layer.names) + 1
+    }
+    
+    n <- jl.inputs$n.Pops
+    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
+    
+    Result.txt(
+      GA.results = multi.GA_nG.o,
       GA.inputs = GA.inputs,
-      rescale = TRUE,
-      p.contribution = TRUE
+      method = "CIRCUITSCAPE.jl",
+      Run.Time = rt,
+      fit.stats = fit.stats,
+      optim = GA.inputs$method,
+      k = k,
+      aic = aic,
+      AICc = AICc,
+      LL = LL[[1]]
     )
-  
-  p.cont <- RAST$percent.contribution
-  RAST <- RAST$combined.surface
-  
-  NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
-  names(RAST) <- NAME
-  cd <- Run_CS.jl(jl.inputs, RAST, full.mat = TRUE)
-  
-  write.table(
-    cd,
-    file = paste0(GA.inputs$Results.dir, NAME, "_jlResistMat.csv"),
-    sep = ",",
-    row.names = F,
-    col.names = F
-  )
-  writeRaster(RAST,
-              paste0(GA.inputs$Results.dir, NAME, ".asc"),
-              overwrite = TRUE)
-  
-  ifelse(length(unique(RAST)) > 15,
-         type <- "continuous",
-         type <- "categorical")
-  
-  #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
-  
-  Diagnostic.Plots(
-    resistance.mat = lower(cd),
-    genetic.dist = jl.inputs$response,
-    plot.dir = GA.inputs$Plots.dir,
-    type = type,
-    name = NAME,
-    ID = jl.inputs$ID,
-    ZZ = jl.inputs$ZZ
-  )
-  
-  # Get parameter estimates
-  MLPE.results <- MLPE.lmm_coef(
-    resistance = GA.inputs$Results.dir,
-    genetic.dist = jl.inputs$response,
-    out.dir = GA.inputs$Results.dir,
-    method = "jl",
-    ID = jl.inputs$ID,
-    ZZ = jl.inputs$ZZ
-  )
-  
-  fit.stats <- r.squaredGLMM(
-    MLPE.lmm(
-      resistance = lower(cd),
-      pairwise.genetic = jl.inputs$response,
-      REML = F,
-      ID = jl.inputs$ID,
-      ZZ = jl.inputs$ZZ
-    )
-  )
-  
-  aic <- AIC(
-    MLPE.lmm(
-      resistance = lower(cd),
-      pairwise.genetic = jl.inputs$response,
-      REML = F,
-      ID = jl.inputs$ID,
-      ZZ = jl.inputs$ZZ
-    )
-  )
-  
-  LL <- logLik(
-    MLPE.lmm(
-      resistance = lower(cd),
-      pairwise.genetic = jl.inputs$response,
-      REML = F,
-      ID = jl.inputs$ID,
-      ZZ = jl.inputs$ZZ
-    )
-  )
-  
-  MLPE.model <- MLPE.lmm(
-    resistance = lower(cd),
-    pairwise.genetic = jl.inputs$response,
-    REML = F,
-    ID = jl.inputs$ID,
-    ZZ = jl.inputs$ZZ
-  )
-  
-  if (k.value == 1) {
-    k <- 2
-  } else if (k.value == 2) {
-    k <-
-      sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + 1
-  } else if (k.value == 3) {
-    k <-
-      sum(GA.inputs$parm.type$n.parm) - sum(GA.inputs$parm.type == "cont") + nrow(GA.inputs$parm.type) + 1
-  } else {
-    k <- length(GA.inputs$layer.names) + 1
+    
+    write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
+                row.names = F,
+                col.names = T)
+    
+    # save(multi.GA_nG, 
+    #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
+    
+    saveRDS(multi.GA_nG, 
+            file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
+    
+    # unlink(GA.inputs$Write.dir, recursive = T, force = T)
+    
+    k.df <- data.frame(surface = NAME, k = k)
+    
+    cd.list <- list(as.matrix(cd))
+    names(cd.list) <- NAME
+    
+    AICc.tab <- data.frame(surface = NAME,
+                           obj = multi.GA_nG@fitnessValue,
+                           k = k,
+                           AIC = aic,
+                           AICc = AICc,
+                           R2m = fit.stats[[1]],
+                           R2c = fit.stats[[2]],
+                           LL = LL)
+    
+    colnames(AICc.tab) <-
+      c(
+        "Surface",
+        paste0("obj.func_", GA.inputs$method),
+        "k",
+        "AIC",
+        "AICc",
+        "R2m",
+        "R2c",
+        "LL"
+      )
+    
+    out <- list(GA.summary = multi.GA_nG.o,
+                MLPE.model = MLPE.model,
+                AICc.tab = AICc.tab,
+                cd = cd.list,
+                percent.contribution = p.cont,
+                k = k.df)
+    
+    return(out)
   }
-  
-  n <- jl.inputs$n.Pops
-  AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
-  
-  Result.txt(
-    GA.results = multi.GA_nG,
-    GA.inputs = GA.inputs,
-    method = "CIRCUITSCAPE.jl",
-    Run.Time = rt,
-    fit.stats = fit.stats,
-    optim = GA.inputs$method,
-    k = k,
-    aic = aic,
-    AICc = AICc,
-    LL = LL[[1]]
-  )
-  
-  write.table(p.cont, file = paste0(GA.inputs$Results.dir, "Percent_Contribution.csv"), sep = ",",
-              row.names = F,
-              col.names = T)
-  
-  # save(multi.GA_nG, 
-  #      file = paste0(GA.inputs$Results.dir, NAME, ".rda"))
-  
-  saveRDS(multi.GA_nG, 
-          file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
-  
-  unlink(GA.inputs$Write.dir, recursive = T, force = T)
-  
-  k.df <- data.frame(surface = NAME, k = k)
-  
-  cd.list <- list(as.matrix(cd))
-  names(cd.list) <- NAME
-  
-  AICc.tab <- data.frame(surface = NAME,
-                         obj = multi.GA_nG@fitnessValue,
-                         k = k,
-                         AIC = aic,
-                         AICc = AICc,
-                         R2m = fit.stats[[1]],
-                         R2c = fit.stats[[2]],
-                         LL = LL)
-  
-  colnames(AICc.tab) <-
-    c(
-      "Surface",
-      paste0("obj.func_", GA.inputs$method),
-      "k",
-      "AIC",
-      "AICc",
-      "R2m",
-      "R2c",
-      "LL"
-    )
-  
-  out <- list(GA.summary = multi.GA_nG,
-              MLPE.model = MLPE.model,
-              AICc.tab = AICc.tab,
-              cd = cd.list,
-              percent.contribution = p.cont,
-              k = k.df)
-  
-  return(out)
-}
 }

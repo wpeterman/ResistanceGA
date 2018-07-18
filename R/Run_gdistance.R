@@ -12,27 +12,82 @@
 Run_gdistance <- function(gdist.inputs, 
                           r, 
                           scl = TRUE) {
-  if (class(r)[1] != 'RasterLayer') {
-    r <- raster(r)
-  }
-  
-  # r <- round(r, 5)
-  
-  tr <- transition(
-    x = r,
-    transitionFunction = gdist.inputs$transitionFunction,
-    directions = gdist.inputs$directions
-  )
-  
-    if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
-      trC <- geoCorrection(tr, "c", scl = scl)
-      ret <- costDistance(trC, gdist.inputs$samples)
+  out <- tryCatch(
+    {
+      
+      if (class(r)[1] != 'RasterLayer') {
+        r <- raster(r)
+      }
+      
+      tr <- transition(
+        x = r,
+        transitionFunction = gdist.inputs$transitionFunction,
+        directions = gdist.inputs$directions
+      )
+      
+      if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
+        trC <- geoCorrection(tr, "c", scl = scl)
+        ret <- costDistance(trC, gdist.inputs$samples)
+        rm(trC, r)
+        gc()
+        
+      } # End costDistance
+      
+      if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
+        
+        trR <- geoCorrection(tr, "r", scl = scl)
+        ret <- commuteDistance(trR, gdist.inputs$samples) / 1000
+        rm(trR, r)
+        gc()
+      } # End commuteDistance
+      
+      return(ret)
+    },
+    warning = function(warning_condition) {
+      # message(warning_condition)
+      return(-99999)
+    }, 
+    error = function(error_condition) {
+      # message(error_condition)
+      return(-99999)
     }
     
-    if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
-      trR <- geoCorrection(tr, "r", scl = scl)
-      ret <- commuteDistance(trR, gdist.inputs$samples) / 1000
-    } 
-
-  return(ret)
+    # tr <- transition(
+    #   x = r,
+    #   transitionFunction = gdist.inputs$transitionFunction,
+    #   directions = gdist.inputs$directions
+    # )
+    # 
+    # if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
+    #   trC <- geoCorrection(tr, "c", scl = scl)
+    #   ret <- try(costDistance(trC, gdist.inputs$samples), silent = TRUE)
+    #   rm(trC, r)
+    #   
+    #   if(isTRUE(ret) == 'try-error') {
+    #     ret <- -99999
+    #     return(ret)
+    #   } else {
+    #     return(ret)
+    #   }
+    # } # End costDistance
+    # 
+    # if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
+    #   
+    #   trR <- geoCorrection(tr, "r", scl = scl)
+    #   ret <- try(commuteDistance(trR, gdist.inputs$samples), silent = TRUE) 
+    #   rm(trR, r)
+    #   
+    #   if(isTRUE(ret) == 'try-error') {
+    #     ret <- -99999
+    #     return(ret)
+    #   } else if (anyNA(ret)) {
+    #     ret <- -99999
+    #     return(ret)
+    #   } else {
+    #     ret <- ret / 1000
+    #     return(ret)
+    #   }
+    #   
+    # } # End commuteDistance 
+  ) # End tryCatch
 }
