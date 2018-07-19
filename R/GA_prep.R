@@ -48,6 +48,7 @@
 #' @param pressel A value in the range [0,1] specifying the pressure selection (default 1.00). The local search is started from a random solution selected with probability proportional to fitness. High values of pressel tend to select the solutions with the largest fitness, whereas low values of pressel assign quasi-uniform probabilities to any solution.
 #' @param control A list of control parameters. See 'Details' section in \code{\link[stats]{optim}}
 #' @param hessian	Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on paramter estimates (not yet implemented). Default = FALSE
+#' @param opt.digits The number of significant digits that the objective function will be assessed at. By default, no rounding occurs.
 #' @param seed Integer random number seed to replicate \code{ga} optimization
 #' @param quiet Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)
 #' @return An R object that is a required input into optimization functions
@@ -112,6 +113,7 @@
 #' pressel = 1.00,
 #' control = list(fnscale = -1, maxit = 100),
 #' hessian = FALSE,
+#' opt.digits = NULL,
 #' seed = NULL,
 #' quiet = FALSE)
 
@@ -153,6 +155,7 @@ GA.prep <- function(ASCII.dir,
                     pressel = 1.00,
                     control = list(fnscale = -1, maxit = 100),
                     hessian = FALSE,
+                    opt.digits = NULL,
                     seed = NULL,
                     quiet = FALSE) {
   
@@ -504,6 +507,7 @@ GA.prep <- function(ASCII.dir,
       Min.Max = Min.Max,
       method = method,
       k.value = k.value,
+      opt.digits = opt.digits,
       seed = seed,
       quiet = quiet
     )
@@ -550,6 +554,7 @@ GA.prep <- function(ASCII.dir,
       Min.Max = Min.Max,
       method = method,
       k.value = k.value,
+      opt.digits = opt.digits,
       seed = seed,
       quiet = quiet,
       inputs = list(
@@ -591,6 +596,7 @@ GA.prep <- function(ASCII.dir,
         pressel = pressel,
         control = control,
         hessian = hessian,
+        opt.digits = opt.digits,
         seed = seed,
         quiet = quiet
       )

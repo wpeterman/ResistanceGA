@@ -253,6 +253,10 @@ Resistance.Opt_multi.scale <-
       cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
     }
     
-    return(obj.func.opt)
-    # OPTIM.DIRECTION(Min.Max)*(obj.func) # Function to be minimized/maximized
+    if(!is.null(GA.inputs$opt.digits)) {
+      obj.func.opt <- round(obj.func.opt, GA.inputs$opt.digits)
+      return(obj.func.opt)
+    } else {
+      return(obj.func.opt)
+    }
   }

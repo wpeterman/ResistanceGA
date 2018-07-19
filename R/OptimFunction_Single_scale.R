@@ -337,5 +337,10 @@ Resistance.Opt_single.scale <- function(PARM,
   }
   rm(r)
   gc()
-  return(obj.func.opt)
+  if(!is.null(GA.inputs$opt.digits)) {
+    obj.func.opt <- round(obj.func.opt, GA.inputs$opt.digits)
+    return(obj.func.opt)
+  } else {
+    return(obj.func.opt)
+  }
 }

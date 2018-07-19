@@ -42,6 +42,7 @@ poptim = 0.0,
 pressel = 1.00,
 control = list(fnscale = -1, maxit = 100),
 hessian = FALSE,
+opt.digits = NULL,
 seed = NULL,
 quiet = FALSE)
 }
@@ -129,6 +130,8 @@ quiet = FALSE)
 \item{control}{A list of control parameters. See 'Details' section in \code{\link[stats]{optim}}}
 
 \item{hessian}{Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on paramter estimates (not yet implemented). Default = FALSE}
+
+\item{opt.digits}{The number of significant digits that the objective function will be assessed at. By default, no rounding occurs.}
 
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
 
