@@ -279,8 +279,10 @@ SCALE <- function(data, MIN, MAX, threshold = 1e-5) {
     data[is.finite(raster::values(data))] <- 0
     data
   } else {
-    Mn = cellStats(data, stat = 'min')
-    Mx = cellStats(data, stat = 'max')
+    # Mn = cellStats(data, stat = 'min')
+    # Mx = cellStats(data, stat = 'max')
+    Mn = min(data@data@values, na.rm = TRUE)
+    Mx = max(data@data@values, na.rm = TRUE)
     (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
   }
 }

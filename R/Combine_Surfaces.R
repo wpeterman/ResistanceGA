@@ -212,18 +212,24 @@ Combine_Surfaces <-
                                        mean = mean.cont)
         }
         
-        if (rescale == TRUE & cellStats(multi_surface, "mean") != 0)
+        if (keep != 0 && rescale == TRUE)
           multi_surface <-
-            multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
+            multi_surface / min(multi_surface@data@values, na.rm = TRUE) # Rescale to min of 1
         
-        if (cellStats(multi_surface, "max") > 1e6)
+        if (keep != 0 && max(multi_surface@data@values, na.rm = TRUE) > 1e6)
           multi_surface <-
             SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
         
         cont.df <- plyr::ldply(cont.list)
         
         # Work around for NA raster surfaces
-        if(is.na(cellStats(multi_surface, mean))) {
+        ## Memory issues?
+        # if(is.na(cellStats(multi_surface, mean))) {
+        #   multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+        # }
+        
+        if(sum(!is.na(multi_surface@data@values)) == 0) {
+          keep <- 0
           multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
         }
         
@@ -233,31 +239,39 @@ Combine_Surfaces <-
         
       } else { # p.contribution = FALSE
         
-        if (rescale == TRUE & cellStats(multi_surface, "mean") != 0)
+        if (keep != 0 && rescale == TRUE)
           multi_surface <-
-            multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
+            multi_surface / min(multi_surface@data@values, na.rm = TRUE) # Rescale to min of 1
         
-        if (cellStats(multi_surface, "max") > 1e6)
+        if (keep != 0 && max(multi_surface@data@values, na.rm = TRUE) > 1e6)
           multi_surface <-
             SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
         
+        rm(r)
+        gc()
         (multi_surface)
         
       }
       
     } else {   # Output directory specified
       
-      if (rescale == TRUE & cellStats(multi_surface, "mean") != 0)
+      if (keep != 0 && rescale == TRUE)
         multi_surface <-
-          multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
+          multi_surface / min(multi_surface@data@values, na.rm = TRUE) # Rescale to min of 1
       
-      if (cellStats(multi_surface, "max") > 1e6)
+      if (keep != 0 && max(multi_surface@data@values, na.rm = TRUE) > 1e6)
         multi_surface <-
           SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
       
       
       # Work around for NA raster surfaces
-      if(is.na(cellStats(multi_surface, mean))) {
+      ## Memory issues?
+      # if(is.na(cellStats(multi_surface, mean))) {
+      #   multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+      # }
+      
+      if(sum(!is.na(multi_surface@data@values)) == 0) {
+        keep <- 0
         multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
       }
       
@@ -266,6 +280,9 @@ Combine_Surfaces <-
         filename = paste0(EXPORT.dir, File.name, ".asc"),
         overwrite = TRUE
       )
+      
+      rm(r)
+      gc()
       (multi_surface)
     }
   }

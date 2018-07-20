@@ -39,7 +39,8 @@ Resistance.Opt_multi <- function(PARM,
     
     r <- raster(paste0(EXPORT.dir, File.name, ".asc"))
     
-    if(cellStats(r, "mean") == 0) { # Skip iteration
+    # if(cellStats(r, "mean") == 0) { # Skip iteration
+    if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration
       
       obj.func.opt <- -99999
       
@@ -117,8 +118,8 @@ Resistance.Opt_multi <- function(PARM,
         rescale = FALSE
       )
     
-    if(cellStats(r, "mean") == 0) { # Skip iteration
-      
+    # if(cellStats(r, "mean") == 0) { # Skip iteration
+    if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration      
       obj.func.opt <- -99999
       
     } 
@@ -188,8 +189,8 @@ Resistance.Opt_multi <- function(PARM,
         rescale = FALSE
       )
     
-    if(cellStats(r, "mean") == 0) { # Skip iteration
-      
+    # if(cellStats(r, "mean") == 0) { # Skip iteration
+    if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration      
       obj.func.opt <- -99999
       
     }
