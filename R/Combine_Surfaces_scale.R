@@ -313,6 +313,7 @@ Combine_Surfaces.scale <-
           p.cont <- r[[i]] / multi_surface
           # mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
           mean.cont <- mean(p.cont@data@values, na.rm = TRUE)
+
           cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
                                        mean = mean.cont)
         }
