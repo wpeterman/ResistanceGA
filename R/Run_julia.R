@@ -104,7 +104,8 @@ Run_CS.jl <-
     
     ######
     
-    if (cellStats(R, "max") > 1e6)
+    # if (cellStats(R, "max") > 1e6)
+    if (max(R@data@values, na.rm = TRUE) > 1e6)
       R <-
       SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
     R <- reclassify(R, c(-Inf, 0, 1))

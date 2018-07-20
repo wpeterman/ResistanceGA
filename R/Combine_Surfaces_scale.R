@@ -295,61 +295,99 @@ Combine_Surfaces.scale <-
     } # Close layer loop layer i
     
     
-    File.name <- File.name
-    
-    ms.r <- multi_surface <- sum(r) # Add all surfaces together
+    multi_surface <- sum(r) # Add all surfaces together
     
     # If unused transformation applied, toss iteration
     if(keep == 0) {
-      ms.r <- multi_surface <- (sum(r) * 0)
+      # ms.r <- (r[[1]] * 0)
+      multi_surface <- (r[[1]] * 0)
     }
-
-    if (rescale == TRUE & cellStats(multi_surface, "mean") != 0)
-      multi_surface <-
-      multi_surface / cellStats(multi_surface, "min") # Rescale to min of 1
     
-    if (cellStats(multi_surface, "max") > 1e6)
-      multi_surface <-
-      SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
+    
     
     if (is.null(out)) {
-      if(p.contribution == FALSE) {
-        (multi_surface)
-        
-      } else {
+      if(p.contribution == TRUE) {
         cont.list <- vector(mode = 'list', length = GA.inputs$n.layers)
         
         for (i in 1:GA.inputs$n.layers) {
-          p.cont <- r[[i]] / ms.r
-          mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
+          p.cont <- r[[i]] / multi_surface
+          # mean.cont <- cellStats(p.cont, mean, na.rm = TRUE)
+          mean.cont <- mean(p.cont@data@values, na.rm = TRUE)
           cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
                                        mean = mean.cont)
-          # ci.cont <- raster::quantile(p.cont, probs = c(0.025, 0.975), na.rm = TRUE)
-          # cont.list[[i]] <- data.frame(surface = GA.inputs$layer.names[i], 
-          #                              mean = mean.cont,
-          #                              l95 = ci.cont[[1]],
-          #                              u95 = ci.cont[[2]])
-          
         }
+        
+        if (keep != 0 && rescale == TRUE)
+          multi_surface <-
+            multi_surface / min(multi_surface@data@values, na.rm = TRUE) # Rescale to min of 1
+        
+        if (keep != 0 && max(multi_surface@data@values, na.rm = TRUE) > 1e6)
+          multi_surface <-
+            SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
         
         cont.df <- plyr::ldply(cont.list)
         
-        ## Work around for NA raster surfaces
-        # if(is.na(sum(multi_surface@data@values))) {
+        # Work around for NA raster surfaces
+        ## Memory issues?
+        # if(is.na(cellStats(multi_surface, mean))) {
         #   multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
         # }
+        
+        if(sum(!is.na(multi_surface@data@values)) == 0) {
+          keep <- 0
+          multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+        }
         
         list.out <- list(percent.contribution = cont.df,
                          combined.surface = multi_surface)
         return(list.out)
+        
+      } else { # p.contribution = FALSE
+        
+        if (keep != 0 && rescale == TRUE)
+          multi_surface <-
+            multi_surface / min(multi_surface@data@values, na.rm = TRUE) # Rescale to min of 1
+        
+        if (keep != 0 && max(multi_surface@data@values, na.rm = TRUE) > 1e6)
+          multi_surface <-
+            SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
+        
+        rm(r)
+        gc()
+        (multi_surface)
+        
       }
       
-    } else {
+    } else {   # Output directory specified
+      
+      if (keep != 0 && rescale == TRUE)
+        multi_surface <-
+          multi_surface / min(multi_surface@data@values, na.rm = TRUE) # Rescale to min of 1
+      
+      if (keep != 0 && max(multi_surface@data@values, na.rm = TRUE) > 1e6)
+        multi_surface <-
+          SCALE(multi_surface, 1, 1e6) # Rescale surface in case resistance are too high
+      
+      
+      # Work around for NA raster surfaces
+      ## Memory issues?
+      # if(is.na(cellStats(multi_surface, mean))) {
+      #   multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+      # }
+      
+      if(sum(!is.na(multi_surface@data@values)) == 0) {
+        keep <- 0
+        multi_surface <- (GA.inputs$Resistance.stack[[1]] * 0)
+      }
+      
       writeRaster(
         x = multi_surface,
         filename = paste0(EXPORT.dir, File.name, ".asc"),
         overwrite = TRUE
       )
+      
+      rm(r)
+      gc()
       (multi_surface)
     }
   }

@@ -177,8 +177,8 @@ Resistance.Opt_single <-
         # gdistance ------------------------------------------------------------
         if (!is.null(gdist.inputs)) {
           
-          if(cellStats(r, "mean") == 0) { # Skip iteration
-            
+          # if(cellStats(r, "mean") == 0) { # Skip iteration
+          if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration            
             obj.func.opt <- -99999
             
           } 
@@ -239,8 +239,8 @@ Resistance.Opt_single <-
         
         if (!is.null(jl.inputs)) {
           
-          if(cellStats(r, "mean") == 0) { # Skip iteration
-            
+          # if(cellStats(r, "mean") == 0) { # Skip iteration
+          if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration            
             obj.func.opt <- -99999
             
           }

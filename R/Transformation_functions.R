@@ -13,7 +13,9 @@ Monomolecular <- function(r, parm){
 Inv.Monomolecular <- function(r, parm){
   if(class(r)=="RasterLayer") {
     R <- parm[3]*(exp(-1*r/parm[2])) 
-    (R <- (R-cellStats(R,stat = "min"))+1)  
+    # (R <- (R-cellStats(R,stat = "min"))+1)  
+    (R <- (R - min(R@data@values, na.rm = TRUE)) + 1)  
+    
   } else {
     R <- parm[3]*(exp(-1*r/parm[2])) 
     (R <- (R-min(R))+1)
@@ -48,7 +50,8 @@ Ricker <- function(r,parm){
 Inv.Ricker <- function(r,parm){
   if(class(r)=="RasterLayer") {
     R <- (-1*parm[3])*r*exp(-1*r/parm[2])-1 # Ricker
-    R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
+    R <- SCALE(R,MIN=abs(max(R@data@values, na.rm = TRUE)),MAX=abs(min(R@data@values, na.rm = TRUE))) # Rescale
+    # R <- SCALE(R,MIN=abs(cellStats(R,stat='max')),MAX=abs(cellStats(R,stat='min'))) # Rescale
   } else {    
     R <- (-1*parm[3])*r*exp(-1*r/parm[2])-1 # Ricker
     R <- SCALE.vector(R,MIN=abs(max(R)),MAX=abs(min(R))) # Rescale

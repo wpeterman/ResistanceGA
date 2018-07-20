@@ -133,7 +133,8 @@ Resistance.Opt_AICc <-
       } # End if-else
     }
     File.name <- "resist_surface"
-    if (cellStats(r, "max") > 1e6)
+    # if (cellStats(r, "max") > 1e6)
+    if (max(r@data@values, na.rm = TRUE) > 1e6)
       r <-
       SCALE(r, 1, 1e6) # Rescale surface in case resistance are too high
     r <- reclassify(r, c(-Inf, 1e-06, 1e-06, 1e6, Inf, 1e6))
@@ -279,8 +280,10 @@ SCALE <- function(data, MIN, MAX, threshold = 1e-5) {
     data[is.finite(raster::values(data))] <- 0
     data
   } else {
-    Mn = cellStats(data, stat = 'min')
-    Mx = cellStats(data, stat = 'max')
+    # Mn = cellStats(data, stat = 'min')
+    # Mx = cellStats(data, stat = 'max')
+    Mn = min(data@data@values, na.rm = TRUE)
+    Mx = max(data@data@values, na.rm = TRUE)
     (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
   }
 }
@@ -650,9 +653,12 @@ Inv.Ricker <- function(r, parm) {
   if (class(r) == "RasterLayer") {
     R <- (-1 * parm[3]) * r * exp(-1 * r / parm[2]) - 1 # Ricker
     R <-
-      SCALE(R,
-            MIN = abs(cellStats(R, stat = 'max')),
-            MAX = abs(cellStats(R, stat = 'min'))) # Rescale
+      # SCALE(R,
+      #       MIN = abs(cellStats(R, stat = 'max')),
+      #       MAX = abs(cellStats(R, stat = 'min'))) # Rescale
+    SCALE(R,
+          MIN = abs(max(R@data@values, na.rm = TRUE)),
+          MAX = abs(min(R@data@values, na.rm = TRUE))) # Rescale
   } else {
     R <- (-1 * parm[3]) * r * exp(-1 * r / parm[2]) - 1 # Ricker
     R <- SCALE.vector(R, MIN = abs(max(R)), MAX = abs(min(R))) # Rescale
