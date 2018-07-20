@@ -82,8 +82,8 @@ SS_optim <- function(CS.inputs = NULL,
           Min.Max = GA.inputs$Min.Max,
           GA.inputs = GA.inputs,
           CS.inputs = CS.inputs,
-          min = GA.inputs$min.list[[i]],
-          max = GA.inputs$max.list[[i]],
+          lower = GA.inputs$min.list[[i]],
+          upper = GA.inputs$max.list[[i]],
           popSize = GA.inputs$pop.size,
           maxiter = GA.inputs$maxiter,
           run = GA.inputs$run,
@@ -254,8 +254,8 @@ SS_optim <- function(CS.inputs = NULL,
           Min.Max = GA.inputs$Min.Max,
           GA.inputs = GA.inputs,
           CS.inputs = CS.inputs,
-          min = GA.inputs$min.list[[i]],
-          max = GA.inputs$max.list[[i]],
+          lower = GA.inputs$min.list[[i]],
+          upper = GA.inputs$max.list[[i]],
           popSize = GA.inputs$pop.size,
           maxiter = GA.inputs$maxiter,
           run = GA.inputs$run,
@@ -607,8 +607,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             gdist.inputs = gdist.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             numIslands = GA.inputs$numIslands,
             migrationRate = GA.inputs$migrationRate,
             migrationInterval = GA.inputs$migrationInterval,
@@ -765,6 +765,9 @@ SS_optim <- function(CS.inputs = NULL,
           names(cd.list)[i] <- GA.inputs$layer.names[i]
           
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
+          
+          rm(single.GA, r)
+          gc()
           
           # *-* Continuous -----------------------------------------------------------
           
@@ -786,8 +789,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             gdist.inputs = gdist.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             numIslands = GA.inputs$numIslands,
             migrationRate = GA.inputs$migrationRate,
             migrationInterval = GA.inputs$migrationInterval,
@@ -964,6 +967,9 @@ SS_optim <- function(CS.inputs = NULL,
               "max"
             )
           RESULTS.cont[[cnt2]] <- RS
+          
+          rm(single.GA, r)
+          gc()
         } # Close gaisl cat-cont if else
       } else { # * Standard GA -------------------------------------------------------------
         
@@ -985,8 +991,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             gdist.inputs = gdist.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             parallel = GA.inputs$parallel,
             optim = GA.inputs$optim,
             optimArgs = GA.inputs$optimArgs,
@@ -1145,6 +1151,8 @@ SS_optim <- function(CS.inputs = NULL,
           
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           
+          rm(single.GA, r)
+          gc()
         } 
         else { # *-* Continuous ----------
           # Processing of continuous surfaces
@@ -1164,8 +1172,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             gdist.inputs = gdist.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             optim = GA.inputs$optim,
             optimArgs = GA.inputs$optimArgs,
             parallel = GA.inputs$parallel,
@@ -1342,6 +1350,8 @@ SS_optim <- function(CS.inputs = NULL,
             )
           RESULTS.cont[[cnt2]] <- RS
           
+          rm(single.GA, r)
+          gc()
         } # Close cat-cont if else
         
       } # Close GA vs. gaisl if-else
@@ -1493,6 +1503,7 @@ SS_optim <- function(CS.inputs = NULL,
             "LL"
           )
       }
+      
     }
     
     # Julia -------------------------------------------------
@@ -1520,8 +1531,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             jl.inputs = jl.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             numIslands = GA.inputs$numIslands,
             migrationRate = GA.inputs$migrationRate,
             migrationInterval = GA.inputs$migrationInterval,
@@ -1700,8 +1711,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             jl.inputs = jl.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             numIslands = GA.inputs$numIslands,
             migrationRate = GA.inputs$migrationRate,
             migrationInterval = GA.inputs$migrationInterval,
@@ -2049,8 +2060,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             jl.inputs = jl.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             optim = GA.inputs$optim,
             optimArgs = GA.inputs$optimArgs,
             parallel = GA.inputs$parallel,
@@ -2222,8 +2233,8 @@ SS_optim <- function(CS.inputs = NULL,
             Min.Max = GA.inputs$Min.Max,
             GA.inputs = GA.inputs,
             jl.inputs = jl.inputs,
-            min = GA.inputs$min.list[[i]],
-            max = GA.inputs$max.list[[i]],
+            lower = GA.inputs$min.list[[i]],
+            upper = GA.inputs$max.list[[i]],
             optim = GA.inputs$optim,
             optimArgs = GA.inputs$optimArgs,
             parallel = GA.inputs$parallel,
@@ -2743,7 +2754,7 @@ SS_optim <- function(CS.inputs = NULL,
         ga = ga.list
       )
   }
-  
-  # unlink(GA.inputs$Write.dir, recursive = T, force = T)
+  rm(single.GA, r)
+  gc()
   return(RESULTS)
 }

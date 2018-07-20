@@ -139,6 +139,8 @@ Resistance.Opt_multi.scale <-
       if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
         
         obj.func.opt <- -99999
+        rm(cd, r)
+        gc()
         
       } else { # Continue with iteration
         
@@ -176,6 +178,8 @@ Resistance.Opt_multi.scale <-
           ))
           obj.func.opt <- obj.func[[1]]
         }
+        rm(cd, r)
+        gc()
       }
     }
     

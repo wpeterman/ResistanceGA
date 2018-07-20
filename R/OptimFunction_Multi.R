@@ -167,9 +167,10 @@ Resistance.Opt_multi <- function(PARM,
             REML = FALSE
           )
         ))
-        gc()
         obj.func.opt <- obj.func[[1]]
       }
+      rm(cd, r)
+      gc()
     } # End objective fun iteration
   } # End gdistance
   
