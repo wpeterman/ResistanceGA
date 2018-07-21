@@ -766,7 +766,7 @@ SS_optim <- function(CS.inputs = NULL,
           
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           
-          rm(single.GA, r)
+          # rm(single.GA, r)
           gc()
           
           # *-* Continuous -----------------------------------------------------------
@@ -968,7 +968,7 @@ SS_optim <- function(CS.inputs = NULL,
             )
           RESULTS.cont[[cnt2]] <- RS
           
-          rm(single.GA, r)
+          # rm(single.GA, r)
           gc()
         } # Close gaisl cat-cont if else
       } else { # * Standard GA -------------------------------------------------------------
@@ -1151,7 +1151,7 @@ SS_optim <- function(CS.inputs = NULL,
           
           names(MLPE.list)[i] <- GA.inputs$layer.names[i]
           
-          rm(single.GA, r)
+          # rm(single.GA, r)
           gc()
         } 
         else { # *-* Continuous ----------
@@ -1350,7 +1350,7 @@ SS_optim <- function(CS.inputs = NULL,
             )
           RESULTS.cont[[cnt2]] <- RS
           
-          rm(single.GA, r)
+          # rm(single.GA, r)
           gc()
         } # Close cat-cont if else
         
@@ -2754,7 +2754,7 @@ SS_optim <- function(CS.inputs = NULL,
         ga = ga.list
       )
   }
-  rm(single.GA, r)
+  # rm(single.GA, r)
   gc()
   return(RESULTS)
 }
