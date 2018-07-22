@@ -14,7 +14,8 @@ all_comb(gdist.inputs = NULL,
                 sample.prop = 0.75,
                 nlm = FALSE,
                 dist_mod = TRUE,
-                null_mod = TRUE)
+                null_mod = TRUE,
+                ...)
 }
 \arguments{
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
@@ -38,6 +39,8 @@ all_comb(gdist.inputs = NULL,
 \item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)}
 
 \item{null_mod}{Logical, if TRUE, an intercept-only model will be calculated and added to the output table (Default = TRUE)}
+
+\item{...}{Additional arguments}
 }
 \value{
 This function optimizes resistance surfaces in isolation using \code{\link[ResistanceGA]{SS_optim}}, followed by multisurface optimization using \code{\link[ResistanceGA]{MS_optim}}, and then conducts a bootstrap analysis.

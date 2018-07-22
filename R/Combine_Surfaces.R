@@ -250,7 +250,7 @@ Combine_Surfaces <-
         
         rm(r)
         gc()
-        (multi_surface)
+        return(multi_surface)
         
       }
       
@@ -284,6 +284,6 @@ Combine_Surfaces <-
       
       rm(r)
       gc()
-      (multi_surface)
+      return(multi_surface)
     }
   }

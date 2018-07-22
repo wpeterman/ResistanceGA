@@ -13,6 +13,7 @@
 #' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. (Default = FALSE)
 #' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)
 #' @param null_mod Logical, if TRUE, an intercept-only model will be calculated and added to the output table (Default = TRUE)
+#' @param ... Additional arguments 
 
 #' @return This function optimizes resistance surfaces in isolation using \code{\link[ResistanceGA]{SS_optim}}, followed by multisurface optimization using \code{\link[ResistanceGA]{MS_optim}}, and then conducts a bootstrap analysis.
 #' @usage all_comb(gdist.inputs = NULL, 
@@ -25,7 +26,8 @@
 #'                 sample.prop = 0.75,
 #'                 nlm = FALSE,
 #'                 dist_mod = TRUE,
-#'                 null_mod = TRUE)
+#'                 null_mod = TRUE,
+#'                 ...)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
 all_comb <- function(gdist.inputs = NULL,
@@ -38,7 +40,8 @@ all_comb <- function(gdist.inputs = NULL,
                      sample.prop = 0.75,
                      nlm = FALSE,
                      dist_mod = TRUE,
-                     null_mod = TRUE) {
+                     null_mod = TRUE,
+                     ...) {
   
   if(!exists('results.dir')) 
     return(cat("ERROR: An empty results directory must be specified"))
@@ -60,6 +63,20 @@ all_comb <- function(gdist.inputs = NULL,
   }
   
   dir.files <- list.files(results.dir)
+  
+  dotargs <- list(...)
+  if(is.null(dotargs$cluster)) dotargs$cluster <- FALSE
+  if(parallel::detectCores() > 16) dotargs$cluster <- TRUE
+  
+  if(isTRUE(dotargs$cluster) && length(dir.files) != 0) {
+    unlink(dir(results.dir, 
+               full.names = TRUE),
+           recursive = TRUE,
+           force = T)
+  } 
+  
+  dir.files <- list.files(results.dir)
+  
   if(length(dir.files) != 0) {
     q <- yn.question(cat(
       paste0("This function is about to delete all files and folders in '", results.dir, "'"),
