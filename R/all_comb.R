@@ -444,10 +444,15 @@ all_comb <- function(gdist.inputs = NULL,
       
       
       # * Bootstrap: scaled -----------------------------------------------------
-      
-      obs <- gdist.inputs$n.Pops
-      genetic.mat <- matrix(0, obs, obs)
-      genetic.mat[lower.tri(genetic.mat)] <- gdist.inputs$response
+      if(!is.null(gdist.inputs)) {
+        obs <- gdist.inputs$n.Pops
+        genetic.mat <- matrix(0, obs, obs)
+        genetic.mat[lower.tri(genetic.mat)] <- gdist.inputs$response
+      } else {
+        obs <- jl.inputs$n.Pops
+        genetic.mat <- matrix(0, obs, obs)
+        genetic.mat[lower.tri(genetic.mat)] <- jl.inputs$response
+      }
       
       boot.results <- Resist.boot(mod.names = all.k[,1],
                                   dist.mat = all.cd,
@@ -643,9 +648,15 @@ all_comb <- function(gdist.inputs = NULL,
       
       # * Bootstrap -----------------------------------------------------
       
-      obs <- gdist.inputs$n.Pops
-      genetic.mat <- matrix(0, obs, obs)
-      genetic.mat[lower.tri(genetic.mat)] <- gdist.inputs$response
+      if(!is.null(gdist.inputs)) {
+        obs <- gdist.inputs$n.Pops
+        genetic.mat <- matrix(0, obs, obs)
+        genetic.mat[lower.tri(genetic.mat)] <- gdist.inputs$response
+      } else {
+        obs <- jl.inputs$n.Pops
+        genetic.mat <- matrix(0, obs, obs)
+        genetic.mat[lower.tri(genetic.mat)] <- jl.inputs$response
+      }
       
       boot.results <- Resist.boot(mod.names = all.k[,1],
                                   dist.mat = all.cd,
