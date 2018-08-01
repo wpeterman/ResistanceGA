@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.3 to 4.1-0.9
+--------
+* Numerous bug fixes and minor updates. Fixed error causing miscalculation of parameters when using multisurface approach.
+
 ResistanceGA 4.1-0.2
 --------
 * Extensive updates. Have now fully implemented the Islands optimization approach from the GA package (gaisl), as well as the hybrid local optimization features. Setting `gaisl = TRUE` has great potential to vastly speed up optimization.
