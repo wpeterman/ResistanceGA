@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.10
+--------
+* Multisurface k-value bug resolved 
+
 ResistanceGA 4.1-0.3 to 4.1-0.9
 --------
 * Numerous bug fixes and minor updates. Fixed error causing miscalculation of parameters when using multisurface approach.
