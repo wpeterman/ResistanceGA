@@ -1,3 +1,7 @@
+ResistanceGA 4.0-13
+--------
+* Add version dependency to the package DESCRIPTION for the GA package (>=3.1.1) (#6).
+
 ResistanceGA 4.0-12
 --------
 * Fully resolved bug causing miscalculation of k in multisurface optimization.
