@@ -4,6 +4,7 @@
 #'
 #' @param n.Pops The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
+#' @param covariates Data frame of additional covariates that you want included in the MLPE model during opitmization.
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. If using a Linux or Mac system, provide the full path to the "csrun.py" file. See details below.
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
@@ -18,6 +19,7 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage CS.prep(n.Pops, 
 #' response, 
+#' covariates = NULL,
 #' CS_Point.File, 
 #' CS.program, 
 #' Neighbor.Connect, 
@@ -42,6 +44,7 @@
 
 CS.prep <- function(n.Pops,
                     response = NULL,
+                    covariates = NULL,
                     CS_Point.File,
                     CS.program = '"C:/Program Files/Circuitscape/cs_run.exe"',
                     Neighbor.Connect = 8,
@@ -144,6 +147,7 @@ CS.prep <- function(n.Pops,
     ID = ID,
     ZZ = ZZ,
     response = response,
+    covariates = covariates,
     CS_Point.File = CS_Point.File,
     CS.program = CS.program,
     Neighbor.Connect = Neighbor.Connect,

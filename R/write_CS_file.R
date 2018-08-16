@@ -10,7 +10,8 @@ write.CS_4.0 <- function(BATCH,
                          solver = NULL,
                          precision = FALSE,
                          PAIRS_TO_INCLUDE = "included_pairs_file = (Browse for a file with pairs to include or exclude)",
-                         PAIRS = "use_included_pairs = False"){
+                         PAIRS = "use_included_pairs = False",
+                         silent = NULL){
   if(PARALLELIZE == TRUE && !is.null(CORES)) {
     PARALLELIZE <- "parallelize = True"
     CORES <- paste0("max_parallel = ", CORES)
@@ -23,6 +24,12 @@ write.CS_4.0 <- function(BATCH,
     solver <- "solver = cg+amg"
   } else {
     solver <- "solver = cholmod"
+  }
+  
+  if(isTRUE(silent)) {
+    LOG <- "log_level = critical"
+  } else {
+    LOG <- "log_level = INFO"
   }
   
  if(!isTRUE(precision)) {
@@ -124,7 +131,7 @@ write.CS_4.0 <- function(BATCH,
   cat("\n")
   cat("[Logging Options]")
   cat("\n")
-  cat("log_level = INFO")
+  cat(LOG)
   cat("\n")
   cat("log_file = None")
   cat("\n")

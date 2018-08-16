@@ -5,6 +5,7 @@
 #' @param n.Pops The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run.
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help.
+#' @param covariates Data frame of additional covariates that you want included in the MLPE model during opitmization.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.
@@ -15,6 +16,7 @@
 #' @param run_test (Logical; Default = TRUE). Should a test of Julia Circuitscape be conducted? (This can take several seconds to complete)
 #' @param write.files (Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.
 #' @param write.criteria Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.
+#' @param silent (Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug. 
 
 #' @return An R object that is a required input into optimization functions
 
@@ -23,6 +25,7 @@
 #' @usage jl.prep(n.Pops, 
 #' response, 
 #' CS_Point.File, 
+#' covariates = NULL,
 #' JULIA_HOME,
 #' Neighbor.Connect, 
 #' pairs_to_include, 
@@ -33,7 +36,8 @@
 #' precision, 
 #' run_test,
 #' write.files = NULL,
-#' write.criteria = NULL)
+#' write.criteria = NULL,
+#' silent = TRUE)
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
@@ -49,6 +53,7 @@
 jl.prep <- function(n.Pops,
                     response = NULL,
                     CS_Point.File,
+                    covariates = NULL,
                     JULIA_HOME,
                     Neighbor.Connect = 8,
                     pairs_to_include = NULL,
@@ -58,8 +63,20 @@ jl.prep <- function(n.Pops,
                     precision = FALSE,
                     run_test = TRUE,
                     write.files = NULL,
-                    write.criteria = NULL) {
+                    write.criteria = NULL,
+                    silent = TRUE) {
   
+  
+  # Checks ------------------------------------------------------------------
+  
+  # Ensure covariates have same length as response
+  if(!is.null(covariates) && !is.data.frame(covariates)) {
+    stop("Please provide a data frame when specifying additional covariates")
+  } 
+  
+  if(!is.null(covariates) && nrow(covariates) != length(response)) {
+    stop("Response and covariates must have the same number of observations")
+  } 
   
   # Setup Julia -------------------------------------------------------------
   
@@ -114,10 +131,12 @@ jl.prep <- function(n.Pops,
                    PARALLELIZE = FALSE,
                    CORES = NULL,
                    solver = 'cholmod',
-                   precision = FALSE
+                   precision = FALSE,
+                   silent = silent
       )
       
       out <- julia_call('compute', temp.ini)[-1,-1]
+      
       
       if(dim(out)[1] == 25) {
         cat("\n"); cat("\n")
@@ -129,30 +148,30 @@ jl.prep <- function(n.Pops,
       } else {
         stop("Test #1: Failed")
       }
-    #   
-    #   cat("Running test #2: Run Circuitscape from Julia in parallel")
-    #   
-    #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-    #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
-    #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-    #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-    #                PARALLELIZE = TRUE,
-    #                CORES = 2,
-    #                solver = 'cholmod',
-    #                precision = NULL
-    #   )
-    #   
-    #   out <- julia_call('compute', temp.ini)[-1,-1]
-    #   
-    #   
-    #   if(dim(out)[1] == 25) {
-    #     cat("\n"); cat("\n")
-    #     
-    #     print("Test #2: Passed")
-    #   } else {
-    #     stop("Test #2: Failed")
-    #   } 
-    #   
+      #   
+      #   cat("Running test #2: Run Circuitscape from Julia in parallel")
+      #   
+      #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+      #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
+      #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+      #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+      #                PARALLELIZE = TRUE,
+      #                CORES = 2,
+      #                solver = 'cholmod',
+      #                precision = NULL
+      #   )
+      #   
+      #   out <- julia_call('compute', temp.ini)[-1,-1]
+      #   
+      #   
+      #   if(dim(out)[1] == 25) {
+      #     cat("\n"); cat("\n")
+      #     
+      #     print("Test #2: Passed")
+      #   } else {
+      #     stop("Test #2: Failed")
+      #   } 
+      #   
       unlink.list <- list.files(td,
                                 pattern = tmp.name,
                                 all.files = TRUE,
@@ -170,8 +189,8 @@ jl.prep <- function(n.Pops,
   if(isTRUE(cholmod) && (precision == 'single')) {
     stop(cat(paste0('\n', 
                     "jl.prep ERROR:", '\n',
-         "CHOLMOD solver only works when using double precision. Set either `cholmod = FALSE` OR `precision = FALSE` to proceed", 
-         '\n', '\n' ))
+                    "CHOLMOD solver only works when using double precision. Set either `cholmod = FALSE` OR `precision = FALSE` to proceed", 
+                    '\n', '\n' ))
     )
   }
   
@@ -280,10 +299,18 @@ jl.prep <- function(n.Pops,
     ID <- To.From.ID(n.Pops)
   }
   suppressWarnings(ZZ <- ZZ.mat(ID))
+  
+  # if(!is.null(covariates)) {
+  #   formula = NULL
+  # } else {
+  #   formula = lme4::lmer(response ~ . + (1|pop1), data = covariates) 
+  # } mlpe_rga(response ~ . -pop + (1|pop), data=covariates)
+  
   list(
     ID = ID,
     ZZ = ZZ,
     response = response,
+    covariates = covariates,
     CS_Point.File = CS_Point.File,
     Neighbor.Connect = Neighbor.Connect,
     n.Pops = n.Pops,
@@ -294,6 +321,7 @@ jl.prep <- function(n.Pops,
     precision = precision,
     JULIA_HOME = JULIA_HOME,
     write.files = write.files,
-    write.criteria = write.criteria
+    write.criteria = write.criteria,
+    silent = silent
   )
 }

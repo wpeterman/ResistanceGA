@@ -17,7 +17,8 @@ cholmod,
 precision, 
 run_test,
 write.files = NULL,
-write.criteria = NULL)
+write.criteria = NULL,
+silent = FALSE)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -45,6 +46,8 @@ write.criteria = NULL)
 \item{write.files}{(Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.}
 
 \item{write.criteria}{Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.}
+
+\item{silent}{(Default = FALSE) If TRUE, no updates or logging of CIRCUITSCAPE will occur.}
 }
 \value{
 An R object that is a required input into optimization functions

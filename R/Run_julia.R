@@ -166,7 +166,8 @@ Run_CS.jl <-
       PARALLELIZE = jl.inputs$parallel,
       CORES = jl.inputs$cores,
       solver = jl.inputs$solver,
-      precision = jl.inputs$precision
+      precision = jl.inputs$precision,
+      silent = jl.inputs$silent
     )
     
     
