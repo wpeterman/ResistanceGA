@@ -66,7 +66,8 @@ Resist.boot <-
           resistance = dat,
           ID = ID,
           ZZ = ZZ,
-          k = n.parameters[j]
+          k = n.parameters[j],
+          obs = length(samp)
         )
         
         mod.aic <- data.frame(mod.names[j], n.parameters[j], AICc)
@@ -165,7 +166,7 @@ ZZ.mat <- function(ID) {
 }
 
 # Bootstrap MLPE
-boot.AICc <- function(response, resistance, ID, ZZ, k) {
+boot.AICc <- function(response, resistance, ID, ZZ, k, obs) {
   resistance <- scale(resistance, center = TRUE, scale = TRUE)
   dat <- data.frame(ID, resistance = resistance, response = response)
   colnames(dat) <- c("pop1", "pop2", "resistance", "response")
@@ -180,7 +181,7 @@ boot.AICc <- function(response, resistance, ID, ZZ, k) {
   R.sq <- MuMIn::r.squaredGLMM(fit.mod)[[1]]
   mod.AIC <- AIC(fit.mod)
   LL <- logLik(fit.mod)
-  AICc <- mod.AIC + ((2 * k * (k + 1)) / (length(response) - k - 1))
+  AICc <- mod.AIC + ((2 * k * (k + 1)) / (obs - k - 1))
   out <- data.frame(AIC = mod.AIC, 
                     AICc = AICc, 
                     R2m = R.sq,

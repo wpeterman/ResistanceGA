@@ -1,3 +1,7 @@
+ResistanceGA 4.0-14
+--------
+* Corrected AICc calculation in bootstrap function. Bootstrap results prior to this release should be updated.
+
 ResistanceGA 4.0-13
 --------
 * Add version dependency to the package DESCRIPTION for the GA package (>=3.1.1) (#6).
