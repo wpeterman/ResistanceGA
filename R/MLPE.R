@@ -155,38 +155,29 @@ MLPE.lmm_coef <-
     if (method == "cs") {
       response = genetic.dist
       resist.mat <-
-        list.files(resistance, pattern = "*_resistances.out", full.names = TRUE)
+        list.files(resistance, pattern = "*_csResistMat.csv", full.names = TRUE)
       resist.names <-
-        gsub(pattern = "_resistances.out",
+        gsub(pattern = "_csResistMat.csv",
              "",
-             x = list.files(resistance, pattern = "*_resistances.out"))
+             x = list.files(resistance, pattern = "*_csResistMat.csv"))
       COEF.Table <- array()
       for (i in 1:length(resist.mat)) {
-        m <- length(read.table(resist.mat[i])[-1, -1])
-        mm <- read.table(resist.mat[i])[-1, -1]
-        mm <- lower(mm)
-        mm <- mm[which(mm != -1)]
-        
-        if (is.null(ID)) {
-          ID <- To.From.ID(POPS = m)
-          
-        }
-        
-        if (is.null(ZZ)) {
-          ZZ <- ZZ.mat(ID = ID)
-          
-        }
-        
-        resistance <- scale(mm, center = TRUE, scale = TRUE)
-        dat <- data.frame(ID, resistance = resistance, response = response)
-        colnames(dat) <- c("pop1", "pop2", "resistance", "response")
+        cd <- read.csv(resist.mat[i], header = F)
+        mm <- lower(cd)
+        # mm <- lower(cd)
+        m <- dim(cd)[1]
+        ID <- To.From.ID(POPS = m)
+        ZZ <- ZZ.mat(ID = ID)
+        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+        cs.unscale <- mm
+        dat <- cbind(ID, cs.matrix, response)
         
         # Assign value to layer
         LAYER <- assign(resist.names[i], value = dat$cs.matrix)
         
         # Fit model
         mod <-
-          lFormula(response ~ resistance + (1 | pop1),
+          lFormula(response ~ LAYER + (1 | pop1),
                    data = dat,
                    REML = TRUE)
         mod$reTrms$Zt <- ZZ

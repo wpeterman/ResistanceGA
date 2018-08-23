@@ -7,6 +7,7 @@
 gdist.prep(n.Pops, 
                   response = NULL,
                   samples,
+                  covariates = NULL,
                   transitionFunction = function(x)  1 / mean(x),
                   directions = 8,
                   longlat = FALSE,
@@ -18,6 +19,8 @@ gdist.prep(n.Pops,
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 
 \item{samples}{Either provide the path to a .txt file containing the xy coordinates, or provide a matrix with x values in column 1 and y values in column 2. Alternatively, you can provide a \code{\link[sp]{SpatialPoints}} object}
+
+\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
 
 \item{transitionFunction}{The function to calculate the gdistance TransitionLayer object. See \code{\link[gdistance]{transition}}. Default = function(x) 1/mean(x)}
 

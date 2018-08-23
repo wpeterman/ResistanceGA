@@ -6,6 +6,7 @@
 \usage{
 CS.prep(n.Pops, 
 response, 
+covariates = NULL,
 CS_Point.File, 
 CS.program, 
 Neighbor.Connect, 
@@ -18,6 +19,8 @@ cores)
 \item{n.Pops}{The number of populations that are being assessed}
 
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
+
+\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
 
 \item{CS_Point.File}{The path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 

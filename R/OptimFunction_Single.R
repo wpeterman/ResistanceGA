@@ -109,7 +109,6 @@ Resistance.Opt_single <-
         ## Use -99999 as 'ga' maximizes
         obj.func.opt <- -99999
       } else {
-        File.name <- "resist_surface"
         
         rclmat <- matrix(c(1e-100, 1e-6, 1e-06, 1e6, Inf, 1e6, -1, 0, 1e6),
                          ncol = 3,
@@ -117,59 +116,72 @@ Resistance.Opt_single <-
         
         r <- reclassify(r, rclmat)
         
+        
+        # CS ----------------------------------------------------------------------
+        
         if (!is.null(CS.inputs)) {
-          writeRaster(
-            x = r,
-            filename = paste0(EXPORT.dir, File.name, ".asc"),
-            overwrite = TRUE
-          )
-          CS.resist <-
-            Run_CS2(
-              CS.inputs,
-              GA.inputs,
-              r = r,
-              EXPORT.dir = GA.inputs$Write.dir,
-              File.name = File.name
-            )
           
-          # Run mixed effect model on each Circuitscape effective resistance
-          if (method == "AIC") {
-            obj.func <- suppressWarnings(AIC(
-              MLPE.lmm2(
-                resistance = CS.resist,
-                response = CS.inputs$response,
-                ID = CS.inputs$ID,
-                ZZ = CS.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func * -1
-          } else if (method == "R2") {
-            obj.func <-
-              suppressWarnings(r.squaredGLMM(
+          CS.resist <- try(Run_CS(CS.inputs, r), TRUE)
+          
+          if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+            
+            obj.func.opt <- -99999
+            
+          } else { # Continue with iteration          
+            
+            # writeRaster(
+            #   x = r,
+            #   filename = paste0(EXPORT.dir, File.name, ".asc"),
+            #   overwrite = TRUE
+            # )
+            # CS.resist <-
+            #   Run_CS2(
+            #     CS.inputs,
+            #     GA.inputs,
+            #     r = r,
+            #     # EXPORT.dir = GA.inputs$Write.dir,
+            #     File.name = File.name
+            #   )
+            
+            # Run mixed effect model on each Circuitscape effective resistance
+            if (method == "AIC") {
+              obj.func <- suppressWarnings(AIC(
                 MLPE.lmm2(
                   resistance = CS.resist,
-                  response =
-                    CS.inputs$response,
+                  response = CS.inputs$response,
                   ID = CS.inputs$ID,
                   ZZ = CS.inputs$ZZ,
                   REML = FALSE
                 )
               ))
-            obj.func.opt <- obj.func[[1]]
-            
-          } else {
-            obj.func <- suppressWarnings(logLik(
-              MLPE.lmm2(
-                resistance = CS.resist,
-                response = CS.inputs$response,
-                ID = CS.inputs$ID,
-                ZZ = CS.inputs$ZZ,
-                REML = FALSE
-              )
-            ))
-            obj.func.opt <- obj.func[[1]]
-          }
+              obj.func.opt <- obj.func * -1
+            } else if (method == "R2") {
+              obj.func <-
+                suppressWarnings(r.squaredGLMM(
+                  MLPE.lmm2(
+                    resistance = CS.resist,
+                    response =
+                      CS.inputs$response,
+                    ID = CS.inputs$ID,
+                    ZZ = CS.inputs$ZZ,
+                    REML = FALSE
+                  )
+                ))
+              obj.func.opt <- obj.func[[1]]
+              
+            } else {
+              obj.func <- suppressWarnings(logLik(
+                MLPE.lmm2(
+                  resistance = CS.resist,
+                  response = CS.inputs$response,
+                  ID = CS.inputs$ID,
+                  ZZ = CS.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+              obj.func.opt <- obj.func[[1]]
+            }
+          } # End Obj func ifelse
         } # End CS Loop 
         
         

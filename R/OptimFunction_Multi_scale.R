@@ -38,17 +38,16 @@ Resistance.Opt_multi.scale <-
     
     
     if (!is.null(CS.inputs)) {
-      Combine_Surfaces(
-        PARM = PARM,
-        CS.inputs = CS.inputs,
-        GA.inputs = GA.inputs,
-        out = GA.inputs$Write.dir,
-        File.name = File.name,
-        rescale = FALSE
-      )
-      
-      r <- raster(paste0(EXPORT.dir, File.name, ".asc"))
-      
+      r <-
+        Combine_Surfaces(
+          PARM = PARM,
+          CS.inputs = CS.inputs,
+          GA.inputs = GA.inputs,
+          out = NULL,
+          File.name = File.name,
+          rescale = FALSE
+        )
+
       # if(cellStats(r, "mean") == 0) { # Skip iteration
       if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration        
         obj.func.opt <- -99999
@@ -57,10 +56,7 @@ Resistance.Opt_multi.scale <-
       
       CS.resist <- try(Run_CS2(
         CS.inputs,
-        GA.inputs,
-        r = multi_surface,
-        EXPORT.dir = GA.inputs$Write.dir,
-        File.name = File.name
+        r = r
       ), TRUE)
       
       if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {

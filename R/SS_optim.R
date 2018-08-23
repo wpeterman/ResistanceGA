@@ -60,12 +60,12 @@ SS_optim <- function(CS.inputs = NULL,
     
     # Processing of categorical surfaces
     if (!is.null(CS.inputs)) {
-      if (GA.inputs$parallel != FALSE) {
-        warning(
-          "\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",
-          immediate. = TRUE
-        )
-      }
+      # if (GA.inputs$parallel != FALSE) {
+      #   warning(
+      #     "\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths and gdistance.",
+      #     immediate. = TRUE
+      #   )
+      # }
       if (GA.inputs$surface.type[i] == 'cat') {
         cnt1 <- cnt1 + 1
         names(r) <- GA.inputs$layer.names[i]
@@ -84,6 +84,9 @@ SS_optim <- function(CS.inputs = NULL,
           CS.inputs = CS.inputs,
           lower = GA.inputs$min.list[[i]],
           upper = GA.inputs$max.list[[i]],
+          parallel = GA.inputs$parallel,
+          optim = GA.inputs$optim,
+          optimArgs = GA.inputs$optimArgs,
           popSize = GA.inputs$pop.size,
           maxiter = GA.inputs$maxiter,
           run = GA.inputs$run,
@@ -103,19 +106,31 @@ SS_optim <- function(CS.inputs = NULL,
           single.GA@solution / min(single.GA@solution)
         df <- data.frame(id = unique(r), t(single.GA@solution))
         r <- subs(r, df)
-        names(r) <- GA.inputs$layer.names[i]
+        NAME <- GA.inputs$layer.names[i]
+        names(r) <- NAME
         
-        Run_CS(CS.inputs, GA.inputs, r, EXPORT.dir = GA.inputs$Results.dir)
+        cd <- Run_CS(CS.inputs, 
+                     r, 
+                     full.mat = TRUE,
+                     EXPORT.dir = GA.inputs$Results.dir)
+        
+        write.table(
+          cd,
+          file = paste0(GA.inputs$Results.dir, NAME, "_csResistMat.csv"),
+          sep = ",",
+          row.names = F,
+          col.names = F
+        )
+        writeRaster(r,
+                    paste0(GA.inputs$Results.dir, NAME, ".asc"),
+                    overwrite = TRUE)
         
         Diagnostic.Plots(
-          resistance.mat = paste0(
-            GA.inputs$Results.dir,
-            GA.inputs$layer.names[i],
-            "_resistances.out"
-          ),
+          resistance.mat = lower(cd),
           genetic.dist = CS.inputs$response,
           plot.dir = GA.inputs$Plots.dir,
           type = "categorical",
+          name = NAME,
           ID = CS.inputs$ID,
           ZZ = CS.inputs$ZZ
         )
@@ -123,11 +138,7 @@ SS_optim <- function(CS.inputs = NULL,
         fit.stats <-
           r.squaredGLMM(
             MLPE.lmm(
-              resistance = paste0(
-                GA.inputs$Results.dir,
-                GA.inputs$layer.names[i],
-                "_resistances.out"
-              ),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = F,
               ID = CS.inputs$ID,
@@ -138,11 +149,7 @@ SS_optim <- function(CS.inputs = NULL,
         aic <-
           AIC(
             MLPE.lmm(
-              resistance = paste0(
-                GA.inputs$Results.dir,
-                GA.inputs$layer.names[i],
-                "_resistances.out"
-              ),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = F,
               ID = CS.inputs$ID,
@@ -153,11 +160,7 @@ SS_optim <- function(CS.inputs = NULL,
         LL <-
           logLik(
             MLPE.lmm(
-              resistance = paste0(
-                GA.inputs$Results.dir,
-                GA.inputs$layer.names[i],
-                "_resistances.out"
-              ),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = F,
               ID = CS.inputs$ID,
@@ -216,21 +219,14 @@ SS_optim <- function(CS.inputs = NULL,
         RESULTS.cat[[cnt1]] <- RS
         
         MLPE.list[[i]] <- MLPE.lmm(
-          resistance = paste0(
-            GA.inputs$Results.dir,
-            GA.inputs$layer.names[i],
-            "_resistances.out"
-          ),
+          resistance = lower(cd),
           pairwise.genetic = CS.inputs$response,
           REML = TRUE,
           ID = CS.inputs$ID,
           ZZ = CS.inputs$ZZ
         )
         
-        cd.list[[i]] <- (read.table(paste0(
-          GA.inputs$Results.dir,
-          GA.inputs$layer.names[i],
-          "_resistances.out"))[-1, -1])
+        cd.list[[i]] <- cd
         
         names(MLPE.list)[i] <- GA.inputs$layer.names[i]
         names(cd.list)[i] <- GA.inputs$layer.names[i]
@@ -256,6 +252,9 @@ SS_optim <- function(CS.inputs = NULL,
           CS.inputs = CS.inputs,
           lower = GA.inputs$min.list[[i]],
           upper = GA.inputs$max.list[[i]],
+          optim = GA.inputs$optim,
+          optimArgs = GA.inputs$optimArgs,
+          parallel = GA.inputs$parallel,
           popSize = GA.inputs$pop.size,
           maxiter = GA.inputs$maxiter,
           run = GA.inputs$run,
@@ -290,22 +289,31 @@ SS_optim <- function(CS.inputs = NULL,
             max = single.GA@solution[3],
             r = r
           )
+        NAME <- GA.inputs$layer.names[i]
         names(r.tran) <- GA.inputs$layer.names[i]
         
-        Run_CS(CS.inputs,
-               GA.inputs,
-               r.tran,
-               EXPORT.dir = GA.inputs$Results.dir)
+        cd <- Run_CS(CS.inputs,
+                     r.tran,
+                     full.mat = TRUE,
+                     EXPORT.dir = GA.inputs$Results.dir)
+        
+        write.table(
+          cd,
+          file = paste0(GA.inputs$Results.dir, NAME, "_csResistMat.csv"),
+          sep = ",",
+          row.names = F,
+          col.names = F
+        )
+        writeRaster(r.tran,
+                    paste0(GA.inputs$Results.dir, NAME, ".asc"),
+                    overwrite = TRUE)
         
         Diagnostic.Plots(
-          resistance.mat = paste0(
-            GA.inputs$Results.dir,
-            GA.inputs$layer.names[i],
-            "_resistances.out"
-          ),
+          resistance.mat = lower(cd),
           genetic.dist = CS.inputs$response,
           plot.dir = GA.inputs$Plots.dir,
           type = "continuous",
+          name = NAME,
           ID = CS.inputs$ID,
           ZZ = CS.inputs$ZZ
         )
@@ -320,11 +328,7 @@ SS_optim <- function(CS.inputs = NULL,
         fit.stats <- r.squaredGLMM(
           MLPE.lmm(
             REML = F,
-            resistance = paste0(
-              GA.inputs$Results.dir,
-              GA.inputs$layer.names[i],
-              "_resistances.out"
-            ),
+            resistance = lower(cd),
             pairwise.genetic = CS.inputs$response,
             ID = CS.inputs$ID,
             ZZ = CS.inputs$ZZ
@@ -333,11 +337,7 @@ SS_optim <- function(CS.inputs = NULL,
         aic <- AIC(
           MLPE.lmm(
             REML = F,
-            resistance = paste0(
-              GA.inputs$Results.dir,
-              GA.inputs$layer.names[i],
-              "_resistances.out"
-            ),
+            resistance = lower(cd),
             pairwise.genetic = CS.inputs$response,
             ID = CS.inputs$ID,
             ZZ = CS.inputs$ZZ
@@ -347,11 +347,7 @@ SS_optim <- function(CS.inputs = NULL,
         LL <-
           logLik(
             MLPE.lmm(
-              resistance = paste0(
-                GA.inputs$Results.dir,
-                GA.inputs$layer.names[i],
-                "_resistances.out"
-              ),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = F,
               ID = CS.inputs$ID,
@@ -408,21 +404,14 @@ SS_optim <- function(CS.inputs = NULL,
         RESULTS.cont[[cnt2]] <- RS
         
         MLPE.list[[i]] <- MLPE.lmm(
-          resistance = paste0(
-            GA.inputs$Results.dir,
-            GA.inputs$layer.names[i],
-            "_resistances.out"
-          ),
+          resistance = lower(cd),
           pairwise.genetic = CS.inputs$response,
           REML = TRUE,
           ID = CS.inputs$ID,
           ZZ = CS.inputs$ZZ
         )
         
-        cd.list[[i]] <- (read.table(paste0(
-          GA.inputs$Results.dir,
-          GA.inputs$layer.names[i],
-          "_resistances.out"))[-1, -1])
+        cd.list[[i]] <- cd
         
         names(MLPE.list)[i] <- GA.inputs$layer.names[i]
         names(cd.list)[i] <- GA.inputs$layer.names[i]
@@ -431,14 +420,23 @@ SS_optim <- function(CS.inputs = NULL,
         
       } # Close if-else
       if (dist_mod == TRUE) {
-        r <- reclassify(r, c(-Inf, Inf, 1))
+        # r <- reclassify(r, c(-Inf, Inf, 1))
+        r <- (r * 0) + 1
         names(r) <- "dist"
-        cd <- Run_CS(CS.inputs, GA.inputs, r, full.mat = T)
+        cd <- Run_CS(CS.inputs, r, full.mat = T)
+        
+        write.table(
+          cd,
+          file = paste0(GA.inputs$Results.dir, "Distance", "_csResistMat.csv"),
+          sep = ",",
+          row.names = F,
+          col.names = F
+        )
         
         Dist.AIC <-
           AIC(
             MLPE.lmm(
-              resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = FALSE,
               ID = CS.inputs$ID,
@@ -449,7 +447,7 @@ SS_optim <- function(CS.inputs = NULL,
         fit.stats <-
           r.squaredGLMM(
             MLPE.lmm(
-              resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = FALSE,
               ID = CS.inputs$ID,
@@ -460,7 +458,7 @@ SS_optim <- function(CS.inputs = NULL,
         LL <-
           logLik(
             MLPE.lmm(
-              resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
+              resistance = lower(cd),
               pairwise.genetic = CS.inputs$response,
               REML = FALSE,
               ID = CS.inputs$ID,
@@ -469,7 +467,7 @@ SS_optim <- function(CS.inputs = NULL,
           )
         
         MLPE.list[[i + 1]] <- MLPE.lmm(
-          resistance = paste0(GA.inputs$Write.dir, "dist_resistances.out"),
+          resistance = lower(cd),
           pairwise.genetic = CS.inputs$response,
           REML = TRUE,
           ID = CS.inputs$ID,
@@ -1509,8 +1507,8 @@ SS_optim <- function(CS.inputs = NULL,
     # Julia -------------------------------------------------
     
     if (!is.null(jl.inputs)) {
-
-# * Island GA ---------------------------------------------------------------
+      
+      # * Island GA ---------------------------------------------------------------
       
       if(isTRUE(GA.inputs$gaisl)) {
         # *-* Categorical -----------------------------------------------------------
@@ -2559,9 +2557,9 @@ SS_optim <- function(CS.inputs = NULL,
     } # End julia
   } # Close ascii loop
   
-
-# Optimization summary ----------------------------------------------------
-
+  
+  # Optimization summary ----------------------------------------------------
+  
   # Make results data frame
   Results.cat <- data.frame()
   Results.cont <- data.frame()

@@ -26,7 +26,7 @@ output = "matrix")
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.}
 
 \item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
-#' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.}
+#' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.}
 }
 \description{
 Execute julia CS from R
