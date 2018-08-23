@@ -149,10 +149,7 @@ Resistance.Opt_AICc <-
       CS.resist <-
         Run_CS2(
           CS.inputs,
-          GA.inputs,
-          r = r,
-          EXPORT.dir = GA.inputs$Write.dir,
-          File.name = File.name
+          r = r
         )
       
       # Replace NA with 0...a workaround for errors when two points fall within the same cell.

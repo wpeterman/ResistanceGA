@@ -148,57 +148,52 @@ Resistance.Opt_single.scale <- function(PARM,
       # CIRCUITSCAPE ------------------------------------------------------------
       
       if (!is.null(CS.inputs)) {
-        writeRaster(
-          x = r,
-          filename = paste0(EXPORT.dir, File.name, ".asc"),
-          overwrite = TRUE
-        )
-        CS.resist <-
-          Run_CS2(
-            CS.inputs,
-            GA.inputs,
-            r = r,
-            EXPORT.dir = GA.inputs$Write.dir,
-            File.name = File.name
-          )
+        CS.resist <- try(Run_CS(CS.inputs, r), TRUE)
         
-        # Run mixed effect model on each Circuitscape effective resistance
-        if (method == "AIC") {
-          obj.func <- suppressWarnings(AIC(
-            MLPE.lmm2(
-              resistance = CS.resist,
-              response = CS.inputs$response,
-              ID = CS.inputs$ID,
-              ZZ = CS.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func * -1
-        } else if (method == "R2") {
-          obj.func <-
-            suppressWarnings(r.squaredGLMM(
+        if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+          
+          obj.func.opt <- -99999
+          
+        } else { 
+          
+          # Run mixed effect model on each Circuitscape effective resistance
+          if (method == "AIC") {
+            obj.func <- suppressWarnings(AIC(
               MLPE.lmm2(
                 resistance = CS.resist,
-                response =
-                  CS.inputs$response,
+                response = CS.inputs$response,
                 ID = CS.inputs$ID,
                 ZZ = CS.inputs$ZZ,
                 REML = FALSE
               )
             ))
-          obj.func.opt <- obj.func[[1]]
-        } else {
-          obj.func <- suppressWarnings(logLik(
-            MLPE.lmm2(
-              resistance = CS.resist,
-              response = CS.inputs$response,
-              ID = CS.inputs$ID,
-              ZZ = CS.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
-        }
+            obj.func.opt <- obj.func * -1
+          } else if (method == "R2") {
+            obj.func <-
+              suppressWarnings(r.squaredGLMM(
+                MLPE.lmm2(
+                  resistance = CS.resist,
+                  response =
+                    CS.inputs$response,
+                  ID = CS.inputs$ID,
+                  ZZ = CS.inputs$ZZ,
+                  REML = FALSE
+                )
+              ))
+            obj.func.opt <- obj.func[[1]]
+          } else {
+            obj.func <- suppressWarnings(logLik(
+              MLPE.lmm2(
+                resistance = CS.resist,
+                response = CS.inputs$response,
+                ID = CS.inputs$ID,
+                ZZ = CS.inputs$ZZ,
+                REML = FALSE
+              )
+            ))
+            obj.func.opt <- obj.func[[1]]
+          }
+        } # End Obj func ifelse
       } # End CS Loop
       ##
       

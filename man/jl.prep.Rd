@@ -7,6 +7,7 @@
 jl.prep(n.Pops, 
 response, 
 CS_Point.File, 
+covariates = NULL,
 JULIA_HOME,
 Neighbor.Connect, 
 pairs_to_include, 
@@ -18,7 +19,7 @@ precision,
 run_test,
 write.files = NULL,
 write.criteria = NULL,
-silent = FALSE)
+silent = TRUE)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -26,6 +27,8 @@ silent = FALSE)
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run.}
 
 \item{CS_Point.File}{Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
+
+\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
 
 \item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details)}
 
@@ -47,7 +50,7 @@ silent = FALSE)
 
 \item{write.criteria}{Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.}
 
-\item{silent}{(Default = FALSE) If TRUE, no updates or logging of CIRCUITSCAPE will occur.}
+\item{silent}{(Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug.}
 }
 \value{
 An R object that is a required input into optimization functions

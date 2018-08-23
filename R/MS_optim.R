@@ -30,12 +30,12 @@ MS_optim <- function(CS.inputs = NULL,
   
   
   if (!is.null(CS.inputs)) {
-    if (GA.inputs$parallel != FALSE) {
-      warning(
-        "\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths or commute time with gdistance.",
-        immediate. = TRUE
-      )
-    }
+    # if (GA.inputs$parallel != FALSE) {
+    #   warning(
+    #     "\n CIRCUITSCAPE cannot be optimized in parallel. \n Ignoring parallel arguement. \n If you want to optimize in parallel, use least cost paths or commute time with gdistance.",
+    #     immediate. = TRUE
+    #   )
+    # }
     t1 <- proc.time()[3]
     
     multi.GA_nG <- ga(
@@ -54,10 +54,10 @@ MS_optim <- function(CS.inputs = NULL,
       upper = GA.inputs$ga.max,
       popSize = GA.inputs$pop.size,
       maxiter = GA.inputs$maxiter,
-      run = GA.inputs$run,
       optim = GA.inputs$optim,
       optimArgs = GA.inputs$optimArgs,
-      parallel = FALSE,
+      parallel = GA.inputs$parallel,
+      run = GA.inputs$run,
       keepBest = GA.inputs$keepBest,
       seed = GA.inputs$seed,
       suggestions = GA.inputs$SUGGESTS,
@@ -102,53 +102,60 @@ MS_optim <- function(CS.inputs = NULL,
     
     NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
     names(RAST) <- NAME
-    Run_CS(
-      CS.inputs,
-      GA.inputs,
-      r = RAST,
-      CurrentMap = FALSE,
-      EXPORT.dir = GA.inputs$Results.dir
+    
+    cd <- Run_CS(CS.inputs,
+                 r = RAST,
+                 full.mat = TRUE,
+                 EXPORT.dir = GA.inputs$Results.dir)
+    
+    write.table(
+      cd,
+      file = paste0(GA.inputs$Results.dir, NAME, "_csResistMat.csv"),
+      sep = ",",
+      row.names = F,
+      col.names = F
     )
+    writeRaster(RAST,
+                paste0(GA.inputs$Results.dir, NAME, ".asc"),
+                overwrite = TRUE)
     
     ifelse(length(unique(RAST)) > 15,
            type <- "continuous",
            type <- "categorical")
     
     Diagnostic.Plots(
-      resistance.mat = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
+      resistance.mat = lower(cd),
       genetic.dist = CS.inputs$response,
       plot.dir = GA.inputs$Plots.dir,
-      type = type,
+      type = "continuous",
+      name = NAME,
       ID = CS.inputs$ID,
       ZZ = CS.inputs$ZZ
     )
     
-    fit.stats <-
-      r.squaredGLMM(
-        MLPE.lmm(
-          resistance = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
-          pairwise.genetic = CS.inputs$response,
-          REML = F,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ
-        )
+    fit.stats <- r.squaredGLMM(
+      MLPE.lmm(
+        REML = F,
+        resistance = lower(cd),
+        pairwise.genetic = CS.inputs$response,
+        ID = CS.inputs$ID,
+        ZZ = CS.inputs$ZZ
       )
-    
-    aic <-
-      AIC(
-        MLPE.lmm(
-          resistance = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
-          pairwise.genetic = CS.inputs$response,
-          REML = F,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ
-        )
+    )
+    aic <- AIC(
+      MLPE.lmm(
+        REML = F,
+        resistance = lower(cd),
+        pairwise.genetic = CS.inputs$response,
+        ID = CS.inputs$ID,
+        ZZ = CS.inputs$ZZ
       )
+    )
     
     LL <-
       logLik(
         MLPE.lmm(
-          resistance = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
+          resistance = lower(cd),
           pairwise.genetic = CS.inputs$response,
           REML = F,
           ID = CS.inputs$ID,
@@ -158,17 +165,12 @@ MS_optim <- function(CS.inputs = NULL,
     
     MLPE.model <-
       MLPE.lmm(
-        resistance = paste0(GA.inputs$Results.dir, NAME, "_resistances.out"),
+        resistance = lower(cd),
         pairwise.genetic = CS.inputs$response,
         REML = F,
         ID = CS.inputs$ID,
         ZZ = CS.inputs$ZZ
       )
-    
-    cd <- (read.table(paste0(
-      GA.inputs$Results.dir,
-      NAME,
-      "_resistances.out"))[-1, -1])
     
     if (k.value == 1) {
       k <- 2
@@ -217,7 +219,7 @@ MS_optim <- function(CS.inputs = NULL,
     saveRDS(multi.GA_nG, 
             file = paste0(GA.inputs$Results.dir, NAME, ".rds"))
     
-    file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
+    # file.remove(list.files(GA.inputs$Write.dir, full.names = TRUE))
     
     # unlink(GA.inputs$Write.dir, recursive = T, force = T)
     
@@ -385,9 +387,7 @@ MS_optim <- function(CS.inputs = NULL,
     ifelse(length(unique(RAST)) > 15,
            type <- "continuous",
            type <- "categorical")
-    
-    #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
-    
+
     Diagnostic.Plots(
       resistance.mat = cd,
       genetic.dist = gdist.inputs$response,
@@ -648,9 +648,7 @@ MS_optim <- function(CS.inputs = NULL,
     ifelse(length(unique(RAST)) > 15,
            type <- "continuous",
            type <- "categorical")
-    
-    #     Run_CS(CS.inputs,GA.inputs,r=RAST,CurrentMap=FALSE,EXPORT.dir=GA.inputs$Results.dir)
-    
+
     Diagnostic.Plots(
       resistance.mat = lower(cd),
       genetic.dist = jl.inputs$response,

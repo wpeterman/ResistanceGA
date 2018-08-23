@@ -13,7 +13,7 @@
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
-#' #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap=TRUE} and \code{output="raster"}.
+#' #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
 #' @usage Run_CS.jl(jl.inputs = NULL, 
 #' r, 
 #' CurrentMap = FALSE, 
@@ -84,11 +84,11 @@ Run_CS.jl <-
     if(is.null(EXPORT.dir)) {
       EXPORT.dir <- paste0(tempdir(), "\\")
     } else {
-      if(CurrentMap == FALSE) {
-        EXPORT.dir <- paste0(tempdir(), "\\")
-      } else {
+      # if(CurrentMap == FALSE) {
+      #   EXPORT.dir <- paste0(tempdir(), "\\")
+      # } else {
         EXPORT.dir
-      }
+      # }
     }
     
     if (CurrentMap == FALSE) {
@@ -104,7 +104,6 @@ Run_CS.jl <-
     
     ######
     
-    # if (cellStats(R, "max") > 1e6)
     if (max(R@data@values, na.rm = TRUE) > 1e6)
       R <-
       SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
@@ -115,9 +114,6 @@ Run_CS.jl <-
                           fileext = ".asc") 
     
     tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
-    
-    # Round raster to facilitate julia solver convergence
-    # R <- round(R, 5)
     
     if(CurrentMap == FALSE) {
       writeRaster(

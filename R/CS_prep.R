@@ -54,14 +54,38 @@ CS.prep <- function(n.Pops,
                     cores = NULL) {
   CS.exe_Test <- gsub("\"", "", CS.program)
   # Error messages
-  if (!file.exists(CS_Point.File)) {
-    stop("The specified CS_Point.File does not exist")
+  if(class(CS_Point.File) != 'SpatialPoints'){
+    if (!file.exists(CS_Point.File)) {
+      stop("The specified CS_Point.File does not exist")
+    }
   }
   if (platform == 'pc') {
     if (!file.exists(gsub("\"", "", CS.program))) {
       stop("The specified path to 'cs_run.exe' is incorrect")
     }
   }
+  
+  if(class(CS_Point.File) == 'SpatialPoints') {
+    sp_file <- tempfile(pattern = "sample_pts_", 
+                        tmpdir = tempdir(),
+                        fileext = ".txt")
+    
+    sp_name <- basename(sp_file) %>% strsplit(., '.txt') %>% unlist()
+    
+    site <- c(1:length(CS_Point.File))
+    
+    cs.txt <- data.frame(site, CS_Point.File)
+    
+    write.table(
+      cs.txt,
+      file = sp_file,
+      col.names = F,
+      row.names = F
+    )
+    
+    CS_Point.File <- sp_file
+  }
+  
   if (grepl(".asc", x = CS_Point.File)) {
     CS_grid <- raster <- raster(CS_Point.File)
     CS_Point.txt <- rasterToPoints(x = CS_grid)

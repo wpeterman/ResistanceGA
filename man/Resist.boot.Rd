@@ -25,12 +25,12 @@ Resist.boot(mod.names,
 
 \item{obs}{Total number of observations (populations or individuals) in your original analysis}
 
-\item{rank.method}{What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL'). Default = 'AICc'}
+\item{rank.method}{What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'SSE'). Default = 'AICc'}
 
 \item{genetic.mat}{Genetic distance matrix without row or column names.}
 }
 \value{
-A data frame reporting the average model weight, average rank, number of time a model was the top model in the set, and the frequency a model was best.
+A data frame reporting the average model weight, average rank, number of times a model was the top model in the set, and the frequency a model was best.
 }
 \description{
 This is a 'pseudo' bootstrap procedure that will subsample a specified proportion of the sample locations/individuals, and will refit the MLPE model using the previously optimized resistance surface.
