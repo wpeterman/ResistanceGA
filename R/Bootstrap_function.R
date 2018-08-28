@@ -51,7 +51,7 @@ Resist.boot <-
     
     sample.list <-
       replicate(iters, sample(obs, size = sample.n, replace = F), simplify = F)
-    holdout.list <- plyr::llply(sample.list, function(x) c(1:50)[!(c(1:50) %in% x)] )
+    holdout.list <- plyr::llply(sample.list, function(x) c(1:obs)[!(c(1:obs) %in% x)] )
     AIC.tab.list <- vector(mode = "list", length = iters)
     
     names(dist.mat) <- mod.names

@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.13
+--------
+* Updated Bootstrap code
+
 ResistanceGA 4.1-0.12
 --------
 * Updated code allow ResistanceGA to be run in parallel when using CIRCUITSCAPE
