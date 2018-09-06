@@ -62,6 +62,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
       parallel = GA.inputs$parallel,
       keepBest = GA.inputs$keepBest,
       seed = GA.inputs$seed,
+      monitor = GA.inputs$monitor,
       suggestions = GA.inputs$SUGGESTS,
       quiet = GA.inputs$quiet
     )
@@ -290,6 +291,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parallel = GA.inputs$parallel,
         run = GA.inputs$run,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )
@@ -320,6 +322,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parallel = GA.inputs$parallel,
         run = GA.inputs$run,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )
@@ -555,6 +558,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parallel = GA.inputs$parallel,
         run = GA.inputs$run,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )
@@ -585,6 +589,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         parallel = GA.inputs$parallel,
         run = GA.inputs$run,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )

@@ -44,6 +44,7 @@ control = list(fnscale = -1, maxit = 100),
 hessian = FALSE,
 opt.digits = NULL,
 seed = NULL,
+monitor = TRUE,
 quiet = FALSE)
 }
 \arguments{
@@ -134,6 +135,8 @@ quiet = FALSE)
 \item{opt.digits}{The number of significant digits that the objective function will be assessed at. By default, no rounding occurs.}
 
 \item{seed}{Integer random number seed to replicate \code{ga} optimization}
+
+\item{monitor}{Default = TRUE, which prints the average and best fitness values at each iteration.}
 
 \item{quiet}{Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)}
 }

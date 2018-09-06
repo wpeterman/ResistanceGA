@@ -258,6 +258,40 @@ ZZ.mat <- function(ID) {
   return(ZZ)
 }
 
+ZZ.mat_select <- function(ID, drop) {
+  Zl <-
+    lapply(c("pop1", "pop2"), function(nm)
+      Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+  
+  p1 <- as.numeric(ID$pop1)
+  p2 <- as.numeric(ID$pop2)
+  
+  for(i in p1) {
+      Zl[[1]][i,] <- Zl[[1]][i,] * drop
+  }
+
+  for(i in p2) {
+      Zl[[2]][i,] <- Zl[[2]][i,] * drop
+  }
+  
+  # for(i in p1) {
+  #   for(j in 1:length(drop)) {
+  #     Zl[[1]][i,j] <- Zl[[1]][i,j] * drop[j]
+  #   }
+  # }
+  # 
+  # for(i in p2) {
+  #   for(j in 1:length(drop)) {
+  #     Zl[[2]][i,j] <- Zl[[2]][i,j] * drop[j]
+  #   }
+  # }
+  
+  ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+  
+  ZZ <- ZZ[,drop == 1]
+  return(ZZ)
+}
+
 # Rescale function
 SCALE.vector <- function(data, MIN, MAX, threshold = 1e-5) {
   if (abs(MIN - MAX) < threshold) {

@@ -10,6 +10,8 @@
 #' @param directions Directions in which cells are connected (4, 8, 16, or other). Default = 8
 #' @param longlat Logical. If true, a \code{\link[gdistance]{geoCorrection}} will be applied to the transition  matrix. Default = FALSE
 #' @param method Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.
+#' @param min.max_dist Optional. Specify the minimum and maximum distance at which pairwise comparisons will be made(e.g., c(1, 50)). Euclidean distances below and above the minumum and maximum values will be omitted from the analysis. This has potential to reduce analysis time, but also reduces the number of pairwise comparisons.
+#' @param keep An optional vector equal to length \code{response} (i.e. all pairwise observations), with 1 indicating to keep the observation, and 0 to drop the observation. This can be used in conjunction with, or in place of \code{min.max_dist} to select which observations to include in analyses.
 #' @return An R object that is a required input into optimization functions
 
 #' @export
@@ -22,7 +24,9 @@
 #'                   transitionFunction = function(x)  1 / mean(x),
 #'                   directions = 8,
 #'                   longlat = FALSE,
-#'                   method = 'commuteDistance')
+#'                   method = 'commuteDistance',
+#'                   min.max_dist = NULL,
+#'                   keep = NULL)
 
 gdist.prep <-
   function(n.Pops,
@@ -33,7 +37,9 @@ gdist.prep <-
              1 / mean(x),
            directions = 8,
            longlat = FALSE,
-           method = 'commuteDistance') {
+           method = 'commuteDistance',
+           min.max_dist = NULL,
+           keep = NULL) {
     
     if (method != 'commuteDistance') {
       method <- 'costDistance'
@@ -77,8 +83,23 @@ gdist.prep <-
       stop("n.Pops does not equal the number of sample locations")
     }
     
-    ID <- To.From.ID(n.Pops)
-    ZZ <- ZZ.mat(ID)
+    if(!is.null(keep)) {
+      ID <- To.From.ID(n.Pops)
+      
+      if(length(keep) != nrow(ID)) {
+        stop("`keep` vector must be same length as the number of pairwise combinations")
+      }
+      
+      drop.obs <- keep 
+      
+      ZZ <- ResistanceGA:::ZZ.mat_select(ID, drop.obs)
+      
+    } else {
+      ID <- To.From.ID(n.Pops)
+      ZZ <- ResistanceGA:::ZZ.mat(ID)
+    }
+    
+    
     
     (
       ret <-
@@ -90,9 +111,92 @@ gdist.prep <-
           directions = directions,
           ID = ID,
           ZZ = ZZ,
+          keep = keep,
           n.Pops = n.Pops,
           longlat = longlat,
           method = method
         )
     )
+    # Min-Max Distance ------------------------------------------------------------
+    
+    if(!is.null(min.max_dist)) {
+      if (length(min.max_dist) != 2) {
+        stop("Specify 'min.max_dist' as a 2-element vector: c(min, max)")
+      }
+      
+      toMatch <- min.max_dist
+      
+      # Function to make list of observations to include
+      Min.MAX <- as.matrix(dist(samples@coords))
+      Min.MAX[upper.tri(Min.MAX)] <- NA
+      
+      drop.pairs <- which((Min.MAX < toMatch[1]) | (Min.MAX > toMatch[2]), arr.ind = T)
+      
+      keep.pairs <- which((Min.MAX > toMatch[1]) & (Min.MAX < toMatch[2]), arr.ind = T)
+      
+      Min.MAX[cbind(drop.pairs[,1], drop.pairs[,2])] <- NA
+      
+      drop.obs <- lower(Min.MAX)
+      drop.obs <- ifelse(is.na(drop.obs), 0, 1)
+      
+      ID <- To.From.ID(n.Pops)
+      
+      if(!is.null(keep)) {
+        if(length(keep) != nrow(ID)) {
+          stop("`keep` vector must be same length as the number of pairwise combinations")
+        }
+        
+        drop.obs <- (keep * drop.obs) + keep
+        drop.obs <- ifelse(drop.obs >= 1, 1, 0)
+        
+      }
+      
+      # keep.dat <- lower(Min.MAX)
+      # ID <- data.frame(pop1 = c(keep.pairs[,2], drop.pairs[,2]), pop2 = c(keep.pairs[,1], drop.pairs[,1]))
+      # drop.row <- which(ID[,1] == ID[,2])
+      # ID <- ID[-drop.row,]
+      # swap <- which(table(ID$pop1) > 1)
+      # n1 <- table(ID$pop1)[[swap[[1]]]]
+      # p1 <- ID[n1, 1]
+      # p2 <- ID[n1, 2]
+      # ID[n1, 1] <- p2
+      # ID[n1, 2] <- p1
+      # ID.n <- ID
+      # ID$pop1 <- factor(ID$pop1)
+      # ID$pop2 <- factor(ID$pop2)
+      
+      ZZ <- ResistanceGA:::ZZ.mat_select(ID, drop.obs)
+      
+      # mx.dist <- as.matrix(dist(samples@coords))
+      # mx.dist[mx.dist > max.dist] <- NA
+      # mx.dist[!is.na(mx.dist)] <- 1
+      # mx.vec <- lower(mx.dist)
+      
+      #   dat <- data.frame(gd = response,
+      #                     ed = lower(Min.MAX),
+      #                     pop = ID$pop1)
+      #   
+      #   dat <- dat[complete.cases(dat),]
+      #   
+      #   mod <- mlpe_rga(gd ~ ed + (1|pop), data = dat, ZZ = ZZ)
+      # }
+      
+      (
+        ret <-
+          list(
+            response = response,
+            samples = sp,
+            covariates = covariates,
+            transitionFunction = transitionFunction,
+            directions = directions,
+            ID = ID,
+            ZZ = ZZ,
+            keep = drop.obs,
+            n.Pops = n.Pops,
+            longlat = longlat,
+            method = method
+          )
+      )
+    }
+    return(ret)
   }

@@ -61,6 +61,7 @@ MS_optim <- function(CS.inputs = NULL,
       keepBest = GA.inputs$keepBest,
       seed = GA.inputs$seed,
       suggestions = GA.inputs$SUGGESTS,
+      monitor = GA.inputs$monitor,
       quiet = GA.inputs$quiet
     )
     rt <- proc.time()[3] - t1
@@ -292,6 +293,7 @@ MS_optim <- function(CS.inputs = NULL,
         run = GA.inputs$run,
         # keepBest = GA.inputs$keepBest,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )
@@ -323,6 +325,7 @@ MS_optim <- function(CS.inputs = NULL,
         run = GA.inputs$run,
         keepBest = GA.inputs$keepBest,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )
@@ -553,6 +556,7 @@ MS_optim <- function(CS.inputs = NULL,
         run = GA.inputs$run,
         # keepBest = GA.inputs$keepBest,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )
@@ -584,6 +588,7 @@ MS_optim <- function(CS.inputs = NULL,
         run = GA.inputs$run,
         keepBest = GA.inputs$keepBest,
         seed = GA.inputs$seed,
+        monitor = GA.inputs$monitor,
         suggestions = GA.inputs$SUGGESTS,
         quiet = GA.inputs$quiet
       )

@@ -24,22 +24,66 @@ Run_gdistance <- function(gdist.inputs,
         transitionFunction = gdist.inputs$transitionFunction,
         directions = gdist.inputs$directions
       )
-      
-      if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
-        trC <- geoCorrection(tr, "c", scl = scl)
-        ret <- costDistance(trC, gdist.inputs$samples)
-        rm(trC, r)
-        gc()
+      if(is.null(gdist.inputs$keep)) {
+        if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
+          trC <- geoCorrection(tr, "c", scl = scl)
+          ret <- costDistance(trC, gdist.inputs$samples)
+          rm(trC, r)
+          gc()
+          
+        } # End costDistance
         
-      } # End costDistance
-      
-      if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
+        if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
+          
+          trR <- geoCorrection(tr, "r", scl = scl)
+          ret <- commuteDistance(trR, gdist.inputs$samples) / 1000
+          rm(trR, r)
+          gc()
+        } # End commuteDistance
+      } else { # Run on select pairs
+        if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
+          trC <- geoCorrection(tr, "c", scl = scl)
+          
+          ret <- vector(mode = 'numeric', length = sum(gdist.inputs$keep))
+          kp <- which(gdist.inputs$keep == 1)
+          id <- gdist.inputs$ID
+          id$pop1 <- as.numeric(id$pop1)
+          id$pop2 <- as.numeric(id$pop2)
+          id <- as.matrix(id)
+          c <- 0
+          for(i in kp) {
+            c <- c + 1
+            pts <- as.vector(id[i,])
+            ret[c] <- costDistance(trC, gdist.inputs$samples[pts])
+          }
+          
+          rm(trC, r)
+          gc()
+          
+        } # End costDistance
         
-        trR <- geoCorrection(tr, "r", scl = scl)
-        ret <- commuteDistance(trR, gdist.inputs$samples) / 1000
-        rm(trR, r)
-        gc()
-      } # End commuteDistance
+        if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'commuteDistance') {
+          
+          trR <- geoCorrection(tr, "r", scl = scl)
+          
+          ret <- vector(mode = 'numeric', length = sum(gdist.inputs$keep))
+          kp <- which(gdist.inputs$keep == 1)
+          id <- gdist.inputs$ID
+          id$pop1 <- as.numeric(id$pop1)
+          id$pop2 <- as.numeric(id$pop2)
+          id <- as.matrix(id)
+          c <- 0
+          for(i in kp) {
+            c <- c + 1
+            pts <- as.vector(id[i,])
+            ret[c] <- commuteDistance(trR, gdist.inputs$samples[pts]) / 1000
+          }
+          
+          rm(trR, r)
+          gc()
+        } # End commuteDistance
+      }
+
       
       return(ret)
     },

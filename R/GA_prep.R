@@ -50,6 +50,7 @@
 #' @param hessian	Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on paramter estimates (not yet implemented). Default = FALSE
 #' @param opt.digits The number of significant digits that the objective function will be assessed at. By default, no rounding occurs.
 #' @param seed Integer random number seed to replicate \code{ga} optimization
+#' @param monitor Default = TRUE, which prints the average and best fitness values at each iteration. 
 #' @param quiet Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)
 #' @return An R object that is a required input into optimization functions
 #'
@@ -115,6 +116,7 @@
 #' hessian = FALSE,
 #' opt.digits = NULL,
 #' seed = NULL,
+#' monitor = TRUE,
 #' quiet = FALSE)
 
 GA.prep <- function(ASCII.dir,
@@ -157,6 +159,7 @@ GA.prep <- function(ASCII.dir,
                     hessian = FALSE,
                     opt.digits = NULL,
                     seed = NULL,
+                    monitor = TRUE,
                     quiet = FALSE) {
   
   
@@ -517,6 +520,7 @@ GA.prep <- function(ASCII.dir,
       k.value = k.value,
       opt.digits = opt.digits,
       seed = seed,
+      monitor = monitor,
       quiet = quiet
     )
   } else {
@@ -564,6 +568,7 @@ GA.prep <- function(ASCII.dir,
       k.value = k.value,
       opt.digits = opt.digits,
       seed = seed,
+      monitor = monitor,
       quiet = quiet,
       inputs = list(
         ASCII.dir = ASCII.dir,
@@ -606,6 +611,7 @@ GA.prep <- function(ASCII.dir,
         hessian = hessian,
         opt.digits = opt.digits,
         seed = seed,
+        monitor = monitor,
         quiet = quiet
       )
     )

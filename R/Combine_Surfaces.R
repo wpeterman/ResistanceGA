@@ -108,19 +108,19 @@ Combine_Surfaces <-
         
         # Prevent NAs and errors
         if(is.na(parm[1])) {
-          equation <- parm[1] <- 9
+          parm[1] <- 9
           keep <- 0
         }
         
         if(is.na(parm[2])) {
-          SHAPE <- parm[2] <- 1
-          equation <- parm[1] <- 9
+          parm[2] <- 1
+          parm[1] <- 9
           keep <- 0
         }
         
         if(is.na(parm[3])) {
-          Max.SCALE <- parm[3] <- 2
-          equation <- parm[1] <- 9
+          parm[3] <- 2
+          parm[1] <- 9
           keep <- 0
         }
         

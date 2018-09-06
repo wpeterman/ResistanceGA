@@ -1,3 +1,8 @@
+ResistanceGA 4.1-0.14
+--------
+* Have paritally integrated method to optimize on select pairs of samples (not yet functional)
+* Added a 'monitor' arguement to GA.prep
+
 ResistanceGA 4.1-0.13
 --------
 * Updated Bootstrap code

@@ -348,6 +348,7 @@ all_comb <- function(gdist.inputs = NULL,
                                control = GA.input_orig$inputs$control,
                                hessian = GA.input_orig$inputs$hessian,
                                parallel = GA.input_orig$inputs$parallel,
+                               monitor = GA.input_orig$inputs$monitor,
                                seed = GA.input_orig$inputs$seed,
                                quiet = GA.input_orig$inputs$quiet
           )
@@ -385,6 +386,7 @@ all_comb <- function(gdist.inputs = NULL,
                                pressel = GA.input_orig$inputs$pressel,
                                control = GA.input_orig$inputs$control,
                                hessian = GA.input_orig$inputs$hessian,
+                               monitor = GA.input_orig$inputs$monitor,
                                seed = GA.input_orig$inputs$seed,
                                quiet = GA.input_orig$inputs$quiet
           )
@@ -555,6 +557,7 @@ all_comb <- function(gdist.inputs = NULL,
                                control = GA.input_orig$inputs$control,
                                hessian = GA.input_orig$inputs$hessian,
                                seed = GA.input_orig$inputs$seed,
+                               monitor = GA.input_orig$inputs$monitor,
                                quiet = GA.input_orig$inputs$quiet
           ) 
         } else { # *-* Standard GA ----------------------
@@ -592,6 +595,7 @@ all_comb <- function(gdist.inputs = NULL,
                                control = GA.input_orig$inputs$control,
                                hessian = GA.input_orig$inputs$hessian,
                                seed = GA.input_orig$inputs$seed,
+                               monitor = GA.input_orig$inputs$monitor,
                                quiet = GA.input_orig$inputs$quiet
           ) 
         }

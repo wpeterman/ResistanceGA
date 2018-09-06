@@ -102,6 +102,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
           elitism = GA.inputs$percent.elite,
           mutation = GA.inputs$mutation,
           seed = GA.inputs$seed,
+          monitor = GA.inputs$monitor,
           iter = i,
           quiet = GA.inputs$quiet
         )
@@ -200,6 +201,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
           elitism = GA.inputs$percent.elite,
           mutation = GA.inputs$mutation,
           seed = GA.inputs$seed,
+          monitor = GA.inputs$monitor,
           iter = i,
           quiet = GA.inputs$quiet
         )
@@ -572,6 +574,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
             elitism = GA.inputs$percent.elite,
             mutation = GA.inputs$mutation,
             seed = GA.inputs$seed,
+            monitor = GA.inputs$monitor,
             iter = i,
             quiet = GA.inputs$quiet
           )
@@ -614,6 +617,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -792,6 +796,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -1188,6 +1193,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
             elitism = GA.inputs$percent.elite,
             mutation = GA.inputs$mutation,
             seed = GA.inputs$seed,
+            monitor = GA.inputs$monitor,
             iter = i,
             quiet = GA.inputs$quiet
           )
@@ -1227,6 +1233,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -1405,6 +1412,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -1812,6 +1820,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
             elitism = GA.inputs$percent.elite,
             mutation = GA.inputs$mutation,
             seed = GA.inputs$seed,
+            monitor = GA.inputs$monitor,
             iter = i,
             quiet = GA.inputs$quiet
           )
@@ -1857,6 +1866,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -2036,6 +2046,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -2079,6 +2090,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
             elitism = GA.inputs$percent.elite,
             mutation = GA.inputs$mutation,
             seed = GA.inputs$seed,
+            monitor = GA.inputs$monitor,
             iter = i,
             quiet = GA.inputs$quiet
           )
@@ -2121,6 +2133,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
@@ -2297,6 +2310,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               elitism = GA.inputs$percent.elite,
               mutation = GA.inputs$mutation,
               seed = GA.inputs$seed,
+              monitor = GA.inputs$monitor,
               iter = i,
               quiet = GA.inputs$quiet
             )
