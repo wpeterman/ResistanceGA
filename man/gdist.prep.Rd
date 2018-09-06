@@ -11,7 +11,9 @@ gdist.prep(n.Pops,
                   transitionFunction = function(x)  1 / mean(x),
                   directions = 8,
                   longlat = FALSE,
-                  method = 'commuteDistance')
+                  method = 'commuteDistance',
+                  min.max_dist = NULL,
+                  keep = NULL)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -29,6 +31,10 @@ gdist.prep(n.Pops,
 \item{longlat}{Logical. If true, a \code{\link[gdistance]{geoCorrection}} will be applied to the transition  matrix. Default = FALSE}
 
 \item{method}{Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.}
+
+\item{min.max_dist}{Optional. Specify the minimum and maximum distance at which pairwise comparisons will be made(e.g., c(1, 50)). Euclidean distances below and above the minumum and maximum values will be omitted from the analysis. This has potential to reduce analysis time, but also reduces the number of pairwise comparisons.}
+
+\item{keep}{An optional vector equal to length \code{response} (i.e. all pairwise observations), with 1 indicating to keep the observation, and 0 to drop the observation. This can be used in conjunction with, or in place of \code{min.max_dist} to select which observations to include in analyses.}
 }
 \value{
 An R object that is a required input into optimization functions
