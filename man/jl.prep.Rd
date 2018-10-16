@@ -19,7 +19,8 @@ precision,
 run_test,
 write.files = NULL,
 write.criteria = NULL,
-silent = TRUE)
+silent = TRUE,
+Julia_link = 'JuliaCall')
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -51,6 +52,8 @@ silent = TRUE)
 \item{write.criteria}{Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.}
 
 \item{silent}{(Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug.}
+
+\item{Julia_link}{Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package}
 }
 \value{
 An R object that is a required input into optimization functions
