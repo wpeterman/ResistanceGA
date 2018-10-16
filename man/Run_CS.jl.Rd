@@ -11,7 +11,8 @@ full.mat = FALSE,
 EXPORT.dir = NULL,
 output = "matrix",
 CS_Point.File = NULL,
-JULIA_HOME = NULL)
+JULIA_HOME = NULL,
+Julia_link = NULL)
 }
 \arguments{
 \item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function}
@@ -28,7 +29,8 @@ JULIA_HOME = NULL)
 
 \item{CS_Point.File}{Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.}
 
-\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.}
+\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}}
 }
 \value{
 Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
