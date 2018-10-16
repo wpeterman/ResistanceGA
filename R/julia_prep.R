@@ -152,7 +152,8 @@ jl.prep <- function(n.Pops,
         cs.jl$Using("Circuitscape")
         
         cs.out <- cs.jl$Call("compute", temp.ini) 
-        out <- juliaGet(cs.out)[-1,-1]
+        out <- read.delim(paste0(td, tmp.name, "_resistances.out"), header = F)[-1,-1]
+        # out <- juliaGet(cs.out)[-1,-1]
       }
     } # End test
     
