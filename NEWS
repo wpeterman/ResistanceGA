@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.15
+--------
+* Added ability to use 'XRJulia' as an alternative to 'JuliaCall' when calling Circuitscape Julia.
+
 ResistanceGA 4.1-0.14
 --------
 * Have paritally integrated method to optimize on select pairs of samples (not yet functional)

@@ -11,15 +11,19 @@
 #' @param full.mat Logical (Default = FALSE). If TRUE, the full distance matrix will be generated as an R object, rather than just the lower half of the distance matrix.
 #' @param EXPORT.dir Directory where CS results will be written. Only specify if Circuitscape current map outputs are requested. It is critical that there are NO SPACES in the directory, as this may cause the function to fail.
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
-#' #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
-#' #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
-#' @usage Run_CS.jl(jl.inputs = NULL, 
-#' r, 
-#' CurrentMap = FALSE, 
+#' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package
+#' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
+#' @usage Run_CS.jl(jl.inputs = NULL,
+#' r,
+#' CurrentMap = FALSE,
 #' full.mat = FALSE,
-#' EXPORT.dir = NULL, 
-#' output = "matrix")
+#' EXPORT.dir = NULL,
+#' output = "matrix",
+#' CS_Point.File = NULL,
+#' JULIA_HOME = NULL,
+#' Julia_link = 'JuliaCall')
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -31,7 +35,12 @@ Run_CS.jl <-
            EXPORT.dir = NULL,
            output = "matrix",
            CS_Point.File = NULL,
-           JULIA_HOME = NULL) {
+           JULIA_HOME = NULL,
+           Julia_link = 'JuliaCall') {
+    
+    if(Julia_link == 'XRJulia') {
+      JULIA_HOME <- findJulia()
+    }
     
     if(is.null(jl.inputs) & is.null(JULIA_HOME)) {
       stop("Specify either `jl.inputs` or `JULIA_HOME` and `CS_Point.File`!")
@@ -64,11 +73,16 @@ Run_CS.jl <-
       JULIA_HOME <- jl.inputs$JULIA_HOME
     }
     
-    julia_setup(JULIA_HOME = JULIA_HOME)
-    julia_library("Circuitscape")
+    if(Julia_link == 'JuliaCall') {
+      julia_setup(JULIA_HOME = JULIA_HOME)
+      julia_library("Circuitscape")
+    } else {
+      juliaEval("using Circuitscape")
+    }
+    
     
     if(!exists('r')) {
-      stop("Missing variable r: Please specify a 'RasterLayer' object or provide the path a raster file!")
+      stop("Missing variable r: Please specify a 'RasterLayer' object or provide the path to a raster file!")
     }
     
     if (class(r)[1] != 'RasterLayer') {
@@ -87,7 +101,7 @@ Run_CS.jl <-
       # if(CurrentMap == FALSE) {
       #   EXPORT.dir <- paste0(tempdir(), "\\")
       # } else {
-        EXPORT.dir
+      EXPORT.dir
       # }
     }
     
@@ -106,7 +120,7 @@ Run_CS.jl <-
     
     if (max(R@data@values, na.rm = TRUE) > 1e6)
       R <-
-      SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
+        SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
     R <- reclassify(R, c(-Inf, 0, 1))
     
     temp_rast <- tempfile(pattern = "raster_", 
@@ -169,12 +183,22 @@ Run_CS.jl <-
     
     # Run CIRCUITSCAPE.jl -----------------------------------------------------
     rt <- NULL
-    if(!is.null(write.criteria)) {
-      t1 <- proc.time()[3]
-      out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
-      rt <- proc.time()[3] - t1
-    } else {
-      out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+    
+    if(Julia_link == 'JuliaCall') {
+      if(!is.null(write.criteria)) {
+        t1 <- proc.time()[3]
+        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        rt <- proc.time()[3] - t1
+      } else {
+        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+      }
+    } else { # use XRJulia
+      cs.jl <- RJulia()
+      cs.jl$Using("Circuitscape")
+      
+      ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
+      cs.out <- cs.jl$Call("compute", ini.file) 
+      out <- juliaGet(cs.out)[-1,-1]
     }
     
     
@@ -206,12 +230,12 @@ Run_CS.jl <-
             file.copy(copy.files, write.files)
           }
         } else {
-        copy.files <- list(paste0(EXPORT.dir, tmp.name, ".ini"),
-                           temp_rast)
-        file.copy(copy.files, write.files)
+          copy.files <- list(paste0(EXPORT.dir, tmp.name, ".ini"),
+                             temp_rast)
+          file.copy(copy.files, write.files)
         }
       }
-        
+      
       
       unlink.list <- list.files(EXPORT.dir, 
                                 pattern = tmp.name,

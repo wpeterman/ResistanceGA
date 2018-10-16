@@ -32,6 +32,7 @@
 #' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif as.formula sigma
 #' @importFrom utils file_test read.csv read.delim read.table write.table
 #' @importFrom JuliaCall julia_setup julia_library julia_call julia_installed_package julia_install_package
+#' @importFrom XRJulia findJulia juliaEval RJulia juliaGet
 #' 
 #' @references Please cite: 
 #' Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413. \href{http://goo.gl/RJb6Go}{Peterman et al.}
