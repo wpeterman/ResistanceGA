@@ -13,6 +13,7 @@
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
+#' #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
 #' @usage Run_CS.jl(jl.inputs = NULL,
 #' r,
@@ -21,7 +22,8 @@
 #' EXPORT.dir = NULL,
 #' output = "matrix",
 #' CS_Point.File = NULL,
-#' JULIA_HOME = NULL)
+#' JULIA_HOME = NULL,
+#' Julia_link = NULL)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -33,9 +35,14 @@ Run_CS.jl <-
            EXPORT.dir = NULL,
            output = "matrix",
            CS_Point.File = NULL,
-           JULIA_HOME = NULL) {
+           JULIA_HOME = NULL,
+           Julia_link = NULL) {
     
-    Julia_link <- jl.inputs$Julia_link
+    if(is.null(Julia_link) & !is.null(jl.inputs)) {
+      Julia_link <- jl.inputs$Julia_link
+    } else if(is.null(Julia_link) & is.null(jl.inputs)) {
+      Julia_link <- 'JuliaCall'
+    }
     
     if(Julia_link == 'XRJulia') {
       JULIA_HOME <- findJulia()
