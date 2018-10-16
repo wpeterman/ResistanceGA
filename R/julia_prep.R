@@ -17,7 +17,7 @@
 #' @param write.files (Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.
 #' @param write.criteria Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.
 #' @param silent (Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug. 
-
+#' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package
 #' @return An R object that is a required input into optimization functions
 
 #' @export
@@ -37,7 +37,8 @@
 #' run_test,
 #' write.files = NULL,
 #' write.criteria = NULL,
-#' silent = TRUE)
+#' silent = TRUE,
+#' Julia_link = 'JuliaCall')
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
@@ -64,7 +65,8 @@ jl.prep <- function(n.Pops,
                     run_test = TRUE,
                     write.files = NULL,
                     write.criteria = NULL,
-                    silent = TRUE) {
+                    silent = TRUE,
+                    Julia_link = 'JuliaCall') {
   
   
   # Checks ------------------------------------------------------------------
@@ -322,6 +324,7 @@ jl.prep <- function(n.Pops,
     JULIA_HOME = JULIA_HOME,
     write.files = write.files,
     write.criteria = write.criteria,
-    silent = silent
+    silent = silent,
+    Julia_link = Julia_link
   )
 }
