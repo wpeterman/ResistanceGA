@@ -103,7 +103,9 @@ jl.prep <- function(n.Pops,
     # Run test ----------------------------------------------------------------
     
   } else {
-    julia_library("Circuitscape")
+    if(Julia_link == 'JuliaCall'){
+      julia_library("Circuitscape")
+    }
     
     if(run_test == TRUE) {
       print("Running test #1: Run Circuitscape from Julia")
