@@ -204,8 +204,8 @@ Run_CS.jl <-
       
       ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
-      out <- read.delim(paste0(EXPORT.dir, tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
-      # out <- juliaGet(cs.out)[-1,-1] ## Slow!
+      # out <- read.delim(paste0(EXPORT.dir, tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+      out <- juliaGet(cs.out)[-1,-1] ## Slow!
     }
     
     
