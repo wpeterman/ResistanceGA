@@ -14,6 +14,7 @@
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
 #' #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}
+#' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE)
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
 #' @usage Run_CS.jl(jl.inputs = NULL,
 #' r,
@@ -23,7 +24,8 @@
 #' output = "matrix",
 #' CS_Point.File = NULL,
 #' JULIA_HOME = NULL,
-#' Julia_link = NULL)
+#' Julia_link = NULL,
+#' rm.files = TRUE)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -36,7 +38,8 @@ Run_CS.jl <-
            output = "matrix",
            CS_Point.File = NULL,
            JULIA_HOME = NULL,
-           Julia_link = NULL) {
+           Julia_link = NULL,
+           rm.files = TRUE) {
     
     if(is.null(Julia_link) & !is.null(jl.inputs)) {
       Julia_link <- jl.inputs$Julia_link
@@ -249,7 +252,10 @@ Run_CS.jl <-
                                 all.files = TRUE,
                                 full.names = TRUE)
       
-      del.files <- sapply(unlink.list, unlink)
+      ## Remove files
+      if(isTRUE(rm.files)) {
+        del.files <- sapply(unlink.list, unlink)
+      }
       
       return(cs.matrix)
     }
