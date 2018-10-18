@@ -95,6 +95,7 @@ jl.prep <- function(n.Pops,
   }
   
   # Determine if CIRCUITSCAPE package is installed
+  # if(Julia_link == 'JuliaCall'){
   if(julia_installed_package("Circuitscape") == 'nothing') {
     julia_install_package('Circuitscape')
     julia_call('Pkg.test', "Circuitscape")
@@ -152,53 +153,54 @@ jl.prep <- function(n.Pops,
         cs.jl$Using("Circuitscape")
         
         cs.out <- cs.jl$Call("compute", temp.ini) 
-        # out <- read.delim(paste0(td, tmp.name, "_resistances.out"), header = F)[-1,-1]
-        out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
+        out <- read.delim(paste0(td, tmp.name, "_resistances.out"), header = F)[-1,-1]
+        # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
       }
-    } # End test
-    
-    
-    
-    if(dim(out)[1] == 25) {
-      cat("\n"); cat("\n")
       
-      cat("Test #1: Passed")
       
-      cat("\n"); cat("\n")
       
-    } else {
-      stop("Test #1: Failed")
-    }
-    #   
-    #   cat("Running test #2: Run Circuitscape from Julia in parallel")
-    #   
-    #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-    #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
-    #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-    #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-    #                PARALLELIZE = TRUE,
-    #                CORES = 2,
-    #                solver = 'cholmod',
-    #                precision = NULL
-    #   )
-    #   
-    #   out <- julia_call('compute', temp.ini)[-1,-1]
-    #   
-    #   
-    #   if(dim(out)[1] == 25) {
-    #     cat("\n"); cat("\n")
-    #     
-    #     print("Test #2: Passed")
-    #   } else {
-    #     stop("Test #2: Failed")
-    #   } 
-    #   
-    unlink.list <- list.files(td,
-                              pattern = tmp.name,
-                              all.files = TRUE,
-                              full.names = TRUE)
-    del.files <- sapply(unlink.list, unlink)
-  } # End Julia setup
+      if(dim(out)[1] == 25) {
+        cat("\n"); cat("\n")
+        
+        cat("Test #1: Passed")
+        
+        cat("\n"); cat("\n")
+        
+      } else {
+        stop("Test #1: Failed")
+      }
+      
+      #   
+      #   cat("Running test #2: Run Circuitscape from Julia in parallel")
+      #   
+      #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+      #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
+      #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+      #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+      #                PARALLELIZE = TRUE,
+      #                CORES = 2,
+      #                solver = 'cholmod',
+      #                precision = NULL
+      #   )
+      #   
+      #   out <- julia_call('compute', temp.ini)[-1,-1]
+      #   
+      #   
+      #   if(dim(out)[1] == 25) {
+      #     cat("\n"); cat("\n")
+      #     
+      #     print("Test #2: Passed")
+      #   } else {
+      #     stop("Test #2: Failed")
+      #   } 
+      #   
+      unlink.list <- list.files(td,
+                                pattern = tmp.name,
+                                all.files = TRUE,
+                                full.names = TRUE)
+      del.files <- sapply(unlink.list, unlink)
+    } # End Julia setup
+  } # End test
   
   
   # Format inputs -----------------------------------------------------------
