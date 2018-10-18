@@ -59,7 +59,7 @@ Run_CS <-
     if (CurrentMap == FALSE) {
       File.name <- names(R)
       MAP = "write_cum_cur_map_only = False"
-      CURRENT.MAP = "write_cur_maps = False"
+      CURRENT.MAP = "write_cur_maps = 0"
       
     } else {
       File.name <- names(R)
@@ -233,7 +233,7 @@ Run_CS2 <-
       LOCATION.FILE = paste0("point_file = ", CS.inputs$CS_Point.File),
       CONNECTION = paste0("connect_four_neighbors_only=", connect),
       MAP = "write_cum_cur_map_only = False",
-      CURRENT.MAP = "write_cur_maps = False",
+      CURRENT.MAP = "write_cur_maps = 0",
       PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
       PAIRS = PAIRS
     )

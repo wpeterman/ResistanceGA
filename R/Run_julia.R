@@ -46,7 +46,7 @@ Run_CS.jl <-
     
     if(Julia_link == 'XRJulia') {
       JULIA_HOME <- findJulia()
-    }
+    } 
     
     if(is.null(jl.inputs) & is.null(JULIA_HOME)) {
       stop("Specify either `jl.inputs` or `JULIA_HOME` and `CS_Point.File`!")
@@ -114,12 +114,12 @@ Run_CS.jl <-
     if (CurrentMap == FALSE) {
       File.name <- names(R)
       MAP = "write_cum_cur_map_only = False"
-      CURRENT.MAP = "write_cur_maps = False"
+      CURRENT.MAP = "write_cur_maps = 0"
       
     } else {
       File.name <- names(R)
       MAP = "write_cum_cur_map_only = True"
-      CURRENT.MAP = "write_cur_maps = 1"
+      CURRENT.MAP = "write_cur_maps = True"
     }
     
     ######
