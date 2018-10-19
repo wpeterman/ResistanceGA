@@ -15,6 +15,7 @@
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
 #' #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}
 #' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE)
+#' @param scratch Scratch directory for use if write access is limited. Must be specified if raster results are desired for outputs.
 #' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
 #' @usage Run_CS.jl(jl.inputs = NULL,
 #' r,
@@ -25,7 +26,8 @@
 #' CS_Point.File = NULL,
 #' JULIA_HOME = NULL,
 #' Julia_link = NULL,
-#' rm.files = TRUE)
+#' rm.files = TRUE,
+#' scratch = NULL)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -39,7 +41,12 @@ Run_CS.jl <-
            CS_Point.File = NULL,
            JULIA_HOME = NULL,
            Julia_link = NULL,
-           rm.files = TRUE) {
+           rm.files = TRUE,
+           scratch = NULL) {
+    
+    if(!is.null(jl.inputs$scratch)) {
+      scratch <- jl.inputs$scratch
+    }
     
     if(is.null(Julia_link) & !is.null(jl.inputs)) {
       Julia_link <- jl.inputs$Julia_link
@@ -132,9 +139,9 @@ Run_CS.jl <-
         SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
     R <- reclassify(R, c(-Inf, 0, 1))
     
-    temp_rast <- tempfile(pattern = "raster_", 
-                          tmpdir = tempdir(),
-                          fileext = ".asc") 
+    rm.rast <- temp_rast <- tempfile(pattern = "raster_", 
+                                     tmpdir = tempdir(),
+                                     fileext = ".asc") 
     
     tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
     
@@ -147,12 +154,13 @@ Run_CS.jl <-
     } else {
       writeRaster(
         x = R,
-        filename = paste0(EXPORT.dir, File.name, '.asc'),
+        # filename = paste0(EXPORT.dir, File.name, '.asc'),
+        filename = temp_rast,
         overwrite = TRUE
       )
       
-      temp_rast <- paste0(EXPORT.dir, File.name, '.asc')
-      tmp.name <- File.name
+      # temp_rast <- paste0(EXPORT.dir, File.name, '.asc')
+      # tmp.name <- File.name
     }    
     
     # Modify and write Circuitscape.ini file
@@ -171,23 +179,41 @@ Run_CS.jl <-
         paste0("included_pairs_file = ", jl.inputs$pairs_to_include)
       PAIRS <- paste0("use_included_pairs = True")
     }
-    
-    write.CS_4.0(
-      BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-      OUT = paste0("output_file = ", EXPORT.dir, tmp.name, ".out"),
-      HABITAT = paste0("habitat_file = ", temp_rast),
-      LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
-      CONNECTION = paste0("connect_four_neighbors_only =", connect),
-      MAP = MAP,
-      CURRENT.MAP = CURRENT.MAP,
-      PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
-      PAIRS = PAIRS,
-      PARALLELIZE = jl.inputs$parallel,
-      CORES = jl.inputs$cores,
-      solver = jl.inputs$solver,
-      precision = jl.inputs$precision,
-      silent = jl.inputs$silent
-    )
+    if(!is.null(scratch)) {
+      write.CS_4.0(
+        BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
+        OUT = paste0("output_file = ", scratch, "/", tmp.name, ".out"),
+        HABITAT = paste0("habitat_file = ", temp_rast),
+        LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
+        CONNECTION = paste0("connect_four_neighbors_only =", connect),
+        MAP = MAP,
+        CURRENT.MAP = CURRENT.MAP,
+        PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
+        PAIRS = PAIRS,
+        PARALLELIZE = jl.inputs$parallel,
+        CORES = jl.inputs$cores,
+        solver = jl.inputs$solver,
+        precision = jl.inputs$precision,
+        silent = jl.inputs$silent
+      )
+    } else {
+      write.CS_4.0(
+        BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
+        OUT = paste0("output_file = ", EXPORT.dir, tmp.name, ".out"),
+        HABITAT = paste0("habitat_file = ", temp_rast),
+        LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
+        CONNECTION = paste0("connect_four_neighbors_only =", connect),
+        MAP = MAP,
+        CURRENT.MAP = CURRENT.MAP,
+        PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
+        PAIRS = PAIRS,
+        PARALLELIZE = jl.inputs$parallel,
+        CORES = jl.inputs$cores,
+        solver = jl.inputs$solver,
+        precision = jl.inputs$precision,
+        silent = jl.inputs$silent
+      )
+    }
     
     
     # Run CIRCUITSCAPE.jl -----------------------------------------------------
@@ -207,17 +233,52 @@ Run_CS.jl <-
       
       ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
-      out <- read.delim(paste0(EXPORT.dir, tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+      out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
       # out <- juliaGet(cs.out)[-1,-1] ## Slow!
     }
     
     
     if (output == "raster" & CurrentMap == TRUE) {
-      rast <- raster(paste0(EXPORT.dir, tmp.name, "_cum_curmap.asc"))
+      if(EXPORT.dir == paste0(tempdir(), "\\") & is.null(scratch)) {
+        stop("Specify an `EXPORT.dir` or `scratch` directory to write CIRCUITSCAPE results to")
+      } 
+      
+      if(EXPORT.dir != paste0(tempdir(), "\\")) {
+        rast <- raster(paste0(EXPORT.dir, "/", tmp.name, "_cum_curmap.asc"))
+      } else {
+        rast <- raster(paste0(scratch, "/", tmp.name, "_cum_curmap.asc"))
+      }
+      
       # NAME <- basename(rast@file@name)
       # NAME <- sub("^([^.]*).*", "\\1", NAME)
       names(rast) <- File.name
-      (rast)
+      
+      ## Remove files
+      if(isTRUE(rm.files)) {
+        unlink.list <- list.files(EXPORT.dir, 
+                                  pattern = tmp.name,
+                                  all.files = TRUE,
+                                  full.names = TRUE)
+        unlink.list2 <- list.files(EXPORT.dir, 
+                                   pattern = basename(temp_rast),
+                                   all.files = TRUE,
+                                   full.names = TRUE)
+        
+        del.files <- sapply(unlink.list, unlink, force = TRUE)
+        del.files <- sapply(unlink.list2, unlink, force = TRUE)
+        unlink(rm.rast, force = TRUE)
+        
+        if(!is.null(scratch)){
+          unlink.list2 <- list.files(scratch,
+                                     pattern = tmp.name,
+                                     all.files = TRUE,
+                                     full.names = TRUE)
+          del.files <- sapply(unlink.list2, unlink, force = TRUE)
+        }
+      }
+      
+      return(rast)
+      
     } else {
       if(full.mat == FALSE) {
         cs.matrix <- lower(out)
@@ -246,16 +307,36 @@ Run_CS.jl <-
         }
       }
       
-      
-      unlink.list <- list.files(EXPORT.dir, 
-                                pattern = tmp.name,
-                                all.files = TRUE,
-                                full.names = TRUE)
-      
       ## Remove files
       if(isTRUE(rm.files)) {
-        del.files <- sapply(unlink.list, unlink)
+        unlink.list <- list.files(EXPORT.dir, 
+                                  pattern = tmp.name,
+                                  all.files = TRUE,
+                                  full.names = TRUE)
+        
+        del.files <- sapply(unlink.list, unlink, force = TRUE)
+
+        if(!is.null(scratch)){
+          unlink.list2 <- list.files(scratch,
+                                     pattern = tmp.name,
+                                     all.files = TRUE,
+                                     full.names = TRUE)
+          del.files <- sapply(unlink.list2, unlink, force = TRUE)
+          unlink(rm.rast, force = TRUE)
+          
+        }
       }
+      
+      asc.files <- list.files(EXPORT.dir, 
+                              pattern = '.asc',
+                              all.files = TRUE,
+                              full.names = TRUE)
+      
+      make.times <- file.mtime(asc.files)
+      
+      time.diff <- Sys.time() - make.times
+      
+      unlink(asc.files[time.diff > 30], force = TRUE)
       
       return(cs.matrix)
     }

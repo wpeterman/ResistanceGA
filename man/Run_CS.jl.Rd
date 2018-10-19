@@ -13,7 +13,8 @@ output = "matrix",
 CS_Point.File = NULL,
 JULIA_HOME = NULL,
 Julia_link = NULL,
-rm.files = TRUE)
+rm.files = TRUE,
+scratch = NULL)
 }
 \arguments{
 \item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function}
@@ -34,6 +35,8 @@ rm.files = TRUE)
 #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}}
 
 \item{rm.files}{Should all temporary files be removed after Julia run (Default = TRUE)}
+
+\item{scratch}{Scratch directory for use if write access is limited. Must be specified if raster results are desired for outputs.}
 }
 \value{
 Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.

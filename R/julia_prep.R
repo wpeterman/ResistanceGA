@@ -18,6 +18,8 @@
 #' @param write.criteria Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.
 #' @param silent (Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug. 
 #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package
+#' #' @param scratch Scratch directory for use if write access is limited. 
+
 #' @return An R object that is a required input into optimization functions
 
 #' @export
@@ -38,7 +40,8 @@
 #' write.files = NULL,
 #' write.criteria = NULL,
 #' silent = TRUE,
-#' Julia_link = 'JuliaCall')
+#' Julia_link = 'JuliaCall',
+#' scratch = NULL)
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
@@ -66,7 +69,8 @@ jl.prep <- function(n.Pops,
                     write.files = NULL,
                     write.criteria = NULL,
                     silent = TRUE,
-                    Julia_link = 'JuliaCall') {
+                    Julia_link = 'JuliaCall',
+                    scratch = NULL) {
   
   
   # Checks ------------------------------------------------------------------
@@ -134,7 +138,19 @@ jl.prep <- function(n.Pops,
                          tmp.name, '.asc'),
                   overwirte = TRUE)
       
-      write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+     if(!is.null(scratch)) {
+       write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+                    OUT = paste0("output_file = ", scratch,"/", tmp.name, ".out"),
+                    HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+                    LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                    PARALLELIZE = FALSE,
+                    CORES = NULL,
+                    solver = 'cholmod',
+                    precision = FALSE,
+                    silent = silent
+       )
+     } else {
+        write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
                    OUT = paste0("output_file = ", td, tmp.name, ".out"),
                    HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
                    LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
@@ -144,6 +160,7 @@ jl.prep <- function(n.Pops,
                    precision = FALSE,
                    silent = silent
       )
+      }
       
       if(Julia_link == 'JuliaCall'){
         out <- julia_call('compute', temp.ini)[-1,-1]
@@ -153,7 +170,7 @@ jl.prep <- function(n.Pops,
         cs.jl$Using("Circuitscape")
         
         cs.out <- cs.jl$Call("compute", temp.ini) 
-        out <- read.delim(paste0(td, tmp.name, "_resistances.out"), header = F)[-1,-1]
+        out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
         # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
       }
       
@@ -198,7 +215,16 @@ jl.prep <- function(n.Pops,
                                 pattern = tmp.name,
                                 all.files = TRUE,
                                 full.names = TRUE)
-      del.files <- sapply(unlink.list, unlink)
+      del.files <- sapply(unlink.list, unlink, force = TRUE)
+      
+      if(!is.null(scratch)){
+        unlink.list2 <- list.files(scratch,
+                                   pattern = tmp.name,
+                                   all.files = TRUE,
+                                   full.names = TRUE)
+        del.files <- sapply(unlink.list2, unlink, force = TRUE)
+      }
+      
     } # End Julia setup
   } # End test
   
@@ -223,11 +249,12 @@ jl.prep <- function(n.Pops,
   }
   
   if(class(CS_Point.File) == 'SpatialPoints') {
-    sp_file <- tempfile(pattern = "sample_pts_", 
-                        tmpdir = tempdir(),
-                        fileext = ".txt")
+    td <- tempdir()
+    # sp_file <- tempfile(pattern = "sample_pts_", 
+    #                     tmpdir = tempdir(),
+    #                     fileext = ".txt")
     
-    sp_name <- basename(sp_file) %>% strsplit(., '.txt') %>% unlist()
+    # sp_name <- basename(sp_file) %>% strsplit(., '.txt') %>% unlist()
     
     site <- c(1:length(CS_Point.File))
     
@@ -235,12 +262,14 @@ jl.prep <- function(n.Pops,
     
     write.table(
       cs.txt,
-      file = sp_file,
+      # file = sp_file,
+      file = paste0(td, "\\samples_pts.txt"),
       col.names = F,
       row.names = F
     )
     
-    CS_Point.File <- sp_file
+    # CS_Point.File <- sp_file
+    CS_Point.File <- paste0(td, "\\samples_pts.txt")
   }
   
   if (grepl(".asc", x = CS_Point.File)) {
@@ -345,6 +374,7 @@ jl.prep <- function(n.Pops,
     write.files = write.files,
     write.criteria = write.criteria,
     silent = silent,
-    Julia_link = Julia_link
+    Julia_link = Julia_link,
+    scratch = scratch
   )
 }
