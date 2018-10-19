@@ -233,7 +233,9 @@ Run_CS.jl <-
       
       ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
-      out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+      out <- as.matrix(read.table(paste0(scratch, "/", tmp.name, "_resistances.out"),
+                                  quote="\"", comment.char=""))[-1,-1]
+      # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
       # out <- juliaGet(cs.out)[-1,-1] ## Slow!
     }
     

@@ -170,7 +170,9 @@ jl.prep <- function(n.Pops,
         cs.jl$Using("Circuitscape")
         
         cs.out <- cs.jl$Call("compute", temp.ini) 
-        out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+        out <- as.matrix(read.table(paste0(scratch, "/", tmp.name, "_resistances.out"),
+                                    quote="\"", comment.char=""))[-1,-1]
+        # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
         # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
       }
       
