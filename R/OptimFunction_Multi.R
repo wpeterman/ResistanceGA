@@ -133,7 +133,7 @@ Resistance.Opt_multi <- function(PARM,
     
     
     # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-    if((exists(cd) & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt')))  {
+    if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt')))  {
       
       obj.func.opt <- -99999
       rm(cd, r)
@@ -204,7 +204,7 @@ Resistance.Opt_multi <- function(PARM,
       cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
     }
     
-    if((exists(cd) & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt'))) {
+    if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt'))) {
       
       obj.func.opt <- -999992
       
