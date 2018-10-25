@@ -115,14 +115,22 @@ Run_CS.jl <-
       
     }
     
-    if(is.null(EXPORT.dir)) {
-      EXPORT.dir <- paste0(tempdir(), "\\")
-    } else {
-      # if(CurrentMap == FALSE) {
-      #   EXPORT.dir <- paste0(tempdir(), "\\")
-      # } else {
-      EXPORT.dir
-      # }
+    # if(is.null(EXPORT.dir)) {
+    #   EXPORT.dir <- paste0(tempdir(), "\\")
+    # } else {
+    #   # if(CurrentMap == FALSE) {
+    #   #   EXPORT.dir <- paste0(tempdir(), "\\")
+    #   # } else {
+    #   EXPORT.dir
+    #   # }
+    # }
+    
+    if(is.null(EXPORT.dir)) {   
+      if(Sys.info()[['sysname']] == "Windows") {
+        EXPORT.dir <- paste0(tempdir(),"\\")
+      } else {
+        EXPORT.dir <- paste0(tempdir(),"/")
+      }
     }
     
     if (CurrentMap == FALSE) {
@@ -321,7 +329,7 @@ Run_CS.jl <-
                                   full.names = TRUE)
         
         del.files <- sapply(unlink.list, unlink, force = TRUE)
-
+        
         if(!is.null(scratch)){
           unlink.list2 <- list.files(scratch,
                                      pattern = tmp.name,

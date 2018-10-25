@@ -91,6 +91,10 @@ jl.prep <- function(n.Pops,
     JULIA_HOME <- findJulia() 
   }
   
+  if(!dir.exists(write.files)) {
+    stop("`write.files` directory does not exist")
+  }
+  
   # Setup Julia -------------------------------------------------------------
   
   if(Julia_link != 'XRJulia'){
@@ -277,13 +281,13 @@ jl.prep <- function(n.Pops,
     write.table(
       cs.txt,
       # file = sp_file,
-      file = paste0(td, "\\sample_pts.txt"),
+      file = paste0(td, "sample_pts.txt"),
       col.names = F,
       row.names = F
     )
     
     # CS_Point.File <- sp_file
-    CS_Point.File <- paste0(td, "\\sample_pts.txt")
+    CS_Point.File <- paste0(td, "sample_pts.txt")
   }
   
   if (grepl(".asc", x = CS_Point.File)) {
