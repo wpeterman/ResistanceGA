@@ -268,12 +268,12 @@ jl.prep <- function(n.Pops,
   }
   
   if(class(CS_Point.File) == 'SpatialPoints') {
-    td <- tempdir()
-    # sp_file <- tempfile(pattern = "sample_pts_", 
-    #                     tmpdir = tempdir(),
-    #                     fileext = ".txt")
-    
-    # sp_name <- basename(sp_file) %>% strsplit(., '.txt') %>% unlist()
+
+    if(Sys.info()[['sysname']] == "Windows") {
+      td <- paste0(tempdir(),"\\")
+    } else {
+      td <- paste0(tempdir(),"/")
+    }
     
     site <- c(1:length(CS_Point.File))
     

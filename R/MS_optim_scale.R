@@ -664,7 +664,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
     
     
     Diagnostic.Plots(
-      resistance.mat = cd,
+      resistance.mat = lower(cd),
       genetic.dist = jl.inputs$response,
       plot.dir = GA.inputs$Plots.dir,
       type = type,
