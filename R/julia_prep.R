@@ -104,7 +104,7 @@ jl.prep <- function(n.Pops,
     } else {
       jl.setup <- try(julia_setup(), TRUE)
       if(class(jl.setup) == "try-error")
-      stop("Specified JULIA_HOME directory does not exist")
+        stop("Specified JULIA_HOME directory does not exist")
     }        
   }
   
@@ -148,28 +148,28 @@ jl.prep <- function(n.Pops,
                          tmp.name, '.asc'),
                   overwirte = TRUE)
       
-     if(!is.null(scratch)) {
-       write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                    OUT = paste0("output_file = ", scratch,"/", tmp.name, ".out"),
-                    HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                    LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-                    PARALLELIZE = FALSE,
-                    CORES = NULL,
-                    solver = 'cholmod',
-                    precision = FALSE,
-                    silent = silent
-       )
-     } else {
+      if(!is.null(scratch)) {
         write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                   OUT = paste0("output_file = ", td, tmp.name, ".out"),
-                   HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                   LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-                   PARALLELIZE = FALSE,
-                   CORES = NULL,
-                   solver = 'cholmod',
-                   precision = FALSE,
-                   silent = silent
-      )
+                     OUT = paste0("output_file = ", scratch,"/", tmp.name, ".out"),
+                     HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+                     LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                     PARALLELIZE = FALSE,
+                     CORES = NULL,
+                     solver = 'cholmod',
+                     precision = FALSE,
+                     silent = silent
+        )
+      } else {
+        write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+                     OUT = paste0("output_file = ", td, tmp.name, ".out"),
+                     HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+                     LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                     PARALLELIZE = FALSE,
+                     CORES = NULL,
+                     solver = 'cholmod',
+                     precision = FALSE,
+                     silent = silent
+        )
       }
       
       if(Julia_link == 'JuliaCall'){
