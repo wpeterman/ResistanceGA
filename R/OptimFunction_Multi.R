@@ -160,7 +160,9 @@ Resistance.Opt_multi <- function(PARM,
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
       obj.func.opt <- -999992
       
-    } else { # Continue with iteration
+    } 
+    
+    if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
       
       if (method == "AIC") {
         obj.func <- suppressWarnings(AIC(
