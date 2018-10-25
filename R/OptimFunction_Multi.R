@@ -41,27 +41,9 @@ Resistance.Opt_multi <- function(PARM,
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration
       
-      obj.func.opt <- -999991
+      obj.func.opt <- -99999
       
     }
-    
-    # CS.resist <- try(Run_CS2(
-    #   CS.inputs,
-    #   r = r
-    # ), TRUE)
-    
-    # if(!exists('obj.func.opt')) {
-    #   CS.resist <- try(Run_CS2(
-    #     CS.inputs,
-    #     r = r
-    #   ), TRUE)
-    # }
-    # 
-    # if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-    #   
-    #   obj.func.opt <- -99999
-    #   
-    # } else 
     
     if(!exists('obj.func.opt')) {
       CS.resist <- try(Run_CS2(
@@ -70,11 +52,11 @@ Resistance.Opt_multi <- function(PARM,
       ), TRUE)
     }
     
-    if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
-      obj.func.opt <- -999992
+    if(exists('CS.resist') && isTRUE(class(CS.resist) == 'try-error')) {
+      obj.func.opt <- -99999
     } 
     
-    if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
+    if(exists('CS.resist') && isTRUE(class(CS.resist) != 'try-error')) { # Continue with iteration
       
       # Replace NA with 0...a workaround for errors when two points fall within the same cell.
       # CS.resist[is.na(CS.resist)] <- 0
@@ -136,30 +118,18 @@ Resistance.Opt_multi <- function(PARM,
     
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration      
-      obj.func.opt <- -999991
+      obj.func.opt <- -99999
       
     } 
-    
-    # if(!exists('obj.func.opt')) {
-    #   cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
-    # }
-    # 
-    # 
-    # # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-    # if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt')))  {
-    #   
-    #   obj.func.opt <- -99999
-    #   rm(cd, r)
-    #   gc()
-    #   
-    # } else 
     
     if(!exists('obj.func.opt')) {
       cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
     }
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
-      obj.func.opt <- -999992
+      obj.func.opt <- -99999
+      rm(cd, r)
+      gc()
     } 
     
     if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
@@ -219,7 +189,7 @@ Resistance.Opt_multi <- function(PARM,
     
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration      
-      obj.func.opt <- -999991
+      obj.func.opt <- -99999
       
     }
     
@@ -228,7 +198,7 @@ Resistance.Opt_multi <- function(PARM,
     }
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
-      obj.func.opt <- -999992
+      obj.func.opt <- -99999
     } 
     
     if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration

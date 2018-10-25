@@ -61,11 +61,11 @@ Resistance.Opt_multi.scale <-
         ), TRUE)
       }
       
-      if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-        
+      if(exists('CS.resist') && isTRUE(class(CS.resist) == 'try-error')) {
         obj.func.opt <- -99999
-        
-      } else { # Continue with iteration
+      } 
+      
+      if(exists('CS.resist') && isTRUE(class(CS.resist) != 'try-error')) { # Continue with iteration
         
         # Replace NA with 0...a workaround for errors when two points fall within the same cell.
         # CS.resist[is.na(CS.resist)] <- 0
@@ -136,13 +136,15 @@ Resistance.Opt_multi.scale <-
         cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
       }
       
-      if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-        
+      if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
         obj.func.opt <- -99999
         rm(cd, r)
         gc()
+      } 
+      
+      if(exists('cd') && isTRUE(class(cd) != 'try-error')) { 
         
-      } else { # Continue with iteration
+        # Continue with iteration
         
         if (method == "AIC") {
           obj.func <- suppressWarnings(AIC(
@@ -208,11 +210,11 @@ Resistance.Opt_multi.scale <-
         cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
       }
       
-      if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-        
+      if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
         obj.func.opt <- -99999
-        
-      } else { # Continue with iteration
+      } 
+      
+      if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
         
         
         if (method == "AIC") {

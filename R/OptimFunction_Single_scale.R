@@ -151,11 +151,11 @@ Resistance.Opt_single.scale <- function(PARM,
         if(!exists('obj.func.opt')) {
           CS.resist <- try(Run_CS(CS.inputs, r), TRUE)
         }        
-        if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-          
+        if(exists('CS.resist') && isTRUE(class(CS.resist) == 'try-error')) {
           obj.func.opt <- -99999
-          
-        } else { 
+        } 
+        
+        if(exists('CS.resist') && isTRUE(class(CS.resist) != 'try-error')) { 
           
           # Run mixed effect model on each Circuitscape effective resistance
           if (method == "AIC") {
@@ -211,11 +211,13 @@ Resistance.Opt_single.scale <- function(PARM,
           cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
         }
         
-        if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-          
+        if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
           obj.func.opt <- -99999
-          
-        } else { # Continue with iteration
+          rm(cd, r)
+          gc()
+        } 
+        
+        if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
           
           # l.cd <- as.vector(cd)
           # 
@@ -258,6 +260,8 @@ Resistance.Opt_single.scale <- function(PARM,
             ))
             obj.func.opt <- obj.func[[1]]
           }
+          rm(cd, r)
+          gc()
         } # Keep loop
       } # End gdistance Loop
       
@@ -275,11 +279,11 @@ Resistance.Opt_single.scale <- function(PARM,
           cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
         }
         
-        if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-          
+        if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
           obj.func.opt <- -99999
-          
-        } else { # Continue with iteration          
+        } 
+        
+        if(exists('cd') && isTRUE(class(cd) != 'try-error')) {  # Continue with iteration          
           
           if (method == "AIC") {
             obj.func <- suppressWarnings(AIC(

@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.18
+--------
+* Debugging Julia interaction
+
 ResistanceGA 4.1-0.17
 --------
 * Updated XRJulia handling of results
