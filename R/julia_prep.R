@@ -94,8 +94,13 @@ jl.prep <- function(n.Pops,
   # Setup Julia -------------------------------------------------------------
   
   if(Julia_link != 'XRJulia'){
-    if(isTRUE(dir.exists(JULIA_HOME))) {
-      julia_setup(JULIA_HOME = JULIA_HOME)
+    if(!is.null(JULIA_HOME)) {
+      if(isTRUE(dir.exists(JULIA_HOME))) {
+        julia_setup(JULIA_HOME = JULIA_HOME)
+      } else {
+        stop("Specified JULIA_HOME directory does not exist")
+      } 
+      
     } else {
       jl.setup <- try(julia_setup(), TRUE)
       if(class(jl.setup) == "try-error")
