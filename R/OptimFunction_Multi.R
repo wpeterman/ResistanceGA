@@ -72,8 +72,9 @@ Resistance.Opt_multi <- function(PARM,
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
       obj.func.opt <- -999992
-      
-    } else { # Continue with iteration
+    } 
+    
+    if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
       
       # Replace NA with 0...a workaround for errors when two points fall within the same cell.
       # CS.resist[is.na(CS.resist)] <- 0
@@ -159,7 +160,6 @@ Resistance.Opt_multi <- function(PARM,
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
       obj.func.opt <- -999992
-      
     } 
     
     if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
@@ -229,8 +229,9 @@ Resistance.Opt_multi <- function(PARM,
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
       obj.func.opt <- -999992
-      
-    } else { # Continue with iteration
+    } 
+    
+    if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
       
       if (method == "AIC") {
         obj.func <- suppressWarnings(AIC(
