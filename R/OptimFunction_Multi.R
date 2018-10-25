@@ -133,7 +133,7 @@ Resistance.Opt_multi <- function(PARM,
     
     
     # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-    if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt')))  {
+    if((exists(cd) & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt')))  {
       
       obj.func.opt <- -99999
       rm(cd, r)
@@ -196,7 +196,7 @@ Resistance.Opt_multi <- function(PARM,
     
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration      
-      obj.func.opt <- -99999
+      obj.func.opt <- -999991
       
     }
     
@@ -204,9 +204,9 @@ Resistance.Opt_multi <- function(PARM,
       cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
     }
     
-    if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+    if((exists(cd) & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt'))) {
       
-      obj.func.opt <- -99999
+      obj.func.opt <- -999992
       
     } else { # Continue with iteration
       
