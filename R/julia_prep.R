@@ -277,13 +277,13 @@ jl.prep <- function(n.Pops,
     write.table(
       cs.txt,
       # file = sp_file,
-      file = paste0(td, "\\samples_pts.txt"),
+      file = paste0(td, "\\sample_pts.txt"),
       col.names = F,
       row.names = F
     )
     
     # CS_Point.File <- sp_file
-    CS_Point.File <- paste0(td, "\\samples_pts.txt")
+    CS_Point.File <- paste0(td, "\\sample_pts.txt")
   }
   
   if (grepl(".asc", x = CS_Point.File)) {

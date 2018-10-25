@@ -41,7 +41,7 @@ Resistance.Opt_multi <- function(PARM,
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration
       
-      obj.func.opt <- -99999
+      obj.func.opt <- -999991
       
     }
     
@@ -50,6 +50,19 @@ Resistance.Opt_multi <- function(PARM,
     #   r = r
     # ), TRUE)
     
+    # if(!exists('obj.func.opt')) {
+    #   CS.resist <- try(Run_CS2(
+    #     CS.inputs,
+    #     r = r
+    #   ), TRUE)
+    # }
+    # 
+    # if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+    #   
+    #   obj.func.opt <- -99999
+    #   
+    # } else 
+    
     if(!exists('obj.func.opt')) {
       CS.resist <- try(Run_CS2(
         CS.inputs,
@@ -57,9 +70,8 @@ Resistance.Opt_multi <- function(PARM,
       ), TRUE)
     }
     
-    if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-      
-      obj.func.opt <- -99999
+    if(isTRUE(class(cd) == 'try-error')) {
+      obj.func.opt <- -999992
       
     } else { # Continue with iteration
       
@@ -123,21 +135,30 @@ Resistance.Opt_multi <- function(PARM,
     
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration      
-      obj.func.opt <- -99999
+      obj.func.opt <- -999991
       
     } 
+    
+    # if(!exists('obj.func.opt')) {
+    #   cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+    # }
+    # 
+    # 
+    # # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
+    # if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt')))  {
+    #   
+    #   obj.func.opt <- -99999
+    #   rm(cd, r)
+    #   gc()
+    #   
+    # } else 
     
     if(!exists('obj.func.opt')) {
       cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
     }
     
-    
-    # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-    if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt')))  {
-      
-      obj.func.opt <- -99999
-      rm(cd, r)
-      gc()
+    if(isTRUE(class(cd) == 'try-error')) {
+      obj.func.opt <- -999992
       
     } else { # Continue with iteration
       
@@ -202,105 +223,105 @@ Resistance.Opt_multi <- function(PARM,
     
     if(!exists('obj.func.opt')) {
       cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+    }
+    
+    if(isTRUE(class(cd) == 'try-error')) {
+      obj.func.opt <- -999992
       
-      if(isTRUE(class(cd) == 'try-error')) {
-        obj.func.opt <- -999992
-        
-      } else { # Continue with iteration
-        
-        if (method == "AIC") {
-          obj.func <- suppressWarnings(AIC(
-            MLPE.lmm2(
-              resistance = cd,
-              response = jl.inputs$response,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func * -1
-        } else if (method == "R2") {
-          obj.func <- suppressWarnings(r.squaredGLMM(
-            MLPE.lmm2(
-              resistance = cd,
-              response =
-                jl.inputs$response,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
-        } else {
-          obj.func <- suppressWarnings(logLik(
-            MLPE.lmm2(
-              resistance = cd,
-              response = jl.inputs$response,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
-        }
+    } else { # Continue with iteration
+      
+      if (method == "AIC") {
+        obj.func <- suppressWarnings(AIC(
+          MLPE.lmm2(
+            resistance = cd,
+            response = jl.inputs$response,
+            ID = jl.inputs$ID,
+            ZZ = jl.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func * -1
+      } else if (method == "R2") {
+        obj.func <- suppressWarnings(r.squaredGLMM(
+          MLPE.lmm2(
+            resistance = cd,
+            response =
+              jl.inputs$response,
+            ID = jl.inputs$ID,
+            ZZ = jl.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func[[1]]
+      } else {
+        obj.func <- suppressWarnings(logLik(
+          MLPE.lmm2(
+            resistance = cd,
+            response = jl.inputs$response,
+            ID = jl.inputs$ID,
+            ZZ = jl.inputs$ZZ,
+            REML = FALSE
+          )
+        ))
+        obj.func.opt <- obj.func[[1]]
       }
-      
-      # if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt'))) {
-      #   
-      #   obj.func.opt <- -999992
-      
-      # } else { # Continue with iteration
-      #   
-      #   if (method == "AIC") {
-      #     obj.func <- suppressWarnings(AIC(
-      #       MLPE.lmm2(
-      #         resistance = cd,
-      #         response = jl.inputs$response,
-      #         ID = jl.inputs$ID,
-      #         ZZ = jl.inputs$ZZ,
-      #         REML = FALSE
-      #       )
-      #     ))
-      #     obj.func.opt <- obj.func * -1
-      #   } else if (method == "R2") {
-      #     obj.func <- suppressWarnings(r.squaredGLMM(
-      #       MLPE.lmm2(
-      #         resistance = cd,
-      #         response =
-      #           jl.inputs$response,
-      #         ID = jl.inputs$ID,
-      #         ZZ = jl.inputs$ZZ,
-      #         REML = FALSE
-      #       )
-      #     ))
-      #     obj.func.opt <- obj.func[[1]]
-      #   } else {
-      #     obj.func <- suppressWarnings(logLik(
-      #       MLPE.lmm2(
-      #         resistance = cd,
-      #         response = jl.inputs$response,
-      #         ID = jl.inputs$ID,
-      #         ZZ = jl.inputs$ZZ,
-      #         REML = FALSE
-      #       )
-      #     ))
-      #     obj.func.opt <- obj.func[[1]]
-      #   }
-      # }
     }
     
-    rt <- proc.time()[3] - t1
-    if (quiet == FALSE) {
-      cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
-      cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
-    }
-    gc()
+    # if((exists('cd') & isTRUE(class(cd) == 'try-error')) || isTRUE(exists('obj.func.opt'))) {
+    #   
+    #   obj.func.opt <- -999992
     
-    if(!is.null(GA.inputs$opt.digits)) {
-      obj.func.opt <- round(obj.func.opt, GA.inputs$opt.digits)
-      return(obj.func.opt)
-    } else {
-      return(obj.func.opt)
-    }
+    # } else { # Continue with iteration
+    #   
+    #   if (method == "AIC") {
+    #     obj.func <- suppressWarnings(AIC(
+    #       MLPE.lmm2(
+    #         resistance = cd,
+    #         response = jl.inputs$response,
+    #         ID = jl.inputs$ID,
+    #         ZZ = jl.inputs$ZZ,
+    #         REML = FALSE
+    #       )
+    #     ))
+    #     obj.func.opt <- obj.func * -1
+    #   } else if (method == "R2") {
+    #     obj.func <- suppressWarnings(r.squaredGLMM(
+    #       MLPE.lmm2(
+    #         resistance = cd,
+    #         response =
+    #           jl.inputs$response,
+    #         ID = jl.inputs$ID,
+    #         ZZ = jl.inputs$ZZ,
+    #         REML = FALSE
+    #       )
+    #     ))
+    #     obj.func.opt <- obj.func[[1]]
+    #   } else {
+    #     obj.func <- suppressWarnings(logLik(
+    #       MLPE.lmm2(
+    #         resistance = cd,
+    #         response = jl.inputs$response,
+    #         ID = jl.inputs$ID,
+    #         ZZ = jl.inputs$ZZ,
+    #         REML = FALSE
+    #       )
+    #     ))
+    #     obj.func.opt <- obj.func[[1]]
+    #   }
+    # }
+  }
+  
+  rt <- proc.time()[3] - t1
+  if (quiet == FALSE) {
+    cat(paste0("\t", "Iteration took ", round(rt, digits = 2), " seconds"), "\n")
+    cat(paste0("\t", method, " = ", round(obj.func.opt, 4)), "\n", "\n")
+  }
+  gc()
+  
+  if(!is.null(GA.inputs$opt.digits)) {
+    obj.func.opt <- round(obj.func.opt, GA.inputs$opt.digits)
+    return(obj.func.opt)
+  } else {
+    return(obj.func.opt)
   }
 }
