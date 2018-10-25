@@ -103,6 +103,8 @@ jl.prep <- function(n.Pops,
       
     } else {
       jl.setup <- try(julia_setup(), TRUE)
+      JULIA_HOME <- XRJulia::findJulia()
+      JULIA_HOME <- paste0(dirname(JULIA_HOME), "/")
       if(class(jl.setup) == "try-error")
         stop("Specified JULIA_HOME directory does not exist")
     }        
