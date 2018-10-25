@@ -47,17 +47,19 @@ Resistance.Opt_multi.scale <-
           File.name = File.name,
           rescale = FALSE
         )
-
+      
       # if(cellStats(r, "mean") == 0) { # Skip iteration
       if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration        
         obj.func.opt <- -99999
         
       }
       
-      CS.resist <- try(Run_CS2(
-        CS.inputs,
-        r = r
-      ), TRUE)
+      if(!exists('obj.func.opt')) {
+        CS.resist <- try(Run_CS2(
+          CS.inputs,
+          r = r
+        ), TRUE)
+      }
       
       if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
         
@@ -130,7 +132,9 @@ Resistance.Opt_multi.scale <-
         
       } 
       
-      cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+      if(!exists('obj.func.opt')) {
+        cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+      }
       
       if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
         
@@ -200,7 +204,9 @@ Resistance.Opt_multi.scale <-
         
       }
       
-      cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+      if(!exists('obj.func.opt')) {
+        cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+      }
       
       if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
         

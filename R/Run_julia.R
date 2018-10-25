@@ -48,6 +48,10 @@ Run_CS.jl <-
       scratch <- jl.inputs$scratch
     }
     
+    if(!is.null(jl.inputs$rm.files)) {
+      rm.files <- jl.inputs$rm.files
+    }
+    
     if(is.null(Julia_link) & !is.null(jl.inputs)) {
       Julia_link <- jl.inputs$Julia_link
     } else if(is.null(Julia_link) & is.null(jl.inputs)) {

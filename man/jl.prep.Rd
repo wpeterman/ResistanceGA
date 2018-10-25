@@ -21,7 +21,8 @@ write.files = NULL,
 write.criteria = NULL,
 silent = TRUE,
 Julia_link = 'JuliaCall',
-scratch = NULL)
+scratch = NULL,
+rm.files = TRUE)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
@@ -54,8 +55,11 @@ scratch = NULL)
 
 \item{silent}{(Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug.}
 
-\item{Julia_link}{Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package
-#' @param scratch Scratch directory for use if write access is limited.}
+\item{Julia_link}{Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package}
+
+\item{scratch}{Scratch directory for use if write access is limited.}
+
+\item{rm.files}{Should all temporary files be removed after Julia run (Default = TRUE)}
 }
 \value{
 An R object that is a required input into optimization functions

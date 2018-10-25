@@ -121,7 +121,9 @@ Resistance.Opt_single <-
         
         if (!is.null(CS.inputs)) {
           
-          CS.resist <- try(Run_CS(CS.inputs, r), TRUE)
+          if(!exists('obj.func.opt')) {
+            CS.resist <- try(Run_CS(CS.inputs, r), TRUE)
+          }
           
           if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
             
@@ -195,7 +197,9 @@ Resistance.Opt_single <-
             
           } 
           
-          cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+          if(!exists('obj.func.opt')) {
+            cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+          }
           
           if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
             
@@ -257,7 +261,9 @@ Resistance.Opt_single <-
             
           }
           
-          cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+          if(!exists('obj.func.opt')) {
+            cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+          }
           
           if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
             

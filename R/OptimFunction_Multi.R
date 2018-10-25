@@ -45,10 +45,17 @@ Resistance.Opt_multi <- function(PARM,
       
     }
     
-    CS.resist <- try(Run_CS2(
-      CS.inputs,
-      r = r
-    ), TRUE)
+    # CS.resist <- try(Run_CS2(
+    #   CS.inputs,
+    #   r = r
+    # ), TRUE)
+    
+    if(!exists('obj.func.opt')) {
+      CS.resist <- try(Run_CS2(
+        CS.inputs,
+        r = r
+      ), TRUE)
+    }
     
     if(isTRUE(class(CS.resist) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
       
@@ -120,11 +127,13 @@ Resistance.Opt_multi <- function(PARM,
       
     } 
     
-    cd <- Run_gdistance(gdist.inputs, r)
+    if(!exists('obj.func.opt')) {
+      cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+    }
     
     
     # if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
-    if((cd == -99999) || isTRUE(exists('obj.func.opt'))) {
+    if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt')))  {
       
       obj.func.opt <- -99999
       rm(cd, r)
@@ -191,7 +200,9 @@ Resistance.Opt_multi <- function(PARM,
       
     }
     
-    cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+    if(!exists('obj.func.opt')) {
+      cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+    }
     
     if(isTRUE(class(cd) == 'try-error') || isTRUE(exists('obj.func.opt'))) {
       

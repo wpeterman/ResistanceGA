@@ -18,7 +18,8 @@
 #' @param write.criteria Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.
 #' @param silent (Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug. 
 #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package
-#' #' @param scratch Scratch directory for use if write access is limited. 
+#' @param scratch Scratch directory for use if write access is limited. 
+#' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE)
 
 #' @return An R object that is a required input into optimization functions
 
@@ -41,7 +42,8 @@
 #' write.criteria = NULL,
 #' silent = TRUE,
 #' Julia_link = 'JuliaCall',
-#' scratch = NULL)
+#' scratch = NULL,
+#' rm.files = TRUE)
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
@@ -70,7 +72,8 @@ jl.prep <- function(n.Pops,
                     write.criteria = NULL,
                     silent = TRUE,
                     Julia_link = 'JuliaCall',
-                    scratch = NULL) {
+                    scratch = NULL,
+                    rm.files = TRUE) {
   
   
   # Checks ------------------------------------------------------------------
@@ -377,6 +380,7 @@ jl.prep <- function(n.Pops,
     write.criteria = write.criteria,
     silent = silent,
     Julia_link = Julia_link,
-    scratch = scratch
+    scratch = scratch,
+    rm.files = rm.files
   )
 }
