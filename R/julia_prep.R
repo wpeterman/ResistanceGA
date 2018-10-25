@@ -91,7 +91,8 @@ jl.prep <- function(n.Pops,
     JULIA_HOME <- findJulia() 
   }
   
-  if(!dir.exists(write.files)) {
+  if(!is.null(write.files)) {
+    if(!dir.exists(write.files))
     stop("`write.files` directory does not exist")
   }
   
