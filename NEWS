@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.19
+--------
+* Added ability to fit MLPE with the 'mlpe_rga' function using only select pairwise observations
+
 ResistanceGA 4.1-0.18
 --------
 * Debugging Julia interaction

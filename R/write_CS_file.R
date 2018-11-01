@@ -157,6 +157,7 @@ write.CS_4.0 <- function(BATCH,
   cat("\n")
   cat("\n")
   cat("[Habitat raster or graph]")
+  cat("\n")
   cat("habitat_map_is_resistances = True")
   cat("\n")
   cat(HABITAT)

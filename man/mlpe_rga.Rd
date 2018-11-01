@@ -4,7 +4,11 @@
 \alias{mlpe_rga}
 \title{Run maximum likelihood population effects mixed effects model (MLPE)}
 \usage{
-mlpe_rga(formula, data, REML = FALSE, ZZ = NULL)
+mlpe_rga(formula,
+                data, 
+                REML = FALSE, 
+                ZZ = NULL,
+                keep = NULL)
 }
 \arguments{
 \item{formula}{\code{lme4} style mixed effects model equation.}
@@ -14,6 +18,8 @@ mlpe_rga(formula, data, REML = FALSE, ZZ = NULL)
 \item{REML}{Logical. If TRUE, mixed effects model will be fit using restricted maximum likelihood. Default = FALSE}
 
 \item{ZZ}{The sparse matrix object for the MLPE model. The function will automatically create this object, but it can be specified directly from the output of CS.prep or gdist.prep (Default = NULL)}
+
+\item{keep}{A vector consisting of 1 (keep) or 0 (drop) for each pairwise observation in \code{data}. An option if you do not want to assess all pairiwse observations in the MLPE model.}
 }
 \value{
 A lmer object from the fitted model
@@ -27,11 +33,11 @@ An AIC value will only be returned if \code{REML = FALSE}. The random effect mus
 \examples{
  
 # Create square 'distance' matrices
-y <- matrix(rnorm(16), 4)
-x <- matrix(rnorm(16), 4)
+y <- matrix(rnorm(25), 5)
+x <- matrix(rnorm(25), 5)
 
 # Create to-from object (4 populations sampled)
-id <- To.From.ID(4)
+id <- To.From.ID(5)
 
 # Create data frame
 df <- data.frame(y = lower(y),
@@ -41,6 +47,13 @@ df <- data.frame(y = lower(y),
 # Fit MLPE model
 out <- mlpe_rga(formula = y ~ x + (1 | pop),
                 data = df)
+                
+ # Fit model with only select pairs
+ keep <- c(1,0,1,1,1,1,0,0,1,0)
+ 
+ out.select <- mlpe_rga(formula = y ~ x + (1 | pop),
+                        data = df,
+                        keep = keep)
 }
 \references{
 Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.

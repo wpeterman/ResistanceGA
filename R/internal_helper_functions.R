@@ -262,34 +262,31 @@ ZZ.mat_select <- function(ID, drop) {
   Zl <-
     lapply(c("pop1", "pop2"), function(nm)
       Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+  ZZ <- Reduce("+", Zl[-1], Zl[[1]])
   
-  p1 <- as.numeric(ID$pop1)
-  p2 <- as.numeric(ID$pop2)
+  ZZ <- ZZ[, drop == 1]
   
-  for(i in p1) {
-      Zl[[1]][i,] <- Zl[[1]][i,] * drop
-  }
-
-  for(i in p2) {
-      Zl[[2]][i,] <- Zl[[2]][i,] * drop
-  }
+  return(ZZ)
   
+  # Zl <-
+  #   lapply(c("pop1", "pop2"), function(nm)
+  #     Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+  # 
+  # p1 <- as.numeric(ID$pop1)
+  # p2 <- as.numeric(ID$pop2)
+  # 
   # for(i in p1) {
-  #   for(j in 1:length(drop)) {
-  #     Zl[[1]][i,j] <- Zl[[1]][i,j] * drop[j]
-  #   }
+  #     Zl[[1]][i,] <- Zl[[1]][i,] * drop
   # }
   # 
   # for(i in p2) {
-  #   for(j in 1:length(drop)) {
-  #     Zl[[2]][i,j] <- Zl[[2]][i,j] * drop[j]
-  #   }
+  #     Zl[[2]][i,] <- Zl[[2]][i,] * drop
   # }
-  
-  ZZ <- Reduce("+", Zl[-1], Zl[[1]])
-  
-  ZZ <- ZZ[,drop == 1]
-  return(ZZ)
+  # 
+  # ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+  # 
+  # ZZ <- ZZ[,drop == 1]
+  # return(ZZ)
 }
 
 # Rescale function
@@ -687,9 +684,9 @@ Inv.Ricker <- function(r, parm) {
       # SCALE(R,
       #       MIN = abs(cellStats(R, stat = 'max')),
       #       MAX = abs(cellStats(R, stat = 'min'))) # Rescale
-    SCALE(R,
-          MIN = abs(max(R@data@values, na.rm = TRUE)),
-          MAX = abs(min(R@data@values, na.rm = TRUE))) # Rescale
+      SCALE(R,
+            MIN = abs(max(R@data@values, na.rm = TRUE)),
+            MAX = abs(min(R@data@values, na.rm = TRUE))) # Rescale
   } else {
     R <- (-1 * parm[3]) * r * exp(-1 * r / parm[2]) - 1 # Ricker
     R <- SCALE.vector(R, MIN = abs(max(R)), MAX = abs(min(R))) # Rescale
