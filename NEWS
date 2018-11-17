@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.20
+--------
+* Updated all combinations function to pass the best single surface results to the multisurface optimization as starting values.
+
 ResistanceGA 4.1-0.19
 --------
 * Added ability to fit MLPE with the 'mlpe_rga' function using only select pairwise observations

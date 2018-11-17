@@ -1,7 +1,7 @@
 #' Get cost distance using gdistance
 #' Execute gdistance
 #'
-#' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function
+#' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function
 #' @param r Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object
 #' @param scl scale the correction values (default is TRUE). No scaling should be done if the user wants to obtain absolute distance values as output. See \code{\link[gdistance]{geoCorrection}} for details
 #' @return A costDistance matrix object from gdistance

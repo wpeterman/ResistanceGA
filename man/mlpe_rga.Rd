@@ -48,7 +48,7 @@ df <- data.frame(y = lower(y),
 out <- mlpe_rga(formula = y ~ x + (1 | pop),
                 data = df)
                 
- # Fit model with only select pairs
+# Fit model with only select pairs
  keep <- c(1,0,1,1,1,1,0,0,1,0)
  
  out.select <- mlpe_rga(formula = y ~ x + (1 | pop),

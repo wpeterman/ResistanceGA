@@ -8,7 +8,7 @@ Execute gdistance}
 Run_gdistance(gdist.inputs, r, scl)
 }
 \arguments{
-\item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function}
+\item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function}
 
 \item{r}{Accepts two types of inputs. Provide either the path to the resistance surface file (.asc) or specify an R RasterLayer object}
 

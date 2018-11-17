@@ -248,6 +248,7 @@ all_comb <- function(gdist.inputs = NULL,
       }
     }
     
+    best.list <- lapply(ss.results$ga, function(x) x@population) # Extract best individuals
     
     # Multisurface optimization -----------------------------------------------
     
@@ -284,6 +285,16 @@ all_comb <- function(gdist.inputs = NULL,
         r.vec <- 1:GA.input_orig$n.layers
         drop.vec <- r.vec[!(r.vec %in% all.combs[[j]])]
         asc.comb <- dropLayer(GA.input_orig$Resistance.stack, drop.vec)
+        
+        ## Make suggestions
+        suggest <- vector(mode = 'list', length = length(all.combs[[j]]))
+          
+        for(s in 1:length(all.combs[[j]])) {
+          suggest.sample <- sample(GA.input_orig$pop.size, GA.input_orig$pop.size, replace = F)
+          suggest[[s]] <- best.list[[all.combs[[j]][s]]][suggest.sample,]
+        }
+        
+        suggest.c <- do.call(cbind, suggest)
         
         if(!is.null(GA.input_orig$inputs$select.trans)) {
           s.trans <- GA.input_orig$inputs$select.trans[all.combs[[j]]]
@@ -391,6 +402,9 @@ all_comb <- function(gdist.inputs = NULL,
                                quiet = GA.input_orig$inputs$quiet
           )
         }
+        
+        ## Update suggests
+        GA.inputs$SUGGESTS <- suggest.c
         
         # Update GA.input directories
         GA.inputs$Plots.dir <- paste0(results.dir,
@@ -511,6 +525,16 @@ all_comb <- function(gdist.inputs = NULL,
           sc.surf <- GA.input_orig$inputs$scale.surfaces[all.combs[[j]]]
         }
         
+        ## Make suggestions
+        suggest.sample <- sample(GA.input_orig$pop.size, GA.input_orig$pop.size, replace = F)
+        suggest <- vector(mode = 'list', length = length(all.combs[[j]]))
+        
+        for(s in 1:length(all.combs[[j]])) {
+          suggest[[s]] <- best.list[[all.combs[[j]][s]]][suggest.sample,]
+        }
+        
+        suggest.c <- do.call(cbind, suggest)
+        
         # sc.surf <- GA.input_orig$inputs$scale.surfaces[all.combs[[j]]]
         
         # Update GA.input 
@@ -599,6 +623,9 @@ all_comb <- function(gdist.inputs = NULL,
                                quiet = GA.input_orig$inputs$quiet
           ) 
         }
+        
+        ## Update suggests
+        GA.inputs$SUGGESTS <- suggest.c
         
         # Update GA.input directories
         GA.inputs$Plots.dir <- paste0(results.dir,

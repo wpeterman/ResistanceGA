@@ -193,6 +193,7 @@ Resistance.Opt_single.scale <- function(PARM,
               )
             ))
             obj.func.opt <- obj.func[[1]]
+            rm(r)
           }
         } # End Obj func ifelse
       } # End CS Loop
@@ -204,11 +205,14 @@ Resistance.Opt_single.scale <- function(PARM,
         # if(cellStats(r, "mean") == 0) { # Skip iteration
         if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration          
           obj.func.opt <- -99999
-          
+          rm(r)
+          gc()
         } 
         
         if(!exists('obj.func.opt')) {
           cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+          rm(r)
+          gc()
         }
         
         if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
@@ -260,7 +264,7 @@ Resistance.Opt_single.scale <- function(PARM,
             ))
             obj.func.opt <- obj.func[[1]]
           }
-          rm(cd, r)
+          rm(cd)
           gc()
         } # Keep loop
       } # End gdistance Loop
@@ -319,6 +323,7 @@ Resistance.Opt_single.scale <- function(PARM,
               )
             ))
             obj.func.opt <- obj.func[[1]]
+            rm(r)
           }
         } # End Keep loop
       } # End Julia Loop
@@ -339,7 +344,6 @@ Resistance.Opt_single.scale <- function(PARM,
       cat(paste0("\t", method, " = ", obj.func.opt, "\n"))
     }
   }
-  rm(r)
   gc()
   if(!is.null(GA.inputs$opt.digits)) {
     obj.func.opt <- round(obj.func.opt, GA.inputs$opt.digits)
