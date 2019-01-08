@@ -1,3 +1,8 @@
+ResistanceGA 4.1-0.21
+--------
+* Added function to calculate SHNe metrics (see Prunier et al. 2017, Method in Ecology and Evolution)
+* It is now possible to conduct single surface optimization with covariates in the MLPE model. This was specifically designed to incorporate SHNe metrics during optimization
+
 ResistanceGA 4.1-0.20
 --------
 * Updated all combinations function to pass the best single surface results to the multisurface optimization as starting values.

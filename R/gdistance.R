@@ -6,6 +6,7 @@
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param samples Either provide the path to a .txt file containing the xy coordinates, or provide a matrix with x values in column 1 and y values in column 2. Alternatively, you can provide a \code{\link[sp]{SpatialPoints}} object
 #' @param covariates Data frame of additional covariates that you want included in the MLPE model during opitmization.
+#' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
 #' @param transitionFunction The function to calculate the gdistance TransitionLayer object. See \code{\link[gdistance]{transition}}. Default = function(x) 1/mean(x)
 #' @param directions Directions in which cells are connected (4, 8, 16, or other). Default = 8
 #' @param longlat Logical. If true, a \code{\link[gdistance]{geoCorrection}} will be applied to the transition  matrix. Default = FALSE
@@ -13,6 +14,8 @@
 #' @param min.max_dist Optional. Specify the minimum and maximum distance at which pairwise comparisons will be made(e.g., c(1, 50)). Euclidean distances below and above the minumum and maximum values will be omitted from the analysis. This has potential to reduce analysis time, but also reduces the number of pairwise comparisons.
 #' @param keep An optional vector equal to length \code{response} (i.e. all pairwise observations), with 1 indicating to keep the observation, and 0 to drop the observation. This can be used in conjunction with, or in place of \code{min.max_dist} to select which observations to include in analyses.
 #' @return An R object that is a required input into optimization functions
+#' @details When specifying a formula, provide it as: \code{response ~ covariate}.
+#' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -21,6 +24,7 @@
 #'                   response = NULL,
 #'                   samples,
 #'                   covariates = NULL,
+#'                   formula = NULL,
 #'                   transitionFunction = function(x)  1 / mean(x),
 #'                   directions = 8,
 #'                   longlat = FALSE,
@@ -33,6 +37,7 @@ gdist.prep <-
            response = NULL,
            samples,
            covariates = NULL,
+           formula = NULL,
            transitionFunction = function(x)
              1 / mean(x),
            directions = 8,
@@ -99,7 +104,17 @@ gdist.prep <-
       ZZ <- ResistanceGA:::ZZ.mat(ID)
     }
     
+    if(!is.null(covariates)) {
+      df <- data.frame(gd = response,
+                       covariates,
+                       pop = ID$pop1)
+    } else {
+      df <- NULL
+    }
     
+    if(!is.null(formula)) {
+      formula <- update(formula, gd ~ . + cd + (1 | pop))
+    }
     
     (
       ret <-
@@ -107,6 +122,7 @@ gdist.prep <-
           response = response,
           samples = sp,
           covariates = covariates,
+          formula = formula,
           transitionFunction = transitionFunction,
           directions = directions,
           ID = ID,
@@ -114,7 +130,8 @@ gdist.prep <-
           keep = keep,
           n.Pops = n.Pops,
           longlat = longlat,
-          method = method
+          method = method,
+          df = df
         )
     )
     # Min-Max Distance ------------------------------------------------------------
@@ -181,12 +198,25 @@ gdist.prep <-
       #   mod <- mlpe_rga(gd ~ ed + (1|pop), data = dat, ZZ = ZZ)
       # }
       
+      if(!is.null(covariates)) {
+        df <- data.frame(gd = response,
+                         covariates,
+                         pop = ID$pop1)
+      } else {
+        df <- NULL
+      }
+      
+      if(!is.null(formula)) {
+        formula <- update(formula, gd ~ . + cd + (1 | pop))
+      }
+      
       (
         ret <-
           list(
             response = response,
             samples = sp,
             covariates = covariates,
+            formula = formula,
             transitionFunction = transitionFunction,
             directions = directions,
             ID = ID,
@@ -194,7 +224,8 @@ gdist.prep <-
             keep = drop.obs,
             n.Pops = n.Pops,
             longlat = longlat,
-            method = method
+            method = method,
+            df = df
           )
       )
     }

@@ -150,131 +150,254 @@ MLPE.lmm_coef <-
            genetic.dist,
            out.dir = NULL,
            method,
+           formula = NULL,
+           inputs = NULL,
            ID = NULL,
            ZZ = NULL) {
-    if (method == "cs") {
-      response = genetic.dist
-      resist.mat <-
-        list.files(resistance, pattern = "*_csResistMat.csv", full.names = TRUE)
-      resist.names <-
-        gsub(pattern = "_csResistMat.csv",
-             "",
-             x = list.files(resistance, pattern = "*_csResistMat.csv"))
-      COEF.Table <- array()
-      for (i in 1:length(resist.mat)) {
-        cd <- read.csv(resist.mat[i], header = F)
-        mm <- lower(cd)
-        # mm <- lower(cd)
-        m <- dim(cd)[1]
-        ID <- To.From.ID(POPS = m)
-        ZZ <- ZZ.mat(ID = ID)
-        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
-        cs.unscale <- mm
-        dat <- cbind(ID, cs.matrix, response)
+    
+    if(!is.null(formula)) {
+      if (method == "cs") {
+        response = genetic.dist
+        resist.mat <-
+          list.files(resistance, pattern = "*_csResistMat.csv", full.names = TRUE)
+        resist.names <-
+          gsub(pattern = "_csResistMat.csv",
+               "",
+               x = list.files(resistance, pattern = "*_csResistMat.csv"))
+        COEF.Table <- array()
+        for (i in 1:length(resist.mat)) {
+          cd <- read.csv(resist.mat[i], header = F)
+          cd.l <- lower(cd)
+
+          scale.cd <- scale(cd.l, center = TRUE, scale = TRUE)
+          cs.unscale <- cd.l
+
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Fit model
+          mod <- mlpe_rga(formula = formula,
+                          data = inputs$df,
+                          ZZ = inputs$ZZ,
+                          REML = TRUE)
+          
+          Mod.Summary <- summary(mod)
+          COEF <- Mod.Summary$coefficients
+          row.names(COEF) <- c("Intercept", resist.names[i])
+          COEF.Table <- rbind(COEF.Table, COEF)
+        }
+      } else if(method == "jl") {
+        response <- genetic.dist
+        resist.mat <-
+          list.files(resistance, pattern = "*_jlResistMat.csv", full.names = TRUE)
+        resist.names <-
+          gsub(pattern = "_jlResistMat.csv",
+               "",
+               x = list.files(resistance, pattern = "*_jlResistMat.csv"))
         
-        # Assign value to layer
-        LAYER <- assign(resist.names[i], value = dat$cs.matrix)
         
-        # Fit model
-        mod <-
-          lFormula(response ~ LAYER + (1 | pop1),
-                   data = dat,
-                   REML = TRUE)
-        mod$reTrms$Zt <- ZZ
-        dfun <- do.call(mkLmerDevfun, mod)
-        opt <- optimizeLmer(dfun)
-        Mod.Summary <-
-          summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
-        COEF <- Mod.Summary$coefficients
-        row.names(COEF) <- c("Intercept", resist.names[i])
-        COEF.Table <- rbind(COEF.Table, COEF)
-      }
-    } else if(method == "jl") {
-      response <- genetic.dist
-      resist.mat <-
-        list.files(resistance, pattern = "*_jlResistMat.csv", full.names = TRUE)
-      resist.names <-
-        gsub(pattern = "_jlResistMat.csv",
-             "",
-             x = list.files(resistance, pattern = "*_jlResistMat.csv"))
-      
-      
-      COEF.Table <- array()
-      for (i in 1:length(resist.mat)) {
-        cd <- read.csv(resist.mat[i], header = F)
-        mm <- lower(cd)
-        # mm <- lower(cd)
-        m <- dim(cd)[1]
-        ID <- To.From.ID(POPS = m)
-        ZZ <- ZZ.mat(ID = ID)
-        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
-        cs.unscale <- mm
-        dat <- cbind(ID, cs.matrix, response)
+        COEF.Table <- array()
+        for (i in 1:length(resist.mat)) {
+          cd <- read.csv(resist.mat[i], header = F)
+          cd.l <- lower(cd)
+          
+          scale.cd <- scale(cd.l, center = TRUE, scale = TRUE)
+          cs.unscale <- cd.l
+          
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Fit model
+          mod <-
+            lFormula(response ~ LAYER + (1 | pop1),
+                     data = dat,
+                     REML = TRUE)
+          mod$reTrms$Zt <- ZZ
+          dfun <- do.call(mkLmerDevfun, mod)
+          opt <- optimizeLmer(dfun)
+          Mod.Summary <-
+            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          COEF <- Mod.Summary$coefficients
+          row.names(COEF) <- c("Intercept", resist.names[i])
+          COEF.Table <- rbind(COEF.Table, COEF)
+        }
+      } else {
+        response <- genetic.dist
+        resist.mat <-
+          list.files(resistance, pattern = "*_distMat.csv", full.names = TRUE)
+        resist.names <-
+          gsub(pattern = "_distMat.csv",
+               "",
+               x = list.files(resistance, pattern = "*_distMat.csv"))
         
-        # Assign value to layer
-        LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+        if(length(agrep("_commuteDistance", resist.names)) > 0){
+          resist.names <- plyr::ldply(strsplit(resist.names, "_commuteDistance"))[,1]
+          
+        } else {
+          resist.names <- plyr::ldply(strsplit(resist.names, "_costDistance"))[,1]
+        }
         
-        # Fit model
-        mod <-
-          lFormula(response ~ LAYER + (1 | pop1),
-                   data = dat,
-                   REML = TRUE)
-        mod$reTrms$Zt <- ZZ
-        dfun <- do.call(mkLmerDevfun, mod)
-        opt <- optimizeLmer(dfun)
-        Mod.Summary <-
-          summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
-        COEF <- Mod.Summary$coefficients
-        row.names(COEF) <- c("Intercept", resist.names[i])
-        COEF.Table <- rbind(COEF.Table, COEF)
+        
+        COEF.Table <- array()
+        for (i in 1:length(resist.mat)) {
+          cd <- read.csv(resist.mat[i], header = F)
+          mm <- lower(cd)
+          # mm <- lower(cd)
+          m <- dim(cd)[1]
+          ID <- To.From.ID(POPS = m)
+          ZZ <- ZZ.mat(ID = ID)
+          cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+          cs.unscale <- mm
+          dat <- cbind(ID, cs.matrix, response)
+          
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Fit model
+          mod <-
+            lFormula(response ~ LAYER + (1 | pop1),
+                     data = dat,
+                     REML = TRUE)
+          mod$reTrms$Zt <- ZZ
+          dfun <- do.call(mkLmerDevfun, mod)
+          opt <- optimizeLmer(dfun)
+          Mod.Summary <-
+            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          COEF <- Mod.Summary$coefficients
+          row.names(COEF) <- c("Intercept", resist.names[i])
+          COEF.Table <- rbind(COEF.Table, COEF)
+        }
       }
     } else {
-      response <- genetic.dist
-      resist.mat <-
-        list.files(resistance, pattern = "*_distMat.csv", full.names = TRUE)
-      resist.names <-
-        gsub(pattern = "_distMat.csv",
-             "",
-             x = list.files(resistance, pattern = "*_distMat.csv"))
-      
-      if(length(agrep("_commuteDistance", resist.names)) > 0){
-        resist.names <- plyr::ldply(strsplit(resist.names, "_commuteDistance"))[,1]
+      if (method == "cs") {
+        response = genetic.dist
+        resist.mat <-
+          list.files(resistance, pattern = "*_csResistMat.csv", full.names = TRUE)
+        resist.names <-
+          gsub(pattern = "_csResistMat.csv",
+               "",
+               x = list.files(resistance, pattern = "*_csResistMat.csv"))
+        COEF.Table <- array()
+        for (i in 1:length(resist.mat)) {
+          cd <- read.csv(resist.mat[i], header = F)
+          mm <- lower(cd)
+          # mm <- lower(cd)
+          m <- dim(cd)[1]
+          ID <- To.From.ID(POPS = m)
+          ZZ <- ZZ.mat(ID = ID)
+          cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+          cs.unscale <- mm
+          dat <- cbind(ID, cs.matrix, response)
+          
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Fit model
+          mod <-
+            lFormula(response ~ LAYER + (1 | pop1),
+                     data = dat,
+                     REML = TRUE)
+          mod$reTrms$Zt <- ZZ
+          dfun <- do.call(mkLmerDevfun, mod)
+          opt <- optimizeLmer(dfun)
+          Mod.Summary <-
+            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          COEF <- Mod.Summary$coefficients
+          row.names(COEF) <- c("Intercept", resist.names[i])
+          COEF.Table <- rbind(COEF.Table, COEF)
+        }
+      } else if(method == "jl") {
+        response <- genetic.dist
+        resist.mat <-
+          list.files(resistance, pattern = "*_jlResistMat.csv", full.names = TRUE)
+        resist.names <-
+          gsub(pattern = "_jlResistMat.csv",
+               "",
+               x = list.files(resistance, pattern = "*_jlResistMat.csv"))
         
+        
+        COEF.Table <- array()
+        for (i in 1:length(resist.mat)) {
+          cd <- read.csv(resist.mat[i], header = F)
+          mm <- lower(cd)
+          # mm <- lower(cd)
+          m <- dim(cd)[1]
+          ID <- To.From.ID(POPS = m)
+          ZZ <- ZZ.mat(ID = ID)
+          cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+          cs.unscale <- mm
+          dat <- cbind(ID, cs.matrix, response)
+          
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Fit model
+          mod <-
+            lFormula(response ~ LAYER + (1 | pop1),
+                     data = dat,
+                     REML = TRUE)
+          mod$reTrms$Zt <- ZZ
+          dfun <- do.call(mkLmerDevfun, mod)
+          opt <- optimizeLmer(dfun)
+          Mod.Summary <-
+            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          COEF <- Mod.Summary$coefficients
+          row.names(COEF) <- c("Intercept", resist.names[i])
+          COEF.Table <- rbind(COEF.Table, COEF)
+        }
       } else {
-        resist.names <- plyr::ldply(strsplit(resist.names, "_costDistance"))[,1]
-      }
+        response <- genetic.dist
+        resist.mat <-
+          list.files(resistance, pattern = "*_distMat.csv", full.names = TRUE)
+        resist.names <-
+          gsub(pattern = "_distMat.csv",
+               "",
+               x = list.files(resistance, pattern = "*_distMat.csv"))
         
-      
-      COEF.Table <- array()
-      for (i in 1:length(resist.mat)) {
-        cd <- read.csv(resist.mat[i], header = F)
-        mm <- lower(cd)
-        # mm <- lower(cd)
-        m <- dim(cd)[1]
-        ID <- To.From.ID(POPS = m)
-        ZZ <- ZZ.mat(ID = ID)
-        cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
-        cs.unscale <- mm
-        dat <- cbind(ID, cs.matrix, response)
+        if(length(agrep("_commuteDistance", resist.names)) > 0){
+          resist.names <- plyr::ldply(strsplit(resist.names, "_commuteDistance"))[,1]
+          
+        } else {
+          resist.names <- plyr::ldply(strsplit(resist.names, "_costDistance"))[,1]
+        }
         
-        # Assign value to layer
-        LAYER <- assign(resist.names[i], value = dat$cs.matrix)
         
-        # Fit model
-        mod <-
-          lFormula(response ~ LAYER + (1 | pop1),
-                   data = dat,
-                   REML = TRUE)
-        mod$reTrms$Zt <- ZZ
-        dfun <- do.call(mkLmerDevfun, mod)
-        opt <- optimizeLmer(dfun)
-        Mod.Summary <-
-          summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
-        COEF <- Mod.Summary$coefficients
-        row.names(COEF) <- c("Intercept", resist.names[i])
-        COEF.Table <- rbind(COEF.Table, COEF)
+        COEF.Table <- array()
+        for (i in 1:length(resist.mat)) {
+          cd <- read.csv(resist.mat[i], header = F)
+          mm <- lower(cd)
+          # mm <- lower(cd)
+          m <- dim(cd)[1]
+          ID <- To.From.ID(POPS = m)
+          ZZ <- ZZ.mat(ID = ID)
+          cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
+          cs.unscale <- mm
+          dat <- cbind(ID, cs.matrix, response)
+          
+          # Assign value to layer
+          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          
+          # Fit model
+          mod <-
+            lFormula(response ~ LAYER + (1 | pop1),
+                     data = dat,
+                     REML = TRUE)
+          mod$reTrms$Zt <- ZZ
+          dfun <- do.call(mkLmerDevfun, mod)
+          opt <- optimizeLmer(dfun)
+          Mod.Summary <-
+            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          COEF <- Mod.Summary$coefficients
+          row.names(COEF) <- c("Intercept", resist.names[i])
+          COEF.Table <- rbind(COEF.Table, COEF)
+        }
       }
     }
+    
+    
     
     
     if (is.null(out.dir)) {

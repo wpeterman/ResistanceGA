@@ -8,6 +8,7 @@ gdist.prep(n.Pops,
                   response = NULL,
                   samples,
                   covariates = NULL,
+                  formula = NULL,
                   transitionFunction = function(x)  1 / mean(x),
                   directions = 8,
                   longlat = FALSE,
@@ -23,6 +24,8 @@ gdist.prep(n.Pops,
 \item{samples}{Either provide the path to a .txt file containing the xy coordinates, or provide a matrix with x values in column 1 and y values in column 2. Alternatively, you can provide a \code{\link[sp]{SpatialPoints}} object}
 
 \item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
+
+\item{formula}{If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.}
 
 \item{transitionFunction}{The function to calculate the gdistance TransitionLayer object. See \code{\link[gdistance]{transition}}. Default = function(x) 1/mean(x)}
 
@@ -41,6 +44,10 @@ An R object that is a required input into optimization functions
 }
 \description{
 Creates a necessary input for optimizing resistance surfaces based on pairwise cost distances, implemented using the \code{gdistance} library
+}
+\details{
+When specifying a formula, provide it as: \code{response ~ covariate}.
+the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
