@@ -1,4 +1,4 @@
-#' Optimize resistance surfaces individually
+#' Optimize resistance surfaces individually with more than one predictor variable
 #'
 #' Optimize all resistance surfaces that are located in the same directory individually. This optimization function is designed to be called from GA
 #'
@@ -155,23 +155,28 @@ Resistance.Opt_single.cov <-
             
             
             # Run mixed effect model on each Circuitscape effective resistance
-            if (method == "AIC") {
-              obj.func <- suppressWarnings(AIC(
-                fit.mod
-              )
-              )
-              obj.func.opt <- obj.func * -1
-            } else if (method == "R2") {
-              obj.func <- suppressWarnings(r.squaredGLMM(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func[[1]]
+            if(lme4::fixef(fit.mod)['cd'] < 0) {
+              obj.func.opt <- -99999
             } else {
-              obj.func <- suppressWarnings(logLik(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func[[1]]
-            }
+              if (method == "AIC") {
+                obj.func <- suppressWarnings(AIC(
+                  fit.mod
+                ))
+                obj.func.opt <- obj.func * -1
+              } else if (method == "R2") {
+                obj.func <-
+                  suppressWarnings(r.squaredGLMM(
+                    fit.mod
+                  ))
+                obj.func.opt <- obj.func[[1]]
+                
+              } else {
+                obj.func <- suppressWarnings(logLik(
+                  fit.mod
+                ))
+                obj.func.opt <- obj.func[[1]]
+              }
+            } # Positive parameter value
             
             
             # if (method == "AIC") {
@@ -243,22 +248,28 @@ Resistance.Opt_single.cov <-
                                  ZZ = gdist.inputs$ZZ,
                                  REML = FALSE)
             
-            if (method == "AIC") {
-              obj.func <- suppressWarnings(AIC(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func * -1
-            } else if (method == "R2") {
-              obj.func <- suppressWarnings(r.squaredGLMM(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func[[1]]
+            if(lme4::fixef(fit.mod)['cd'] < 0) {
+              obj.func.opt <- -99999
             } else {
-              obj.func <- suppressWarnings(logLik(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func[[1]]
-            }
+              if (method == "AIC") {
+                obj.func <- suppressWarnings(AIC(
+                  fit.mod
+                ))
+                obj.func.opt <- obj.func * -1
+              } else if (method == "R2") {
+                obj.func <-
+                  suppressWarnings(r.squaredGLMM(
+                    fit.mod
+                  ))
+                obj.func.opt <- obj.func[[1]]
+                
+              } else {
+                obj.func <- suppressWarnings(logLik(
+                  fit.mod
+                ))
+                obj.func.opt <- obj.func[[1]]
+              }
+            } # Positive parameter value
             rm(cd, r)
             gc()
           } # Keep loop
@@ -292,22 +303,28 @@ Resistance.Opt_single.cov <-
                                  ZZ = jl.inputs$ZZ,
                                  REML = FALSE)
             
-            if (method == "AIC") {
-              obj.func <- suppressWarnings(AIC(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func * -1
-            } else if (method == "R2") {
-              obj.func <- suppressWarnings(r.squaredGLMM(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func[[1]]
+            if(lme4::fixef(fit.mod)['cd'] < 0) {
+              obj.func.opt <- -99999
             } else {
-              obj.func <- suppressWarnings(logLik(
-                fit.mod
-              ))
-              obj.func.opt <- obj.func[[1]]
-            }
+              if (method == "AIC") {
+                obj.func <- suppressWarnings(AIC(
+                  fit.mod
+                ))
+                obj.func.opt <- obj.func * -1
+              } else if (method == "R2") {
+                obj.func <-
+                  suppressWarnings(r.squaredGLMM(
+                    fit.mod
+                  ))
+                obj.func.opt <- obj.func[[1]]
+                
+              } else {
+                obj.func <- suppressWarnings(logLik(
+                  fit.mod
+                ))
+                obj.func.opt <- obj.func[[1]]
+              }
+            } # Positive parameter value
           } # End Keep loop
         } # End Julia Loop
         

@@ -1,3 +1,8 @@
+ResistanceGA 4.1-0.22
+--------
+* Updated multisurface optimization to accommodate covariates
+* Added catch to optimization functions constraining resistance distance to have a positive relationship with genetic distance
+
 ResistanceGA 4.1-0.21
 --------
 * Added function to calculate SHNe metrics (see Prunier et al. 2017, Method in Ecology and Evolution)

@@ -1,6 +1,6 @@
-#' Optimize multiple resistance surfaces simultaneously
+#' Optimize multiple resistance surfaces simultaneously with more than one predictor variable
 #'
-#' Create composite resistance surface by simultaneously optimizing multiple categoricla and continuous surfaces. This optimization function is designed to be called from GA
+#' Create composite resistance surface by simultaneously optimizing multiple categorical and continuous surfaces. This optimization function is designed to be called from GA
 #'
 #' @param PARM Parameters to transform conintuous surface or resistance values of categorical surface. Should be a vector with parameters specified in the order of resistance surfaces. These values are selected during optimization if called within GA function.
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
@@ -11,7 +11,7 @@
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @return Objective function value (either AIC, R2, or LL) from mixed effect model
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-Resistance.Opt_multi <- function(PARM,
+Resistance.Opt_multi.cov <- function(PARM,
                                  CS.inputs = NULL,
                                  gdist.inputs = NULL,
                                  jl.inputs = NULL,
@@ -62,14 +62,12 @@ Resistance.Opt_multi <- function(PARM,
       # CS.resist[is.na(CS.resist)] <- 0
       
       # Run mixed effect model on each Circuitscape effective resistance
-      dat <- data.frame(gd = CS.inputs$response,
-                        cd = scale(CD.Resist),
-                        pop = CS.inputs$ID$pop1)
-      
-      fit.mod <- mlpe_rga(formula = gd ~ cd + (1 | pop),
-                          data = dat,
-                          ZZ = CS.inputs$ZZ,
-                          REML = FALSE)
+      dat <- CS.inputs$df
+      dat$cd <- scale(CS.resist)
+      fit.mod <-  mlpe_rga(formula = CS.inputs$formula,
+                           data = dat,
+                           ZZ = CS.inputs$ZZ,
+                           REML = FALSE)
       
       # Run mixed effect model on each Circuitscape effective resistance
       if(lme4::fixef(fit.mod)['cd'] < 0) {
@@ -169,8 +167,7 @@ Resistance.Opt_multi <- function(PARM,
       
       dat <- gdist.inputs$df
       dat$cd <- scale(c(cd))
-      
-      fit.mod <-  mlpe_rga(formula = gd ~ cd + (1 | pop),
+      fit.mod <-  mlpe_rga(formula = gdist.inputs$formula,
                            data = dat,
                            ZZ = gdist.inputs$ZZ,
                            REML = FALSE)
@@ -269,8 +266,7 @@ Resistance.Opt_multi <- function(PARM,
       
       dat <- jl.inputs$df
       dat$cd <- scale(cd)
-      
-      fit.mod <-  mlpe_rga(formula = gd ~ cd + (1 | pop),
+      fit.mod <-  mlpe_rga(formula = jl.inputs$formula,
                            data = dat,
                            ZZ = jl.inputs$ZZ,
                            REML = FALSE)

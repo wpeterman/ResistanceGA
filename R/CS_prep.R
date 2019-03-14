@@ -5,6 +5,7 @@
 #' @param n.Pops The number of populations that are being assessed
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix).
 #' @param covariates Data frame of additional covariates that you want included in the MLPE model during opitmization.
+#' #' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
 #' @param CS_Point.File The path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param CS.program The path to the CIRCUITSCAPE executable file (cs_run.exe) on a Windows PC. If using a Linux or Mac system, provide the full path to the "csrun.py" file. See details below.
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
@@ -20,6 +21,7 @@
 #' @usage CS.prep(n.Pops, 
 #' response, 
 #' covariates = NULL,
+#' formula = NULL,
 #' CS_Point.File, 
 #' CS.program, 
 #' Neighbor.Connect, 
@@ -27,7 +29,9 @@
 #' platform, 
 #' parallel, 
 #' cores)
-#' @details \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows:
+#' @details 
+#' IT IS HIGHLY RECOMMENDED THAT YOU LOOK INTO USING THE JULIA VERSION OF CIRCUITSCAPE. THIS FUNCTION IS NO LONGER BEING ACTIVELY SUPPORTED OR UPDATED.
+#' \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows:
 #'
 #' '"C:/Program Files/Circuitscape/cs_run.exe"'
 #'
@@ -41,10 +45,14 @@
 #' Only with Linux, \code{parallel} can be set to \code{TRUE}, and the number of cores to run in parallel can be specified with \code{cores}.
 #'
 #' The Linux and Mac versions are in development. Please let me know if you encounter errors.
+#' 
+#' When specifying a formula, provide it as: \code{response ~ covariate}.
+#' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 
 CS.prep <- function(n.Pops,
                     response = NULL,
                     covariates = NULL,
+                    formula = NULL,
                     CS_Point.File,
                     CS.program = '"C:/Program Files/Circuitscape/cs_run.exe"',
                     Neighbor.Connect = 8,

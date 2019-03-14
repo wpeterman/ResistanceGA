@@ -8,6 +8,7 @@ jl.prep(n.Pops,
 response, 
 CS_Point.File, 
 covariates = NULL,
+formula = NULL,
 JULIA_HOME,
 Neighbor.Connect, 
 pairs_to_include, 
@@ -33,7 +34,8 @@ rm.files = TRUE)
 
 \item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
 
-\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details)}
+\item{formula}{If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
+#' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)}
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
@@ -78,6 +80,9 @@ The cholmod solver can only be used when \code{precision} `= FALSE` (double prec
 If \code{precision} is TRUE, then the EXPERIMENTAL single precision method will be used. Single precision usually uses less memory, but is likely to reduce accuracy. NOTE: Preliminary testing of single precision mode in a Windows pc resulted in extremely slow runs.
 
 \code{JULIA_HOME} is where the Julia binary files are stored. Usually in a `bin` directory within the Julia install directory.
+
+When specifying a formula, provide it as: \code{response ~ covariate}.
+the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

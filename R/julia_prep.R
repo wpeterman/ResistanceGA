@@ -6,7 +6,8 @@
 #' @param response Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run.
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param covariates Data frame of additional covariates that you want included in the MLPE model during opitmization.
-#' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
+#' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
+#' #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.
 #' @param parallel (Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel?
@@ -29,6 +30,7 @@
 #' response, 
 #' CS_Point.File, 
 #' covariates = NULL,
+#' formula = NULL,
 #' JULIA_HOME,
 #' Neighbor.Connect, 
 #' pairs_to_include, 
@@ -56,10 +58,14 @@
 #' 
 #' \code{JULIA_HOME} is where the Julia binary files are stored. Usually in a `bin` directory within the Julia install directory.
 #' 
+#' When specifying a formula, provide it as: \code{response ~ covariate}.
+#' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
+#' 
 jl.prep <- function(n.Pops,
                     response = NULL,
                     CS_Point.File,
                     covariates = NULL,
+                    formula = NULL,
                     JULIA_HOME = NULL,
                     Neighbor.Connect = 8,
                     pairs_to_include = NULL,
@@ -370,17 +376,31 @@ jl.prep <- function(n.Pops,
   }
   suppressWarnings(ZZ <- ZZ.mat(ID))
   
-  # if(!is.null(covariates)) {
-  #   formula = NULL
-  # } else {
-  #   formula = lme4::lmer(response ~ . + (1|pop1), data = covariates) 
-  # } mlpe_rga(response ~ . -pop + (1|pop), data=covariates)
+  df <- NULL
+  if(!is.null(response)) {
+    if(!is.null(covariates)) {
+      df <- data.frame(gd = response,
+                       covariates,
+                       pop = ID$pop1)
+    } else {
+      df <- data.frame(gd = response,
+                       pop = ID$pop1)
+    }
+    
+    if(!is.null(formula)) {
+      formula <- update(formula, gd ~ . + cd + (1 | pop))
+    } else {
+      formula <- gd ~ cd + (1 | pop)
+    }
+  }
   
   list(
     ID = ID,
     ZZ = ZZ,
+    df = df,
     response = response,
     covariates = covariates,
+    formula = formula,
     CS_Point.File = CS_Point.File,
     Neighbor.Connect = Neighbor.Connect,
     n.Pops = n.Pops,

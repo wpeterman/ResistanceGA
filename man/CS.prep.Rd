@@ -7,6 +7,7 @@
 CS.prep(n.Pops, 
 response, 
 covariates = NULL,
+formula = NULL,
 CS_Point.File, 
 CS.program, 
 Neighbor.Connect, 
@@ -20,7 +21,8 @@ cores)
 
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 
-\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
+\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.
+#' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.}
 
 \item{CS_Point.File}{The path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 
@@ -43,6 +45,7 @@ An R object that is a required input into optimization functions
 This function will prepare objects needed for running optimization functions
 }
 \details{
+IT IS HIGHLY RECOMMENDED THAT YOU LOOK INTO USING THE JULIA VERSION OF CIRCUITSCAPE. THIS FUNCTION IS NO LONGER BEING ACTIVELY SUPPORTED OR UPDATED.
 \code{CS.program} Example of path to CIRCUITSCAPE executible on Windows:
 
 '"C:/Program Files/Circuitscape/cs_run.exe"'
@@ -57,6 +60,9 @@ Then specify \code{CS.program} as `csrun.py`
 Only with Linux, \code{parallel} can be set to \code{TRUE}, and the number of cores to run in parallel can be specified with \code{cores}.
 
 The Linux and Mac versions are in development. Please let me know if you encounter errors.
+
+When specifying a formula, provide it as: \code{response ~ covariate}.
+the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

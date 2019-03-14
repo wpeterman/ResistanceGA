@@ -525,7 +525,8 @@ Result.txt <-
            optim,
            aic,
            AICc,
-           LL) {
+           LL,
+           fit.mod_REML = NULL) {
     if(class(GA.results) == 'ga') {
       summary.file <-
         paste0(GA.inputs$Results.dir, "Multisurface_Optim_Summary.txt")
@@ -571,6 +572,13 @@ Result.txt <-
       cat(paste0("Optimized values for each surface:"), "\n")
       cat(GA.results@solution, "\n")
       cat("\n")
+      cat("\n")
+      if(!is.null(fit.mod_REML)) {
+        cat(paste0("----- Final MLPE model fit using REML -----"), "\n")
+        print(summary(fit.mod_REML))
+        cat("\n")
+        cat("\n")
+      }
       cat(paste0("Optimization took ", Run.Time, " seconds to complete"),
           "\n")
       sink()

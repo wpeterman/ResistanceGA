@@ -104,17 +104,24 @@ gdist.prep <-
       ZZ <- ResistanceGA:::ZZ.mat(ID)
     }
     
-    if(!is.null(covariates)) {
-      df <- data.frame(gd = response,
-                       covariates,
-                       pop = ID$pop1)
-    } else {
-      df <- NULL
+    df <- NULL
+    if(!is.null(response)) {
+      if(!is.null(covariates)) {
+        df <- data.frame(gd = response,
+                         covariates,
+                         pop = ID$pop1)
+      } else {
+        df <- data.frame(gd = response,
+                         pop = ID$pop1)
+      }
+      
+      if(!is.null(formula)) {
+        formula <- update(formula, gd ~ . + cd + (1 | pop))
+      } else {
+        formula <- gd ~ cd + (1 | pop)
+      }
     }
-    
-    if(!is.null(formula)) {
-      formula <- update(formula, gd ~ . + cd + (1 | pop))
-    }
+
     
     (
       ret <-

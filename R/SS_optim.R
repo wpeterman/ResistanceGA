@@ -712,11 +712,18 @@ SS_optim <- function(CS.inputs = NULL,
             if (k.value == 1) {
               k <- 2
             } else if (k.value == 2) {
-              k <- GA.inputs$parm.type$n.parm[i] + 1
+              k <- GA.inputs$parm.type$n.parm[i] + 
+                length(lme4::fixef(fit.mod)) - 1
+              
             } else if (k.value == 3) {
-              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+              k <- GA.inputs$parm.type$n.parm[i] + 
+                length(GA.inputs$layer.names) + 
+                length(lme4::fixef(fit.mod)) - 1
+              
             } else {
-              k <- length(GA.inputs$layer.names[i]) + 1
+              k <- length(GA.inputs$layer.names[i]) + 
+                length(lme4::fixef(fit.mod)) - 1
+              
             }
             
             k.list[[i]] <- k
@@ -844,6 +851,8 @@ SS_optim <- function(CS.inputs = NULL,
             NAME <- GA.inputs$layer.names[i]
             
             cd <- Run_gdistance(gdist.inputs, r)
+            dat <- gdist.inputs$df
+            dat$cd <- scale(c(cd))
             
             write.table(
               as.matrix(cd),
@@ -881,47 +890,27 @@ SS_optim <- function(CS.inputs = NULL,
               print.dir = GA.inputs$Plots.dir
             )
             
-            fit.stats <-
-              r.squaredGLMM(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            fit.mod <- mlpe_rga(formula = gdist.inputs$formula,
+                                data = dat,
+                                ZZ = gdist.inputs$ZZ,
+                                REML = FALSE)
             
+            Dist.AIC <- suppressWarnings(AIC(
+              fit.mod
+            ))
             
-            aic <-
-              AIC(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
-            
-            LL <-
-              logLik(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
-            
-            MLPE.list[[i]] <-  MLPE.lmm2(
-              resistance = cd,
-              response = gdist.inputs$response,
-              REML = TRUE,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
+            fit.stats <- r.squaredGLMM(
+              fit.mod
             )
+            
+            LL <- logLik(
+              fit.mod
+            )
+            
+            MLPE.list[[i + 1]] <- mlpe_rga(formula = gdist.inputs$formula,
+                                           data = dat,
+                                           ZZ = gdist.inputs$ZZ,
+                                           REML = TRUE)
             
             cd.list[[i]] <- as.matrix(cd)
             names(cd.list)[i] <- GA.inputs$layer.names[i]
@@ -931,11 +920,18 @@ SS_optim <- function(CS.inputs = NULL,
             if (k.value == 1) {
               k <- 2
             } else if (k.value == 2) {
-              k <- GA.inputs$parm.type$n.parm[i] + 1
+              k <- GA.inputs$parm.type$n.parm[i] + 
+                length(lme4::fixef(fit.mod)) - 1
+              
             } else if (k.value == 3) {
-              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+              k <- GA.inputs$parm.type$n.parm[i] + 
+                length(GA.inputs$layer.names) + 
+                length(lme4::fixef(fit.mod)) - 1
+              
             } else {
-              k <- length(GA.inputs$layer.names[i]) + 1
+              k <- length(GA.inputs$layer.names[i]) + 
+                length(lme4::fixef(fit.mod)) - 1
+              
             }
             
             k.list[[i]] <- k
@@ -1540,6 +1536,8 @@ SS_optim <- function(CS.inputs = NULL,
             names(r) <- NAME
             
             cd <- Run_gdistance(gdist.inputs, r)
+            dat <- gdist.inputs$df
+            dat$cd <- scale(c(cd))
             
             write.table(
               as.matrix(cd),
@@ -1569,44 +1567,71 @@ SS_optim <- function(CS.inputs = NULL,
               ZZ = gdist.inputs$ZZ
             )
             
-            fit.stats <- r.squaredGLMM(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                REML = F,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ
-              )
-            )
+            # fit.stats <- r.squaredGLMM(
+            #   MLPE.lmm2(
+            #     resistance = cd,
+            #     response = gdist.inputs$response,
+            #     REML = F,
+            #     ID = gdist.inputs$ID,
+            #     ZZ = gdist.inputs$ZZ
+            #   )
+            # )
+            # 
+            # aic <- AIC(
+            #   MLPE.lmm2(
+            #     resistance = cd,
+            #     response = gdist.inputs$response,
+            #     REML = F,
+            #     ID = gdist.inputs$ID,
+            #     ZZ = gdist.inputs$ZZ
+            #   )
+            # )
+            # 
+            # LL <- logLik(
+            #   MLPE.lmm2(
+            #     resistance = cd,
+            #     response = gdist.inputs$response,
+            #     REML = F,
+            #     ID = gdist.inputs$ID,
+            #     ZZ = gdist.inputs$ZZ
+            #   )
+            # )
+            # 
+            # if (k.value == 1) {
+            #   k <- 2
+            # } else if (k.value == 2) {
+            #   k <- GA.inputs$parm.type$n.parm[i] + 1
+            # } else if (k.value == 3) {
+            #   k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+            # } else {
+            #   k <- length(GA.inputs$layer.names[i]) + 1
+            # }
+            
+            fit.mod <- mlpe_rga(formula = gd ~ cd + (1|pop),
+                                data = dat,
+                                ZZ = gdist.inputs$ZZ,
+                                REML = FALSE)
+            
+            fit.stats <- suppressWarnings(r.squaredGLMM(
+              fit.mod
+            ))
             
             aic <- AIC(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                REML = F,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ
-              )
+              fit.mod
             )
             
             LL <- logLik(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                REML = F,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ
-              )
+              fit.mod
             )
             
             if (k.value == 1) {
               k <- 2
             } else if (k.value == 2) {
-              k <- GA.inputs$parm.type$n.parm[i] + 1
+              k <- GA.inputs$parm.type$n.parm[i] + length(lme4::fixef(fit.mod)) - 1
             } else if (k.value == 3) {
-              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + length(lme4::fixef(fit.mod)) - 1
             } else {
-              k <- length(GA.inputs$layer.names[i]) + 1
+              k <- length(GA.inputs$layer.names[i]) + length(lme4::fixef(fit.mod)) - 1
             }
             
             k.list[[i]] <- k
@@ -1734,6 +1759,8 @@ SS_optim <- function(CS.inputs = NULL,
             NAME <- GA.inputs$layer.names[i]
             
             cd <- Run_gdistance(gdist.inputs, r)
+            dat <- gdist.inputs$df
+            dat$cd <- scale(c(cd))
             
             write.table(
               as.matrix(cd),
@@ -1771,39 +1798,66 @@ SS_optim <- function(CS.inputs = NULL,
               print.dir = GA.inputs$Plots.dir
             )
             
-            fit.stats <-
-              r.squaredGLMM(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            # fit.stats <-
+            #   r.squaredGLMM(
+            #     MLPE.lmm(
+            #       resistance = cd,
+            #       pairwise.genetic = gdist.inputs$response,
+            #       REML = F,
+            #       ID = gdist.inputs$ID,
+            #       ZZ = gdist.inputs$ZZ
+            #     )
+            #   )
+            # 
+            # 
+            # aic <-
+            #   AIC(
+            #     MLPE.lmm(
+            #       resistance = cd,
+            #       pairwise.genetic = gdist.inputs$response,
+            #       REML = F,
+            #       ID = gdist.inputs$ID,
+            #       ZZ = gdist.inputs$ZZ
+            #     )
+            #   )
+            # 
+            # LL <-
+            #   logLik(
+            #     MLPE.lmm(
+            #       resistance = cd,
+            #       pairwise.genetic = gdist.inputs$response,
+            #       REML = F,
+            #       ID = gdist.inputs$ID,
+            #       ZZ = gdist.inputs$ZZ
+            #     )
+            #   )
             
+            fit.mod <- mlpe_rga(formula = gd ~ cd + (1|pop),
+                                data = dat,
+                                ZZ = gdist.inputs$ZZ,
+                                REML = FALSE)
             
-            aic <-
-              AIC(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            fit.stats <- suppressWarnings(r.squaredGLMM(
+              fit.mod
+            ))
             
-            LL <-
-              logLik(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            aic <- AIC(
+              fit.mod
+            )
+            
+            LL <- logLik(
+              fit.mod
+            )
+            
+            if (k.value == 1) {
+              k <- 2
+            } else if (k.value == 2) {
+              k <- GA.inputs$parm.type$n.parm[i] + length(lme4::fixef(fit.mod)) - 1
+            } else if (k.value == 3) {
+              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + length(lme4::fixef(fit.mod)) - 1
+            } else {
+              k <- length(GA.inputs$layer.names[i]) + length(lme4::fixef(fit.mod)) - 1
+            }
             
             MLPE.list[[i]] <-  MLPE.lmm2(
               resistance = cd,
@@ -1818,15 +1872,15 @@ SS_optim <- function(CS.inputs = NULL,
             
             names(MLPE.list)[i] <- GA.inputs$layer.names[i]
             
-            if (k.value == 1) {
-              k <- 2
-            } else if (k.value == 2) {
-              k <- GA.inputs$parm.type$n.parm[i] + 1
-            } else if (k.value == 3) {
-              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
-            } else {
-              k <- length(GA.inputs$layer.names[i]) + 1
-            }
+            # if (k.value == 1) {
+            #   k <- 2
+            # } else if (k.value == 2) {
+            #   k <- GA.inputs$parm.type$n.parm[i] + 1
+            # } else if (k.value == 3) {
+            #   k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+            # } else {
+            #   k <- length(GA.inputs$layer.names[i]) + 1
+            # }
             
             k.list[[i]] <- k
             names(k.list)[i] <- GA.inputs$layer.names[i]
@@ -1923,6 +1977,9 @@ SS_optim <- function(CS.inputs = NULL,
             names(r) <- NAME
             
             cd <- Run_gdistance(gdist.inputs, r)
+            dat <- gdist.inputs$df
+            dat$cd <- scale(c(cd))
+            
             # save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
             write.table(
               as.matrix(cd),
@@ -1955,44 +2012,71 @@ SS_optim <- function(CS.inputs = NULL,
               ZZ = gdist.inputs$ZZ
             )
             
-            fit.stats <- r.squaredGLMM(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                REML = F,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ
-              )
-            )
+            # fit.stats <- r.squaredGLMM(
+            #   MLPE.lmm2(
+            #     resistance = cd,
+            #     response = gdist.inputs$response,
+            #     REML = F,
+            #     ID = gdist.inputs$ID,
+            #     ZZ = gdist.inputs$ZZ
+            #   )
+            # )
+            # 
+            # aic <- AIC(
+            #   MLPE.lmm2(
+            #     resistance = cd,
+            #     response = gdist.inputs$response,
+            #     REML = F,
+            #     ID = gdist.inputs$ID,
+            #     ZZ = gdist.inputs$ZZ
+            #   )
+            # )
+            # 
+            # LL <- logLik(
+            #   MLPE.lmm2(
+            #     resistance = cd,
+            #     response = gdist.inputs$response,
+            #     REML = F,
+            #     ID = gdist.inputs$ID,
+            #     ZZ = gdist.inputs$ZZ
+            #   )
+            # )
+            # 
+            # if (k.value == 1) {
+            #   k <- 2
+            # } else if (k.value == 2) {
+            #   k <- GA.inputs$parm.type$n.parm[i] + 1
+            # } else if (k.value == 3) {
+            #   k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+            # } else {
+            #   k <- length(GA.inputs$layer.names[i]) + 1
+            # }
+            
+            fit.mod <- mlpe_rga(formula = gd ~ cd + (1|pop),
+                                data = dat,
+                                ZZ = gdist.inputs$ZZ,
+                                REML = FALSE)
+            
+            fit.stats <- suppressWarnings(r.squaredGLMM(
+              fit.mod
+            ))
             
             aic <- AIC(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                REML = F,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ
-              )
+              fit.mod
             )
             
             LL <- logLik(
-              MLPE.lmm2(
-                resistance = cd,
-                response = gdist.inputs$response,
-                REML = F,
-                ID = gdist.inputs$ID,
-                ZZ = gdist.inputs$ZZ
-              )
+              fit.mod
             )
             
             if (k.value == 1) {
               k <- 2
             } else if (k.value == 2) {
-              k <- GA.inputs$parm.type$n.parm[i] + 1
+              k <- GA.inputs$parm.type$n.parm[i] + length(lme4::fixef(fit.mod)) - 1
             } else if (k.value == 3) {
-              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + 1
+              k <- GA.inputs$parm.type$n.parm[i] + length(GA.inputs$layer.names) + length(lme4::fixef(fit.mod)) - 1
             } else {
-              k <- length(GA.inputs$layer.names[i]) + 1
+              k <- length(GA.inputs$layer.names[i]) + length(lme4::fixef(fit.mod)) - 1
             }
             
             k.list[[i]] <- k
@@ -2117,6 +2201,9 @@ SS_optim <- function(CS.inputs = NULL,
             NAME <- GA.inputs$layer.names[i]
             
             cd <- Run_gdistance(gdist.inputs, r)
+            dat <- gdist.inputs$df
+            dat$cd <- scale(c(cd))
+            
             # save(cd, file = paste0(GA.inputs$Write.dir, NAME, ".rda"))
             write.table(
               as.matrix(cd),
@@ -2157,39 +2244,56 @@ SS_optim <- function(CS.inputs = NULL,
               print.dir = GA.inputs$Plots.dir
             )
             
-            fit.stats <-
-              r.squaredGLMM(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            # fit.stats <-
+            #   r.squaredGLMM(
+            #     MLPE.lmm(
+            #       resistance = cd,
+            #       pairwise.genetic = gdist.inputs$response,
+            #       REML = F,
+            #       ID = gdist.inputs$ID,
+            #       ZZ = gdist.inputs$ZZ
+            #     )
+            #   )
+            # 
+            # 
+            # aic <-
+            #   AIC(
+            #     MLPE.lmm(
+            #       resistance = cd,
+            #       pairwise.genetic = gdist.inputs$response,
+            #       REML = F,
+            #       ID = gdist.inputs$ID,
+            #       ZZ = gdist.inputs$ZZ
+            #     )
+            #   )
+            # 
+            # LL <-
+            #   logLik(
+            #     MLPE.lmm(
+            #       resistance = cd,
+            #       pairwise.genetic = gdist.inputs$response,
+            #       REML = F,
+            #       ID = gdist.inputs$ID,
+            #       ZZ = gdist.inputs$ZZ
+            #     )
+            #   )
             
+            fit.mod <- mlpe_rga(formula = gd ~ cd + (1|pop),
+                                data = dat,
+                                ZZ = gdist.inputs$ZZ,
+                                REML = FALSE)
             
-            aic <-
-              AIC(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            aic <- suppressWarnings(AIC(
+              fit.mod
+            ))
             
-            LL <-
-              logLik(
-                MLPE.lmm(
-                  resistance = cd,
-                  pairwise.genetic = gdist.inputs$response,
-                  REML = F,
-                  ID = gdist.inputs$ID,
-                  ZZ = gdist.inputs$ZZ
-                )
-              )
+            fit.stats <- suppressWarnings(r.squaredGLMM(
+              fit.mod
+            ))
+            
+            LL <- logLik(
+              fit.mod
+            )
             
             MLPE.list[[i]] <-  MLPE.lmm2(
               resistance = cd,
@@ -2471,6 +2575,8 @@ SS_optim <- function(CS.inputs = NULL,
           names(r) <- NAME
           
           cd <- Run_CS.jl(jl.inputs, r, full.mat = TRUE)
+          dat <- jl.inputs$df
+          dat$cd <- scale(cd)
           
           write.table(
             cd,
@@ -2663,6 +2769,8 @@ SS_optim <- function(CS.inputs = NULL,
           NAME <- GA.inputs$layer.names[i]
           
           cd <- Run_CS.jl(jl.inputs, r, full.mat = TRUE)
+          dat <- jl.inputs$df
+          dat$cd <- scale(cd)
           
           write.table(
             cd,
@@ -2802,6 +2910,8 @@ SS_optim <- function(CS.inputs = NULL,
           r <- reclassify(r, c(-Inf, Inf, 1))
           names(r) <- "dist"
           cd <- Run_CS.jl(jl.inputs, r, full.mat = TRUE)
+          dat <- jl.inputs$df
+          dat$cd <- scale(cd)
           
           write.table(
             cd,
@@ -2996,6 +3106,8 @@ SS_optim <- function(CS.inputs = NULL,
           names(r) <- NAME
           
           cd <- Run_CS.jl(jl.inputs, r, full.mat = TRUE)
+          dat <- jl.inputs$df
+          dat$cd <- scale(cd)
           
           write.table(
             cd,
@@ -3182,6 +3294,8 @@ SS_optim <- function(CS.inputs = NULL,
           NAME <- GA.inputs$layer.names[i]
           
           cd <- Run_CS.jl(jl.inputs, r, full.mat = TRUE)
+          dat <- jl.inputs$df
+          dat$cd <- scale(cd)
           
           write.table(
             cd,
@@ -3321,6 +3435,8 @@ SS_optim <- function(CS.inputs = NULL,
           r <- reclassify(r, c(-Inf, Inf, 1))
           names(r) <- "dist"
           cd <- Run_CS.jl(jl.inputs, r, full.mat = TRUE)
+          dat <- jl.inputs$df
+          dat$cd <- scale(cd)
           
           write.table(
             cd,
