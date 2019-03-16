@@ -683,19 +683,30 @@ all_comb <- function(gdist.inputs = NULL,
         obs <- gdist.inputs$n.Pops
         genetic.mat <- matrix(0, obs, obs)
         genetic.mat[lower.tri(genetic.mat)] <- gdist.inputs$response
+        
+        boot.results <- Resist.boot(mod.names = all.k[,1],
+                                    dist.mat = all.cd,
+                                    n.parameters = all.k[,2],
+                                    sample.prop = sample.prop,
+                                    iters = iters,
+                                    obs = obs,
+                                    genetic.mat = genetic.mat)
       } else {
         obs <- jl.inputs$n.Pops
         genetic.mat <- matrix(0, obs, obs)
-        genetic.mat[lower.tri(genetic.mat)] <- jl.inputs$response
+        genetic.mat[lower.tri(genetic.mat)] <- jl.inputs$response.all
+        
+        boot.results <- Resist.boot(mod.names = all.k[,1],
+                                    dist.mat = all.cd,
+                                    n.parameters = all.k[,2],
+                                    sample.prop = sample.prop,
+                                    iters = iters,
+                                    obs = obs,
+                                    genetic.mat = genetic.mat,
+                                    keep = jl.inputs$keep)
       }
       
-      boot.results <- Resist.boot(mod.names = all.k[,1],
-                                  dist.mat = all.cd,
-                                  n.parameters = all.k[,2],
-                                  sample.prop = sample.prop,
-                                  iters = iters,
-                                  obs = obs,
-                                  genetic.mat = genetic.mat)
+     
       
     } # End scaled if-else
     

@@ -48,21 +48,26 @@ Diagnostic.Plots <-
       
       cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
       cs.unscale <- mm
-      dat <- data.frame(ID, cs.matrix = cs.matrix, response = response)
-      colnames(dat) <- c("pop1", "pop2", "cs.matrix", "response")
+      dat <- data.frame(pop = ID$pop1, cd = cs.matrix, gd = response)
+      # dat <- data.frame(ID, cs.matrix = cs.matrix, response = response)
+      # colnames(dat) <- c("pop1", "pop2", "cs.matrix", "response")
       
       # Assign value to layer
-      LAYER <- assign("LAYER", value = dat$cs.matrix)
+      # LAYER <- assign("LAYER", value = dat$cs.matrix)
       
       # Fit model
-      mod <- lFormula(response ~ LAYER + (1 | pop1),
+      Mod <- mlpe_rga(gd ~ cd + (1 | pop),
                       data = dat,
-                      REML = TRUE)
-      mod$reTrms$Zt <- ZZ
-      dfun <- do.call(mkLmerDevfun, mod)
-      opt <- optimizeLmer(dfun)
-      Mod <-
-        (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+                      REML = TRUE,
+                      ZZ = ZZ)
+      # mod <- lFormula(response ~ LAYER + (1 | pop1),
+      #                 data = dat,
+      #                 REML = TRUE)
+      # mod$reTrms$Zt <- ZZ
+      # dfun <- do.call(mkLmerDevfun, mod)
+      # opt <- optimizeLmer(dfun)
+      # Mod <-
+      #   (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
     }
     
     
@@ -85,71 +90,76 @@ Diagnostic.Plots <-
       }
       cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
       cs.unscale <- mm
-      dat <- data.frame(ID, cs.matrix = cs.matrix, response = response)
-      colnames(dat) <- c("pop1", "pop2", "cs.matrix", "response")
+      dat <- data.frame(pop = ID$pop1, cd = cs.matrix, gd = response)
+      # colnames(dat) <- c("pop1", "pop2", "cs.matrix", "response")
       
       # Assign value to layer
-      LAYER <- assign("LAYER", value = dat$cs.matrix)
+      # LAYER <- assign("LAYER", value = dat$cs.matrix)
       
       # Fit model
-      mod <- lFormula(response ~ LAYER + (1 | pop1),
+      Mod <- mlpe_rga(gd ~ cd + (1 | pop),
                       data = dat,
-                      REML = TRUE)
-      mod$reTrms$Zt <- ZZ
-      dfun <- do.call(mkLmerDevfun, mod)
-      opt <- optimizeLmer(dfun)
-      Mod <-
-        (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
-    }
-    #######
-    # Make diagnostic plots
-    if (type == "categorical") {
-      tiff(
-        filename = paste0(plot.dir, NAME, "_DiagnosticPlots.tif"),
-        width = 279,
-        height = 215,
-        units = "mm",
-        compression = c("lzw"),
-        bg = "white",
-        res = 300
-      )
-      par(
-        mfrow = c(2, 1),
-        oma = c(0, 4, 0, 0) + 0.1,
-        mar = c(4, 4, 1, 1) + 0.1
-      )
-      hist(residuals(Mod), xlab = "Residuals", main = "")
-      qqnorm(resid(Mod), main = "")
-      qqline(resid(Mod))
-      dev.off()
-      par(mfrow = c(1, 1))
-    } else {
-      tiff(
-        filename = paste0(plot.dir, NAME, "_DiagnosticPlots.tif"),
-        width = 279,
-        height = 215,
-        units = "mm",
-        compression = c("lzw"),
-        bg = "white",
-        res = 300
-      )
-      par(
-        mfrow = c(2, 2),
-        oma = c(0, 4, 0, 0) + 0.1,
-        mar = c(4, 4, 1, 1) + 0.1
-      )
-      plot(dat$response ~ cs.unscale,
-           xlab = XLAB,
-           ylab = YLAB)
-      abline(lm(dat$response ~ cs.unscale))
-      plot(residuals(Mod) ~ cs.unscale,
-           xlab = XLAB,
-           ylab = "Residuals")
-      abline(lm(residuals(Mod) ~ cs.unscale))
-      hist(residuals(Mod), xlab = "Residuals", main = "")
-      qqnorm(resid(Mod), main = "")
-      qqline(resid(Mod))
-      dev.off()
-      par(mfrow = c(1, 1))
+                      REML = TRUE,
+                      ZZ = ZZ)
+      #   mod <- lFormula(response ~ LAYER + (1 | pop1),
+      #                   data = dat,
+      #                   REML = TRUE)
+      #   mod$reTrms$Zt <- ZZ
+      #   dfun <- do.call(mkLmerDevfun, mod)
+      #   opt <- optimizeLmer(dfun)
+      #   Mod <-
+      #     (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+      # }
+      #######
+      # Make diagnostic plots
+      if (type == "categorical") {
+        tiff(
+          filename = paste0(plot.dir, NAME, "_DiagnosticPlots.tif"),
+          width = 279,
+          height = 215,
+          units = "mm",
+          compression = c("lzw"),
+          bg = "white",
+          res = 300
+        )
+        par(
+          mfrow = c(2, 1),
+          oma = c(0, 4, 0, 0) + 0.1,
+          mar = c(4, 4, 1, 1) + 0.1
+        )
+        hist(residuals(Mod), xlab = "Residuals", main = "")
+        qqnorm(resid(Mod), main = "")
+        qqline(resid(Mod))
+        dev.off()
+        par(mfrow = c(1, 1))
+      } else {
+        tiff(
+          filename = paste0(plot.dir, NAME, "_DiagnosticPlots.tif"),
+          width = 279,
+          height = 215,
+          units = "mm",
+          compression = c("lzw"),
+          bg = "white",
+          res = 300
+        )
+        par(
+          mfrow = c(2, 2),
+          oma = c(0, 4, 0, 0) + 0.1,
+          mar = c(4, 4, 1, 1) + 0.1
+        )
+        plot(dat$gd ~ cs.unscale,
+             xlab = XLAB,
+             ylab = YLAB)
+        abline(lm(dat$gd ~ cs.unscale))
+        plot(residuals(Mod) ~ cs.unscale,
+             xlab = XLAB,
+             ylab = "Residuals")
+        abline(lm(residuals(Mod) ~ cs.unscale))
+        hist(residuals(Mod), xlab = "Residuals", main = "")
+        qqnorm(resid(Mod), main = "")
+        qqline(resid(Mod))
+        dev.off()
+        par(mfrow = c(1, 1))
+      }
     }
   }

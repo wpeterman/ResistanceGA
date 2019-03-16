@@ -145,7 +145,7 @@ Resistance.Opt_single.cov <-
             #     File.name = File.name
             #   )
             
-
+            
             dat <- CS.inputs$df
             dat$cd <- scale(CS.resist)
             fit.mod <-  mlpe_rga(formula = CS.inputs$formula,
@@ -295,7 +295,7 @@ Resistance.Opt_single.cov <-
           
           if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration    
             
-
+            
             dat <- jl.inputs$df
             dat$cd <- scale(cd)
             fit.mod <-  mlpe_rga(formula = jl.inputs$formula,
@@ -359,7 +359,7 @@ Resistance.Opt_single.cov <-
         }
       }
     }
-    rm(r)
+    # rm(r)
     gc()
     if(!is.null(GA.inputs$opt.digits)) {
       obj.func.opt <- round(obj.func.opt, GA.inputs$opt.digits)

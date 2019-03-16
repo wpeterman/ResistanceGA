@@ -2,7 +2,7 @@
 % Please edit documentation in R/OptimFunction_Multi_covariate.R
 \name{Resistance.Opt_multi.cov}
 \alias{Resistance.Opt_multi.cov}
-\title{Optimize multiple resistance surfaces simultaneously}
+\title{Optimize multiple resistance surfaces simultaneously with more than one predictor variable}
 \usage{
 Resistance.Opt_multi.cov(PARM, CS.inputs = NULL, gdist.inputs = NULL,
   jl.inputs = NULL, GA.inputs, Min.Max, quiet = FALSE)
@@ -26,7 +26,7 @@ Resistance.Opt_multi.cov(PARM, CS.inputs = NULL, gdist.inputs = NULL,
 Objective function value (either AIC, R2, or LL) from mixed effect model
 }
 \description{
-Create composite resistance surface by simultaneously optimizing multiple categoricla and continuous surfaces. This optimization function is designed to be called from GA
+Create composite resistance surface by simultaneously optimizing multiple categorical and continuous surfaces. This optimization function is designed to be called from GA
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

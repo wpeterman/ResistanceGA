@@ -12,11 +12,20 @@
 #' @param EXPORT.dir Directory where CS results will be written. Only specify if Circuitscape current map outputs are requested. It is critical that there are NO SPACES in the directory, as this may cause the function to fail.
 #' @param output Specifiy either "matrix" or "raster". "matrix" will return the lower half of the pairwise resistance matrix (default), while "raster" will return a \code{raster} object of the cumulative current map. The raster map can only be returned if \code{CurrentMap=TRUE}
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations. Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param parallel (Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel? Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param cores If `parallel = TRUE`, how many cores should be used for parallel processing? Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param cholmod (Logical; Default = TRUE). Should the cholmod solver be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.
+#' @param precision (Logical; Default = FALSE). Should experimental single precision method be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
 #' #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}
-#' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE)
+#' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE). Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param scratch Scratch directory for use if write access is limited. Must be specified if raster results are desired for outputs.
-#' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
+#' @return Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}. The `full.mat` cannot be requested if only select pairs are being analyzed.
+#' 
+#' @examples 
+#' ## To do
+#' 
 #' @usage Run_CS.jl(jl.inputs = NULL,
 #' r,
 #' CurrentMap = FALSE,
@@ -24,6 +33,11 @@
 #' EXPORT.dir = NULL,
 #' output = "matrix",
 #' CS_Point.File = NULL,
+#' pairs_to_include = NULL,
+#' parallel = FALSE, 
+#' cores = NULL,
+#' cholmod = TRUE,
+#' precision = FALSE, 
 #' JULIA_HOME = NULL,
 #' Julia_link = NULL,
 #' rm.files = TRUE,
@@ -39,14 +53,15 @@ Run_CS.jl <-
            EXPORT.dir = NULL,
            output = "matrix",
            CS_Point.File = NULL,
+           pairs_to_include = NULL,
+           parallel = FALSE,
+           cores = NULL,
+           cholmod = TRUE,
+           precision = FALSE,
            JULIA_HOME = NULL,
            Julia_link = NULL,
            rm.files = TRUE,
            scratch = NULL) {
-    
-    if(!is.null(jl.inputs$scratch)) {
-      scratch <- jl.inputs$scratch
-    }
     
     if(!is.null(jl.inputs$rm.files)) {
       rm.files <- jl.inputs$rm.files
@@ -73,9 +88,23 @@ Run_CS.jl <-
     if(is.null(jl.inputs)) {
       jl.inputs <- jl.prep(n.Pops = length(CS_Point.File),
                            CS_Point.File = CS_Point.File,
+                           pairs_to_include = pairs_to_include,
                            JULIA_HOME = JULIA_HOME,
+                           scratch = scratch,
+                           Julia_link = Julia_link,
+                           parallel = parallel,
+                           cores = cores,
+                           cholmod = cholmod,
+                           precision = precision,
                            run_test = FALSE)
     }
+    
+    scratch <- jl.inputs$scratch
+    
+    if(isTRUE(full.mat) & !is.null(jl.inputs$pairs_to_include)) {
+      warning("The full matrix generated will have -1 values. These indicate pairs that were excluded from the analysis.")
+    }
+    
     
     if(!is.null(jl.inputs)) {
       if(is.null(jl.inputs$write.files)) {
@@ -115,16 +144,6 @@ Run_CS.jl <-
       
     }
     
-    # if(is.null(EXPORT.dir)) {
-    #   EXPORT.dir <- paste0(tempdir(), "\\")
-    # } else {
-    #   # if(CurrentMap == FALSE) {
-    #   #   EXPORT.dir <- paste0(tempdir(), "\\")
-    #   # } else {
-    #   EXPORT.dir
-    #   # }
-    # }
-    
     if(is.null(EXPORT.dir)) {   
       if(Sys.info()[['sysname']] == "Windows") {
         EXPORT.dir <- paste0(tempdir(),"\\")
@@ -148,7 +167,7 @@ Run_CS.jl <-
     
     if (max(R@data@values, na.rm = TRUE) > 1e6)
       R <-
-        SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
+      SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
     R <- reclassify(R, c(-Inf, 0, 1))
     
     rm.rast <- temp_rast <- tempfile(pattern = "raster_", 
@@ -297,6 +316,7 @@ Run_CS.jl <-
     } else {
       if(full.mat == FALSE) {
         cs.matrix <- lower(out)
+        cs.matrix <- cs.matrix[cs.matrix != -1]
       } else {
         cs.matrix <- out
       }

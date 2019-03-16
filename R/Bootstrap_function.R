@@ -22,7 +22,8 @@
 #'                    sample.prop, 
 #'                    iters, obs, 
 #'                    rank.method, 
-#'                    genetic.mat)
+#'                    genetic.mat,
+#'                    keep = NULL)
 #'
 
 Resist.boot <-

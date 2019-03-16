@@ -55,7 +55,7 @@ Resistance.Opt_multi.scale <-
       }
       
       if(!exists('obj.func.opt')) {
-        CS.resist <- try(Run_CS2(
+        CS.resist <- try(Run_CS(
           CS.inputs,
           r = r
         ), TRUE)

@@ -13,10 +13,10 @@ JULIA_HOME,
 Neighbor.Connect, 
 pairs_to_include, 
 platform, 
-parallel, 
-cores,
-cholmod,
-precision, 
+parallel = FALSE, 
+cores = NULL,
+cholmod = TRUE,
+precision = FALSE, 
 run_test,
 write.files = NULL,
 write.criteria = NULL,
@@ -28,18 +28,19 @@ rm.files = TRUE)
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}
 
-\item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run.}
+\item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run. If optimizing with select points only (see \code{pairs_to_include} below), still provide the full vector for the lower half of the square matrix. This will automatically be trimmed down based on the selected pairs to include.}
 
 \item{CS_Point.File}{Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 
 \item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
 
-\item{formula}{If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
-#' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)}
+\item{formula}{If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.}
+
+\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details)}
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
-\item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.}
+\item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations in the MLPE model.}
 
 \item{parallel}{(Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel?}
 
@@ -83,6 +84,10 @@ If \code{precision} is TRUE, then the EXPERIMENTAL single precision method will 
 
 When specifying a formula, provide it as: \code{response ~ covariate}.
 the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
+}
+\examples{
+# To do
+
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

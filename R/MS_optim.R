@@ -134,44 +134,68 @@ MS_optim <- function(CS.inputs = NULL,
       ZZ = CS.inputs$ZZ
     )
     
-    fit.stats <- r.squaredGLMM(
-      MLPE.lmm(
-        REML = F,
-        resistance = lower(cd),
-        pairwise.genetic = CS.inputs$response,
-        ID = CS.inputs$ID,
-        ZZ = CS.inputs$ZZ
-      )
-    )
-    aic <- AIC(
-      MLPE.lmm(
-        REML = F,
-        resistance = lower(cd),
-        pairwise.genetic = CS.inputs$response,
-        ID = CS.inputs$ID,
-        ZZ = CS.inputs$ZZ
-      )
+    dat <- CS.inputs$df
+    dat$cd <- scale(lower(cd))
+    fit.mod <- mlpe_rga(formula = CS.inputs$formula,
+                        data = dat,
+                        ZZ = CS.inputs$ZZ,
+                        REML = FALSE)
+    fit.mod_REML <- mlpe_rga(formula = CS.inputs$formula,
+                             data = dat,
+                             ZZ = CS.inputs$ZZ,
+                             REML = TRUE)
+    
+    aic <- suppressWarnings(AIC(
+      fit.mod
+    ))
+    
+    fit.stats <- suppressWarnings(r.squaredGLMM(
+      fit.mod
+    ))
+    
+    LL <- logLik(
+      fit.mod
     )
     
-    LL <-
-      logLik(
-        MLPE.lmm(
-          resistance = lower(cd),
-          pairwise.genetic = CS.inputs$response,
-          REML = F,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ
-        )
-      )
-    
-    MLPE.model <-
-      MLPE.lmm(
-        resistance = lower(cd),
-        pairwise.genetic = CS.inputs$response,
-        REML = F,
-        ID = CS.inputs$ID,
-        ZZ = CS.inputs$ZZ
-      )
+    MLPE.model <- fit.mod
+    # fit.stats <- r.squaredGLMM(
+    #   MLPE.lmm(
+    #     REML = F,
+    #     resistance = lower(cd),
+    #     pairwise.genetic = CS.inputs$response,
+    #     ID = CS.inputs$ID,
+    #     ZZ = CS.inputs$ZZ
+    #   )
+    # )
+    # aic <- AIC(
+    #   MLPE.lmm(
+    #     REML = F,
+    #     resistance = lower(cd),
+    #     pairwise.genetic = CS.inputs$response,
+    #     ID = CS.inputs$ID,
+    #     ZZ = CS.inputs$ZZ
+    #   )
+    # )
+    # 
+    # LL <-
+    #   logLik(
+    #     MLPE.lmm(
+    #       resistance = lower(cd),
+    #       pairwise.genetic = CS.inputs$response,
+    #       REML = F,
+    #       ID = CS.inputs$ID,
+    #       ZZ = CS.inputs$ZZ
+    #     )
+    #   )
+    # 
+    # MLPE.model <-
+    #   MLPE.lmm(
+    #     resistance = lower(cd),
+    #     pairwise.genetic = CS.inputs$response,
+    #     REML = F,
+    #     ID = CS.inputs$ID,
+    #     ZZ = CS.inputs$ZZ
+    #   )
     
     if (k.value == 1) {
       k <- 2
@@ -272,9 +296,9 @@ MS_optim <- function(CS.inputs = NULL,
   
   if (!is.null(gdist.inputs)) {
     
-
-# MLPE with Covariates ----------------------------------------------------
-
+    
+    # MLPE with Covariates ----------------------------------------------------
+    
     if(!is.null(gdist.inputs$covariates)) { 
       #  * Island GA -------------------------------------------------------------
       if(isTRUE(GA.inputs$gaisl)) {
@@ -343,7 +367,7 @@ MS_optim <- function(CS.inputs = NULL,
         rt <- proc.time()[3] - t1
         
       }
-       
+      
     } # End covariates
     
     # MLPE no Covariates ------------------------------------------------------
@@ -417,7 +441,7 @@ MS_optim <- function(CS.inputs = NULL,
       }
     } # End no covariates
     
-
+    
     
     multi.GA_nG.o <- multi.GA_nG
     
@@ -479,7 +503,7 @@ MS_optim <- function(CS.inputs = NULL,
     ifelse(length(unique(RAST)) > 15,
            type <- "continuous",
            type <- "categorical")
-
+    
     Diagnostic.Plots(
       resistance.mat = cd,
       genetic.dist = gdist.inputs$response,
@@ -509,9 +533,9 @@ MS_optim <- function(CS.inputs = NULL,
                         ZZ = gdist.inputs$ZZ,
                         REML = FALSE)
     fit.mod_REML <- mlpe_rga(formula = gdist.inputs$formula,
-                        data = dat,
-                        ZZ = gdist.inputs$ZZ,
-                        REML = TRUE)
+                             data = dat,
+                             ZZ = gdist.inputs$ZZ,
+                             REML = TRUE)
     
     aic <- suppressWarnings(AIC(
       fit.mod
@@ -732,9 +756,13 @@ MS_optim <- function(CS.inputs = NULL,
     
     NAME <- paste(GA.inputs$parm.type$name, collapse = ".")
     names(RAST) <- NAME
-    cd <- Run_CS.jl(jl.inputs, RAST, full.mat = TRUE)
+    
+    cd <- suppressWarnings(Run_CS.jl(jl.inputs, RAST, full.mat = TRUE))
+    cd.l <- lower(cd)
+    cd.l <- scale(cd.l[jl.inputs$keep == 1])
     dat <- jl.inputs$df
-    dat$cd <- scale(cd)
+    dat$cd <- cd.l
+    # dat$cd <- scale(lower(cd)[which(lower(cd) != -1)])
     
     write.table(
       cd,
@@ -750,9 +778,9 @@ MS_optim <- function(CS.inputs = NULL,
     ifelse(length(unique(RAST)) > 15,
            type <- "continuous",
            type <- "categorical")
-
+    
     Diagnostic.Plots(
-      resistance.mat = lower(cd),
+      resistance.mat = dat$cd,
       genetic.dist = jl.inputs$response,
       plot.dir = GA.inputs$Plots.dir,
       type = type,
@@ -763,6 +791,8 @@ MS_optim <- function(CS.inputs = NULL,
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(
+      formula = jl.inputs$formula,
+      inputs = dat,
       resistance = GA.inputs$Results.dir,
       genetic.dist = jl.inputs$response,
       out.dir = GA.inputs$Results.dir,

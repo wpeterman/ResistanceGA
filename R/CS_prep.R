@@ -133,6 +133,12 @@ CS.prep <- function(n.Pops,
       )[1, 1],
       pattern = paste(toMatch, collapse = "|")
     )) {
+      
+
+      
+# Pairs to include -- NEED TO UPDATE --------------------------------------
+
+      
       # Function to make list of observations to include
       Min.MAX <-
         read.table(file = pairs_to_include,
@@ -174,12 +180,42 @@ CS.prep <- function(n.Pops,
   if (!exists(x = "ID")) {
     ID <- To.From.ID(n.Pops)
   }
+  
+  # Make data frame ---------------------------------------------------------
+  # Make to-from population list
+  if (!exists(x = "ID")) {
+    ID <- To.From.ID(n.Pops)
+  }
+  suppressWarnings(ZZ <- ZZ.mat(ID))
+  
+  keep <-  pairs_to_include
+  
+  # df <- NULL
+  if(!is.null(response)) {
+    if(!is.null(covariates)) {
+      df <- data.frame(gd = response,
+                       covariates,
+                       pop = ID$pop1)
+    } else {
+      df <- data.frame(gd = response,
+                       pop = ID$pop1)
+    }
+    
+    fmla <- formula
+    if(!is.null(fmla)) {
+      fmla <- update(fmla, gd ~ . + cd + (1 | pop))
+    } else {
+      fmla <- gd ~ cd + (1 | pop)
+    }
+  }
+  
   suppressWarnings(ZZ <- ZZ.mat(ID))
   list(
     ID = ID,
     ZZ = ZZ,
     response = response,
     covariates = covariates,
+    formula = fmla,
     CS_Point.File = CS_Point.File,
     CS.program = CS.program,
     Neighbor.Connect = Neighbor.Connect,
@@ -187,6 +223,7 @@ CS.prep <- function(n.Pops,
     platform = platform,
     pairs_to_include = pairs_to_include,
     parallel = parallel,
-    cores = cores
+    cores = cores,
+    df = df
   )
 }

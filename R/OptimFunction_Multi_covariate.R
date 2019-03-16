@@ -12,12 +12,12 @@
 #' @return Objective function value (either AIC, R2, or LL) from mixed effect model
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_multi.cov <- function(PARM,
-                                 CS.inputs = NULL,
-                                 gdist.inputs = NULL,
-                                 jl.inputs = NULL,
-                                 GA.inputs,
-                                 Min.Max,
-                                 quiet = FALSE) {
+                                     CS.inputs = NULL,
+                                     gdist.inputs = NULL,
+                                     jl.inputs = NULL,
+                                     GA.inputs,
+                                     Min.Max,
+                                     quiet = FALSE) {
   t1 <- proc.time()[3]
   
   method <- GA.inputs$method
@@ -159,7 +159,7 @@ Resistance.Opt_multi.cov <- function(PARM,
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
       obj.func.opt <- -99999
-      rm(cd, r)
+      rm(r)
       gc()
     } 
     
@@ -229,7 +229,7 @@ Resistance.Opt_multi.cov <- function(PARM,
       #   ))
       #   obj.func.opt <- obj.func[[1]]
       # }
-      rm(cd, r)
+      # rm(cd, r)
       gc()
     } # End objective fun iteration
   } # End gdistance

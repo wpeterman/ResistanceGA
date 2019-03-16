@@ -10,7 +10,8 @@ Resist.boot(mod.names,
                    sample.prop, 
                    iters, obs, 
                    rank.method, 
-                   genetic.mat)
+                   genetic.mat,
+                   keep = NULL)
 }
 \arguments{
 \item{mod.names}{A vector of the model names to be assessed}

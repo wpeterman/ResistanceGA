@@ -3,13 +3,13 @@
 #' This function will prepare objects needed for running optimization functions
 #'
 #' @param n.Pops The number of populations that are being assessed
-#' @param response Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run.
+#' @param response Vector of pairwise genetic distances (lower half of pairwise matrix). Not necessary if only executing Julia run. If optimizing with select points only (see \code{pairs_to_include} below), still provide the full vector for the lower half of the square matrix. This will automatically be trimmed down based on the selected pairs to include.
 #' @param CS_Point.File Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help.
 #' @param covariates Data frame of additional covariates that you want included in the MLPE model during opitmization.
 #' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
-#' #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
+#' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
-#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide the path to the properly formatted "pairs_to_include.txt" file here. Currently only "include" method is supported.
+#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations in the MLPE model. 
 #' @param parallel (Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel?
 #' @param cores If `parallel = TRUE`, how many cores should be used for parallel processing?
 #' @param cholmod (Logical; Default = TRUE). Should the cholmod solver be used? See details.
@@ -35,10 +35,10 @@
 #' Neighbor.Connect, 
 #' pairs_to_include, 
 #' platform, 
-#' parallel, 
-#' cores,
-#' cholmod,
-#' precision, 
+#' parallel = FALSE, 
+#' cores = NULL,
+#' cholmod = TRUE,
+#' precision = FALSE, 
 #' run_test,
 #' write.files = NULL,
 #' write.criteria = NULL,
@@ -60,6 +60,9 @@
 #' 
 #' When specifying a formula, provide it as: \code{response ~ covariate}.
 #' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
+#' 
+#' @examples 
+#' # To do
 #' 
 jl.prep <- function(n.Pops,
                     response = NULL,
@@ -99,7 +102,7 @@ jl.prep <- function(n.Pops,
   
   if(!is.null(write.files)) {
     if(!dir.exists(write.files))
-    stop("`write.files` directory does not exist")
+      stop("`write.files` directory does not exist")
   }
   
   # Setup Julia -------------------------------------------------------------
@@ -122,135 +125,128 @@ jl.prep <- function(n.Pops,
   }
   
   # Determine if CIRCUITSCAPE package is installed
-  # if(Julia_link == 'JuliaCall'){
-  if(julia_installed_package("Circuitscape") == 'nothing') {
-    julia_install_package('Circuitscape')
-    julia_call('Pkg.test', "Circuitscape")
+  jl.cs <- try(julia_library("Circuitscape"), TRUE)
+  if(class(jl.cs) == "try-error"){
+    stop(cat(paste("You must install the Julia CIRCUITSCAPE package!!!",
+                   "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
+  }
+  
+  
+  if(run_test == TRUE) {
+    print("Running test #1: Run Circuitscape from Julia")
+    
+    if(Sys.info()[['sysname']] == "Windows") {
+      td <- paste0(tempdir(),"\\")
+    } else {
+      td <- paste0(tempdir(),"/")
+    }
+    write.table(samples, 
+                paste0(td,'samples.txt'), 
+                quote = FALSE,
+                sep = "\t",
+                row.names = FALSE,
+                col.names = FALSE)
+    
+    temp.ini <- tempfile(pattern = "", 
+                         tmpdir = tempdir(),
+                         fileext = ".ini")
+    
+    tmp.name <- basename(temp.ini) %>% strsplit(., '.ini') %>% unlist()
+    
+    writeRaster(resistance_surfaces$continuous,
+                paste0(td,
+                       tmp.name, '.asc'),
+                overwirte = TRUE)
     
     
-    # Run test ----------------------------------------------------------------
-    
-  } else {
-    if(Julia_link == 'JuliaCall'){
-      julia_library("Circuitscape")
+    if(!is.null(scratch)) {
+      write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+                   OUT = paste0("output_file = ", scratch,"/", tmp.name, ".out"),
+                   HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+                   LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                   PARALLELIZE = FALSE,
+                   CORES = NULL,
+                   solver = 'cholmod',
+                   precision = FALSE,
+                   silent = silent
+      )
+    } else {
+      write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+                   OUT = paste0("output_file = ", td, tmp.name, ".out"),
+                   HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+                   LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                   PARALLELIZE = FALSE,
+                   CORES = NULL,
+                   solver = 'cholmod',
+                   precision = FALSE,
+                   silent = silent
+      )
     }
     
-    if(run_test == TRUE) {
-      print("Running test #1: Run Circuitscape from Julia")
+    if(Julia_link == 'JuliaCall'){
+      out <- julia_call('compute', temp.ini)[-1,-1]
       
-      if(Sys.info()[['sysname']] == "Windows") {
-        td <- paste0(tempdir(),"\\")
-      } else {
-        td <- paste0(tempdir(),"/")
-      }
-      write.table(samples, 
-                  paste0(td,'samples.txt'), 
-                  quote = FALSE,
-                  sep = "\t",
-                  row.names = FALSE,
-                  col.names = FALSE)
+    } else {
+      cs.jl <- RJulia()
+      cs.jl$Using("Circuitscape")
       
-      temp.ini <- tempfile(pattern = "", 
-                           tmpdir = tempdir(),
-                           fileext = ".ini")
+      cs.out <- cs.jl$Call("compute", temp.ini) 
+      out <- as.matrix(read.table(paste0(scratch, "/", tmp.name, "_resistances.out"),
+                                  quote="\"", comment.char=""))[-1,-1]
+      # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+      # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
+    }
+    
+    
+    
+    if(dim(out)[1] == 25) {
+      cat("\n"); cat("\n")
       
-      tmp.name <- basename(temp.ini) %>% strsplit(., '.ini') %>% unlist()
+      cat("Test #1: Passed")
       
-      writeRaster(resistance_surfaces$continuous,
-                  paste0(td,
-                         tmp.name, '.asc'),
-                  overwirte = TRUE)
+      cat("\n"); cat("\n")
       
-      if(!is.null(scratch)) {
-        write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                     OUT = paste0("output_file = ", scratch,"/", tmp.name, ".out"),
-                     HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                     LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-                     PARALLELIZE = FALSE,
-                     CORES = NULL,
-                     solver = 'cholmod',
-                     precision = FALSE,
-                     silent = silent
-        )
-      } else {
-        write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                     OUT = paste0("output_file = ", td, tmp.name, ".out"),
-                     HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                     LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-                     PARALLELIZE = FALSE,
-                     CORES = NULL,
-                     solver = 'cholmod',
-                     precision = FALSE,
-                     silent = silent
-        )
-      }
-      
-      if(Julia_link == 'JuliaCall'){
-        out <- julia_call('compute', temp.ini)[-1,-1]
-        
-      } else {
-        cs.jl <- RJulia()
-        cs.jl$Using("Circuitscape")
-        
-        cs.out <- cs.jl$Call("compute", temp.ini) 
-        out <- as.matrix(read.table(paste0(scratch, "/", tmp.name, "_resistances.out"),
-                                    quote="\"", comment.char=""))[-1,-1]
-        # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
-        # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
-      }
-      
-      
-      
-      if(dim(out)[1] == 25) {
-        cat("\n"); cat("\n")
-        
-        cat("Test #1: Passed")
-        
-        cat("\n"); cat("\n")
-        
-      } else {
-        stop("Test #1: Failed")
-      }
-      
-      #   
-      #   cat("Running test #2: Run Circuitscape from Julia in parallel")
-      #   
-      #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-      #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
-      #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-      #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-      #                PARALLELIZE = TRUE,
-      #                CORES = 2,
-      #                solver = 'cholmod',
-      #                precision = NULL
-      #   )
-      #   
-      #   out <- julia_call('compute', temp.ini)[-1,-1]
-      #   
-      #   
-      #   if(dim(out)[1] == 25) {
-      #     cat("\n"); cat("\n")
-      #     
-      #     print("Test #2: Passed")
-      #   } else {
-      #     stop("Test #2: Failed")
-      #   } 
-      #   
-      unlink.list <- list.files(td,
-                                pattern = tmp.name,
-                                all.files = TRUE,
-                                full.names = TRUE)
-      del.files <- sapply(unlink.list, unlink, force = TRUE)
-      
-      if(!is.null(scratch)){
-        unlink.list2 <- list.files(scratch,
-                                   pattern = tmp.name,
-                                   all.files = TRUE,
-                                   full.names = TRUE)
-        del.files <- sapply(unlink.list2, unlink, force = TRUE)
-      }
-      
-    } # End Julia setup
+    } else {
+      stop("Test #1: Failed")
+    }
+    
+    #   
+    #   cat("Running test #2: Run Circuitscape from Julia in parallel")
+    #   
+    #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
+    #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
+    #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
+    #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+    #                PARALLELIZE = TRUE,
+    #                CORES = 2,
+    #                solver = 'cholmod',
+    #                precision = NULL
+    #   )
+    #   
+    #   out <- julia_call('compute', temp.ini)[-1,-1]
+    #   
+    #   
+    #   if(dim(out)[1] == 25) {
+    #     cat("\n"); cat("\n")
+    #     
+    #     print("Test #2: Passed")
+    #   } else {
+    #     stop("Test #2: Failed")
+    #   } 
+    #   
+    unlink.list <- list.files(td,
+                              pattern = tmp.name,
+                              all.files = TRUE,
+                              full.names = TRUE)
+    del.files <- sapply(unlink.list, unlink, force = TRUE)
+    
+    if(!is.null(scratch)){
+      unlink.list2 <- list.files(scratch,
+                                 pattern = tmp.name,
+                                 all.files = TRUE,
+                                 full.names = TRUE)
+      del.files <- sapply(unlink.list2, unlink, force = TRUE)
+    }
   } # End test
   
   
@@ -274,7 +270,7 @@ jl.prep <- function(n.Pops,
   }
   
   if(class(CS_Point.File) == 'SpatialPoints') {
-
+    
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(tempdir(),"\\")
     } else {
@@ -313,70 +309,22 @@ jl.prep <- function(n.Pops,
   }
   
   if (!is.null(response)) {
-    TEST.response <- (is.vector(response) || ncol(response) == 1)
+    TEST.response <- ((is.vector(response)) || (ncol(response) == 1))
     if (TEST.response == FALSE) {
       stop("The object 'response' is not in the form of a single column vector")
     }
   }
   
-  if (!is.null(pairs_to_include)) {
-    if (!file.exists(pairs_to_include)) {
-      stop("The specified pairs_to_include file does not exist")
-    }
-    toMatch <- c("min", "max")
-    if (grep(
-      read.table(
-        file = pairs_to_include,
-        header = F,
-        sep = "\t"
-      )[1, 1],
-      pattern = paste(toMatch, collapse = "|")
-    )) {
-      # Function to make list of observations to include
-      Min.MAX <-
-        read.table(file = pairs_to_include,
-                   header = F,
-                   sep = "\t")[c(1, 2), c(1, 2)]
-      MIN <- Min.MAX[which(Min.MAX[, 1] == "min"), 2]
-      MAX <- Min.MAX[which(Min.MAX[, 1] == "max"), 2]
-      PTI <-
-        read.table(file = pairs_to_include,
-                   header = F,
-                   sep = "\t")[-c(1:3), ]
-      site <- PTI[, 1]
-      PTI <- as.matrix(PTI[, -1])
-      
-      p_t_i <- list()
-      count <- 0
-      for (i in 1:(ncol(PTI) - 1)) {
-        for (j in (i + 1):ncol(PTI)) {
-          if (PTI[j, i] >= MIN && PTI[j, i] <= MAX) {
-            count <- count + 1
-            p_t_i[[count]] <- data.frame(i, j)
-          } # close if statement
-        } # close j loop
-      } # close i loop
-      
-      ID <- plyr::ldply(p_t_i, .fun = identity)
-      colnames(ID) <- c("pop1", "pop2")
-      #           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
-      n1 <- table(ID$pop1)[[1]]
-      p1 <- ID[n1, 1]
-      p2 <- ID[n1, 2]
-      ID[n1, 1] <- p2
-      ID[n1, 2] <- p1
-      ID$pop1 <- factor(ID$pop1)
-      ID$pop2 <- factor(ID$pop2)
-    } # close function
-  } # close pairs to include statement
   
+  # Make data frame ---------------------------------------------------------
   # Make to-from population list
   if (!exists(x = "ID")) {
     ID <- To.From.ID(n.Pops)
   }
   suppressWarnings(ZZ <- ZZ.mat(ID))
   
-  df <- NULL
+  
+  # df <- NULL
   if(!is.null(response)) {
     if(!is.null(covariates)) {
       df <- data.frame(gd = response,
@@ -387,24 +335,113 @@ jl.prep <- function(n.Pops,
                        pop = ID$pop1)
     }
     
-    if(!is.null(formula)) {
-      formula <- update(formula, gd ~ . + cd + (1 | pop))
+    fmla <- formula
+    if(!is.null(fmla)) {
+      fmla <- update(fmla, gd ~ . + cd + (1 | pop))
     } else {
-      formula <- gd ~ cd + (1 | pop)
+      fmla <- gd ~ cd + (1 | pop)
     }
   }
   
+  # Pairs to include ---------------------------------------------------------
+  pairs_to_include.file <- NULL
+  keep <-  rep(1, length(response))
+  ID.keep <- ID
+  covariates.keep <- covariates
+  ZZ.keep <- ZZ
+  response.keep <- response
+  
+  if (!is.null(pairs_to_include)) {
+    keep <-  pairs_to_include
+    
+    df <- df[keep == 1,]
+    ZZ.keep <- ZZ[,keep == 1]
+    pop <- ID$pop1[keep == 1]
+    miss.pops <- as.character(pop)
+    
+    ## Reduce ZZ
+    ZZ.keep <- ZZ.keep[rownames(ZZ.keep) %in% unique(miss.pops),]
+    
+    ## Reduce response & covariates
+    response.keep <- response[keep == 1]
+    covariates.keep <- covariates[keep == 1]
+    
+    keep.id <- ID[keep == 1,]
+    names(keep.id) <- c('mode', 'include')
+    write.table(keep.id,
+                file = paste0(td, "include_pairs.txt"),
+                col.names = TRUE,
+                row.names = FALSE,
+                quote = FALSE)
+    pairs_to_include.file <- paste0(td, "include_pairs.txt")
+    ID.keep <- ID[keep == 1,]
+    
+  }
+  
+  ## ORIGINAL CODE  
+  # if (!is.null(pairs_to_include)) {
+  #   if (!file.exists(pairs_to_include)) {
+  #     stop("The specified pairs_to_include file does not exist")
+  #   }
+  #   toMatch <- c("min", "max")
+  #   if (grep(
+  #     read.table(
+  #       file = pairs_to_include,
+  #       header = F,
+  #       sep = "\t"
+  #     )[1, 1],
+  #     pattern = paste(toMatch, collapse = "|")
+  #   )) {
+  #     # Function to make list of observations to include
+  #     Min.MAX <-
+  #       read.table(file = pairs_to_include,
+  #                  header = F,
+  #                  sep = "\t")[c(1, 2), c(1, 2)]
+  #     MIN <- Min.MAX[which(Min.MAX[, 1] == "min"), 2]
+  #     MAX <- Min.MAX[which(Min.MAX[, 1] == "max"), 2]
+  #     PTI <-
+  #       read.table(file = pairs_to_include,
+  #                  header = F,
+  #                  sep = "\t")[-c(1:3), ]
+  #     site <- PTI[, 1]
+  #     PTI <- as.matrix(PTI[, -1])
+  #     
+  #     p_t_i <- list()
+  #     count <- 0
+  #     for (i in 1:(ncol(PTI) - 1)) {
+  #       for (j in (i + 1):ncol(PTI)) {
+  #         if (PTI[j, i] >= MIN && PTI[j, i] <= MAX) {
+  #           count <- count + 1
+  #           p_t_i[[count]] <- data.frame(i, j)
+  #         } # close if statement
+  #       } # close j loop
+  #     } # close i loop
+  #     
+  #     ID <- plyr::ldply(p_t_i, .fun = identity)
+  #     colnames(ID) <- c("pop1", "pop2")
+  #     #           ID<-arrange(tmp2,as.numeric(pop1),as.numeric(pop2))
+  #     n1 <- table(ID$pop1)[[1]]
+  #     p1 <- ID[n1, 1]
+  #     p2 <- ID[n1, 2]
+  #     ID[n1, 1] <- p2
+  #     ID[n1, 2] <- p1
+  #     ID$pop1 <- factor(ID$pop1)
+  #     ID$pop2 <- factor(ID$pop2)
+  #   } # close function
+  # } # close pairs to include statement
+  
+  ##Return list  
   list(
-    ID = ID,
-    ZZ = ZZ,
+    ID = ID.keep,
+    ZZ = ZZ.keep,
     df = df,
-    response = response,
-    covariates = covariates,
-    formula = formula,
+    response = response.keep,
+    covariates = covariates.keep,
+    formula = fmla,
     CS_Point.File = CS_Point.File,
     Neighbor.Connect = Neighbor.Connect,
     n.Pops = n.Pops,
-    pairs_to_include = pairs_to_include,
+    pairs_to_include = pairs_to_include.file,
     parallel = parallel,
     cores = cores,
     solver = solver,
@@ -415,6 +452,11 @@ jl.prep <- function(n.Pops,
     silent = silent,
     Julia_link = Julia_link,
     scratch = scratch,
+    keep = keep,
+    response.all = response,
+    ID.all = ID,
+    ZZ.all = ZZ,
+    covariates.all = covariates,
     rm.files = rm.files
   )
 }

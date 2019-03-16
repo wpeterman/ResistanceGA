@@ -11,6 +11,11 @@ full.mat = FALSE,
 EXPORT.dir = NULL,
 output = "matrix",
 CS_Point.File = NULL,
+pairs_to_include = NULL,
+parallel = FALSE, 
+cores = NULL,
+cholmod = TRUE,
+precision = FALSE, 
 JULIA_HOME = NULL,
 Julia_link = NULL,
 rm.files = TRUE,
@@ -31,18 +36,32 @@ scratch = NULL)
 
 \item{CS_Point.File}{Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.}
 
+\item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations. Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{parallel}{(Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel? Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{cores}{If `parallel = TRUE`, how many cores should be used for parallel processing? Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{cholmod}{(Logical; Default = TRUE). Should the cholmod solver be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{precision}{(Logical; Default = FALSE). Should experimental single precision method be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.}
+
 \item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}}
 
-\item{rm.files}{Should all temporary files be removed after Julia run (Default = TRUE)}
+\item{rm.files}{Should all temporary files be removed after Julia run (Default = TRUE). Only necessary to specify if \code{jl.inputs} are not specified.}
 
 \item{scratch}{Scratch directory for use if write access is limited. Must be specified if raster results are desired for outputs.}
 }
 \value{
-Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}.
+Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}. The `full.mat` cannot be requested if only select pairs are being analyzed.
 }
 \description{
 Execute julia CS from R
+}
+\examples{
+## To do
+
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

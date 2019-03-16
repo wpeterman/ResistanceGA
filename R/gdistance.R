@@ -121,7 +121,7 @@ gdist.prep <-
         formula <- gd ~ cd + (1 | pop)
       }
     }
-
+    
     
     (
       ret <-

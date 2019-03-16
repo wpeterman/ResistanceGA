@@ -150,6 +150,7 @@ MLPE.lmm_coef <-
            genetic.dist,
            out.dir = NULL,
            method,
+           dat = NULL,
            formula = NULL,
            inputs = NULL,
            ID = NULL,
@@ -198,28 +199,33 @@ MLPE.lmm_coef <-
         
         COEF.Table <- array()
         for (i in 1:length(resist.mat)) {
-          cd <- read.csv(resist.mat[i], header = F)
-          cd.l <- lower(cd)
+          cd.mat <- read.csv(resist.mat[i], header = F)
+          cd.l <- lower(cd.mat)
           
-          scale.cd <- scale(cd.l, center = TRUE, scale = TRUE)
-          cs.unscale <- cd.l
+          scale.cd <- scale(cd.l[which(cd.l != -1)], center = TRUE, scale = TRUE)
+          cs.unscale <- cd.l[which(cd.l != -1)]
           
-          # Assign value to layer
-          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          dat <- inputs
+          dat$cd <- scale.cd
           
-          # Assign value to layer
-          LAYER <- assign(resist.names[i], value = dat$cs.matrix)
+          # # Assign value to layer
+          # cd <- assign(resist.names[i], value = inputs$cd)
           
           # Fit model
-          mod <-
-            lFormula(response ~ LAYER + (1 | pop1),
-                     data = dat,
-                     REML = TRUE)
-          mod$reTrms$Zt <- ZZ
-          dfun <- do.call(mkLmerDevfun, mod)
-          opt <- optimizeLmer(dfun)
+          mod <- mlpe_rga(formula = formula,
+                          data = dat,
+                          REML = TRUE,
+                          ZZ = ZZ)
+            
+            
+          #   lFormula(formula,
+          #            data = inputs,
+          #            REML = TRUE)
+          # mod$reTrms$Zt <- ZZ
+          # dfun <- do.call(mkLmerDevfun, mod)
+          # opt <- optimizeLmer(dfun)
           Mod.Summary <-
-            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+            summary(mod)
           COEF <- Mod.Summary$coefficients
           row.names(COEF) <- c("Intercept", resist.names[i])
           COEF.Table <- rbind(COEF.Table, COEF)

@@ -46,7 +46,7 @@ Resistance.Opt_multi <- function(PARM,
     }
     
     if(!exists('obj.func.opt')) {
-      CS.resist <- try(Run_CS2(
+      CS.resist <- try(Run_CS(
         CS.inputs,
         r = r
       ), TRUE)
@@ -63,7 +63,7 @@ Resistance.Opt_multi <- function(PARM,
       
       # Run mixed effect model on each Circuitscape effective resistance
       dat <- data.frame(gd = CS.inputs$response,
-                        cd = scale(CD.Resist),
+                        cd = scale(CS.resist),
                         pop = CS.inputs$ID$pop1)
       
       fit.mod <- mlpe_rga(formula = gd ~ cd + (1 | pop),
@@ -161,7 +161,7 @@ Resistance.Opt_multi <- function(PARM,
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
       obj.func.opt <- -99999
-      rm(cd, r)
+      rm(r)
       gc()
     } 
     
@@ -232,7 +232,7 @@ Resistance.Opt_multi <- function(PARM,
       #   ))
       #   obj.func.opt <- obj.func[[1]]
       # }
-      rm(cd, r)
+      rm(r)
       gc()
     } # End objective fun iteration
   } # End gdistance
@@ -258,7 +258,7 @@ Resistance.Opt_multi <- function(PARM,
     }
     
     if(!exists('obj.func.opt')) {
-      cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+      cd <- try(Run_CS.jl(jl.inputs, r, full.mat = FALSE), TRUE)
     }
     
     if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
@@ -268,7 +268,13 @@ Resistance.Opt_multi <- function(PARM,
     if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
       
       dat <- jl.inputs$df
-      dat$cd <- scale(cd)
+      
+      if(is.null(nrow(cd))) {
+        dat$cd <- scale(cd)
+      } else {
+        cd.l <- scale(lower(cd))
+        dat$cd <- cd.l
+      }
       
       fit.mod <-  mlpe_rga(formula = gd ~ cd + (1 | pop),
                            data = dat,

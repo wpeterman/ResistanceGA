@@ -60,14 +60,14 @@ Plot.trans <- function(PARM,
       # r <- k.smooth(raster = r,
       #               sigma = scale,
       #               SCALE = FALSE)
-    #   zmat <- as.matrix(r)
-    #   
-    #   x <- spatstat::as.im(zmat)
-    #   
-    #   r <- spatstat::blur(x = x,
-    #                       sigma = sigma,
-    #                       normalise = TRUE,
-    #                       bleed = FALSE)
+      #   zmat <- as.matrix(r)
+      #   
+      #   x <- spatstat::as.im(zmat)
+      #   
+      #   r <- spatstat::blur(x = x,
+      #                       sigma = sigma,
+      #                       normalise = TRUE,
+      #                       bleed = FALSE)
     }
     Mn = min(r)
     Mx = max(r)
@@ -355,7 +355,7 @@ Plot.trans <- function(PARM,
                             type = c(type, type1))
     x.break <- pretty(original1 * 1.07)
     y.break <- pretty(transformed * 1.07)
- 
+    
     p <- ggplot(plot.data[type==1,], aes(x = original, y = transformed)) +
       theme_bw() +
       geom_point(size = 1.5, color = "white") +

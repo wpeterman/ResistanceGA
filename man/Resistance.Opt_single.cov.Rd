@@ -2,7 +2,7 @@
 % Please edit documentation in R/OptimFunction_Single_covariate.R
 \name{Resistance.Opt_single.cov}
 \alias{Resistance.Opt_single.cov}
-\title{Optimize resistance surfaces individually}
+\title{Optimize resistance surfaces individually with more than one predictor variable}
 \usage{
 Resistance.Opt_single.cov(PARM, Resistance, CS.inputs = NULL,
   gdist.inputs = NULL, jl.inputs = NULL, GA.inputs, Min.Max = "max",

@@ -32,6 +32,8 @@ Run_CS <-
            output = "matrix",
            hidden = TRUE) {
     
+    save.dir <- EXPORT.dir
+    
     if(!exists('r')) {
       stop("Missing variable r: Please specify a 'RasterLayer' object or provide the path a raster file!")
     }
@@ -48,12 +50,10 @@ Run_CS <-
     
     if(is.null(EXPORT.dir)) {
       EXPORT.dir <- paste0(tempdir(), "\\")
+      save.dir <- EXPORT.dir
     } else {
-      # if(CurrentMap == FALSE) {
-      #   EXPORT.dir <- paste0(tempdir(), "\\")
-      # } else {
-        EXPORT.dir
-      # }
+      save.dir <- EXPORT.dir
+      EXPORT.dir <- paste0(tempdir(), "\\")
     }
     
     if (CurrentMap == FALSE) {
@@ -89,11 +89,11 @@ Run_CS <-
     } else {
       writeRaster(
         x = R,
-        filename = paste0(EXPORT.dir, File.name, '.asc'),
+        filename = paste0(save.dir, File.name, '.asc'),
         overwrite = TRUE
       )
       
-      temp_rast <- paste0(EXPORT.dir, File.name, '.asc')
+      temp_rast <- paste0(save.dir, File.name, '.asc')
       tmp.name <- File.name
     }
     
@@ -126,7 +126,7 @@ Run_CS <-
       PAIRS = PAIRS
     )
     
-    # Run CS ------------------------------------------------------------------
+    # Execute CS ------------------------------------------------------------------
     
     # Keep status of each run hidden? Set to either 'TRUE' or 'FALSE'; If 'FALSE' updates will be visible on screen
     # hidden = TRUE

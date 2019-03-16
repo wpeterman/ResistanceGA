@@ -36,9 +36,9 @@ SHNe <- function(n.samples,
       if (j <= i) {
         next
       } #else {
-        dhm[j,i] <- -((2 * pop.size[i] * pop.size[j]) / (pop.size[i] + pop.size[j]))
-        di[j,i] <- ((pop.size[i] + pop.size[j]) / (pop.size[i] * pop.size[j]))
-    # }
+      dhm[j,i] <- -((2 * pop.size[i] * pop.size[j]) / (pop.size[i] + pop.size[j]))
+      di[j,i] <- ((pop.size[i] + pop.size[j]) / (pop.size[i] * pop.size[j]))
+      # }
     } # Close j
   } # Close i
   
