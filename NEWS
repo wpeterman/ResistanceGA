@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.24
+--------
+* Updated bootstrap function to accomodate select pairs
+
 ResistanceGA 4.1-0.23
 --------
 * Now possible to optimize using select pairs of individuals or populations when using Julia

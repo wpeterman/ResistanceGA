@@ -10,6 +10,7 @@
 #' @param obs Total number of observations (populations or individuals) in your original analysis
 #' @param rank.method What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'SSE'). Default = 'AICc'
 #' @param genetic.mat Genetic distance matrix without row or column names.
+#' @param keep Optional vector of pairwise observations to keep (1) or omit (0)
 #' @return A data frame reporting the average model weight, average rank, number of times a model was the top model in the set, and the frequency a model was best.
 #' 
 #' @details This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surfaces that is top ranked across all bootstrap iterations.
@@ -34,11 +35,19 @@ Resist.boot <-
             iters,
             obs,
             rank.method = 'AICc',
-            genetic.mat) {
+            genetic.mat,
+            keep = NULL) {
     
     options(warn = -1)
     progress_bar <- plyr::progress_text()
     progress_bar$init(iters * length(mod.names))
+    
+    if(!is.null(keep)) {
+      keep.mat <- matrix(0, obs, obs)
+      keep.mat[lower.tri(keep.mat)] <- keep
+    } else {
+      keep.mat <- NULL
+    }
     
     sample.n <- floor(sample.prop * obs)
     ID <- To.From.ID(sample.n)
@@ -62,6 +71,11 @@ Resist.boot <-
       samp <- sort(sample.list[[i]])
       ho <- sort(holdout.list[[i]])
       genetic.samp <- lower(genetic.mat[samp, samp])
+      keep.samp <- try(lower(keep.mat[samp, samp]), silent = TRUE)
+      if(class(keep.samp) == "try-error") {
+        keep.samp <- NULL
+      } 
+      
       ho_genetic.samp <- lower(genetic.mat[ho, ho])
       AICc.tab <- vector(mode = "list", length = length(dist.mat))
       
@@ -75,6 +89,8 @@ Resist.boot <-
                                response = ho_genetic.samp)
         colnames(pred.dat) <- c("pop1", "pop2", "resistance", "response")
         
+        pred.dat <- pred.dat[pred.dat$response != -1,]
+        
         AICc <- boot.AICc(
           response = genetic.samp,
           resistance = dat,
@@ -82,7 +98,8 @@ Resist.boot <-
           ZZ = ZZ,
           k = n.parameters[j],
           pred.dat = pred.dat,
-          obs = length(samp)
+          obs = length(samp),
+          keep = keep.samp
         )
         
         mod.aic <- data.frame(mod.names[j], n.parameters[j], AICc)
@@ -185,22 +202,15 @@ ZZ.mat <- function(ID) {
 }
 
 # Bootstrap MLPE
-boot.AICc <- function(response, resistance, ID, ZZ, k, obs, pred.dat) {
+boot.AICc <- function(response, resistance, ID, ZZ, k, obs, pred.dat, keep = NULL) {
   resistance <- scale(resistance, center = TRUE, scale = TRUE)
   dat <- data.frame(ID, resistance = resistance, response = response)
   colnames(dat) <- c("pop1", "pop2", "resistance", "response")
   
   fit.mod <- mlpe_rga(response ~ resistance + (1 | pop1),
                       data = dat,
-                      REML = F)
-  
-  # mod <- lFormula(response ~ resistance + (1 | pop1),
-  #                 data = dat,
-  #                 REML = F)
-  # mod$reTrms$Zt <- ZZ
-  # dfun <- do.call(mkLmerDevfun, mod)
-  # opt <- optimizeLmer(dfun)
-  # fit.mod <- mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr)
+                      REML = F,
+                      keep = keep)
   
   R.sq <- MuMIn::r.squaredGLMM(fit.mod)[[1]]
   mod.AIC <- AIC(fit.mod)

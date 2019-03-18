@@ -29,6 +29,8 @@ Resist.boot(mod.names,
 \item{rank.method}{What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'SSE'). Default = 'AICc'}
 
 \item{genetic.mat}{Genetic distance matrix without row or column names.}
+
+\item{keep}{Optional vector of pairwise observations to keep (1) or omit (0)}
 }
 \value{
 A data frame reporting the average model weight, average rank, number of times a model was the top model in the set, and the frequency a model was best.
