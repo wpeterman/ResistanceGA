@@ -324,7 +324,9 @@ jl.prep <- function(n.Pops,
   suppressWarnings(ZZ <- ZZ.mat(ID))
   
   
-  # df <- NULL
+  fmla <- formula
+  df <- NULL
+  
   if(!is.null(response)) {
     if(!is.null(covariates)) {
       df <- data.frame(gd = response,
@@ -335,7 +337,6 @@ jl.prep <- function(n.Pops,
                        pop = ID$pop1)
     }
     
-    fmla <- formula
     if(!is.null(fmla)) {
       fmla <- update(fmla, gd ~ . + cd + (1 | pop))
     } else {
@@ -345,7 +346,10 @@ jl.prep <- function(n.Pops,
   
   # Pairs to include ---------------------------------------------------------
   pairs_to_include.file <- NULL
-  keep <-  rep(1, length(response))
+  keep <- pairs_to_include
+  if(!is.null(response)){
+    keep <-  rep(1, length(response))
+  }
   ID.keep <- ID
   covariates.keep <- covariates
   ZZ.keep <- ZZ
