@@ -347,8 +347,8 @@ jl.prep <- function(n.Pops,
   # Pairs to include ---------------------------------------------------------
   pairs_to_include.file <- NULL
   keep <- pairs_to_include
-  if(!is.null(response)){
-    keep <-  rep(1, length(response))
+  if(is.null(keep)){
+    keep <-  rep(1, nrow(ID))
   }
   ID.keep <- ID
   covariates.keep <- covariates
@@ -368,7 +368,7 @@ jl.prep <- function(n.Pops,
     
     ## Reduce response & covariates
     response.keep <- response[keep == 1]
-    covariates.keep <- covariates[keep == 1]
+    covariates.keep <- covariates[keep == 1,]
     
     keep.id <- ID[keep == 1,]
     names(keep.id) <- c('mode', 'include')

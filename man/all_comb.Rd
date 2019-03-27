@@ -40,7 +40,7 @@ all_comb(gdist.inputs = NULL,
 
 \item{null_mod}{Logical, if TRUE, an intercept-only model will be calculated and added to the output table (Default = TRUE)}
 
-\item{...}{Additional arguments}
+\item{...}{Additional arguments (Not currently used)}
 }
 \value{
 This function optimizes resistance surfaces in isolation using \code{\link[ResistanceGA]{SS_optim}}, followed by multisurface optimization using \code{\link[ResistanceGA]{MS_optim}}, and then conducts a bootstrap analysis.

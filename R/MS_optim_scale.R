@@ -444,7 +444,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         ID = gdist.inputs$ID,
         ZZ = gdist.inputs$ZZ
       )
-    )
+    )[[1]]
     
     MLPE.model <- MLPE.lmm(
       resistance = cd,
@@ -713,7 +713,7 @@ MS_optim.scale <- function(CS.inputs = NULL,
         ID = jl.inputs$ID,
         ZZ = jl.inputs$ZZ
       )
-    )
+    )[[1]]
     
     MLPE.model <- MLPE.lmm(
       resistance = lower(cd),

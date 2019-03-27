@@ -694,7 +694,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
-            )
+            )[[1]]
             
             if (k.value == 1) {
               k <- 2
@@ -1055,7 +1055,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               ZZ = gdist.inputs$ZZ,
               REML = FALSE
             )
-          )
+          )[[1]]
           
           MLPE.list[[i + 1]] <-  MLPE.lmm2(
             resistance = cd,
@@ -1315,7 +1315,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
-            )
+            )[[1]]
             
             if (k.value == 1) {
               k <- 2
@@ -1676,7 +1676,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
               ZZ = gdist.inputs$ZZ,
               REML = FALSE
             )
-          )
+          )[[1]]
           
           MLPE.list[[i + 1]] <-  MLPE.lmm2(
             resistance = cd,
@@ -1946,7 +1946,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
                 ID = jl.inputs$ID,
                 ZZ = jl.inputs$ZZ
               )
-            )
+            )[[1]]
             
             if (k.value == 1) {
               k <- 2
@@ -2215,7 +2215,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
                 ID = jl.inputs$ID,
                 ZZ = jl.inputs$ZZ
               )
-            )
+            )[[1]]
             
             if (k.value == 1) {
               k <- 2
@@ -2593,7 +2593,7 @@ SS_optim.scale <- function(CS.inputs = NULL,
             ZZ = jl.inputs$ZZ,
             REML = FALSE
           )
-        )
+        )[[1]]
         
         MLPE.list[[i + 1]] <-  MLPE.lmm2(
           resistance = lower(cd),

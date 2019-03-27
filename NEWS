@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.25
+--------
+* Covariates can now be used when optimizing with Julia
+
 ResistanceGA 4.1-0.24
 --------
 * Updated bootstrap function to accomodate select pairs

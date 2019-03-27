@@ -21,7 +21,8 @@
 #'                    dist.mat, 
 #'                    n.parameters, 
 #'                    sample.prop, 
-#'                    iters, obs, 
+#'                    iters, 
+#'                    obs, 
 #'                    rank.method, 
 #'                    genetic.mat,
 #'                    keep = NULL)

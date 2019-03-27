@@ -32,7 +32,7 @@ Resistance.Opt_single.cov <-
     method <- GA.inputs$method
     EXPORT.dir <- GA.inputs$Write.dir
     select.trans <- GA.inputs$select.trans
-    r <- Resistance
+    R <- r <- Resistance
     keep <- 1 # Indicator to keep or drop transformation
     
     if (GA.inputs$surface.type[iter] == "cat") {
@@ -40,6 +40,7 @@ Resistance.Opt_single.cov <-
       parm <- PARM
       df <-
         data.frame(id = unique(r), PARM) # Data frame with original raster values and replacement values
+      # browser()
       r <- subs(r, df)
       
     } else {
@@ -223,12 +224,10 @@ Resistance.Opt_single.cov <-
         
         # gdistance ------------------------------------------------------------
         if (!is.null(gdist.inputs)) {
-          
-          # if(cellStats(r, "mean") == 0) { # Skip iteration
           if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration            
             obj.func.opt <- -99999
             
-          } 
+          }
           
           if(!exists('obj.func.opt')) {
             cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
@@ -236,14 +235,15 @@ Resistance.Opt_single.cov <-
           
           if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
             obj.func.opt <- -99999
-            rm(cd, r)
-            gc()
           } 
           
-          if(exists('cd') && isTRUE(class(cd) != 'try-error')) {  # Continue with iteration
+          if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration    
+            
+            
             dat <- gdist.inputs$df
             dat$cd <- scale(c(cd))
-            fit.mod <-  mlpe_rga(formula = gdist.inputs$formula,
+            
+            fit.mod <-  mlpe_rga(formula = gd ~ cd + (1 | pop),
                                  data = dat,
                                  ZZ = gdist.inputs$ZZ,
                                  REML = FALSE)
@@ -270,12 +270,60 @@ Resistance.Opt_single.cov <-
                 obj.func.opt <- obj.func[[1]]
               }
             } # Positive parameter value
-            rm(cd, r)
-            gc()
-          } # Keep loop
+          } # End Keep loop
+
+          ## ORIGINAL BELOW
+          # if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration            
+          #   obj.func.opt <- -99999
+          #   
+          # } 
+          # 
+          # if(!exists('obj.func.opt')) {
+          #   cd <- try(Run_gdistance(gdist.inputs, r), TRUE)
+          # }
+          # 
+          # if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
+          #   obj.func.opt <- -99999
+          #   rm(cd, r)
+          #   gc()
+          # } 
+          # 
+          # if(exists('cd') && isTRUE(class(cd) != 'try-error')) {  # Continue with iteration
+          #   dat <- gdist.inputs$df
+          #   dat$cd <- scale(c(cd))
+          #   fit.mod <-  mlpe_rga(formula = gdist.inputs$formula,
+          #                        data = dat,
+          #                        ZZ = gdist.inputs$ZZ,
+          #                        REML = FALSE)
+          #   
+          #   if(lme4::fixef(fit.mod)['cd'] < 0) {
+          #     obj.func.opt <- -99999
+          #   } else {
+          #     if (method == "AIC") {
+          #       obj.func <- suppressWarnings(AIC(
+          #         fit.mod
+          #       ))
+          #       obj.func.opt <- obj.func * -1
+          #     } else if (method == "R2") {
+          #       obj.func <-
+          #         suppressWarnings(r.squaredGLMM(
+          #           fit.mod
+          #         ))
+          #       obj.func.opt <- obj.func[[1]]
+          #       
+          #     } else {
+          #       obj.func <- suppressWarnings(logLik(
+          #         fit.mod
+          #       ))
+          #       obj.func.opt <- obj.func[[1]]
+          #     }
+          #   } # Positive parameter value
+          #   rm(cd, r)
+          #   gc()
+          # } # Keep loop
         } # End gdistance Loop
         
-        # CS jl ------------------------------------------------------------
+        # Julia ------------------------------------------------------------
         
         if (!is.null(jl.inputs)) {
           
@@ -329,6 +377,10 @@ Resistance.Opt_single.cov <-
         } # End Julia Loop
         
       } # End drop Loop
+      
+      if(!exists('obj.func.opt')) {
+        obj.func.opt <- -99999
+      }
       
       rt <- proc.time()[3] - t1
       if (quiet == FALSE) {

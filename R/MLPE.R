@@ -169,6 +169,7 @@ MLPE.lmm_coef <-
         for (i in 1:length(resist.mat)) {
           cd <- read.csv(resist.mat[i], header = F)
           cd.l <- lower(cd)
+          cd.l <- cd.l[cd.l != -1]
 
           scale.cd <- scale(cd.l, center = TRUE, scale = TRUE)
           cs.unscale <- cd.l
@@ -201,9 +202,13 @@ MLPE.lmm_coef <-
         for (i in 1:length(resist.mat)) {
           cd.mat <- read.csv(resist.mat[i], header = F)
           cd.l <- lower(cd.mat)
+          cd.l <- cd.l[cd.l != -1]
           
-          scale.cd <- scale(cd.l[which(cd.l != -1)], center = TRUE, scale = TRUE)
-          cs.unscale <- cd.l[which(cd.l != -1)]
+          scale.cd <- scale(cd.l, center = TRUE, scale = TRUE)
+          cs.unscale <- cd.l
+          
+          # scale.cd <- scale(cd.l[which(cd.l != -1)], center = TRUE, scale = TRUE)
+          # cs.unscale <- cd.l[which(cd.l != -1)]
           
           dat <- inputs
           dat$cd <- scale.cd
@@ -227,7 +232,13 @@ MLPE.lmm_coef <-
           Mod.Summary <-
             summary(mod)
           COEF <- Mod.Summary$coefficients
-          row.names(COEF) <- c("Intercept", resist.names[i])
+          if(nrow(COEF) > 2) {
+            row.names(COEF)[length(row.names(COEF))] <- resist.names[i]
+            
+          } else {
+            row.names(COEF) <- c("Intercept", resist.names[i])
+            
+          }
           COEF.Table <- rbind(COEF.Table, COEF)
         }
       } else {
