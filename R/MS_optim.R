@@ -24,7 +24,7 @@ MS_optim <- function(CS.inputs = NULL,
     )
   }
   k.value <- GA.inputs$k.value
-  
+  wd <- getwd()
   
   # Circuitscape ------------------------------------------------------------
   
@@ -644,151 +644,154 @@ MS_optim <- function(CS.inputs = NULL,
   
   
   # Julia ---------------------------------------------------------------
-  # MLPE with Covariates ----------------------------------------------------
-  
-  if(!is.null(gdist.inputs$covariates)) { 
-    #  * Island GA -------------------------------------------------------------
-    if(isTRUE(GA.inputs$gaisl)) {
-      # stop("Optimization with covariates is not currently supported with gaisl!")
-      
-      t1 <- proc.time()[3]
-      multi.GA_nG <- gaisl(
-        type = "real-valued",
-        fitness = Resistance.Opt_multi.cov,
-        population = GA.inputs$population,
-        selection = GA.inputs$selection,
-        mutation = GA.inputs$mutation,
-        pcrossover = GA.inputs$pcrossover,
-        crossover = GA.inputs$crossover,
-        pmutation = GA.inputs$pmutation,
-        Min.Max = GA.inputs$Min.Max,
-        GA.inputs = GA.inputs,
-        jl.inputs = jl.inputs,
-        lower = GA.inputs$ga.min,
-        upper = GA.inputs$ga.max,
-        popSize = GA.inputs$pop.size,
-        maxiter = GA.inputs$maxiter,
-        numIslands = GA.inputs$numIslands,
-        migrationRate = GA.inputs$migrationRate,
-        migrationInterval = GA.inputs$migrationInterval,
-        optim = GA.inputs$optim,
-        optimArgs = GA.inputs$optimArgs,
-        parallel = GA.inputs$parallel,
-        run = GA.inputs$run,
-        # keepBest = GA.inputs$keepBest,
-        seed = GA.inputs$seed,
-        monitor = GA.inputs$monitor,
-        suggestions = GA.inputs$SUGGESTS,
-        quiet = GA.inputs$quiet
-      )
-      rt <- proc.time()[3] - t1
-      
-    } else {
-      # * Standard GA -------------------------------------------------------------
-      
-      t1 <- proc.time()[3]
-      multi.GA_nG <- ga(
-        type = "real-valued",
-        fitness = Resistance.Opt_multi.cov,
-        population = GA.inputs$population,
-        selection = GA.inputs$selection,
-        mutation = GA.inputs$mutation,
-        pcrossover = GA.inputs$pcrossover,
-        crossover = GA.inputs$crossover,
-        pmutation = GA.inputs$pmutation,
-        Min.Max = GA.inputs$Min.Max,
-        GA.inputs = GA.inputs,
-        jl.inputs = jl.inputs,
-        lower = GA.inputs$ga.min,
-        upper = GA.inputs$ga.max,
-        popSize = GA.inputs$pop.size,
-        maxiter = GA.inputs$maxiter,
-        optim = GA.inputs$optim,
-        optimArgs = GA.inputs$optimArgs,
-        parallel = GA.inputs$parallel,
-        run = GA.inputs$run,
-        keepBest = GA.inputs$keepBest,
-        seed = GA.inputs$seed,
-        monitor = GA.inputs$monitor,
-        suggestions = GA.inputs$SUGGESTS,
-        quiet = GA.inputs$quiet
-      )
-      rt <- proc.time()[3] - t1
-      
-    }
-    
-  } # End covariates
-
-  # MLPE no Covariates ------------------------------------------------------
-  
   if (!is.null(jl.inputs)) {
-    #  * Island GA -------------------------------------------------------------
-    if(isTRUE(GA.inputs$gaisl)) {
-      t1 <- proc.time()[3]
-      multi.GA_nG <- gaisl(
-        type = "real-valued",
-        fitness = Resistance.Opt_multi,
-        population = GA.inputs$population,
-        selection = GA.inputs$selection,
-        mutation = GA.inputs$mutation,
-        pcrossover = GA.inputs$pcrossover,
-        crossover = GA.inputs$crossover,
-        pmutation = GA.inputs$pmutation,
-        Min.Max = GA.inputs$Min.Max,
-        GA.inputs = GA.inputs,
-        jl.inputs = jl.inputs,
-        lower = GA.inputs$ga.min,
-        upper = GA.inputs$ga.max,
-        popSize = GA.inputs$pop.size,
-        maxiter = GA.inputs$maxiter,
-        numIslands = GA.inputs$numIslands,
-        migrationRate = GA.inputs$migrationRate,
-        migrationInterval = GA.inputs$migrationInterval,
-        optim = GA.inputs$optim,
-        optimArgs = GA.inputs$optimArgs,
-        parallel = GA.inputs$parallel,
-        run = GA.inputs$run,
-        # keepBest = GA.inputs$keepBest,
-        seed = GA.inputs$seed,
-        monitor = GA.inputs$monitor,
-        suggestions = GA.inputs$SUGGESTS,
-        quiet = GA.inputs$quiet
-      )
-      rt <- proc.time()[3] - t1
-      
-    } else {
-      # * Standard GA -------------------------------------------------------------
-      
-      t1 <- proc.time()[3]
-      multi.GA_nG <- ga(
-        type = "real-valued",
-        fitness = Resistance.Opt_multi,
-        population = GA.inputs$population,
-        selection = GA.inputs$selection,
-        mutation = GA.inputs$mutation,
-        pcrossover = GA.inputs$pcrossover,
-        crossover = GA.inputs$crossover,
-        pmutation = GA.inputs$pmutation,
-        Min.Max = GA.inputs$Min.Max,
-        GA.inputs = GA.inputs,
-        jl.inputs = jl.inputs,
-        lower = GA.inputs$ga.min,
-        upper = GA.inputs$ga.max,
-        popSize = GA.inputs$pop.size,
-        maxiter = GA.inputs$maxiter,
-        optim = GA.inputs$optim,
-        optimArgs = GA.inputs$optimArgs,
-        parallel = GA.inputs$parallel,
-        run = GA.inputs$run,
-        keepBest = GA.inputs$keepBest,
-        seed = GA.inputs$seed,
-        monitor = GA.inputs$monitor,
-        suggestions = GA.inputs$SUGGESTS,
-        quiet = GA.inputs$quiet
-      )
-      rt <- proc.time()[3] - t1
-      
-    }
+    setwd(jl.inputs$JULIA_HOME)
+    # MLPE with Covariates ----------------------------------------------------
+    
+    if(!is.null(jl.inputs$covariates)) { 
+      #  * Island GA -------------------------------------------------------------
+      if(isTRUE(GA.inputs$gaisl)) {
+        # stop("Optimization with covariates is not currently supported with gaisl!")
+        
+        t1 <- proc.time()[3]
+        multi.GA_nG <- gaisl(
+          type = "real-valued",
+          fitness = Resistance.Opt_multi.cov,
+          population = GA.inputs$population,
+          selection = GA.inputs$selection,
+          mutation = GA.inputs$mutation,
+          pcrossover = GA.inputs$pcrossover,
+          crossover = GA.inputs$crossover,
+          pmutation = GA.inputs$pmutation,
+          Min.Max = GA.inputs$Min.Max,
+          GA.inputs = GA.inputs,
+          jl.inputs = jl.inputs,
+          lower = GA.inputs$ga.min,
+          upper = GA.inputs$ga.max,
+          popSize = GA.inputs$pop.size,
+          maxiter = GA.inputs$maxiter,
+          numIslands = GA.inputs$numIslands,
+          migrationRate = GA.inputs$migrationRate,
+          migrationInterval = GA.inputs$migrationInterval,
+          optim = GA.inputs$optim,
+          optimArgs = GA.inputs$optimArgs,
+          parallel = GA.inputs$parallel,
+          run = GA.inputs$run,
+          # keepBest = GA.inputs$keepBest,
+          seed = GA.inputs$seed,
+          monitor = GA.inputs$monitor,
+          suggestions = GA.inputs$SUGGESTS,
+          quiet = GA.inputs$quiet
+        )
+        rt <- proc.time()[3] - t1
+        
+      } else {
+        # * Standard GA -------------------------------------------------------------
+        
+        t1 <- proc.time()[3]
+        multi.GA_nG <- ga(
+          type = "real-valued",
+          fitness = Resistance.Opt_multi.cov,
+          population = GA.inputs$population,
+          selection = GA.inputs$selection,
+          mutation = GA.inputs$mutation,
+          pcrossover = GA.inputs$pcrossover,
+          crossover = GA.inputs$crossover,
+          pmutation = GA.inputs$pmutation,
+          Min.Max = GA.inputs$Min.Max,
+          GA.inputs = GA.inputs,
+          jl.inputs = jl.inputs,
+          lower = GA.inputs$ga.min,
+          upper = GA.inputs$ga.max,
+          popSize = GA.inputs$pop.size,
+          maxiter = GA.inputs$maxiter,
+          optim = GA.inputs$optim,
+          optimArgs = GA.inputs$optimArgs,
+          parallel = GA.inputs$parallel,
+          run = GA.inputs$run,
+          keepBest = GA.inputs$keepBest,
+          seed = GA.inputs$seed,
+          monitor = GA.inputs$monitor,
+          suggestions = GA.inputs$SUGGESTS,
+          quiet = GA.inputs$quiet
+        )
+        rt <- proc.time()[3] - t1
+        
+      }
+    } # End covariates
+    
+    # MLPE no Covariates ------------------------------------------------------
+    
+    if (is.null(jl.inputs$covariates)) {
+      #  * Island GA -------------------------------------------------------------
+      if(isTRUE(GA.inputs$gaisl)) {
+        t1 <- proc.time()[3]
+        multi.GA_nG <- gaisl(
+          type = "real-valued",
+          fitness = Resistance.Opt_multi,
+          population = GA.inputs$population,
+          selection = GA.inputs$selection,
+          mutation = GA.inputs$mutation,
+          pcrossover = GA.inputs$pcrossover,
+          crossover = GA.inputs$crossover,
+          pmutation = GA.inputs$pmutation,
+          Min.Max = GA.inputs$Min.Max,
+          GA.inputs = GA.inputs,
+          jl.inputs = jl.inputs,
+          lower = GA.inputs$ga.min,
+          upper = GA.inputs$ga.max,
+          popSize = GA.inputs$pop.size,
+          maxiter = GA.inputs$maxiter,
+          numIslands = GA.inputs$numIslands,
+          migrationRate = GA.inputs$migrationRate,
+          migrationInterval = GA.inputs$migrationInterval,
+          optim = GA.inputs$optim,
+          optimArgs = GA.inputs$optimArgs,
+          parallel = GA.inputs$parallel,
+          run = GA.inputs$run,
+          # keepBest = GA.inputs$keepBest,
+          seed = GA.inputs$seed,
+          monitor = GA.inputs$monitor,
+          suggestions = GA.inputs$SUGGESTS,
+          quiet = GA.inputs$quiet
+        )
+        rt <- proc.time()[3] - t1
+        
+      } else {
+        # * Standard GA -------------------------------------------------------------
+        
+        t1 <- proc.time()[3]
+        multi.GA_nG <- ga(
+          type = "real-valued",
+          fitness = Resistance.Opt_multi,
+          population = GA.inputs$population,
+          selection = GA.inputs$selection,
+          mutation = GA.inputs$mutation,
+          pcrossover = GA.inputs$pcrossover,
+          crossover = GA.inputs$crossover,
+          pmutation = GA.inputs$pmutation,
+          Min.Max = GA.inputs$Min.Max,
+          GA.inputs = GA.inputs,
+          jl.inputs = jl.inputs,
+          lower = GA.inputs$ga.min,
+          upper = GA.inputs$ga.max,
+          popSize = GA.inputs$pop.size,
+          maxiter = GA.inputs$maxiter,
+          optim = GA.inputs$optim,
+          optimArgs = GA.inputs$optimArgs,
+          parallel = GA.inputs$parallel,
+          run = GA.inputs$run,
+          keepBest = GA.inputs$keepBest,
+          seed = GA.inputs$seed,
+          monitor = GA.inputs$monitor,
+          suggestions = GA.inputs$SUGGESTS,
+          quiet = GA.inputs$quiet
+        )
+        rt <- proc.time()[3] - t1
+        
+      }
+    } # End no covariates
+    
     
     multi.GA_nG.o <- multi.GA_nG
     
@@ -1010,6 +1013,8 @@ MS_optim <- function(CS.inputs = NULL,
         "LL"
       )
     
+    setwd(wd)
+    
     out <- list(GA.summary = multi.GA_nG.o,
                 MLPE.model = MLPE.model,
                 MLPE.model_REML = fit.mod_REML,
@@ -1019,5 +1024,5 @@ MS_optim <- function(CS.inputs = NULL,
                 k = k.df)
     
     return(out)
-  }
-}
+  } # End Julia
+} # End function

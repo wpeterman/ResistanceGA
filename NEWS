@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.26
+--------
+* Minor bug fixes to Julia covariate function
+
 ResistanceGA 4.1-0.25
 --------
 * Covariates can now be used when optimizing with Julia

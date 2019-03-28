@@ -130,7 +130,8 @@ jl.prep <- function(n.Pops,
     stop(cat(paste("You must install the Julia CIRCUITSCAPE package!!!",
                    "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
   }
-  
+  wd <- getwd()
+  setwd(JULIA_HOME)
   
   if(run_test == TRUE) {
     print("Running test #1: Run Circuitscape from Julia")
@@ -434,7 +435,9 @@ jl.prep <- function(n.Pops,
   #   } # close function
   # } # close pairs to include statement
   
-  ##Return list  
+  setwd(wd)
+ 
+   ##Return list  
   list(
     ID = ID.keep,
     ZZ = ZZ.keep,
