@@ -63,6 +63,8 @@ Run_CS.jl <-
            rm.files = TRUE,
            scratch = NULL) {
     
+    wd <- getwd()
+    
     if(!is.null(jl.inputs)) {
       if(!is.null(jl.inputs$rm.files) & is.null(rm.files)) {
         rm.files <- jl.inputs$rm.files
@@ -125,6 +127,8 @@ Run_CS.jl <-
       }
       
       JULIA_HOME <- jl.inputs$JULIA_HOME
+      setwd(JULIA_HOME)
+      
     }
     
     if(Julia_link == 'JuliaCall') {
@@ -381,6 +385,8 @@ Run_CS.jl <-
       time.diff <- Sys.time() - make.times
       
       unlink(asc.files[time.diff > 30], force = TRUE)
+      
+      setwd(wd)
       
       return(cs.matrix)
     }
