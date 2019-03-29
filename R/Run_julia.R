@@ -63,9 +63,16 @@ Run_CS.jl <-
            rm.files = TRUE,
            scratch = NULL) {
     
-    if(!is.null(jl.inputs$rm.files)) {
-      rm.files <- jl.inputs$rm.files
+    if(!is.null(jl.inputs)) {
+      if(!is.null(jl.inputs$rm.files) & is.null(rm.files)) {
+        rm.files <- jl.inputs$rm.files
+      }
+      
+      if(!is.null(jl.inputs$scratch)){
+        scratch <- jl.inputs$scratch
+      }
     }
+    
     
     if(is.null(Julia_link) & !is.null(jl.inputs)) {
       Julia_link <- jl.inputs$Julia_link
@@ -98,9 +105,7 @@ Run_CS.jl <-
                            precision = precision,
                            run_test = FALSE)
     }
-    
-    scratch <- jl.inputs$scratch
-    
+
     if(isTRUE(full.mat) & !is.null(jl.inputs$pairs_to_include)) {
       warning("The full matrix generated will have -1 values. These indicate pairs that were excluded from the analysis.")
     }
@@ -138,9 +143,12 @@ Run_CS.jl <-
       R <- raster(r)
       File.name <- basename(r)
       File.name <- sub(".asc", "", File.name)
+      File.name <- sub(".tif", "", File.name)
       names(R) <- File.name
+      asc.dir <- r
     } else {
       R = r
+      asc.dir <- NULL
       
     }
     
@@ -152,6 +160,12 @@ Run_CS.jl <-
       }
     }
     
+    rm.rast <- temp_rast <- tempfile(pattern = "raster_", 
+                                     tmpdir = tempdir(),
+                                     fileext = ".asc") 
+    
+    tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
+    
     if (CurrentMap == FALSE) {
       File.name <- names(R)
       MAP = "write_cum_cur_map_only = False"
@@ -159,39 +173,33 @@ Run_CS.jl <-
       
     } else {
       File.name <- names(R)
+      tmp.name <- File.name
       MAP = "write_cum_cur_map_only = True"
       CURRENT.MAP = "write_cur_maps = True"
     }
     
-    ######
+    ####
+    mx.val <- suppressWarnings(try(max(R@data@values, na.rm = TRUE), silent = T))
+    if (is.infinite(mx.val)){
+      mx.val <- cellStats(R, max)
+    }
     
-    if (max(R@data@values, na.rm = TRUE) > 1e6)
-      R <-
-      SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
+    if(mx.val > 1e6) {
+      R <- SCALE(R, 1, 1e6) # Rescale surface in case resistances are too high
+    }
+    
     R <- reclassify(R, c(-Inf, 0, 1))
+    ####
     
-    rm.rast <- temp_rast <- tempfile(pattern = "raster_", 
-                                     tmpdir = tempdir(),
-                                     fileext = ".asc") 
-    
-    tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
-    
-    if(CurrentMap == FALSE) {
+    if(is.null(asc.dir)) {
       writeRaster(
         x = R,
         filename = temp_rast,
         overwrite = TRUE
       )
     } else {
-      writeRaster(
-        x = R,
-        # filename = paste0(EXPORT.dir, File.name, '.asc'),
-        filename = temp_rast,
-        overwrite = TRUE
-      )
-      
-      # temp_rast <- paste0(EXPORT.dir, File.name, '.asc')
-      # tmp.name <- File.name
+      temp_rast <- asc.dir
+      tmp.name <- File.name
     }    
     
     # Modify and write Circuitscape.ini file
@@ -273,6 +281,7 @@ Run_CS.jl <-
     
     
     if (output == "raster" & CurrentMap == TRUE) {
+      rm.files <- FALSE
       if(EXPORT.dir == paste0(tempdir(), "\\") & is.null(scratch)) {
         stop("Specify an `EXPORT.dir` or `scratch` directory to write CIRCUITSCAPE results to")
       } 
