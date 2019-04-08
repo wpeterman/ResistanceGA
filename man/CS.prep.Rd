@@ -21,8 +21,9 @@ cores)
 
 \item{response}{Vector of pairwise genetic distances (lower half of pairwise matrix).}
 
-\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.
-#' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.}
+\item{covariates}{Data frame of additional covariates that you want included in the MLPE model during opitmization.}
+
+\item{formula}{If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.}
 
 \item{CS_Point.File}{The path to the Circuitscape formatted point file. See Circuitscape documentation for help.}
 

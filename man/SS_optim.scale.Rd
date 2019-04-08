@@ -16,8 +16,9 @@ SS_optim.scale(CS.inputs,
 
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
-\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
-#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
+\item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
+
+\item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
 
 \item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)}
 

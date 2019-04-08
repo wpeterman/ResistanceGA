@@ -9,6 +9,8 @@
 #' @param max.cont The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 2500)
 #' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details
 #' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)
+#' @param shape.min The minimum value for the shape parameter used for transformimg resistance surfaces. If unspecified, used 0.5
+#' @param shape.max The maximum value for the shape parameter used for transformimg resistance surfaces. If unspecified, used 14.5
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. Default = "M"; see Details.
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
@@ -77,47 +79,49 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage GA.prep(ASCII.dir,
-#' Results.dir = NULL,
-#' min.cat = NULL,
-#' max.cat = 2500,
-#' max.cont = 2500,
-#' min.scale = NULL,
-#' max.scale = NULL,
-#' cont.shape = NULL,
-#' select.trans = NULL,
-#' method = "LL",
-#' scale = FALSE,
-#' scale.surfaces = NULL,
-#' k.value = 2,
-#' pop.mult = 15,
-#' percent.elite = 0.05,
-#' type = "real-valued",
-#' pcrossover = 0.85,
-#' pmutation = 0.125,
-#' maxiter = 1000,
-#' run = NULL,
-#' keepBest = TRUE,
-#' population = gaControl(type)$population,
-#' selection = gaControl(type)$selection,
-#' crossover = "gareal_blxCrossover",
-#' mutation = gaControl(type)$mutation,
-#' pop.size = NULL,
-#' parallel = FALSE,
-#' gaisl = FALSE,
-#' island.pop = 20,
-#' numIslands = NULL,
-#' migrationRate = NULL,
-#' migrationInterval = NULL,
-#' optim = FALSE,
-#' optim.method = "L-BFGS-B", 
-#' poptim = 0.0,
-#' pressel = 1.00,
-#' control = list(fnscale = -1, maxit = 100),
-#' hessian = FALSE,
-#' opt.digits = NULL,
-#' seed = NULL,
-#' monitor = TRUE,
-#' quiet = FALSE)
+#'                Results.dir = NULL,
+#'                min.cat = NULL,
+#'                max.cat = 2500,
+#'                max.cont = 2500,
+#'                min.scale = NULL,
+#'                max.scale = NULL,
+#'                shape.min = NULL,
+#'                shape.max = NULL,
+#'                cont.shape = NULL,
+#'                select.trans = NULL,
+#'                method = "LL",
+#'                scale = FALSE,
+#'                scale.surfaces = NULL,
+#'                k.value = 2,
+#'                pop.mult = 15,
+#'                percent.elite = 0.05,
+#'                type = "real-valued",
+#'                pcrossover = 0.85,
+#'                pmutation = 0.125,
+#'                maxiter = 1000,
+#'                run = NULL,
+#'                keepBest = TRUE,
+#'                population = gaControl(type)$population,
+#'                selection = gaControl(type)$selection,
+#'                crossover = "gareal_blxCrossover",
+#'                mutation = gaControl(type)$mutation,
+#'                pop.size = NULL,
+#'                parallel = FALSE,
+#'                gaisl = FALSE,
+#'                island.pop = 20,
+#'                numIslands = NULL,
+#'                migrationRate = NULL,
+#'                migrationInterval = NULL,
+#'                optim = FALSE,
+#'                optim.method = "L-BFGS-B", 
+#'                poptim = 0.0,
+#'                pressel = 1.00,
+#'                control = list(fnscale = -1, maxit = 100),
+#'                hessian = FALSE,
+#'                opt.digits = NULL,
+#'                seed = NULL,
+#'                monitor = TRUE,
+#'                quiet = FALSE)
 
 GA.prep <- function(ASCII.dir,
                     Results.dir = NULL,
@@ -126,6 +130,8 @@ GA.prep <- function(ASCII.dir,
                     max.cont = 2500,
                     min.scale = NULL,
                     max.scale = NULL,
+                    shape.min = NULL,
+                    shape.max = NULL,
                     cont.shape = NULL,
                     select.trans = NULL,
                     method = "LL",
@@ -216,6 +222,14 @@ GA.prep <- function(ASCII.dir,
   
   if(is.null(min.cat)){
     min.cat <- 1 / max.cat
+  }
+  
+  if(is.null(shape.min)){
+    shape.min <- 0.5
+  }
+  
+  if(is.null(shape.max)){
+    shape.max <- 14.5
   }
   
   if(scale == FALSE) {
@@ -374,15 +388,15 @@ GA.prep <- function(ASCII.dir,
         }
         
         min.list[[i]] <-
-          c(1, 0.5, 0.001, min.scale) # eq, shape/gaus.opt, max, gaus.sd
-        max.list[[i]] <- c(9.99, 15, max.cont, max.scale)
+          c(1, shape.min, 0.001, min.scale) # eq, shape/gaus.opt, max, gaus.sd
+        max.list[[i]] <- c(9.99, shape.max, max.cont, max.scale)
         
       } else {
         parm.type[i, 2] <- 3
         min.list[[i]] <-
-          c(1, 0.5, 0.001) # eq, shape/gaus.opt, max
+          c(1, shape.min, 0.001) # eq, shape/gaus.opt, max
         
-        max.list[[i]] <- c(9.99, 14.5, max.cont)
+        max.list[[i]] <- c(9.99, shape.max, max.cont)
       }
       
       parm.type[i, 3] <- names[i]

@@ -5,25 +5,24 @@
 \title{Prepare and bundle input CIRCUITSCAPE model parameters to run in Julia}
 \usage{
 jl.prep(n.Pops, 
-response, 
-CS_Point.File, 
-covariates = NULL,
-formula = NULL,
-JULIA_HOME,
-Neighbor.Connect, 
-pairs_to_include, 
-platform, 
-parallel = FALSE, 
-cores = NULL,
-cholmod = TRUE,
-precision = FALSE, 
-run_test,
-write.files = NULL,
-write.criteria = NULL,
-silent = TRUE,
-Julia_link = 'JuliaCall',
-scratch = NULL,
-rm.files = TRUE)
+               response = NULL, 
+               CS_Point.File, 
+               covariates = NULL,
+               formula = NULL,
+               JULIA_HOME = NULL,
+               Neighbor.Connect = 8, 
+               pairs_to_include = NULL, 
+               parallel = FALSE, 
+               cores = NULL,
+               cholmod = TRUE,
+               precision = FALSE, 
+               run_test = TRUE,
+               write.files = NULL,
+               write.criteria = NULL,
+               silent = TRUE,
+               Julia_link = 'JuliaCall',
+               scratch = NULL,
+               rm.files = TRUE)
 }
 \arguments{
 \item{n.Pops}{The number of populations that are being assessed}

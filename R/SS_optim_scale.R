@@ -5,7 +5,7 @@
 #' @param CS.inputs Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
-#' #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
+#' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)
 #' @param null_mod Logical, if TRUE, an intercept-only model will be calculated and added to the output table (default = TRUE)
 #' @return This function optimizes resistance surfaces in isolation. Following optimization of all surfaces, several summary objects are created.\cr

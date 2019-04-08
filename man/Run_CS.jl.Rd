@@ -46,8 +46,9 @@ scratch = NULL)
 
 \item{precision}{(Logical; Default = FALSE). Should experimental single precision method be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.}
 
-\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
-#' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}}
+\item{JULIA_HOME}{Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{Julia_link}{Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}}
 
 \item{rm.files}{Should all temporary files be removed after Julia run (Default = TRUE). Only necessary to specify if \code{jl.inputs} are not specified.}
 

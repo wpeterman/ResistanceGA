@@ -6,7 +6,7 @@
 \usage{
 SHNe(n.samples,
             pop.size,
-            out = 'df')
+            output = 'df')
 }
 \arguments{
 \item{n.samples}{Specify the number of samples (populations) included in your analysis}

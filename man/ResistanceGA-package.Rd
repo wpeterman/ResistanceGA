@@ -9,17 +9,13 @@ This package contains functions to optimize resistance surfaces using Genetic Al
 }
 \details{
 \tabular{ll}{
-   Package: \tab ResistanceOptimization\cr
+   Package: \tab ResistanceGA\cr
    Type: \tab Package\cr
    License: \tab >=GPL-2\cr
  }
- This package provides functions to prepare data and execute a number of functions to optimize continuous and categorical resistance surfaces using CIRCUITSCAPE and Genetic Algorithms within R. You must have CIRCUITSCAPE (4.0-Beta or higher) installed to run these functions. Output from functions in this package include: a summary table with AIC, AICc, conditional and marginal R2 values, and log-likelihood values for each optimized surface, parameters that optimized each of the top models, coefficients from the fitted mixed effects models, plots of the fitted response curves, diagnostic plots of model fit, and Circuitscape outputs for each of the optimized resistance surfaces. Resistance surfaces can also be optimized using least cost paths, which are implemented using the `gdistance` package.
+ This package provides functions to prepare data and execute a number of functions to optimize continuous and categorical resistance surfaces using CIRCUITSCAPE, \href{https://github.com/Circuitscape/Circuitscape.jl}{CIRCUITSCAPE written in Julia} and Genetic Algorithms within R. You must have CIRCUITSCAPE (4.0-Beta or higher) or Julia installed to run these functions. The continued development and support of functions is primarily occurring with `gdistsance` and Julia implementations. Output from functions in this package include: a summary table with AIC, AICc, conditional and marginal R2 values, and log-likelihood values for each optimized surface, parameters that optimized each of the top models, coefficients from the fitted mixed effects models, plots of the fitted response curves, diagnostic plots of model fit, and Circuitscape outputs for each of the optimized resistance surfaces. Resistance surfaces can also be optimized using least cost paths, which are implemented using the `gdistance` package.
   
- *** Use of this package to run CIRCUITSCAPE is limited to Windows machines due its use of the Circuitscape .exe file. Anyone interested in adapting the code to accommodate command-line execution on other platforms is welcome to do so. 
- 
-  In order to use this package with CIRCUITSCAPE, you must have CIRCUITSCAPE v4.0 or greater installed.
-  
-  Official release: \url{http://www.circuitscape.org/downloads}
+ *** Use of this package to run CIRCUITSCAPE is limited to Windows machines due its use of the Circuitscape .exe file. However, Julia can be installed on any operating system, making this a more versatile option.
 }
 \references{
 Please cite: 

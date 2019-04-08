@@ -200,16 +200,16 @@ MS_optim <- function(CS.inputs = NULL,
     if (k.value == 1) {
       k <- 2
     } else if (k.value == 2) {
-      k <- GA.inputs$parm.type$n.parm[i] + 
+      k <- sum(GA.inputs$parm.type$n.parm) + 
         length(lme4::fixef(fit.mod)) - 1
       
     } else if (k.value == 3) {
-      k <- GA.inputs$parm.type$n.parm[i] + 
+      k <- sum(GA.inputs$parm.type$n.parm) + 
         length(GA.inputs$layer.names) + 
         length(lme4::fixef(fit.mod)) - 1
       
     } else {
-      k <- length(GA.inputs$layer.names[i]) + 
+      k <- length(GA.inputs$layer.names) + 
         length(lme4::fixef(fit.mod)) - 1
       
     }
@@ -562,16 +562,16 @@ MS_optim <- function(CS.inputs = NULL,
     if (k.value == 1) {
       k <- 2
     } else if (k.value == 2) {
-      k <- GA.inputs$parm.type$n.parm[i] + 
+      k <- sum(GA.inputs$parm.type$n.parm) + 
         length(lme4::fixef(fit.mod)) - 1
       
     } else if (k.value == 3) {
-      k <- GA.inputs$parm.type$n.parm[i] + 
+      k <- sum(GA.inputs$parm.type$n.parm) + 
         length(GA.inputs$layer.names) + 
         length(lme4::fixef(fit.mod)) - 1
       
     } else {
-      k <- length(GA.inputs$layer.names[i]) + 
+      k <- length(GA.inputs$layer.names) + 
         length(lme4::fixef(fit.mod)) - 1
       
     }
@@ -944,16 +944,16 @@ MS_optim <- function(CS.inputs = NULL,
     if (k.value == 1) {
       k <- 2
     } else if (k.value == 2) {
-      k <- GA.inputs$parm.type$n.parm[i] + 
+      k <- sum(GA.inputs$parm.type$n.parm) + 
         length(lme4::fixef(fit.mod)) - 1
       
     } else if (k.value == 3) {
-      k <- GA.inputs$parm.type$n.parm[i] + 
+      k <- sum(GA.inputs$parm.type$n.parm) + 
         length(GA.inputs$layer.names) + 
         length(lme4::fixef(fit.mod)) - 1
       
     } else {
-      k <- length(GA.inputs$layer.names[i]) + 
+      k <- length(GA.inputs$layer.names) + 
         length(lme4::fixef(fit.mod)) - 1
       
     }

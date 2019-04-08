@@ -20,7 +20,7 @@
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage SHNe(n.samples,
 #'             pop.size,
-#'             out = 'df')
+#'             output = 'df')
 #' 
 SHNe <- function(n.samples, 
                  pop.size, 

@@ -11,8 +11,8 @@
 #' @param directions Directions in which cells are connected (4, 8, 16, or other). Default = 8
 #' @param longlat Logical. If true, a \code{\link[gdistance]{geoCorrection}} will be applied to the transition  matrix. Default = FALSE
 #' @param method Specify whether pairwise distance should be calulated using the \code{\link[gdistance]{costDistance}} or \code{\link[gdistance]{commuteDistance}} (Default) functions. \code{\link[gdistance]{costDistance}} calculates least cost path distance, \code{\link[gdistance]{commuteDistance}} is equivalent (i.e. nearly perfectly correlated with) resistance distance calculated by CIRCUITSCAPE.
-#' @param min.max_dist Optional. Specify the minimum and maximum distance at which pairwise comparisons will be made(e.g., c(1, 50)). Euclidean distances below and above the minumum and maximum values will be omitted from the analysis. This has potential to reduce analysis time, but also reduces the number of pairwise comparisons.
-#' @param keep An optional vector equal to length \code{response} (i.e. all pairwise observations), with 1 indicating to keep the observation, and 0 to drop the observation. This can be used in conjunction with, or in place of \code{min.max_dist} to select which observations to include in analyses.
+#' @param min.max_dist NOT YET SUPPORTED. Optional. Specify the minimum and maximum distance at which pairwise comparisons will be made(e.g., c(1, 50)). Euclidean distances below and above the minumum and maximum values will be omitted from the analysis. This has potential to reduce analysis time, but also reduces the number of pairwise comparisons.
+#' @param keep NOT YET SUPPORTED. An optional vector equal to length \code{response} (i.e. all pairwise observations), with 1 indicating to keep the observation, and 0 to drop the observation. This can be used in conjunction with, or in place of \code{min.max_dist} to select which observations to include in analyses.
 #' @return An R object that is a required input into optimization functions
 #' @details When specifying a formula, provide it as: \code{response ~ covariate}.
 #' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
@@ -97,11 +97,11 @@ gdist.prep <-
       
       drop.obs <- keep 
       
-      ZZ <- ResistanceGA:::ZZ.mat_select(ID, drop.obs)
+      ZZ <- ZZ.mat_select(ID, drop.obs)
       
     } else {
       ID <- To.From.ID(n.Pops)
-      ZZ <- ResistanceGA:::ZZ.mat(ID)
+      ZZ <- ZZ.mat(ID)
     }
     
     df <- NULL
@@ -144,6 +144,7 @@ gdist.prep <-
     # Min-Max Distance ------------------------------------------------------------
     
     if(!is.null(min.max_dist)) {
+      stop("This feature is not yet supported")
       if (length(min.max_dist) != 2) {
         stop("Specify 'min.max_dist' as a 2-element vector: c(min, max)")
       }
@@ -189,7 +190,7 @@ gdist.prep <-
       # ID$pop1 <- factor(ID$pop1)
       # ID$pop2 <- factor(ID$pop2)
       
-      ZZ <- ResistanceGA:::ZZ.mat_select(ID, drop.obs)
+      ZZ <- ZZ.mat_select(ID, drop.obs)
       
       # mx.dist <- as.matrix(dist(samples@coords))
       # mx.dist[mx.dist > max.dist] <- NA

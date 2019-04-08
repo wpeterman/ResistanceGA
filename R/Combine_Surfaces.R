@@ -27,14 +27,14 @@
 #' The Distance transformation sets all values equal to one. Because of the flexibility of the Ricker function to take a monomolecular shape (try \code{Plot.trans(PARM=c(10,100), Resistance=c(1,10), transformation="Ricker")} to see this), whenever a shape parameter >6 is selected in combination with a Ricker family transformation, the transformation reverts to a Distance transformation. In general, it seems that using a combination of intermediate Ricker and Monomolecular transformations provides the best, most flexible coverage of parameter space.
 #' @return R raster object that is the sum all transformed and/or reclassified resistance surfaces provided
 #' @usage Combine_Surfaces(PARM, 
-#'                         CS.inputs, 
-#'                         gdist.inputs, 
+#'                         CS.inputs = NULL, 
+#'                         gdist.inputs = NULL, 
+#'                         jl.inputs = NULL,
 #'                         GA.inputs, 
-#'                         jl.inputs,
-#'                         out, 
+#'                         out = NULL, 
 #'                         File.name, 
-#'                         rescale, 
-#'                         p.contribution)
+#'                         rescale = TRUE, 
+#'                         p.contribution = FALSE)
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Combine_Surfaces <-

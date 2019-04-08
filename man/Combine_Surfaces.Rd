@@ -5,14 +5,14 @@
 \title{Combine multiple resistance surfaces together}
 \usage{
 Combine_Surfaces(PARM, 
-                        CS.inputs, 
-                        gdist.inputs, 
+                        CS.inputs = NULL, 
+                        gdist.inputs = NULL, 
+                        jl.inputs = NULL,
                         GA.inputs, 
-                        jl.inputs,
-                        out, 
+                        out = NULL, 
                         File.name, 
-                        rescale, 
-                        p.contribution)
+                        rescale = TRUE, 
+                        p.contribution = FALSE)
 }
 \arguments{
 \item{PARM}{Parameters to transform conintuous surface or resistance values of categorical surface. Requires a vector with parameters specified in the order of resistance surfaces}

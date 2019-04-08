@@ -3,7 +3,7 @@
 \docType{data}
 \name{samples}
 \alias{samples}
-\title{Example sample location file to run CIRCUITSCAPE}
+\title{Data file. Example sample location file}
 \format{A 25 x 3 data frame}
 \usage{
 data(samples)

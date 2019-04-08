@@ -27,25 +27,24 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage jl.prep(n.Pops, 
-#' response, 
-#' CS_Point.File, 
-#' covariates = NULL,
-#' formula = NULL,
-#' JULIA_HOME,
-#' Neighbor.Connect, 
-#' pairs_to_include, 
-#' platform, 
-#' parallel = FALSE, 
-#' cores = NULL,
-#' cholmod = TRUE,
-#' precision = FALSE, 
-#' run_test,
-#' write.files = NULL,
-#' write.criteria = NULL,
-#' silent = TRUE,
-#' Julia_link = 'JuliaCall',
-#' scratch = NULL,
-#' rm.files = TRUE)
+#'                response = NULL, 
+#'                CS_Point.File, 
+#'                covariates = NULL,
+#'                formula = NULL,
+#'                JULIA_HOME = NULL,
+#'                Neighbor.Connect = 8, 
+#'                pairs_to_include = NULL, 
+#'                parallel = FALSE, 
+#'                cores = NULL,
+#'                cholmod = TRUE,
+#'                precision = FALSE, 
+#'                run_test = TRUE,
+#'                write.files = NULL,
+#'                write.criteria = NULL,
+#'                silent = TRUE,
+#'                Julia_link = 'JuliaCall',
+#'                scratch = NULL,
+#'                rm.files = TRUE)
 #' @details 
 #' This function requires that Julia is properly installed on your system. Upon first running of this function, the Circuitscape.jl library will be downloaded and tested. (see https://github.com/Circuitscape/Circuitscape.jl for more details). This may take some time.
 #' 
