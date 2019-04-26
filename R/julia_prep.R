@@ -141,12 +141,12 @@ jl.prep <- function(n.Pops,
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(tempdir(),"//")
       setwd(JULIA_HOME)
-      
+
     } else {
       td <- paste0(tempdir(),"/")
     }
     td <- gsub("/","//", td)
-    
+
     write.table(samples, 
                 paste0(td,'samples.txt'), 
                 quote = FALSE,
@@ -161,7 +161,10 @@ jl.prep <- function(n.Pops,
     # if(Sys.info()[['sysname']] == "Windows") {
       temp.ini <- gsub("/", "//", temp.ini)
     # }
-    
+    if(Sys.info()[['sysname']] == "Windows") {
+      temp.ini <- gsub("/", "\\", temp.ini)
+    }
+
     
     tmp.name <- basename(temp.ini) %>% strsplit(., '.ini') %>% unlist()
     
@@ -271,6 +274,7 @@ jl.prep <- function(n.Pops,
     } else {
       td <- paste0(tempdir(),"//")
     }
+    
     td <- gsub("/", "//",td)
     
     site <- c(1:length(CS_Point.File))
