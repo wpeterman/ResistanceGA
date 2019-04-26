@@ -100,6 +100,7 @@ jl.prep <- function(n.Pops,
   }
   
   if(!is.null(write.files)) {
+    write.files <- normalizePath(write.files)
     if(!dir.exists(write.files))
       stop("`write.files` directory does not exist")
   }
@@ -118,10 +119,13 @@ jl.prep <- function(n.Pops,
       jl.setup <- try(julia_setup(), TRUE)
       JULIA_HOME <- XRJulia::findJulia()
       JULIA_HOME <- paste0(dirname(JULIA_HOME), "\\")
+      
       if(class(jl.setup) == "try-error")
         stop("Specified JULIA_HOME directory does not exist")
     }        
   }
+  JULIA_HOME <- normalizePath(JULIA_HOME)
+  
   
   # Determine if CIRCUITSCAPE package is installed
   jl.cs <- try(julia_library("Circuitscape"), TRUE)
@@ -130,8 +134,7 @@ jl.prep <- function(n.Pops,
                    "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
   }
   wd <- getwd()
-  # setwd(JULIA_HOME)
-  
+
   if(run_test == TRUE) {
     print("Test: Run Circuitscape from Julia")
     
@@ -141,6 +144,8 @@ jl.prep <- function(n.Pops,
     } else {
       td <- paste0(tempdir(),"\\")
     }
+    td <- gsub("/","\\", td)
+    
     write.table(samples, 
                 paste0(td,'samples.txt'), 
                 quote = FALSE,
@@ -152,6 +157,8 @@ jl.prep <- function(n.Pops,
                          tmpdir = tempdir(),
                          fileext = ".ini")
     
+    temp.ini <- gsub("/", "\\", temp.ini)
+
     tmp.name <- basename(temp.ini) %>% strsplit(., '.ini') %>% unlist()
     
     writeRaster(resistance_surfaces$continuous,
@@ -188,6 +195,7 @@ jl.prep <- function(n.Pops,
       out <- julia_call('compute', temp.ini)[-1,-1]
       
     } else {
+      scratch <- normalizePath(scratch)
       cs.jl <- RJulia()
       cs.jl$Using("Circuitscape")
       
@@ -214,30 +222,6 @@ jl.prep <- function(n.Pops,
       stop("Test Failed")
     }
     
-    #   
-    #   cat("Running test #2: Run Circuitscape from Julia in parallel")
-    #   
-    #   write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-    #                OUT = paste0("output_file = ", td, tmp.name, ".out"),
-    #                HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-    #                LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-    #                PARALLELIZE = TRUE,
-    #                CORES = 2,
-    #                solver = 'cholmod',
-    #                precision = NULL
-    #   )
-    #   
-    #   out <- julia_call('compute', temp.ini)[-1,-1]
-    #   
-    #   
-    #   if(dim(out)[1] == 25) {
-    #     cat("\n"); cat("\n")
-    #     
-    #     print("Test #2: Passed")
-    #   } else {
-    #     stop("Test #2: Failed")
-    #   } 
-    #   
     unlink.list <- list.files(td,
                               pattern = tmp.name,
                               all.files = TRUE,
@@ -280,7 +264,8 @@ jl.prep <- function(n.Pops,
     } else {
       td <- paste0(tempdir(),"\\")
     }
-    
+    td <- gsub("/", "\\",td)
+
     site <- c(1:length(CS_Point.File))
     
     cs.txt <- data.frame(site, CS_Point.File)

@@ -71,7 +71,7 @@ Run_CS.jl <-
       }
       
       if(!is.null(jl.inputs$scratch)){
-        scratch <- jl.inputs$scratch
+        scratch <- normalizePath(jl.inputs$scratch)
       }
     }
     
@@ -127,8 +127,6 @@ Run_CS.jl <-
       }
       
       JULIA_HOME <- jl.inputs$JULIA_HOME
-      setwd(JULIA_HOME)
-      
     }
     
     if(Julia_link == 'JuliaCall') {
@@ -153,12 +151,8 @@ Run_CS.jl <-
     } else {
       R = r
       asc.dir <- NULL
-      
     }
-    
-    if(Sys.info()[['sysname']] == "Windows") {
-      setwd(JULIA_HOME)
-    }
+
     
     if(is.null(EXPORT.dir)) {   
       if(Sys.info()[['sysname']] == "Windows") {
@@ -168,9 +162,13 @@ Run_CS.jl <-
       }
     }
     
-    rm.rast <- temp_rast <- tempfile(pattern = "raster_", 
-                                     tmpdir = tempdir(),
-                                     fileext = ".asc") 
+    rm.rast <- tempfile(pattern = "raster_", 
+                        tmpdir = tempdir(),
+                        fileext = ".asc") 
+    
+    EXPORT.dir <- normalizePath(EXPORT.dir)
+    temp_rast <- rm.rast <- gsub('/','\\', rm.rast)
+    
     
     tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
     
@@ -264,6 +262,9 @@ Run_CS.jl <-
     
     
     # Run CIRCUITSCAPE.jl -----------------------------------------------------
+    if(Sys.info()[['sysname']] == "Windows") {
+      setwd(JULIA_HOME)
+    }
     rt <- NULL
     
     if(Julia_link == 'JuliaCall') {
