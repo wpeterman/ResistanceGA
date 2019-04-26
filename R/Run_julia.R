@@ -156,9 +156,9 @@ Run_CS.jl <-
     
     if(is.null(EXPORT.dir)) {   
       if(Sys.info()[['sysname']] == "Windows") {
-        EXPORT.dir <- paste0(tempdir(),"\\")
+        EXPORT.dir <- paste0(tempdir(),"//")
       } else {
-        EXPORT.dir <- paste0(tempdir(),"\\")
+        EXPORT.dir <- paste0(tempdir(),"//")
       }
     }
     
@@ -167,7 +167,7 @@ Run_CS.jl <-
                         fileext = ".asc") 
     
     EXPORT.dir <- normalizePath(EXPORT.dir)
-    temp_rast <- rm.rast <- gsub('/','\\', rm.rast)
+    temp_rast <- rm.rast <- gsub('/','//', rm.rast)
     
     
     tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
@@ -225,11 +225,16 @@ Run_CS.jl <-
       PAIRS <- paste0("use_included_pairs = True")
     }
     if(!is.null(scratch)) {
+      # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
+      # scratch2 <- gsub("/", "//", scratch)
+      # temp_rast2 <- gsub("/", "\\", temp_rast)
+      cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)
+      
       write.CS_4.0(
         BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-        OUT = paste0("output_file = ", scratch, "\\", tmp.name, ".out"),
+        OUT = paste0("output_file = ", scratch, "//", tmp.name, ".out"),
         HABITAT = paste0("habitat_file = ", temp_rast),
-        LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
+        LOCATION.FILE = paste0("point_file = ", cs.pt2),
         CONNECTION = paste0("connect_four_neighbors_only =", connect),
         MAP = MAP,
         CURRENT.MAP = CURRENT.MAP,
@@ -242,11 +247,15 @@ Run_CS.jl <-
         silent = jl.inputs$silent
       )
     } else {
+      # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
+      # temp_rast2 <- gsub("/", "\\", temp_rast)
+      cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)   
+      
       write.CS_4.0(
         BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
         OUT = paste0("output_file = ", EXPORT.dir, tmp.name, ".out"),
         HABITAT = paste0("habitat_file = ", temp_rast),
-        LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
+        LOCATION.FILE = paste0("point_file = ", cs.pt2),
         CONNECTION = paste0("connect_four_neighbors_only =", connect),
         MAP = MAP,
         CURRENT.MAP = CURRENT.MAP,
@@ -282,7 +291,7 @@ Run_CS.jl <-
       ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
       Sys.sleep(0.5)
-      out <- as.matrix(read.table(paste0(scratch, "\\", tmp.name, "_resistances.out"),
+      out <- as.matrix(read.table(paste0(scratch, "//", tmp.name, "_resistances.out"),
                                   quote="\"", comment.char=""))[-1,-1]
       # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
       # out <- juliaGet(cs.out)[-1,-1] ## Slow!
@@ -294,14 +303,14 @@ Run_CS.jl <-
     
     if (output == "raster" & CurrentMap == TRUE) {
       rm.files <- FALSE
-      if(EXPORT.dir == paste0(tempdir(), "\\") & is.null(scratch)) {
+      if(EXPORT.dir == paste0(tempdir(), "//") & is.null(scratch)) {
         stop("Specify an `EXPORT.dir` or `scratch` directory to write CIRCUITSCAPE results to")
       } 
       
-      if(EXPORT.dir != paste0(tempdir(), "\\")) {
-        rast <- raster(paste0(EXPORT.dir, "\\", tmp.name, "_cum_curmap.asc"))
+      if(EXPORT.dir != paste0(tempdir(), "//")) {
+        rast <- raster(paste0(EXPORT.dir, "//", tmp.name, "_cum_curmap.asc"))
       } else {
-        rast <- raster(paste0(scratch, "\\", tmp.name, "_cum_curmap.asc"))
+        rast <- raster(paste0(scratch, "//", tmp.name, "_cum_curmap.asc"))
       }
       
       # NAME <- basename(rast@file@name)
