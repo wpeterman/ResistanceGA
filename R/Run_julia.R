@@ -107,7 +107,7 @@ Run_CS.jl <-
                            precision = precision,
                            run_test = FALSE)
     }
-
+    
     if(isTRUE(full.mat) & !is.null(jl.inputs$pairs_to_include)) {
       warning("The full matrix generated will have -1 values. These indicate pairs that were excluded from the analysis.")
     }
@@ -154,6 +154,10 @@ Run_CS.jl <-
       R = r
       asc.dir <- NULL
       
+    }
+    
+    if(Sys.info()[['sysname']] == "Windows") {
+      setwd(JULIA_HOME)
     }
     
     if(is.null(EXPORT.dir)) {   
@@ -283,8 +287,9 @@ Run_CS.jl <-
       # out <- juliaGet(cs.out)[-1,-1] ## Slow!
     }
     
-    setwd(wd)
-    
+    if(wd != getwd()) {
+      setwd(wd)
+    }    
     
     if (output == "raster" & CurrentMap == TRUE) {
       rm.files <- FALSE
