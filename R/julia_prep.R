@@ -117,7 +117,7 @@ jl.prep <- function(n.Pops,
     } else {
       jl.setup <- try(julia_setup(), TRUE)
       JULIA_HOME <- XRJulia::findJulia()
-      JULIA_HOME <- paste0(dirname(JULIA_HOME), "/")
+      JULIA_HOME <- paste0(dirname(JULIA_HOME), "\\")
       if(class(jl.setup) == "try-error")
         stop("Specified JULIA_HOME directory does not exist")
     }        
@@ -133,12 +133,12 @@ jl.prep <- function(n.Pops,
   setwd(JULIA_HOME)
   
   if(run_test == TRUE) {
-    print("Running test #1: Run Circuitscape from Julia")
+    print("Test: Run Circuitscape from Julia")
     
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(tempdir(),"\\")
     } else {
-      td <- paste0(tempdir(),"/")
+      td <- paste0(tempdir(),"\\")
     }
     write.table(samples, 
                 paste0(td,'samples.txt'), 
@@ -161,7 +161,7 @@ jl.prep <- function(n.Pops,
     
     if(!is.null(scratch)) {
       write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                   OUT = paste0("output_file = ", scratch,"/", tmp.name, ".out"),
+                   OUT = paste0("output_file = ", scratch,"\\", tmp.name, ".out"),
                    HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
                    LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
                    PARALLELIZE = FALSE,
@@ -191,7 +191,7 @@ jl.prep <- function(n.Pops,
       cs.jl$Using("Circuitscape")
       
       cs.out <- cs.jl$Call("compute", temp.ini) 
-      out <- as.matrix(read.table(paste0(scratch, "/", tmp.name, "_resistances.out"),
+      out <- as.matrix(read.table(paste0(scratch, "\\", tmp.name, "_resistances.out"),
                                   quote="\"", comment.char=""))[-1,-1]
       # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
       # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
@@ -202,12 +202,12 @@ jl.prep <- function(n.Pops,
     if(dim(out)[1] == 25) {
       cat("\n"); cat("\n")
       
-      cat("Test #1: Passed")
+      cat("Test Passed")
       
       cat("\n"); cat("\n")
       
     } else {
-      stop("Test #1: Failed")
+      stop("Test Failed")
     }
     
     #   
@@ -274,7 +274,7 @@ jl.prep <- function(n.Pops,
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(tempdir(),"\\")
     } else {
-      td <- paste0(tempdir(),"/")
+      td <- paste0(tempdir(),"\\")
     }
     
     site <- c(1:length(CS_Point.File))

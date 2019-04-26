@@ -10,7 +10,7 @@
 #' @param iters Number of bootstrap iterations to be conducted (Default = 1000)
 #' @param sample.prop Proportion of observations to be sampled each iteration (Default = 0.75)
 #' @param replicate The number of times to replicate the GA optimization process for each surface (Default = 1)
-#' @param nlm Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. (Default = FALSE)
+#' @param nlm (NOT CURRENTLY IMPLEMENTED) Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. (Default = FALSE)
 #' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)
 #' @param null_mod Logical, if TRUE, an intercept-only model will be calculated and added to the output table (Default = TRUE)
 #' @param ... Additional arguments (Not currently used)

@@ -34,7 +34,7 @@ all_comb(gdist.inputs = NULL,
 
 \item{sample.prop}{Proportion of observations to be sampled each iteration (Default = 0.75)}
 
-\item{nlm}{Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. (Default = FALSE)}
+\item{nlm}{(NOT CURRENTLY IMPLEMENTED) Logical, if TRUE, the final step of optimization will use nlm to fine-tune parameter estimates. This may lead to overfitting in some cases. (Default = FALSE)}
 
 \item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)}
 

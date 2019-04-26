@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.29
+--------
+* Updates to accomodate running on linux cluster
+
 ResistanceGA 4.1-0.28
 --------
 * Added new sample data sets for running examples

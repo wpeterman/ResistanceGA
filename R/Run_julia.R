@@ -283,6 +283,8 @@ Run_CS.jl <-
       # out <- juliaGet(cs.out)[-1,-1] ## Slow!
     }
     
+    setwd(wd)
+    
     
     if (output == "raster" & CurrentMap == TRUE) {
       rm.files <- FALSE
@@ -385,8 +387,6 @@ Run_CS.jl <-
       time.diff <- Sys.time() - make.times
       
       unlink(asc.files[time.diff > 30], force = TRUE)
-      
-      setwd(wd)
       
       return(cs.matrix)
     }
