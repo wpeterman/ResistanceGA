@@ -164,7 +164,7 @@ Run_CS.jl <-
       if(Sys.info()[['sysname']] == "Windows") {
         EXPORT.dir <- paste0(tempdir(),"\\")
       } else {
-        EXPORT.dir <- paste0(tempdir(),"/")
+        EXPORT.dir <- paste0(tempdir(),"\\")
       }
     }
     
@@ -229,7 +229,7 @@ Run_CS.jl <-
     if(!is.null(scratch)) {
       write.CS_4.0(
         BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-        OUT = paste0("output_file = ", scratch, "/", tmp.name, ".out"),
+        OUT = paste0("output_file = ", scratch, "\\", tmp.name, ".out"),
         HABITAT = paste0("habitat_file = ", temp_rast),
         LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
         CONNECTION = paste0("connect_four_neighbors_only =", connect),
@@ -281,7 +281,7 @@ Run_CS.jl <-
       ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
       Sys.sleep(0.5)
-      out <- as.matrix(read.table(paste0(scratch, "/", tmp.name, "_resistances.out"),
+      out <- as.matrix(read.table(paste0(scratch, "\\", tmp.name, "_resistances.out"),
                                   quote="\"", comment.char=""))[-1,-1]
       # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
       # out <- juliaGet(cs.out)[-1,-1] ## Slow!
@@ -298,9 +298,9 @@ Run_CS.jl <-
       } 
       
       if(EXPORT.dir != paste0(tempdir(), "\\")) {
-        rast <- raster(paste0(EXPORT.dir, "/", tmp.name, "_cum_curmap.asc"))
+        rast <- raster(paste0(EXPORT.dir, "\\", tmp.name, "_cum_curmap.asc"))
       } else {
-        rast <- raster(paste0(scratch, "/", tmp.name, "_cum_curmap.asc"))
+        rast <- raster(paste0(scratch, "\\", tmp.name, "_cum_curmap.asc"))
       }
       
       # NAME <- basename(rast@file@name)
