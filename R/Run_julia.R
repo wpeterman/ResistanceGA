@@ -225,11 +225,16 @@ Run_CS.jl <-
       PAIRS <- paste0("use_included_pairs = True")
     }
     if(!is.null(scratch)) {
+      EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
+      scratch2 <- gsub("/", "\\", scratch)
+      temp_rast2 <- gsub("/", "\\", temp_rast)
+      cs.pt2 <- gsub("/", "\\", jl.inputs$CS_Point.File)
+      
       write.CS_4.0(
-        BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-        OUT = paste0("output_file = ", scratch, "\\", tmp.name, ".out"),
-        HABITAT = paste0("habitat_file = ", temp_rast),
-        LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
+        BATCH = paste0(EXPORT.dir2, tmp.name, ".ini"),
+        OUT = paste0("output_file = ", scratch2, "\\", tmp.name, ".out"),
+        HABITAT = paste0("habitat_file = ", temp_rast2),
+        LOCATION.FILE = paste0("point_file = ", cs.pt2),
         CONNECTION = paste0("connect_four_neighbors_only =", connect),
         MAP = MAP,
         CURRENT.MAP = CURRENT.MAP,
@@ -242,11 +247,15 @@ Run_CS.jl <-
         silent = jl.inputs$silent
       )
     } else {
+      EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
+      temp_rast2 <- gsub("/", "\\", temp_rast)
+      cs.pt2 <- gsub("/", "\\", jl.inputs$CS_Point.File)   
+      
       write.CS_4.0(
-        BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-        OUT = paste0("output_file = ", EXPORT.dir, tmp.name, ".out"),
-        HABITAT = paste0("habitat_file = ", temp_rast),
-        LOCATION.FILE = paste0("point_file = ", jl.inputs$CS_Point.File),
+        BATCH = paste0(EXPORT.dir2, tmp.name, ".ini"),
+        OUT = paste0("output_file = ", EXPORT.dir2, tmp.name, ".out"),
+        HABITAT = paste0("habitat_file = ", temp_rast2),
+        LOCATION.FILE = paste0("point_file = ", cs.pt2),
         CONNECTION = paste0("connect_four_neighbors_only =", connect),
         MAP = MAP,
         CURRENT.MAP = CURRENT.MAP,
@@ -270,16 +279,16 @@ Run_CS.jl <-
     if(Julia_link == 'JuliaCall') {
       if(!is.null(write.criteria)) {
         t1 <- proc.time()[3]
-        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        out <- julia_call('compute', paste0(EXPORT.dir2, tmp.name, ".ini"))[-1,-1]
         rt <- proc.time()[3] - t1
       } else {
-        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        out <- julia_call('compute', paste0(EXPORT.dir2, tmp.name, ".ini"))[-1,-1]
       }
     } else { # use XRJulia
       cs.jl <- RJulia()
       cs.jl$Using("Circuitscape")
       
-      ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
+      ini.file <- paste0(EXPORT.dir2, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
       Sys.sleep(0.5)
       out <- as.matrix(read.table(paste0(scratch, "\\", tmp.name, "_resistances.out"),

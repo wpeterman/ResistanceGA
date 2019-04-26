@@ -118,7 +118,7 @@ jl.prep <- function(n.Pops,
     } else {
       jl.setup <- try(julia_setup(), TRUE)
       JULIA_HOME <- XRJulia::findJulia()
-      JULIA_HOME <- paste0(dirname(JULIA_HOME), "\\")
+      JULIA_HOME <- paste0(dirname(JULIA_HOME), "/")
       
       if(class(jl.setup) == "try-error")
         stop("Specified JULIA_HOME directory does not exist")
@@ -134,17 +134,18 @@ jl.prep <- function(n.Pops,
                    "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
   }
   wd <- getwd()
-
+  
   if(run_test == TRUE) {
     print("Test: Run Circuitscape from Julia")
     
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(tempdir(),"\\")
       setwd(JULIA_HOME)
+      td <- gsub("/","\\", td)
+      
     } else {
-      td <- paste0(tempdir(),"\\")
+      td <- paste0(tempdir(),"/")
     }
-    td <- gsub("/","\\", td)
     
     write.table(samples, 
                 paste0(td,'samples.txt'), 
@@ -157,8 +158,11 @@ jl.prep <- function(n.Pops,
                          tmpdir = tempdir(),
                          fileext = ".ini")
     
-    temp.ini <- gsub("/", "\\", temp.ini)
-
+    if(Sys.info()[['sysname']] == "Windows") {
+      temp.ini <- gsub("/", "\\", temp.ini)
+    }
+    
+    
     tmp.name <- basename(temp.ini) %>% strsplit(., '.ini') %>% unlist()
     
     writeRaster(resistance_surfaces$continuous,
@@ -168,10 +172,11 @@ jl.prep <- function(n.Pops,
     
     
     if(!is.null(scratch)) {
+      td2 <- gsub("/", "\\", td)
       write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
                    OUT = paste0("output_file = ", scratch,"\\", tmp.name, ".out"),
-                   HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                   LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                   HABITAT = paste0("habitat_file = ", td2, tmp.name, '.asc'),
+                   LOCATION.FILE = paste0("point_file = ", td2, 'samples.txt'),
                    PARALLELIZE = FALSE,
                    CORES = NULL,
                    solver = 'cholmod',
@@ -179,10 +184,11 @@ jl.prep <- function(n.Pops,
                    silent = silent
       )
     } else {
+      td2 <- gsub("/", "\\", td)
       write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                   OUT = paste0("output_file = ", td, tmp.name, ".out"),
-                   HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                   LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
+                   OUT = paste0("output_file = ", td2, tmp.name, ".out"),
+                   HABITAT = paste0("habitat_file = ", td2, tmp.name, '.asc'),
+                   LOCATION.FILE = paste0("point_file = ", td2, 'samples.txt'),
                    PARALLELIZE = FALSE,
                    CORES = NULL,
                    solver = 'cholmod',
@@ -221,12 +227,13 @@ jl.prep <- function(n.Pops,
     } else {
       stop("Test Failed")
     }
-    
-    unlink.list <- list.files(td,
-                              pattern = tmp.name,
-                              all.files = TRUE,
-                              full.names = TRUE)
-    del.files <- sapply(unlink.list, unlink, force = TRUE)
+    if(isTRUE(rm.files)) {
+      unlink.list <- list.files(td,
+                                pattern = tmp.name,
+                                all.files = TRUE,
+                                full.names = TRUE)
+      del.files <- sapply(unlink.list, unlink, force = TRUE)
+    }
     
     if(!is.null(scratch)){
       unlink.list2 <- list.files(scratch,
@@ -265,7 +272,7 @@ jl.prep <- function(n.Pops,
       td <- paste0(tempdir(),"\\")
     }
     td <- gsub("/", "\\",td)
-
+    
     site <- c(1:length(CS_Point.File))
     
     cs.txt <- data.frame(site, CS_Point.File)
@@ -371,8 +378,8 @@ jl.prep <- function(n.Pops,
     
   }
   
- 
-   ##Return list  
+  
+  ##Return list  
   list(
     ID = ID.keep,
     ZZ = ZZ.keep,
