@@ -279,16 +279,16 @@ Run_CS.jl <-
     if(Julia_link == 'JuliaCall') {
       if(!is.null(write.criteria)) {
         t1 <- proc.time()[3]
-        out <- julia_call('compute', paste0(EXPORT.dir2, tmp.name, ".ini"))[-1,-1]
+        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
         rt <- proc.time()[3] - t1
       } else {
-        out <- julia_call('compute', paste0(EXPORT.dir2, tmp.name, ".ini"))[-1,-1]
+        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
       }
     } else { # use XRJulia
       cs.jl <- RJulia()
       cs.jl$Using("Circuitscape")
       
-      ini.file <- paste0(EXPORT.dir2, tmp.name, ".ini")
+      ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
       cs.out <- cs.jl$Call("compute", ini.file) 
       Sys.sleep(0.5)
       out <- as.matrix(read.table(paste0(scratch, "//", tmp.name, "_resistances.out"),
