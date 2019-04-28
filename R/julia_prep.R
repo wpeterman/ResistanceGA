@@ -141,12 +141,16 @@ jl.prep <- function(n.Pops,
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(tempdir(),"//")
       setwd(JULIA_HOME)
-
+      
     } else {
       td <- paste0(tempdir(),"/")
     }
     td <- gsub("/","//", td)
-
+    
+    if(!is.null(scratch)) {
+     td <- normalizePath(scratch)
+    }
+    
     write.table(samples, 
                 paste0(td,'samples.txt'), 
                 quote = FALSE,
@@ -159,35 +163,41 @@ jl.prep <- function(n.Pops,
                          fileext = ".ini")
     
     # if(Sys.info()[['sysname']] == "Windows") {
-      temp.ini <- gsub("/", "//", temp.ini)
+    temp.ini <- gsub("/", "//", temp.ini)
     # }
     if(Sys.info()[['sysname']] == "Windows") {
       temp.ini <- gsub("/", "\\", temp.ini)
     }
-
+    
+    if(!is.null(scratch)) {
+      temp.ini <- paste0(scratch, basename(temp.ini))
+    }
+    
     
     tmp.name <- basename(temp.ini) %>% strsplit(., '.ini') %>% unlist()
     
-    writeRaster(resistance_surfaces$continuous,
-                paste0(td,
-                       tmp.name, '.asc'),
-                overwirte = TRUE)
-    
-    
-    if(!is.null(scratch)) {
-      # td2 <- gsub("/", "//", td)
-      write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
-                   OUT = paste0("output_file = ", scratch,"//", tmp.name, ".out"),
-                   HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
-                   LOCATION.FILE = paste0("point_file = ", td, 'samples.txt'),
-                   PARALLELIZE = FALSE,
-                   CORES = NULL,
-                   solver = 'cholmod',
-                   precision = FALSE,
-                   silent = silent
-      )
-    } else {
-      # td2 <- gsub("/", "\\", td)
+    # if(!is.null(scratch)) {
+    #   writeRaster(resistance_surfaces$continuous,
+    #               paste0(scratch,
+    #                      tmp.name, '.asc'),
+    #               overwirte = TRUE)
+    #   
+    #   write.CS_4.0(BATCH = paste0(scratch, tmp.name, ".ini"),
+    #                OUT = paste0("output_file = ", scratch,"//", tmp.name, ".out"),
+    #                HABITAT = paste0("habitat_file = ", scratch, tmp.name, '.asc'),
+    #                LOCATION.FILE = paste0("point_file = ", scratch, 'samples.txt'),
+    #                PARALLELIZE = FALSE,
+    #                CORES = NULL,
+    #                solver = 'cholmod',
+    #                precision = FALSE,
+    #                silent = silent
+    #   )
+    # } else {
+      writeRaster(resistance_surfaces$continuous,
+                  paste0(td,
+                         tmp.name, '.asc'),
+                  overwirte = TRUE)
+      
       write.CS_4.0(BATCH = paste0(td, tmp.name, ".ini"),
                    OUT = paste0("output_file = ", td, tmp.name, ".out"),
                    HABITAT = paste0("habitat_file = ", td, tmp.name, '.asc'),
@@ -198,13 +208,16 @@ jl.prep <- function(n.Pops,
                    precision = FALSE,
                    silent = silent
       )
+    # }
+    
+    if(!is.null(scratch)) {
+      scratch <- normalizePath(scratch)
     }
     
     if(Julia_link == 'JuliaCall'){
       out <- julia_call('compute', temp.ini)[-1,-1]
       
     } else {
-      scratch <- normalizePath(scratch)
       cs.jl <- RJulia()
       cs.jl$Using("Circuitscape")
       

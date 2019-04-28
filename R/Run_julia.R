@@ -160,6 +160,9 @@ Run_CS.jl <-
       } else {
         EXPORT.dir <- paste0(tempdir(),"//")
       }
+      if(!is.null(scratch)) {
+        EXPORT.dir <- scratch
+      }
     }
     
     rm.rast <- tempfile(pattern = "raster_", 
@@ -168,6 +171,10 @@ Run_CS.jl <-
     
     EXPORT.dir <- normalizePath(EXPORT.dir)
     temp_rast <- rm.rast <- gsub('/','//', rm.rast)
+    
+    if(!is.null(scratch)) {
+      temp_rast <- rm.rast <- paste0(scratch, basename(rm.rast))
+    }
     
     
     tmp.name <- basename(temp_rast) %>% strsplit(., '.asc') %>% unlist()
@@ -224,29 +231,30 @@ Run_CS.jl <-
         paste0("included_pairs_file = ", jl.inputs$pairs_to_include)
       PAIRS <- paste0("use_included_pairs = True")
     }
-    if(!is.null(scratch)) {
-      # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
-      # scratch2 <- gsub("/", "//", scratch)
-      # temp_rast2 <- gsub("/", "\\", temp_rast)
-      cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)
-      
-      write.CS_4.0(
-        BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-        OUT = paste0("output_file = ", scratch, "//", tmp.name, ".out"),
-        HABITAT = paste0("habitat_file = ", temp_rast),
-        LOCATION.FILE = paste0("point_file = ", cs.pt2),
-        CONNECTION = paste0("connect_four_neighbors_only =", connect),
-        MAP = MAP,
-        CURRENT.MAP = CURRENT.MAP,
-        PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
-        PAIRS = PAIRS,
-        PARALLELIZE = jl.inputs$parallel,
-        CORES = jl.inputs$cores,
-        solver = jl.inputs$solver,
-        precision = jl.inputs$precision,
-        silent = jl.inputs$silent
-      )
-    } else {
+    
+    # if(!is.null(scratch)) {
+    #   # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
+    #   # scratch2 <- gsub("/", "//", scratch)
+    #   # temp_rast2 <- gsub("/", "\\", temp_rast)
+    #   cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)
+    #   
+    #   write.CS_4.0(
+    #     BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
+    #     OUT = paste0("output_file = ", scratch, "//", tmp.name, ".out"),
+    #     HABITAT = paste0("habitat_file = ", temp_rast),
+    #     LOCATION.FILE = paste0("point_file = ", cs.pt2),
+    #     CONNECTION = paste0("connect_four_neighbors_only =", connect),
+    #     MAP = MAP,
+    #     CURRENT.MAP = CURRENT.MAP,
+    #     PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
+    #     PAIRS = PAIRS,
+    #     PARALLELIZE = jl.inputs$parallel,
+    #     CORES = jl.inputs$cores,
+    #     solver = jl.inputs$solver,
+    #     precision = jl.inputs$precision,
+    #     silent = jl.inputs$silent
+    #   )
+    # } else {
       # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
       # temp_rast2 <- gsub("/", "\\", temp_rast)
       cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)   
@@ -267,7 +275,7 @@ Run_CS.jl <-
         precision = jl.inputs$precision,
         silent = jl.inputs$silent
       )
-    }
+    # }
     
     
     # Run CIRCUITSCAPE.jl -----------------------------------------------------
