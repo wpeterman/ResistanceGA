@@ -156,7 +156,7 @@ Run_CS.jl <-
     
     if(is.null(EXPORT.dir)) {   
       if(Sys.info()[['sysname']] == "Windows") {
-        EXPORT.dir <- paste0(tempdir(),"//")
+        EXPORT.dir <- paste0(tempdir(),"\\")
       } else {
         EXPORT.dir <- paste0(tempdir(),"//")
       }

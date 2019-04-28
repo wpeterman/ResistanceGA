@@ -145,10 +145,10 @@ jl.prep <- function(n.Pops,
     } else {
       td <- paste0(tempdir(),"/")
     }
-    td <- gsub("/","//", td)
+    # td <- gsub("/","//", td)
     
     if(!is.null(scratch)) {
-     td <- normalizePath(scratch)
+     scratch <- td <- normalizePath(scratch)
     }
     
     write.table(samples, 
@@ -158,16 +158,18 @@ jl.prep <- function(n.Pops,
                 row.names = FALSE,
                 col.names = FALSE)
     
-    temp.ini <- tempfile(pattern = "", 
-                         tmpdir = tempdir(),
-                         fileext = ".ini")
-    
-    # if(Sys.info()[['sysname']] == "Windows") {
-    temp.ini <- gsub("/", "//", temp.ini)
-    # }
-    if(Sys.info()[['sysname']] == "Windows") {
-      temp.ini <- gsub("/", "\\", temp.ini)
+    if(!is.null(scratch)) {
+      temp.ini <- tempfile(pattern = "", 
+                           tmpdir = scratch,
+                           fileext = ".ini")
+    } else {
+      temp.ini <- tempfile(pattern = "", 
+                           tmpdir = tempdir(),
+                           fileext = ".ini")
     }
+    
+    temp.ini <- gsub("\\\\", "\\", temp.ini)
+    temp.ini <- gsub("//", "/", temp.ini)
     
     if(!is.null(scratch)) {
       temp.ini <- paste0(scratch, basename(temp.ini))
@@ -287,8 +289,10 @@ jl.prep <- function(n.Pops,
     } else {
       td <- paste0(tempdir(),"//")
     }
-    
-    td <- gsub("/", "//",td)
+
+    if(!is.null(scratch)) {
+      td <- normalizePath(scratch)
+    }
     
     site <- c(1:length(CS_Point.File))
     
