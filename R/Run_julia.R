@@ -169,8 +169,11 @@ Run_CS.jl <-
                         tmpdir = tempdir(),
                         fileext = ".asc") 
     
-    EXPORT.dir <- normalizePath(EXPORT.dir)
-    temp_rast <- rm.rast <- gsub('/','//', rm.rast)
+    if(Sys.info()[['sysname']] == "Windows") {
+      EXPORT.dir <- normalizePath(EXPORT.dir)
+    }
+    
+    # temp_rast <- rm.rast <- gsub('/','//', rm.rast)
     
     if(!is.null(scratch)) {
       temp_rast <- rm.rast <- paste0(scratch, basename(rm.rast))
