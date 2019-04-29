@@ -100,7 +100,7 @@ jl.prep <- function(n.Pops,
   }
   
   if(!is.null(write.files)) {
-    write.files <- normalizePath(write.files)
+    write.files <- paste0(normalizePath(write.files, winslash = '/'), "/")
     if(!dir.exists(write.files))
       stop("`write.files` directory does not exist")
   }
@@ -139,21 +139,28 @@ jl.prep <- function(n.Pops,
     print("Test: Run Circuitscape from Julia")
     
     if(Sys.info()[['sysname']] == "Windows") {
-      td <- paste0(tempdir(),"//")
+      td <- paste0(normalizePath(tempdir(), winslash = "/"), "/")
       setwd(JULIA_HOME)
       
     } else {
       td <- paste0(tempdir(),"/")
     }
-    # td <- gsub("/","//", td)
-    
+
     if(!is.null(scratch)) {
-      if(Sys.info()[['sysname']] == "Windows") {
-        scratch <- td <- normalizePath(scratch)
+      if(Sys.info()[['sysname']] == "Linux") {
+        scratch <- td <- paste0(normalizePath(scratch),"/")
       } else {
-        scratch <- td <- scratch
+        scratch <- td <- normalizePath(scratch, winslash = "/")
       }
     }
+    
+    # if(!is.null(scratch)) {
+    #   if(Sys.info()[['sysname']] == "Windows") {
+    #     scratch <- td <- normalizePath(scratch)
+    #   } else {
+    #     scratch <- td <- scratch
+    #   }
+    # }
     
     write.table(samples, 
                 paste0(td,'samples.txt'), 
@@ -162,19 +169,11 @@ jl.prep <- function(n.Pops,
                 row.names = FALSE,
                 col.names = FALSE)
     
-    if(!is.null(scratch)) {
-      temp.ini <- tempfile(pattern = "", 
-                           tmpdir = scratch,
-                           fileext = ".ini")
-    } else {
+   
       temp.ini <- tempfile(pattern = "", 
                            tmpdir = tempdir(),
                            fileext = ".ini")
-    }
-    
-    temp.ini <- gsub("\\\\", "\\", temp.ini)
-    temp.ini <- gsub("//", "/", temp.ini)
-    
+
     if(!is.null(scratch)) {
       temp.ini <- paste0(scratch, basename(temp.ini))
     }
@@ -215,11 +214,7 @@ jl.prep <- function(n.Pops,
                  silent = silent
     )
     # }
-    
-    if(!is.null(scratch)) {
-      scratch <- normalizePath(scratch)
-    }
-    
+
     if(Julia_link == 'JuliaCall'){
       out <- julia_call('compute', temp.ini)[-1,-1]
       

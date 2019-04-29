@@ -71,7 +71,7 @@ Run_CS.jl <-
       }
       
       if(!is.null(jl.inputs$scratch)){
-        scratch <- normalizePath(jl.inputs$scratch)
+        scratch <- jl.inputs$scratch
       }
     }
     
@@ -156,9 +156,10 @@ Run_CS.jl <-
     
     if(is.null(EXPORT.dir)) {   
       if(Sys.info()[['sysname']] == "Windows") {
-        EXPORT.dir <- paste0(tempdir(),"\\")
+        EXPORT.dir <- paste0(tempdir(),"/")
+        EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
       } else {
-        EXPORT.dir <- paste0(tempdir(),"//")
+        EXPORT.dir <- paste0(tempdir(),"/")
       }
       if(!is.null(scratch)) {
         EXPORT.dir <- scratch
@@ -170,7 +171,11 @@ Run_CS.jl <-
                         fileext = ".asc") 
     
     if(Sys.info()[['sysname']] == "Windows") {
-      EXPORT.dir <- normalizePath(EXPORT.dir)
+      EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
+    }
+    
+    if(Sys.info()[['sysname']] == "Linux") {
+      EXPORT.dir <- paste0(normalizePath(EXPORT.dir), "/")
     }
     
     # temp_rast <- rm.rast <- gsub('/','//', rm.rast)
