@@ -215,8 +215,9 @@ MS_optim <- function(CS.inputs = NULL,
     }
     
     n <- CS.inputs$n.Pops
-    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
-    
+    AICc <- 
+      # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+      (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(
@@ -577,7 +578,9 @@ MS_optim <- function(CS.inputs = NULL,
     }
     
     n <- gdist.inputs$n.Pops
-    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
+    AICc <- 
+      # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+      (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
     
     Result.txt(
       GA.results = multi.GA_nG.o,
@@ -959,7 +962,9 @@ MS_optim <- function(CS.inputs = NULL,
     }
     
     n <- jl.inputs$n.Pops
-    AICc <- (-2 * LL) + (2 * k) + ((2 * k) * (k + 1)) / (n - k - 1)
+    AICc <- 
+      # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+      (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
     
     Result.txt(
       GA.results = multi.GA_nG.o,

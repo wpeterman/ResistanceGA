@@ -166,7 +166,7 @@ Run_CS.jl <-
       }
     }
     
-    rm.rast <- tempfile(pattern = "raster_", 
+    temp_rast <- rm.rast <- tempfile(pattern = "raster_", 
                         tmpdir = tempdir(),
                         fileext = ".asc") 
     

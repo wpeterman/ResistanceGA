@@ -216,7 +216,7 @@ boot.AICc <- function(response, resistance, ID, ZZ, k, obs, pred.dat, keep = NUL
   R.sq <- MuMIn::r.squaredGLMM(fit.mod)[[1]]
   mod.AIC <- AIC(fit.mod)
   LL <- logLik(fit.mod)
-  AICc <- mod.AIC + ((2 * k * (k + 1)) / (obs - k - 1))
+  AICc <- mod.AIC + ((2 * k * (k + 1)) / max((obs - k - 1), 1))
   
   pred.dat$resistance <- (pred.dat$resistance - attributes(resistance)[[2]]) / attributes(resistance)[[3]]
   

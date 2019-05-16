@@ -12,7 +12,7 @@
 #'                    jl.inputs,
 #'                    GA.inputs)
 
-#' @export
+#' @noRd
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 MS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,

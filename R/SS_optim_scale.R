@@ -23,7 +23,7 @@
 #'   dist_mod, 
 #'   null_mod)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
-#' @export
+#' @noRd
 SS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,
                            jl.inputs = NULL,

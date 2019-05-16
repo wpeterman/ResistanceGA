@@ -12,6 +12,7 @@
 #' @param iter A counter for the number of surfaces that will be optimized
 #' @param quiet Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.
 #' @return Objective function value (either AIC, R2, or LL) from mixed effect model
+#' @noRd
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_single <-
   function(PARM,

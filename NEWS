@@ -1,3 +1,8 @@
+ResistanceGA 4.1-0.33
+--------
+* Update to AICc calculation
+* Fixed bug in temporary file handling when using Julia
+
 ResistanceGA 4.1-0.32
 --------
 * Bug fixes and and adjustments to scratch directory use

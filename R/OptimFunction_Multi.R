@@ -10,6 +10,7 @@
 #' @param Min.Max Define whether the optimization function should minimized ('min') or maximized ('max')
 #' @param quiet Logical, if TRUE, AICc and iteration time will not be printed to the screen at the completion of each iteration. Default = FALSE
 #' @return Objective function value (either AIC, R2, or LL) from mixed effect model
+#' @noRd
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 Resistance.Opt_multi <- function(PARM,
                                  CS.inputs = NULL,
