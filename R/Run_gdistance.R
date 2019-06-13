@@ -40,6 +40,21 @@ Run_gdistance <- function(gdist.inputs,
           rm(trR, r)
           gc()
         } # End commuteDistance
+        
+        if(!exists('ret')) {
+          if(gdist.inputs$method == 'commuteDistance') {
+            trR <- geoCorrection(tr, "r", scl = scl)
+            ret <- commuteDistance(trR, gdist.inputs$samples) / 1000
+            rm(trR, tr, r)
+            
+          } else {
+            trC <- geoCorrection(tr, "c", scl = scl)
+            ret <- costDistance(trC, gdist.inputs$samples)
+            rm(trC, tr, r)
+          }
+          
+          gc()
+        }
       } else { # Run on select pairs
         if (gdist.inputs$longlat == TRUE | gdist.inputs$directions >= 8 & gdist.inputs$method == 'costDistance') {
           trC <- geoCorrection(tr, "c", scl = scl)
