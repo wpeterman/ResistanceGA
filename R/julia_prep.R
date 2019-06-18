@@ -426,6 +426,7 @@ jl.prep <- function(n.Pops,
       ID.all = ID,
       ZZ.all = ZZ,
       covariates.all = covariates,
-      rm.files = rm.files
+      rm.files = rm.files,
+      opt.input = 'jl'
     )
   }

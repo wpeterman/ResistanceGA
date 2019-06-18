@@ -233,7 +233,8 @@ gdist.prep <-
             n.Pops = n.Pops,
             longlat = longlat,
             method = method,
-            df = df
+            df = df,
+            opt.input = 'gdist'
           )
       )
     }

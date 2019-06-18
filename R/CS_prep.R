@@ -224,6 +224,7 @@ CS.prep <- function(n.Pops,
     pairs_to_include = pairs_to_include,
     parallel = parallel,
     cores = cores,
-    df = df
+    df = df,
+    opt.input = 'CS'
   )
 }

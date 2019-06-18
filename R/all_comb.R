@@ -248,7 +248,15 @@ all_comb <- function(gdist.inputs = NULL,
       }
     }
     
-    best.list <- lapply(ss.results$ga, function(x) x@population) # Extract best individuals
+    if(isTRUE(GA.input_orig$gaisl)) {
+      best.list <- lapply(ss.results$ga, function(x) x@solutions) # Extract best individuals
+      best.list <- lapply(best.list, function(x) plyr::ldply(x))
+      
+    } else {
+      best.list <- lapply(ss.results$ga, function(x) x@population) # Extract best individuals
+      
+    }
+    
     
     # Multisurface optimization -----------------------------------------------
     

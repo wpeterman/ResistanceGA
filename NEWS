@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.35
+--------
+* Updated gaisl for use with all.comb function
+
 ResistanceGA 4.1-0.34
 --------
 * Updated pairs_to_include handling
