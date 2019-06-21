@@ -191,6 +191,8 @@ CS.prep <- function(n.Pops,
   keep <-  pairs_to_include
   
   # df <- NULL
+  fmla <- formula
+  
   if(!is.null(response)) {
     if(!is.null(covariates)) {
       df <- data.frame(gd = response,
@@ -201,7 +203,6 @@ CS.prep <- function(n.Pops,
                        pop = ID$pop1)
     }
     
-    fmla <- formula
     if(!is.null(fmla)) {
       fmla <- update(fmla, gd ~ . + cd + (1 | pop))
     } else {

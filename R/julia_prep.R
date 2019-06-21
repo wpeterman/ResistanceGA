@@ -162,7 +162,7 @@ jl.prep <- function(n.Pops,
     #   }
     # }
     
-    write.table(samples, 
+    write.table(samples[1:5,], 
                 paste0(td,'samples.txt'), 
                 quote = FALSE,
                 sep = "\t",
@@ -234,7 +234,7 @@ jl.prep <- function(n.Pops,
     }
     
     
-    if(dim(out)[1] == 25) {
+    if(dim(out)[1] == 5) {
       cat("\n"); cat("\n")
       
       cat("Test Passed")
