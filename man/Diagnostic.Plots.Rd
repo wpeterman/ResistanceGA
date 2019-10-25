@@ -31,6 +31,13 @@ A multipanel panel .tif including histogram of residuals and qqplot of fitted mi
 \description{
 This function will generate mixed effect model diagnostic plots following optimization
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

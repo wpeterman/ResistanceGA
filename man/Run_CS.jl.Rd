@@ -63,6 +63,11 @@ Execute julia CS from R
 \examples{
 ## To do
 
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

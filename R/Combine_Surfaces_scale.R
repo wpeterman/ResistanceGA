@@ -35,8 +35,13 @@
 #'                               File.name, 
 #'                               rescale, 
 #'                               p.contribution)
-#' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @noRd
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 Combine_Surfaces.scale <-
   function(PARM,
            CS.inputs = NULL,

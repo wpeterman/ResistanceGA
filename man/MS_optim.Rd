@@ -24,6 +24,13 @@ This function optimizes multiple resistance surfaces, returning a Genetic Algori
 \description{
 Optimize multiple resistance surfsaces simultaneously using genetic algorithms
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

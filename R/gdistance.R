@@ -31,6 +31,12 @@
 #'                   method = 'commuteDistance',
 #'                   min.max_dist = NULL,
 #'                   keep = NULL)
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 
 gdist.prep <-
   function(n.Pops,

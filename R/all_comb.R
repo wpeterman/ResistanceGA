@@ -4,6 +4,7 @@
 #'
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
+#' @param CS.inputs NOT CURRENTLY ACTIVATED. Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{Results.dir} has been been correctly specified as "all.comb"
 #' @param results.dir Directory to write and save analysis results. This should be an empty directory. Any existing files located in this directory will be deleted!
 #' @param max.combination The maximum number of surfaces to include in the all combinations analysis (Default = 4). Alternatively, specify a vector with the minimum and maximum number of surfaces to combine (e.g., c(2,4). If the minimum > 1, then the single surface optimization will be skipped.
@@ -18,6 +19,7 @@
 #' @return This function optimizes resistance surfaces in isolation using \code{\link[ResistanceGA]{SS_optim}}, followed by multisurface optimization using \code{\link[ResistanceGA]{MS_optim}}, and then conducts a bootstrap analysis.
 #' @usage all_comb(gdist.inputs = NULL, 
 #'                 jl.inputs = NULL,
+#'                 CS.inputs = NULL,
 #'                 GA.inputs, 
 #'                 results.dir,
 #'                 max.combination = 4,
@@ -30,8 +32,16 @@
 #'                 ...)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
+
 all_comb <- function(gdist.inputs = NULL,
                      jl.inputs = NULL,
+                     CS.inputs = NULL,
                      GA.inputs,
                      results.dir,
                      max.combination = 4,
@@ -48,6 +58,9 @@ all_comb <- function(gdist.inputs = NULL,
   
   if(!exists('gdist.inputs')) 
     return(cat("ERROR: Please specify gdist.inputs"))
+  
+  # if(!is.null('CS.inputs')) 
+  #   return(cat("ERROR: All combinations analysis cannot currently be done using CIRCUITSCAPE"))
   
   if(!exists('GA.inputs')) 
     return(cat("ERROR: Please specify GA.inputs"))
@@ -240,8 +253,13 @@ all_comb <- function(gdist.inputs = NULL,
                                  GA.inputs = GA.inputs,
                                  dist_mod = dist_mod,
                                  null_mod = null_mod)
+        } else if(!is.null(CS.inputs)) {
+          ss.results <- SS_optim(CS.inputs = CS.inputs,
+                                 GA.inputs = GA.inputs,
+                                 dist_mod = dist_mod,
+                                 null_mod = null_mod)
         } else {
-          stop("`gdist.inputs` or `jl.inputs` must be specified!!!")
+          stop("`CS.inputs`, `gdist.inputs` or `jl.inputs` must be specified!!!")
         }
         
         AICc.tab <- ss.results$AICc
@@ -653,6 +671,9 @@ all_comb <- function(gdist.inputs = NULL,
                                       GA.inputs = GA.inputs)
         } else if(!is.null(jl.inputs)) {
           ms.results[[j]] <- MS_optim(jl.inputs = jl.inputs,
+                                      GA.inputs = GA.inputs)
+        } else if(!is.null(CS.inputs)) {
+          ms.results[[j]] <- MS_optim(CS.inputs = CS.inputs,
                                       GA.inputs = GA.inputs)
         } else {
           stop("`gdist.inputs` or `jl.inputs` must be specified!!!")

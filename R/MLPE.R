@@ -21,6 +21,13 @@
 #'                 ZZ = NULL,
 #'                 scale = TRUE)
 #' @references Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
+#' 
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 
 MLPE.lmm <-
   function(resistance,

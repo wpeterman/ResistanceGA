@@ -25,6 +25,13 @@
 #'  null_mod)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
+
 SS_optim <- function(CS.inputs = NULL,
                      gdist.inputs = NULL,
                      jl.inputs = NULL,

@@ -14,6 +14,13 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
+
 MS_optim <- function(CS.inputs = NULL,
                      gdist.inputs = NULL,
                      jl.inputs = NULL,

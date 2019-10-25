@@ -45,6 +45,12 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 Run_CS.jl <-
   function(jl.inputs = NULL,
            r,

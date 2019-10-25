@@ -173,6 +173,13 @@ Setting \code{gaisl = TRUE} has the potential greatly reduce the optimization ru
 
 It is recommended to first run GA optimization with the default settings
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

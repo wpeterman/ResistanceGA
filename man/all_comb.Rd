@@ -6,6 +6,7 @@
 \usage{
 all_comb(gdist.inputs = NULL, 
                 jl.inputs = NULL,
+                CS.inputs = NULL,
                 GA.inputs, 
                 results.dir,
                 max.combination = 4,
@@ -21,6 +22,8 @@ all_comb(gdist.inputs = NULL,
 \item{gdist.inputs}{Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance}
 
 \item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
+
+\item{CS.inputs}{NOT CURRENTLY ACTIVATED. Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function. Be sure that the \code{Results.dir} has been been correctly specified as "all.comb"}
 
@@ -47,6 +50,13 @@ This function optimizes resistance surfaces in isolation using \code{\link[Resis
 }
 \description{
 A wrapper function to run both \code{\link[ResistanceGA]{SS_optim}} and \code{\link[ResistanceGA]{MS_optim}} to optimize all combinations of resistance surfaces with the Genetic Algorithms package \pkg{GA}. Following optimization, \code{\link[ResistanceGA]{Resist.boot}} is run to conduct a bootstrap analysis.  This function can only be used when optimizing resistance surface with least cost path or commute distance (\pkg{gdistance}).
+}
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

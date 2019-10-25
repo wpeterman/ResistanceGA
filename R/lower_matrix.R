@@ -9,6 +9,12 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 
 lower <- function(matrix) {
   if (is.vector(matrix) == TRUE ||

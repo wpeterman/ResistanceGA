@@ -22,6 +22,11 @@
 #'             pop.size,
 #'             output = 'df')
 #' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 SHNe <- function(n.samples, 
                  pop.size, 
                  output = 'df') {

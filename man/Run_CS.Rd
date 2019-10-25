@@ -33,6 +33,13 @@ Vector of CIRCUITSCAPE resistance distances (lower half of "XXX_resistances.out"
 \description{
 Execute CS from R
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

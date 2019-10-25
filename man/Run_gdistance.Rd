@@ -21,6 +21,13 @@ A costDistance matrix object from gdistance
 Get cost distance using gdistance
 Execute gdistance
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

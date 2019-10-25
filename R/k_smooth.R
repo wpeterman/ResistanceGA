@@ -9,10 +9,15 @@
 #' @usage k.smooth (raster, sigma, SCALE)
 #' 
 #' @details The sigma parameter indicates the standard deviation of the Gaussian smoothing function. Note that sigma is in raster cells, not spatial units.
-
-
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
+
 k.smooth <- function(raster,
                      sigma,
                      SCALE = FALSE) {

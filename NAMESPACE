@@ -3,7 +3,6 @@
 export("%>%")
 export(CS.prep)
 export(Combine_Surfaces)
-export(Combine_Surfaces.scale)
 export(Diagnostic.Plots)
 export(GA.prep)
 export(Grid.Search)

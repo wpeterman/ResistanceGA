@@ -21,6 +21,13 @@ Either a data frame or a list of matrices containing the SHNe metrics
 \description{
 Use formulas from Prunier et al. to calculate di and dhm
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \references{
 Prunier, J. G., V. Dubut, L. Chikhi, and S. Blanchet. 2017. Contribution of spatial heterogeneity in effective population sizes to the variance in pairwise measures of genetic differentiation. Methods in Ecology and Evolution 8:1866-1877.
 

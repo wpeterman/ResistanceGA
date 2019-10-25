@@ -19,6 +19,13 @@ Apply Gaussian kernel smoothing of specified sigma
 \details{
 The sigma parameter indicates the standard deviation of the Gaussian smoothing function. Note that sigma is in raster cells, not spatial units.
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

@@ -48,7 +48,12 @@
 #' 
 #' When specifying a formula, provide it as: \code{response ~ covariate}.
 #' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
-
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 CS.prep <- function(n.Pops,
                     response = NULL,
                     covariates = NULL,

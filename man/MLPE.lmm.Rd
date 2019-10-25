@@ -33,6 +33,13 @@ Runs MLPE as detailed by Clarke et al. (2002). This function will run the model 
 \details{
 An AIC value will only be returned if \code{REML = FALSE}
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \references{
 Clarke, R. T., P. Rothery, and A. F. Raybould. 2002. Confidence limits for regression relationships between distance matrices: Estimating gene flow with distance. Journal of Agricultural, Biological, and Environmental Statistics 7:361-372.
 }

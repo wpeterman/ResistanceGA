@@ -29,25 +29,35 @@ Runs MLPE as detailed by Clarke et al. (2002). This is a general function for fl
 }
 \details{
 An AIC value will only be returned if \code{REML = FALSE}. The random effect must be the population vector \code{pop1} generated from the function \code{\link[ResistanceGA]{To.From.ID}}.
+
+A generalized MLPE model can be fit if an appropriate \code{\link[stats]{family}}. It is not possible to use REML when fitting a generalized model.
 }
 \examples{
  
 # Create square 'distance' matrices
 y <- matrix(rnorm(25), 5)
+y.pois <- matrix(rpois(25, 5), 5)
 x <- matrix(rnorm(25), 5)
 
-# Create to-from object (4 populations sampled)
+# Create to-from object (5 populations sampled)
 id <- To.From.ID(5)
 
 # Create data frame
 df <- data.frame(y = lower(y),
+                 y.pois = lower(y.pois),
                  x = lower(x),
                  pop = id$pop1)
 
 # Fit MLPE model
 out <- mlpe_rga(formula = y ~ x + (1 | pop),
+                REML = TRUE,
                 data = df)
                 
+# Fit generalized MLPE model
+out.pois <- mlpe_rga(formula = y.pois ~ x + (1 | pop),
+                     family = poisson,
+                     data = df)
+                                
 # Fit model with only select pairs
  keep <- c(1,0,1,1,1,1,0,0,1,0)
  

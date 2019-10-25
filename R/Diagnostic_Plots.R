@@ -17,7 +17,12 @@
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @usage Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, ID, ZZ)
-
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 Diagnostic.Plots <-
   function(resistance.mat,
            genetic.dist,

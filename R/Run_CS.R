@@ -23,6 +23,13 @@
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
+
 Run_CS <-
   function(CS.inputs,
            r,

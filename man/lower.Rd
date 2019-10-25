@@ -18,6 +18,13 @@ This function will prepare and compile objects and commands for optimization wit
 \details{
 This is a convenience function to obtain the lower half of a matrix, which is required as input for several other functions
 }
+\examples{
+ 
+## Not run:
+## *** TO BE COMPLETED *** ##
+
+## End (Not run)
+}
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>
 }

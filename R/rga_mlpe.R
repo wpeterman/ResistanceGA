@@ -10,23 +10,34 @@
 #' @param keep A vector consisting of 1 (keep) or 0 (drop) for each pairwise observation in \code{data}. An option if you do not want to assess all pairiwse observations in the MLPE model.
 #' @return A lmer object from the fitted model
 #' @details An AIC value will only be returned if \code{REML = FALSE}. The random effect must be the population vector \code{pop1} generated from the function \code{\link[ResistanceGA]{To.From.ID}}.
+#' 
+#' A generalized MLPE model can be fit if an appropriate \code{\link[stats]{family}}. It is not possible to use REML when fitting a generalized model.
+#' 
 #' @examples  
 #' # Create square 'distance' matrices
 #' y <- matrix(rnorm(25), 5)
+#' y.pois <- matrix(rpois(25, 5), 5)
 #' x <- matrix(rnorm(25), 5)
 #' 
-#' # Create to-from object (4 populations sampled)
+#' # Create to-from object (5 populations sampled)
 #' id <- To.From.ID(5)
 #' 
 #' # Create data frame
 #' df <- data.frame(y = lower(y),
+#'                  y.pois = lower(y.pois),
 #'                  x = lower(x),
 #'                  pop = id$pop1)
 #' 
 #' # Fit MLPE model
 #' out <- mlpe_rga(formula = y ~ x + (1 | pop),
+#'                 REML = TRUE,
 #'                 data = df)
 #'                 
+#' # Fit generalized MLPE model
+#' out.pois <- mlpe_rga(formula = y.pois ~ x + (1 | pop),
+#'                      family = poisson,
+#'                      data = df)
+#'                                 
 #' # Fit model with only select pairs
 #'  keep <- c(1,0,1,1,1,1,0,0,1,0)
 #'  
@@ -48,7 +59,8 @@ mlpe_rga <-
            data,
            REML = FALSE,
            ZZ = NULL,
-           keep = NULL) {
+           keep = NULL,
+           ...) {
     
     
     if(class(formula) != 'formula') {
@@ -71,16 +83,40 @@ mlpe_rga <-
       ZZ <- ZZ[rownames(ZZ) %in% unique(miss.pops),]
     }
     
-    # Fit model
-    mod <-
-      lFormula(formula,
-               data = data,
-               REML = REML)
-    mod$reTrms$Zt <- ZZ
-    dfun <- do.call(mkLmerDevfun, mod)
-    opt <- optimizeLmer(dfun)
+    
+    # Fit merMod --------------------------------------------------------------
+    
+    
+    # > glmer -----------------------------------------------------------------
+    args <- list(...)
+    
+    if(any("family" %in% names(args))) {
+      
+      mod <-
+        glFormula(formula,
+                  data = data,
+                  ...)
+      mod$reTrms$Zt <- ZZ
+      dfun <- do.call(mkGlmerDevfun, mod)
+      opt <- optimizeGlmer(dfun)
+      
+    } else {
+      
+      # > lmer ---------------------------------------------------------------
+      
+      mod <-
+        lFormula(formula,
+                 data = data,
+                 REML = REML)
+      mod$reTrms$Zt <- ZZ
+      dfun <- do.call(mkLmerDevfun, mod)
+      opt <- optimizeLmer(dfun)
+      
+    }
+    
     MOD <-
       (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+    
     return(MOD)
   }
 

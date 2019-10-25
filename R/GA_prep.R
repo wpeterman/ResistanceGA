@@ -122,6 +122,12 @@
 #'                seed = NULL,
 #'                monitor = TRUE,
 #'                quiet = FALSE)
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 
 GA.prep <- function(ASCII.dir,
                     Results.dir = NULL,

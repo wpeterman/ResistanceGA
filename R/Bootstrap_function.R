@@ -26,7 +26,12 @@
 #'                    rank.method, 
 #'                    genetic.mat,
 #'                    keep = NULL)
-#'
+#' 
+#' @examples  
+#' ## Not run:
+#' ## *** TO BE COMPLETED *** ##
+#' 
+#' ## End (Not run)
 
 Resist.boot <-
   function (mod.names,

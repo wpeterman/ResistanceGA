@@ -21,7 +21,6 @@
 #' @importFrom dplyr mutate group_by summarise filter tally left_join
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
-#' @importFrom magrittr "%>%"
 #' @importFrom plyr arrange rbind.fill ldply
 #' @importFrom spatstat as.im blur as.matrix.im
 #' @importFrom grDevices dev.off tiff topo.colors
