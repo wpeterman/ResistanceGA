@@ -60,6 +60,7 @@ Run_CS.jl <-
            output = "matrix",
            CS_Point.File = NULL,
            pairs_to_include = NULL,
+           pop2ind = FALSE,
            parallel = FALSE,
            cores = NULL,
            cholmod = TRUE,

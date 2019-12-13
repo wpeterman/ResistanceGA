@@ -91,7 +91,9 @@ mlpe_rga <-
     args <- list(...)
     
     if(any("family" %in% names(args))) {
-      
+      if(isTRUE(REML)) {
+        cat("REML will be ignored when fitting a generalized MLPE model.")
+      }
       mod <-
         glFormula(formula,
                   data = data,
@@ -120,27 +122,6 @@ mlpe_rga <-
     return(MOD)
   }
 
-
-# Make to-from population list
-To.From.ID <- function(POPS) {
-  tmp <- matrix(nrow = POPS, ncol = POPS)
-  dimnames(tmp) <- list(1:POPS, 1:POPS)
-  tmp2 <-
-    as.data.frame(which(row(tmp) < col(tmp), arr.ind = TRUE))
-  tmp2[[2]] <- dimnames(tmp)[[2]][tmp2$col]
-  tmp2[[1]] <- dimnames(tmp)[[2]][tmp2$row]
-  colnames(tmp2) <- c("pop1", "pop2")
-  as.numeric(tmp2$pop1)
-  as.numeric(tmp2$pop2)
-  ID <- plyr::arrange(tmp2, as.numeric(pop1), as.numeric(pop2))
-  p1 <- ID[POPS - 1, 1]
-  p2 <- ID[POPS - 1, 2]
-  ID[POPS - 1, 1] <- p2
-  ID[POPS - 1, 2] <- p1
-  ID$pop1 <- factor(ID$pop1)
-  ID$pop2 <- factor(ID$pop2)
-  return(ID)
-}
 
 
 # Create ZZ matrix for mixed effects model

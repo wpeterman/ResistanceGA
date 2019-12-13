@@ -4,10 +4,16 @@
 \alias{To.From.ID}
 \title{Convenience function to make to-from object needed for specifying MLPE random effects}
 \usage{
-To.From.ID(POPS)
+To.From.ID(sampled_pops,
+                  pop_n = NULL,
+                  ...)
 }
 \arguments{
-\item{POPS}{Provide an integer value representing the number of individuals or populations that were sampled}
+\item{sampled_pops}{Provide an integer value representing the number of individuals or populations that were sampled}
+
+\item{pop_n}{Provide a vector of length equal to `sampled_pops`, indicating the number of individuals sampled at each population. Only needed if going from a population- to an individual-based analysis}
+
+\item{...}{Additional arguments. Currently only `dist` argument is accepted.}
 }
 \value{
 A data frame with two columns
@@ -16,10 +22,21 @@ A data frame with two columns
 Convenience function to make to-from object needed for specifying MLPE random effects
 }
 \details{
-This object indicates the population pairs that distance values were calculated between. Note: Distance values must be taken from the lower half of a distance matrix. You can use \code{\link[ResistanceGA]{lower}} to obtain these values. When specifying a MLPE model using \code{\link[ResistanceGA]{mlpe_rga}}, \code{pop1} from \code{To.From.ID} must be added to the data frame containing model data, and must be specified as the random effect.
+This function creates an object indicating the population pairs that distance values were calculated between. Note: Distance values must be taken from the lower half of a distance matrix. You can use \code{\link[ResistanceGA]{lower}} to obtain these values. When specifying a MLPE model using \code{\link[ResistanceGA]{mlpe_rga}}, \code{pop1} from \code{To.From.ID} must be added to the data frame containing model data, and must be specified as the random effect.
 }
 \examples{
-To.From.ID(3)
+## Standard use
+To.From.ID(sampled_pops = 3)
+
+## If going from population to individual-level 
+To.From.ID(sampled_pops = 3,
+           pop_n = c(1,2,3))
+         
+## A vector of pairwise distances can also be expanded            
+To.From.ID(sampled_pops = 3,
+           pop_n = c(1,2,3),
+           dist = c(.5, .2, .1)) 
+                       
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

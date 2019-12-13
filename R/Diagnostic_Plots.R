@@ -45,7 +45,7 @@ Diagnostic.Plots <-
       mm <- mm[which(mm != -1)]
       
       if (is.null(ID)) {
-        ID <- To.From.ID(POPS = m)
+        ID <- To.From.ID(m)
       }
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)
@@ -88,7 +88,7 @@ Diagnostic.Plots <-
       mm <- mm[which(mm != -1)]
       
       if (is.null(ID)) {
-        ID <- To.From.ID(POPS = m)
+        ID <- To.From.ID(m)
       }
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)

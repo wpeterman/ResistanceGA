@@ -123,7 +123,9 @@ all_comb <- function(gdist.inputs = NULL,
   
   
   # Create combination list -------------------------------------------------
-  mc <- max.combination
+## Check on creation of combination list!!!
+  ## Errored when trying to run select combinations.
+    mc <- max.combination
   
   if(length(max.combination) == 2) {
     if(mc[1] == 1) {

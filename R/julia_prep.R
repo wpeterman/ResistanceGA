@@ -74,6 +74,7 @@ jl.prep <- function(n.Pops,
                     JULIA_HOME = NULL,
                     Neighbor.Connect = 8,
                     pairs_to_include = NULL,
+                    pop2ind = NULL,
                     parallel = FALSE,
                     cores = NULL,
                     cholmod = TRUE,
@@ -106,6 +107,14 @@ jl.prep <- function(n.Pops,
     write.files <- paste0(normalizePath(write.files, winslash = '/'), "/")
     if(!dir.exists(write.files))
       stop("`write.files` directory does not exist")
+  }
+  
+  if(!is.null(pop2ind)) {
+    if(!is.vector(pop2ind)) {
+      stop("`pop2ind` must be a vector of population sizes")
+    }
+    keep.df <- expand.mat_vec(pop2ind, 
+                              gd = response)
   }
   
   # Setup Julia -------------------------------------------------------------
@@ -148,7 +157,7 @@ jl.prep <- function(n.Pops,
     } else {
       td <- paste0(tempdir(),"/")
     }
-
+    
     if(!is.null(scratch)) {
       if(Sys.info()[['sysname']] == "Linux") {
         scratch <- td <- paste0(normalizePath(scratch),"/")
@@ -172,11 +181,11 @@ jl.prep <- function(n.Pops,
                 row.names = FALSE,
                 col.names = FALSE)
     
-   
-      temp.ini <- tempfile(pattern = "", 
-                           tmpdir = tempdir(),
-                           fileext = ".ini")
-
+    
+    temp.ini <- tempfile(pattern = "", 
+                         tmpdir = tempdir(),
+                         fileext = ".ini")
+    
     if(!is.null(scratch)) {
       temp.ini <- paste0(scratch, basename(temp.ini))
     }
@@ -217,7 +226,7 @@ jl.prep <- function(n.Pops,
                  silent = silent
     )
     # }
-
+    
     if(Julia_link == 'JuliaCall'){
       out <- julia_call('compute', temp.ini)[-1,-1]
       
@@ -286,7 +295,7 @@ jl.prep <- function(n.Pops,
   
   if(class(CS_Point.File) == 'SpatialPoints') {
     
-      td <- paste0(tempdir(),"//")
+    td <- paste0(tempdir(),"//")
     
     if(!is.null(scratch)) {
       if(Sys.info()[['sysname']] == "Windows") {
@@ -295,141 +304,151 @@ jl.prep <- function(n.Pops,
         td <- scratch
       }
     }
-      
-      site <- c(1:length(CS_Point.File))
-      
-      cs.txt <- data.frame(site, CS_Point.File)
-      
-      write.table(
-        cs.txt,
-        # file = sp_file,
-        file = paste0(td, "sample_pts.txt"),
-        col.names = F,
-        row.names = F
-      )
-      
-      # CS_Point.File <- sp_file
-      CS_Point.File <- paste0(td, "sample_pts.txt")
+    
+    site <- c(1:length(CS_Point.File))
+    
+    cs.txt <- data.frame(site, CS_Point.File)
+    
+    write.table(
+      cs.txt,
+      # file = sp_file,
+      file = paste0(td, "sample_pts.txt"),
+      col.names = F,
+      row.names = F
+    )
+    
+    # CS_Point.File <- sp_file
+    CS_Point.File <- paste0(td, "sample_pts.txt")
+  }
+  
+  if (grepl(".asc", x = CS_Point.File)) {
+    CS_grid <- raster <- raster(CS_Point.File)
+    CS_Point.txt <- rasterToPoints(x = CS_grid)
+    site <- CS_Point.txt[, 3]
+    CS_Point.txt <- data.frame(site, CS_Point.txt[, c(1, 2)])
+    CS_Point.txt <- CS_Point.txt[order(site), ]
+    CS_Point.File <- sub(".asc", ".txt", x = CS_Point.File)
+    write.table(
+      CS_Point.txt,
+      file = CS_Point.File,
+      col.names = F,
+      row.names = F
+    )
+  }
+  
+  if (!is.null(response)) {
+    TEST.response <- ((is.vector(response)) || (ncol(response) == 1))
+    if (TEST.response == FALSE) {
+      stop("The object 'response' is not in the form of a single column vector")
+    }
+  }
+  
+  
+  # Make data frame ---------------------------------------------------------
+  # Make to-from population list
+  if (!exists(x = "ID")) {
+    ID <- To.From.ID(n.Pops)
+  }
+  suppressWarnings(ZZ <- ZZ.mat(ID))
+  
+  
+  fmla <- formula
+  df <- NULL
+  
+  if(!is.null(response)) {
+    if(!is.null(covariates)) {
+      df <- data.frame(gd = response,
+                       covariates,
+                       pop = ID$pop1)
+    } else {
+      df <- data.frame(gd = response,
+                       pop = ID$pop1)
     }
     
-    if (grepl(".asc", x = CS_Point.File)) {
-      CS_grid <- raster <- raster(CS_Point.File)
-      CS_Point.txt <- rasterToPoints(x = CS_grid)
-      site <- CS_Point.txt[, 3]
-      CS_Point.txt <- data.frame(site, CS_Point.txt[, c(1, 2)])
-      CS_Point.txt <- CS_Point.txt[order(site), ]
-      CS_Point.File <- sub(".asc", ".txt", x = CS_Point.File)
-      write.table(
-        CS_Point.txt,
-        file = CS_Point.File,
-        col.names = F,
-        row.names = F
-      )
-    }
-    
-    if (!is.null(response)) {
-      TEST.response <- ((is.vector(response)) || (ncol(response) == 1))
-      if (TEST.response == FALSE) {
-        stop("The object 'response' is not in the form of a single column vector")
-      }
-    }
-    
-    
-    # Make data frame ---------------------------------------------------------
-    # Make to-from population list
-    if (!exists(x = "ID")) {
-      ID <- To.From.ID(n.Pops)
-    }
-    suppressWarnings(ZZ <- ZZ.mat(ID))
-    
-    
-    fmla <- formula
-    df <- NULL
-    
-    if(!is.null(response)) {
-      if(!is.null(covariates)) {
-        df <- data.frame(gd = response,
-                         covariates,
-                         pop = ID$pop1)
+    if(!is.null(fmla)) {
+      if(!is.null(pop2ind)){
+        fmla <- update(fmla, gd ~ . + cd + (1 | pop) + (1 | grp))
+        
       } else {
-        df <- data.frame(gd = response,
-                         pop = ID$pop1)
-      }
-      
-      if(!is.null(fmla)) {
         fmla <- update(fmla, gd ~ . + cd + (1 | pop))
+      }
+    } else {
+      if(!is.null(pop2ind)){
+        fmla <- gd ~ cd + (1 | pop) + (1 | grp)
+        
       } else {
         fmla <- gd ~ cd + (1 | pop)
       }
     }
-    
-    # Pairs to include ---------------------------------------------------------
-    pairs_to_include.file <- NULL
-    keep <- pairs_to_include
-    if(is.null(keep)){
-      keep <-  rep(1, nrow(ID))
-    }
-    ID.keep <- ID
-    covariates.keep <- covariates
-    ZZ.keep <- ZZ
-    response.keep <- response
-    
-    if (!is.null(pairs_to_include)) {
-      keep <-  pairs_to_include
-      
-      df <- df[keep == 1,]
-      ZZ.keep <- ZZ[,keep == 1]
-      pop <- ID$pop1[keep == 1]
-      miss.pops <- as.character(pop)
-      
-      ## Reduce ZZ
-      ZZ.keep <- ZZ.keep[rownames(ZZ.keep) %in% unique(miss.pops),]
-      
-      ## Reduce response & covariates
-      response.keep <- response[keep == 1]
-      covariates.keep <- covariates[keep == 1,]
-      
-      keep.id <- ID[keep == 1,]
-      names(keep.id) <- c('mode', 'include')
-      write.table(keep.id,
-                  file = paste0(td, "include_pairs.txt"),
-                  col.names = TRUE,
-                  row.names = FALSE,
-                  quote = FALSE)
-      pairs_to_include.file <- paste0(td, "include_pairs.txt")
-      ID.keep <- ID[keep == 1,]
-      
-    }
-    
-    
-    ##Return list  
-    list(
-      ID = ID.keep,
-      ZZ = ZZ.keep,
-      df = df,
-      response = response.keep,
-      covariates = covariates.keep,
-      formula = fmla,
-      CS_Point.File = CS_Point.File,
-      Neighbor.Connect = Neighbor.Connect,
-      n.Pops = n.Pops,
-      pairs_to_include = pairs_to_include.file,
-      parallel = parallel,
-      cores = cores,
-      solver = solver,
-      precision = precision,
-      JULIA_HOME = JULIA_HOME,
-      write.files = write.files,
-      write.criteria = write.criteria,
-      silent = silent,
-      Julia_link = Julia_link,
-      scratch = scratch,
-      keep = keep,
-      response.all = response,
-      ID.all = ID,
-      ZZ.all = ZZ,
-      covariates.all = covariates,
-      rm.files = rm.files,
-      opt.input = 'jl'
-    )
   }
+  
+  # Pairs to include ---------------------------------------------------------
+  pairs_to_include.file <- NULL
+  keep <- pairs_to_include
+  if(is.null(keep)){
+    keep <-  rep(1, nrow(ID))
+  }
+  ID.keep <- ID
+  covariates.keep <- covariates
+  ZZ.keep <- ZZ
+  response.keep <- response
+  
+  if (!is.null(pairs_to_include)) {
+    keep <-  pairs_to_include
+    
+    df <- df[keep == 1,]
+    ZZ.keep <- ZZ[,keep == 1]
+    pop <- ID$pop1[keep == 1]
+    miss.pops <- as.character(pop)
+    
+    ## Reduce ZZ
+    ZZ.keep <- ZZ.keep[rownames(ZZ.keep) %in% unique(miss.pops),]
+    
+    ## Reduce response & covariates
+    response.keep <- response[keep == 1]
+    covariates.keep <- covariates[keep == 1,]
+    
+    keep.id <- ID[keep == 1,]
+    names(keep.id) <- c('mode', 'include')
+    write.table(keep.id,
+                file = paste0(td, "include_pairs.txt"),
+                col.names = TRUE,
+                row.names = FALSE,
+                quote = FALSE)
+    pairs_to_include.file <- paste0(td, "include_pairs.txt")
+    ID.keep <- ID[keep == 1,]
+    
+  }
+  
+  
+  ##Return list  
+  list(
+    ID = ID.keep,
+    ZZ = ZZ.keep,
+    df = df,
+    response = response.keep,
+    covariates = covariates.keep,
+    formula = fmla,
+    CS_Point.File = CS_Point.File,
+    Neighbor.Connect = Neighbor.Connect,
+    n.Pops = n.Pops,
+    pairs_to_include = pairs_to_include.file,
+    parallel = parallel,
+    cores = cores,
+    solver = solver,
+    precision = precision,
+    JULIA_HOME = JULIA_HOME,
+    write.files = write.files,
+    write.criteria = write.criteria,
+    silent = silent,
+    Julia_link = Julia_link,
+    scratch = scratch,
+    keep = keep,
+    response.all = response,
+    ID.all = ID,
+    ZZ.all = ZZ,
+    covariates.all = covariates,
+    rm.files = rm.files,
+    opt.input = 'jl'
+  )
+}

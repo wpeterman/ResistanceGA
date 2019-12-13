@@ -1,3 +1,92 @@
+#' @description Function to create expanded keep and random effect grp object
+expand.mat_vec <- function(pop_n, 
+                           mat) {
+  
+  keep.mat <- matrix(1, length(pop_n), length(pop_n))
+  diag(keep.mat) <- 0
+  
+  keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
+                       rep(1:ncol(keep.mat), times = pop_n)]
+  
+  keep <- lower(keep.mat)
+  
+  mat <- mat[rep(1:nrow(mat), times = pop_n), 
+             rep(1:ncol(mat), times = pop_n)]
+  
+  out <- lower(mat)
+  
+  return(out)
+}
+
+#' @description Function to create expanded pop-to-pop data frame. Use internally to convert population-based pairiwse distances to individual-based vector
+expand.mat <- function(mat,
+                       pop_n,
+                       format = 'vector') {
+  
+  if(length(pop_n) != ncol(mat)) {
+    stop("Number of populations in pop_n does not match number of populations sampled!")
+  }
+  
+  keep.mat <- matrix(1, length(pop_n), length(pop_n))
+  diag(keep.mat) <- 0
+  
+  keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
+                       rep(1:ncol(keep.mat), times = pop_n)]
+  
+  keep <- lower(keep.mat)
+  
+  mat <- mat[rep(1:nrow(mat), times = pop_n), 
+             rep(1:ncol(mat), times = pop_n)]
+  
+  if(format == 'vector'){
+    out <- lower(mat)[keep == 1]
+    
+  } else {
+    out <- mat
+  }
+  
+  return(out)
+}
+
+#' @description Function to create expanded pop-to-pop data frame
+expand.mat_ <- function(from_mat,
+                        to_mat,
+                        pop_n) {
+  
+  # args <- list(...)
+  
+  if(length(pop_n) != ncol(from_mat)) {
+    stop("Number of populations in pop_n does not match number of populations sampled!")
+  }
+  
+  obs <- length(pop_n)
+  cnt <- 0
+  
+  out.list <- vector(mode = 'list')
+  
+  for(i in 1:(obs-1)) {
+    pop1 <- from_mat[(i+1):obs, i]
+    pop2 <- to_mat[(i+1):obs, i]
+    
+    tfi <- cbind(pop1, pop2)
+    
+    for(j in 1:nrow(tfi)) {
+      for(k in 1:2) {
+        cnt <- cnt + 1
+        tfi.rep <- tfi[rep(j, times = pop_n[tfi[j,k]]),]
+        out.list[[cnt]] <- tfi.rep
+        
+      } # End k
+    } # End j
+  } # End i
+  
+  out.df <- do.call(rbind, out.list) %>% as.data.frame()
+  out.df$pop1 <- factor(out.df$pop1)
+  out.df$pop2 <- factor(out.df$pop2)
+  
+  return(out.df)
+}
+
 ## FOR ASSESSING AICc of fitted models, not exported
 Resistance.Opt_AICc <-
   function(PARM,
@@ -10,7 +99,6 @@ Resistance.Opt_AICc <-
            iter = NULL,
            quiet = FALSE) {
     t1 <- proc.time()[3]
-    
     
     EXPORT.dir <- GA.inputs$Write.dir
     
@@ -250,11 +338,38 @@ read.matrix2 <- function(cs.matrix) {
 
 
 # Create ZZ matrix for mixed effects model
-ZZ.mat <- function(ID) {
-  Zl <-
-    lapply(c("pop1", "pop2"), function(nm)
-      Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
-  ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+ZZ.mat <- function(ID) { ## Added 11/5/2019
+  if(ncol(ID) > 2) {
+    
+    df <- data.frame(pop = ID$pop1,
+                     y = ID$gd,
+                     x = rnorm(nrow(ID)),
+                     grp = ID$grp)
+    
+    fmla <- y ~ x + (1 | pop) + (1 | grp)
+    mod <-
+      lFormula(fmla,
+               data = df)
+    
+    # ID <- ID[,1:2]
+    
+    Zl <-
+      lapply(c("pop1.ind", "pop2.ind"), function(nm)
+        Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+    ZZ.ind <- Reduce("+", Zl[-1], Zl[[1]])
+    
+    Zl <-
+      lapply(c("pop1.pop", "pop2.pop"), function(nm)
+        Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+    ZZ.pop <- Reduce("+", Zl[-1], Zl[[1]])
+    
+    ZZ <- rbind(ZZ.ind, ZZ.pop)
+  } else {
+    Zl <-
+      lapply(c("pop1", "pop2"), function(nm)
+        Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+    ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+  }
   return(ZZ)
 }
 
@@ -732,6 +847,4 @@ yn.question <- function(question, add_lines_before = TRUE) {
   } else if(the_answer == 3L){
     return(NA)
   }
-  
-  # ifelse(the_answer == 1L, TRUE, FALSE)   # returns TRUE or FALSE
 }

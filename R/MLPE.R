@@ -44,7 +44,7 @@ MLPE.lmm <-
       mm <- mm[which(mm != -1)]
       
       if (is.null(ID)) {
-        ID <- To.From.ID(POPS = m)
+        ID <- To.From.ID(m)
       }
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)
@@ -69,7 +69,7 @@ MLPE.lmm <-
       }
       
       if (is.null(ID)) {
-        ID <- To.From.ID(POPS = m)
+        ID <- To.From.ID(m)
       }
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)
@@ -88,7 +88,7 @@ MLPE.lmm <-
       mm <- mm[which(mm != -1)]
       
       if (is.null(ID)) {
-        ID <- To.From.ID(POPS = m)
+        ID <- To.From.ID(m)
       }
       if (is.null(ZZ)) {
         ZZ <- ZZ.mat(ID = ID)
@@ -271,7 +271,7 @@ MLPE.lmm_coef <-
           mm <- lower(cd)
           # mm <- lower(cd)
           m <- dim(cd)[1]
-          ID <- To.From.ID(POPS = m)
+          ID <- To.From.ID(m)
           ZZ <- ZZ.mat(ID = ID)
           cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
           cs.unscale <- mm
@@ -310,7 +310,7 @@ MLPE.lmm_coef <-
           mm <- lower(cd)
           # mm <- lower(cd)
           m <- dim(cd)[1]
-          ID <- To.From.ID(POPS = m)
+          ID <- To.From.ID(m)
           ZZ <- ZZ.mat(ID = ID)
           cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
           cs.unscale <- mm
@@ -349,7 +349,7 @@ MLPE.lmm_coef <-
           mm <- lower(cd)
           # mm <- lower(cd)
           m <- dim(cd)[1]
-          ID <- To.From.ID(POPS = m)
+          ID <- To.From.ID(m)
           ZZ <- ZZ.mat(ID = ID)
           cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
           cs.unscale <- mm
@@ -395,7 +395,7 @@ MLPE.lmm_coef <-
           mm <- lower(cd)
           # mm <- lower(cd)
           m <- dim(cd)[1]
-          ID <- To.From.ID(POPS = m)
+          ID <- To.From.ID(m)
           ZZ <- ZZ.mat(ID = ID)
           cs.matrix <- scale(mm, center = TRUE, scale = TRUE)
           cs.unscale <- mm
