@@ -341,18 +341,16 @@ read.matrix2 <- function(cs.matrix) {
 ZZ.mat <- function(ID) { ## Added 11/5/2019
   if(ncol(ID) > 2) {
     
-    df <- data.frame(pop = ID$pop1,
-                     y = ID$gd,
-                     x = rnorm(nrow(ID)),
-                     grp = ID$grp)
-    
-    fmla <- y ~ x + (1 | pop) + (1 | grp)
-    mod <-
-      lFormula(fmla,
-               data = df)
-    
-    # ID <- ID[,1:2]
-    
+    # df <- data.frame(pop = ID$pop1,
+    #                  y = ID$gd,
+    #                  x = rnorm(nrow(ID)),
+    #                  grp = ID$grp)
+    # 
+    # fmla <- y ~ x + (1 | pop) + (1 | grp)
+    # mod <-
+    #   lFormula(fmla,
+    #            data = df)
+
     Zl <-
       lapply(c("pop1.ind", "pop2.ind"), function(nm)
         Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
