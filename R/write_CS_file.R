@@ -9,6 +9,7 @@ write.CS_4.0 <- function(BATCH,
                          CORES = NULL,
                          solver = NULL,
                          precision = FALSE,
+                         is_resistance = TRUE,
                          PAIRS_TO_INCLUDE = "included_pairs_file = (Browse for a file with pairs to include or exclude)",
                          PAIRS = "use_included_pairs = False",
                          silent = NULL){
@@ -32,13 +33,21 @@ write.CS_4.0 <- function(BATCH,
     LOG <- "log_level = INFO"
   }
   
- if(!isTRUE(precision)) {
-   precision <- "precision = None"
- }
+  if(!isTRUE(precision)) {
+    precision <- "precision = None"
+  }
   
- if(precision == 'single') {
-   precision <- "precision = single"
- } 
+  if(precision == 'single') {
+    precision <- "precision = single"
+  } 
+  
+  if(isTRUE(is_resistance)) {
+    RESISTANCE <- "connect_using_avg_resistances = True"
+    HABITAT_RES <- "habitat_map_is_resistances = True"
+  } else {
+    RESISTANCE <- "connect_using_avg_resistances = False"
+    HABITAT_RES <- "habitat_map_is_resistances = False"
+  }
   
   sink(BATCH)
   cat("[Options for advanced mode]")
@@ -151,14 +160,14 @@ write.CS_4.0 <- function(BATCH,
   cat("\n")
   cat("[Connection scheme for raster habitat data]")
   cat("\n")
-  cat("connect_using_avg_resistances = True")
+  cat(RESISTANCE)
   cat("\n")
   cat(CONNECTION)
   cat("\n")
   cat("\n")
   cat("[Habitat raster or graph]")
   cat("\n")
-  cat("habitat_map_is_resistances = True")
+  cat(HABITAT_RES)
   cat("\n")
   cat(HABITAT)
   cat("\n")

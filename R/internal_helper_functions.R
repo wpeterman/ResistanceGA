@@ -18,10 +18,34 @@ expand.mat_vec <- function(pop_n,
   return(out)
 }
 
-#' @description Function to create expanded pop-to-pop data frame. Use internally to convert population-based pairiwse distances to individual-based vector
+#' @description Function to create expanded pop-to-ind data frame. Use internally to generate vector of indices to retain for analysis
+expand.keep <- function(pop_n){
+    
+    keep.mat <- matrix(1, length(pop_n), length(pop_n))
+    diag(keep.mat) <- 0
+    
+    keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
+                         rep(1:ncol(keep.mat), times = pop_n)]
+    
+    keep <- lower(keep.mat)
+
+    return(keep)
+}
+
+#' @description Function to create expanded pop-to-ind data frame. Use internally to convert population-based pairiwse distances to individual-based vector
 expand.mat <- function(mat,
                        pop_n,
                        format = 'vector') {
+  if(is.null(pop_n)){
+    return(mat)
+    
+  } else {
+    
+    if(is.vector(mat) | dim(mat)[2] == 1) {
+      n.mat <- matrix(0, length(pop_n), length(pop_n))
+      n.mat[lower.tri(n.mat)] <- mat
+      mat <- n.mat
+    }
   
   if(length(pop_n) != ncol(mat)) {
     stop("Number of populations in pop_n does not match number of populations sampled!")
@@ -46,6 +70,7 @@ expand.mat <- function(mat,
   }
   
   return(out)
+  }
 }
 
 #' @description Function to create expanded pop-to-pop data frame
@@ -338,19 +363,89 @@ read.matrix2 <- function(cs.matrix) {
 
 
 # Create ZZ matrix for mixed effects model
-ZZ.mat <- function(ID) { ## Added 11/5/2019
-  if(ncol(ID) > 2) {
+ZZ.mat <- function(ID, drop = NULL) { ## Added 11/5/2019
+  ID.num <- ID
+  
+  # Sparse correlation matrix -----------------------------------------------------------
+  if(any("corr_" %in% names(ID))) {
+
+    if(any("pop1.pop" %in% names(ID))) {
+      # ID.num$pop1 <- as.numeric(ID.num$pop1.pop)
+      # ID.num$pop2 <- as.numeric(ID.num$pop2.pop)
+    
+      # Zl.corr <-
+      #   lapply(c("pop1.pop", "pop2.pop"), function(nm) # c("pop1", "pop2")
+      #     Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+      
+      ID.num$pop1 <- as.numeric(ID.num$pop1.ind)
+      ID.num$pop2 <- as.numeric(ID.num$pop2.ind)
+    
+      Zl.corr <-
+        lapply(c("pop1.ind", "pop2.ind"), function(nm) # c("pop1", "pop2")
+          Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+      
+      
+    } else {
+      ID.num$pop1 <- as.numeric(ID.num$pop1)
+      ID.num$pop2 <- as.numeric(ID.num$pop2)
+      
+      Zl.corr <-
+        lapply(c("pop1", "pop2"), function(nm) # c("pop1", "pop2")
+          Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+    }
+    
+    
+    for(i in 1:dim(Zl.corr[[1]])[1]){
+      # for(j in 1:dim(Zl.corr[[1]])[2]) {
+        Zl.corr[[1]][i,] <- (ID.num$pop1 == i & ID.num$corr_ == 1)
+        # Zl.corr[[1]][i,j] <- ifelse(ID.num$pop1[j] == i & ID.num$cor.grp[j] == 1, 1, 0)
+      # }
+    }
+    
+    for(i in 1:dim(Zl.corr[[2]])[1]){
+      # for(j in 1:dim(Zl.corr[[2]])[2]) {
+      Zl.corr[[2]][i,] <- (ID.num$pop2 == i & ID.num$corr_ == 1)
+      # Zl.corr[[2]][i,j] <- ifelse(ID.num$pop2[j] == i & ID.num$cor.grp[j] == 1, 1, 0)
+      # }
+    }
+    
+    ZZ.corr <- Reduce("+", Zl.corr[-1], Zl.corr[[1]])
+    ZZ.corr <- Matrix::drop0(ZZ.corr)
+  }
+  
+  
+  if(any("pop1.pop" %in% names(ID))) {
+ 
+    ### TEST
+    # ID$gd<-rnorm(nrow(ID))
+    # df <- data.frame(pop = ID$pop1.ind,
+    #                  y = ID$gd,
+    #                  x = rnorm(nrow(ID)),
+    #                  grp = ID$pop1.pop,
+    #                  cor.grp = ID$cor.grp,
+    #                  cg = ID$pop1.pop,
+    #                  cg_t = sample(x = c(1,2), size = nrow(ID), replace = T))
     
     # df <- data.frame(pop = ID$pop1,
     #                  y = ID$gd,
     #                  x = rnorm(nrow(ID)),
-    #                  grp = ID$grp)
+    #                  grp = ID$pop1,
+    #                  cor.grp = ID$cor.grp,
+    #                  cg = ID$pop1)
     # 
-    # fmla <- y ~ x + (1 | pop) + (1 | grp)
+    # # fmla <- y ~ x + (1 |  pop) + (1 | grp) + (1 | grp)
+    # fmla <- y ~ x + (1 |  pop) + (1 | grp)
     # mod <-
-    #   lFormula(fmla,
+    #   lme4::lFormula(fmla,
     #            data = df)
-
+    # mod$reTrms$Zt <- ZZ
+    # dfun <- do.call(lme4::mkLmerDevfun, mod)
+    # opt <- lme4::optimizeLmer(dfun)
+    # 
+    # MOD <-
+    #   (lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+    ### END TEST
+    
     Zl <-
       lapply(c("pop1.ind", "pop2.ind"), function(nm)
         Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
@@ -361,15 +456,33 @@ ZZ.mat <- function(ID) { ## Added 11/5/2019
         Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
     ZZ.pop <- Reduce("+", Zl[-1], Zl[[1]])
     
-    ZZ <- rbind(ZZ.ind, ZZ.pop)
+    if(any("corr_" %in% names(ID))) {
+      ZZ <- rbind(ZZ.ind, ZZ.pop, ZZ.corr)
+      
+    } else {
+      ZZ <- rbind(ZZ.ind, ZZ.pop)
+      
+    }
+    
   } else {
     Zl <-
       lapply(c("pop1", "pop2"), function(nm)
         Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
-    ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+    ZZ <- ZZ.pop <- Reduce("+", Zl[-1], Zl[[1]])
+    
+    if(any("corr_" %in% names(ID))) {
+      ZZ <- rbind(ZZ.pop, ZZ.corr)
+      
+    }
   }
+  
+  if(!is.null(drop)){
+    ZZ <- ZZ[, drop == 1]
+  }
+  
   return(ZZ)
-}
+  
+} ## End function
 
 ZZ.mat_select <- function(ID, drop) {
   Zl <-
@@ -401,6 +514,7 @@ ZZ.mat_select <- function(ID, drop) {
   # ZZ <- ZZ[,drop == 1]
   # return(ZZ)
 }
+
 
 # Rescale function
 SCALE.vector <- function(data, MIN, MAX, threshold = 1e-5) {

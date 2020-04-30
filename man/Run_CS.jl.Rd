@@ -12,6 +12,7 @@ EXPORT.dir = NULL,
 output = "matrix",
 CS_Point.File = NULL,
 pairs_to_include = NULL,
+pop2ind = NULL,
 parallel = FALSE, 
 cores = NULL,
 cholmod = TRUE,
@@ -37,6 +38,8 @@ scratch = NULL)
 \item{CS_Point.File}{Provide a \code{\link[sp]{SpatialPoints}} object containing sample locations. Alternatively, specify the path to the Circuitscape formatted point file. See Circuitscape documentation for help. Only necessary to specify if \code{jl.inputs} are not specified.}
 
 \item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations. Only necessary to specify if \code{jl.inputs} are not specified.}
+
+\item{pop2ind}{Default is NULL. A vector with length equivalent to the number of populations sapled. Each value of the vector indicates the number of samples from each respective population.}
 
 \item{parallel}{(Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel? Only necessary to specify if \code{jl.inputs} are not specified.}
 

@@ -103,7 +103,8 @@ gdist.prep <-
       
       drop.obs <- keep 
       
-      ZZ <- ZZ.mat_select(ID, drop.obs)
+      ZZ <- ZZ.mat(ID, drop.obs)
+      # ZZ <- ZZ.mat_select(ID, drop.obs)
       
     } else {
       ID <- To.From.ID(n.Pops)
@@ -196,7 +197,8 @@ gdist.prep <-
       # ID$pop1 <- factor(ID$pop1)
       # ID$pop2 <- factor(ID$pop2)
       
-      ZZ <- ZZ.mat_select(ID, drop.obs)
+      # ZZ <- ZZ.mat_select(ID, drop.obs)
+      ZZ <- ZZ.mat(ID, drop.obs)
       
       # mx.dist <- as.matrix(dist(samples@coords))
       # mx.dist[mx.dist > max.dist] <- NA

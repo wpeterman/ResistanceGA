@@ -152,10 +152,6 @@ MS_optim <- function(CS.inputs = NULL,
                              ZZ = CS.inputs$ZZ,
                              REML = TRUE)
     
-    aic <- suppressWarnings(AIC(
-      fit.mod
-    ))
-    
     fit.stats <- suppressWarnings(r.squaredGLMM(
       fit.mod
     ))
@@ -222,6 +218,9 @@ MS_optim <- function(CS.inputs = NULL,
     }
     
     n <- CS.inputs$n.Pops
+    
+    aic <- (-2 * LL) + (2 * k)
+    
     AICc <- 
       # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
       (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -545,10 +544,6 @@ MS_optim <- function(CS.inputs = NULL,
                              ZZ = gdist.inputs$ZZ,
                              REML = TRUE)
     
-    aic <- suppressWarnings(AIC(
-      fit.mod
-    ))
-    
     fit.stats <- suppressWarnings(r.squaredGLMM(
       fit.mod
     ))
@@ -585,6 +580,7 @@ MS_optim <- function(CS.inputs = NULL,
     }
     
     n <- gdist.inputs$n.Pops
+    aic <- (-2 * LL) + (2 * k)
     AICc <- 
       # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
       (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -937,10 +933,6 @@ MS_optim <- function(CS.inputs = NULL,
                              ZZ = jl.inputs$ZZ,
                              REML = TRUE)
     
-    aic <- suppressWarnings(AIC(
-      fit.mod
-    ))
-    
     fit.stats <- suppressWarnings(r.squaredGLMM(
       fit.mod
     ))
@@ -969,6 +961,7 @@ MS_optim <- function(CS.inputs = NULL,
     }
     
     n <- jl.inputs$n.Pops
+    aic <- (-2 * LL) + (2 * k)
     AICc <- 
       # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
       (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))

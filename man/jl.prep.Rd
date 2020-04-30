@@ -12,6 +12,8 @@ jl.prep(n.Pops,
                JULIA_HOME = NULL,
                Neighbor.Connect = 8, 
                pairs_to_include = NULL, 
+               pop2ind = NULL,
+               nb = NULL,
                parallel = FALSE, 
                cores = NULL,
                cholmod = TRUE,
@@ -40,6 +42,10 @@ jl.prep(n.Pops,
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
 \item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations in the MLPE model.}
+
+\item{pop2ind}{Default is NULL. A vector with length equivalent to the number of populations sapled. Each value of the vector indicates the number of samples from each respective population.}
+
+\item{nb}{Default is NULL. Optionally, specify a distance between points that should be considered as part of the same group or neighborhood. See Details.}
 
 \item{parallel}{(Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel?}
 
@@ -83,6 +89,8 @@ If \code{precision} is TRUE, then the EXPERIMENTAL single precision method will 
 
 When specifying a formula, provide it as: \code{response ~ covariate}.
 the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
+
+If \code{nb} is specified, this indicates the maximum distance (in units of your \code{CS_Point.File} SpatialPoints object) that locations are considered to be part of the same neighborhood.
 }
 \examples{
  

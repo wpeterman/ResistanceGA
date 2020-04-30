@@ -125,45 +125,45 @@ mlpe_rga <-
 
 
 # Create ZZ matrix for mixed effects model
-ZZ.mat <- function(ID) {
-  Zl <-
-    lapply(c("pop1", "pop2"), function(nm)
-      Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
-  ZZ <- Reduce("+", Zl[-1], Zl[[1]])
-  return(ZZ)
-}
-
-# Rescale function
-SCALE.vector <- function(data, MIN, MAX, threshold = 1e-5) {
-  if (abs(MIN - MAX) < threshold) {
-    data[is.finite(data)] <- 0
-    data
-  } else {
-    Mn = min(data)
-    Mx = max(data)
-    (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
-  }
-}
-
-# Define scaling function
-# This will rescale from 1 to specified MAX
-SCALE <- function(data, MIN, MAX, threshold = 1e-5) {
-  if (abs(MIN - MAX) < threshold) {
-    data[is.finite(raster::values(data))] <- 0
-    data
-  } else {
-    Mn = cellStats(data, stat = 'min')
-    Mx = cellStats(data, stat = 'max')
-    (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
-  }
-}
-
-
-lower <- function(matrix) {
-  if (is.vector(matrix) == TRUE ||
-      dim(matrix)[1] != dim(matrix)[2]) {
-    warning("Must provide square distance matrix with no column or row names")
-  }
-  lm <- matrix[lower.tri(matrix)]
-  return(lm)
-}
+# ZZ.mat <- function(ID) {
+#   Zl <-
+#     lapply(c("pop1", "pop2"), function(nm)
+#       Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
+#   ZZ <- Reduce("+", Zl[-1], Zl[[1]])
+#   return(ZZ)
+# }
+# 
+# # Rescale function
+# SCALE.vector <- function(data, MIN, MAX, threshold = 1e-5) {
+#   if (abs(MIN - MAX) < threshold) {
+#     data[is.finite(data)] <- 0
+#     data
+#   } else {
+#     Mn = min(data)
+#     Mx = max(data)
+#     (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
+#   }
+# }
+# 
+# # Define scaling function
+# # This will rescale from 1 to specified MAX
+# SCALE <- function(data, MIN, MAX, threshold = 1e-5) {
+#   if (abs(MIN - MAX) < threshold) {
+#     data[is.finite(raster::values(data))] <- 0
+#     data
+#   } else {
+#     Mn = cellStats(data, stat = 'min')
+#     Mx = cellStats(data, stat = 'max')
+#     (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
+#   }
+# }
+# 
+# 
+# lower <- function(matrix) {
+#   if (is.vector(matrix) == TRUE ||
+#       dim(matrix)[1] != dim(matrix)[2]) {
+#     warning("Must provide square distance matrix with no column or row names")
+#   }
+#   lm <- matrix[lower.tri(matrix)]
+#   return(lm)
+# }

@@ -10,6 +10,8 @@
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
 #' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations in the MLPE model. 
+#' @param pop2ind Default is NULL. A vector with length equivalent to the number of populations sapled. Each value of the vector indicates the number of samples from each respective population.
+#' @param nb Default is NULL. Optionally, specify a distance between points that should be considered as part of the same group or neighborhood. See Details.
 #' @param parallel (Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel?
 #' @param cores If `parallel = TRUE`, how many cores should be used for parallel processing?
 #' @param cholmod (Logical; Default = TRUE). Should the cholmod solver be used? See details.
@@ -34,6 +36,8 @@
 #'                JULIA_HOME = NULL,
 #'                Neighbor.Connect = 8, 
 #'                pairs_to_include = NULL, 
+#'                pop2ind = NULL,
+#'                nb = NULL,
 #'                parallel = FALSE, 
 #'                cores = NULL,
 #'                cholmod = TRUE,
@@ -60,6 +64,8 @@
 #' When specifying a formula, provide it as: \code{response ~ covariate}.
 #' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 #' 
+#' If \code{nb} is specified, this indicates the maximum distance (in units of your \code{CS_Point.File} SpatialPoints object) that locations are considered to be part of the same neighborhood.
+#' 
 #' 
 #' @examples  
 #' ## Not run:
@@ -75,6 +81,7 @@ jl.prep <- function(n.Pops,
                     Neighbor.Connect = 8,
                     pairs_to_include = NULL,
                     pop2ind = NULL,
+                    nb = NULL,
                     parallel = FALSE,
                     cores = NULL,
                     cholmod = TRUE,
@@ -109,13 +116,13 @@ jl.prep <- function(n.Pops,
       stop("`write.files` directory does not exist")
   }
   
-  if(!is.null(pop2ind)) {
-    if(!is.vector(pop2ind)) {
-      stop("`pop2ind` must be a vector of population sizes")
-    }
-    keep.df <- expand.mat_vec(pop2ind, 
-                              gd = response)
-  }
+  # if(!is.null(pop2ind)) {
+  #   if(!is.vector(pop2ind)) {
+  #     stop("`pop2ind` must be a vector of population sizes")
+  #   }
+  #   keep.df <- expand.mat_vec(pop2ind, 
+  #                             gd = response)
+  # }
   
   # Setup Julia -------------------------------------------------------------
   
@@ -140,11 +147,22 @@ jl.prep <- function(n.Pops,
   
   
   # Determine if CIRCUITSCAPE package is installed
-  jl.cs <- try(julia_library("Circuitscape"), TRUE)
-  if(class(jl.cs) == "try-error"){
+  # jl.cs <- try(julia_library("Circuitscape"), TRUE)
+  
+  # if(class(jl.cs) == "try-error"){
+  #   stop(cat(paste("You must install the Julia CIRCUITSCAPE package!!!",
+  #                  "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
+  # }
+  
+  jl.cs <- julia_installed_package("Circuitscape")
+  
+  if(jl.cs == "nothing"){
     stop(cat(paste("You must install the Julia CIRCUITSCAPE package!!!",
                    "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
   }
+  
+  JuliaCall::julia_library("Circuitscape")
+  
   wd <- getwd()
   
   if(run_test == TRUE) {
@@ -347,40 +365,143 @@ jl.prep <- function(n.Pops,
   # Make data frame ---------------------------------------------------------
   # Make to-from population list
   if (!exists(x = "ID")) {
-    ID <- To.From.ID(n.Pops)
+    if(!is.null(nb)){
+      ID <- To.From.ID(sampled_pops = n.Pops,
+                       pop_n = pop2ind,
+                       spLoc = CS_Point.File,
+                       nb = nb)
+    } else {
+      ID <- To.From.ID(sampled_pops = n.Pops,
+                       pop_n = pop2ind,
+                       spLoc = NULL,
+                       nb = nb)
+    }
   }
+  
+  ## * Update formula?
   suppressWarnings(ZZ <- ZZ.mat(ID))
   
   
   fmla <- formula
   df <- NULL
   
-  if(!is.null(response)) {
-    if(!is.null(covariates)) {
-      df <- data.frame(gd = response,
-                       covariates,
-                       pop = ID$pop1)
-    } else {
-      df <- data.frame(gd = response,
-                       pop = ID$pop1)
-    }
-    
-    if(!is.null(fmla)) {
+  if(!is.null(response)){
+    if(!is.null(covariates)){
       if(!is.null(pop2ind)){
-        fmla <- update(fmla, gd ~ . + cd + (1 | pop) + (1 | grp))
+        keep.vec <- expand.keep(pop2ind)
+        gd.mat <- matrix(0, n.Pops, n.Pops)
+
         
+        cov.list <- vector('list', length(names(covariates)))
+        for(i in 1:length(cov.list)){
+          mat <- gd.mat
+          mat[lower.tri(mat)] <- covariates[,i]
+          
+          cov.list[[i]] <- expand.mat(mat,
+                                      pop2ind)
+        }
+        
+        names(cov.list) <- names(covariates)
+        cov.df <- as.data.frame(cov.list)
+        covariates <- cov.df
+        
+        response <- response[keep.vec == 1]
+        
+        if(!is.null(nb)){
+
+          df <- data.frame(gd = response,
+                           cov.df,
+                           pop = ID$pop,
+                           grp = ID$pop1.pop,
+                           cor.grp = ID$cor.grp)
+        } else {
+          df <- data.frame(gd = response,
+                           cov.df,
+                           pop = ID$pop,
+                           grp = ID$pop1.pop)
+        }
       } else {
-        fmla <- update(fmla, gd ~ . + cd + (1 | pop))
+        if(!is.null(nb)){
+          df <- data.frame(gd = response,
+                           covariates,
+                           pop = ID$pop1,
+                           cor.grp = ID$cor.grp)
+        } else {
+          df <- data.frame(gd = response,
+                           covariates,
+                           pop = ID$pop1)
+        }
       }
+      
     } else {
       if(!is.null(pop2ind)){
-        fmla <- gd ~ cd + (1 | pop) + (1 | grp)
+        keep.vec <- expand.keep(pop2ind)
+        gd.mat <- matrix(0, n.Pops, n.Pops)
+        response <- response[keep.vec == 1]
         
+        if(!is.null(nb)){
+          
+          df <- data.frame(gd = response,
+                           pop = ID$pop,
+                           grp = ID$pop1.pop,
+                           cor.grp = ID$cor.grp)
+        } else {
+          df <- data.frame(gd = response,
+                           pop = ID$pop,
+                           grp = ID$pop1.pop)
+        } 
       } else {
-        fmla <- gd ~ cd + (1 | pop)
+        if(!is.null(nb)){
+          df <- data.frame(gd = response,
+                           pop = ID$pop1,
+                           cor.grp = ID$cor.grp)
+        } else {
+          df <- data.frame(gd = response,
+                           pop = ID$pop1)
+        }
       }
     }
   }
+  
+  if(!is.null(fmla)) {
+    if(!is.null(pop2ind)){
+      if(!is.null(nb)){
+        fmla <- update(fmla, gd ~ . + cd + (1 | pop) + (1 | grp) + (1 | cor.grp))
+        
+      } else {
+        fmla <- update(fmla, gd ~ . + cd + (1 | pop) + (1 | grp))
+        
+      }
+      
+    } else {
+      if(!is.null(nb)){
+        fmla <- update(fmla, gd ~ . + cd + (1 | pop) + (1 | cor.grp))
+      } else {
+        fmla <- update(fmla, gd ~ . + cd + (1 | pop))
+      }
+    }
+  } else {
+    if(!is.null(pop2ind)){
+      if(!is.null(nb)){
+        fmla <- gd ~ cd + (1 | pop) + (1 | grp) + (1 | cor.grp)
+        
+      } else {
+        fmla <- gd ~ cd + (1 | pop) + (1 | grp)
+        
+      }
+      
+    } else {
+      if(!is.null(nb)){
+        fmla <- gd ~ cd + (1 | pop) + (1 | cor.grp)
+        
+      } else {
+        fmla <- gd ~ cd + (1 | pop)
+        
+      }
+    }
+  }
+  
+  
   
   # Pairs to include ---------------------------------------------------------
   pairs_to_include.file <- NULL
@@ -393,12 +514,19 @@ jl.prep <- function(n.Pops,
   ZZ.keep <- ZZ
   response.keep <- response
   
+  # if(!is.null(pop2ind)) {
+  #   keep.vec <- expand.keep(pop2ind)
+  #   response.keep <- response[keep == 1]
+  #   covariates.keep <- covariates[keep == 1,]
+  # }
+  
   if (!is.null(pairs_to_include)) {
+
     keep <-  pairs_to_include
     
     df <- df[keep == 1,]
     ZZ.keep <- ZZ[,keep == 1]
-    pop <- ID$pop1[keep == 1]
+    pop <- ID$pop1[keep == 1] ## Will need to be updated for pop2ind
     miss.pops <- as.character(pop)
     
     ## Reduce ZZ
@@ -433,6 +561,8 @@ jl.prep <- function(n.Pops,
     Neighbor.Connect = Neighbor.Connect,
     n.Pops = n.Pops,
     pairs_to_include = pairs_to_include.file,
+    pop2ind = pop2ind,
+    nb = nb,
     parallel = parallel,
     cores = cores,
     solver = solver,

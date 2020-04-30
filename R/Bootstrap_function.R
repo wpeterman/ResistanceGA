@@ -8,9 +8,10 @@
 #' @param sample.prop Proportion of observations to be sampled each iteration (Default = 0.75)
 #' @param iters Number of bootstrap iterations to be conducted
 #' @param obs Total number of observations (populations or individuals) in your original analysis
-#' @param rank.method What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'SSE'). Default = 'AICc'
+#' @param rank.method What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'RMSE'). Default = 'AIC'
 #' @param genetic.mat Genetic distance matrix without row or column names.
 #' @param keep Optional vector of pairwise observations to keep (1) or omit (0)
+#' @param n.cores Number of cores to use when running bootstrap in parallel. Default 2 less than total available.
 #' @return A data frame reporting the average model weight, average rank, number of times a model was the top model in the set, and the frequency a model was best.
 #' 
 #' @details This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surfaces that is top ranked across all bootstrap iterations.
@@ -25,7 +26,8 @@
 #'                    obs, 
 #'                    rank.method, 
 #'                    genetic.mat,
-#'                    keep = NULL)
+#'                    keep = NULL,
+#'                    n.cores = NULL)
 #' 
 #' @examples  
 #' ## Not run:
@@ -40,9 +42,10 @@ Resist.boot <-
             sample.prop = 0.75,
             iters,
             obs,
-            rank.method = 'AICc',
+            rank.method = 'AIC',
             genetic.mat,
-            keep = NULL) {
+            keep = NULL,
+            n.cores = NULL) {
     
     options(warn = -1)
     progress_bar <- plyr::progress_text()
@@ -71,9 +74,11 @@ Resist.boot <-
     AIC.tab.list <- vector(mode = "list", length = iters)
     
     names(dist.mat) <- mod.names
+
     
-    for (i in 1:iters) {
-      # bootsrap iteration
+    # Execute iterations ------------------------------------------------------
+    
+      for (i in 1:iters) {
       samp <- sort(sample.list[[i]])
       ho <- sort(holdout.list[[i]])
       genetic.samp <- lower(genetic.mat[samp, samp])
@@ -109,9 +114,10 @@ Resist.boot <-
         )
         
         mod.aic <- data.frame(mod.names[j], n.parameters[j], AICc)
-        names(mod.aic) <- c("surface", "k", "AIC","AICc", "R2m", "LL", 'SSE')
+        names(mod.aic) <- c("surface", "k", "AIC","AICc", "R2m", "LL", 'RMSE')
         
         AICc.tab[[j]] <- mod.aic
+        
         progress_bar$step()
         
       } # Close composite loop
@@ -125,7 +131,7 @@ Resist.boot <-
         dplyr::mutate(., iteration = i) %>%
         dplyr::mutate(., LL = LL) %>%
         dplyr::mutate(., R2m = R2m) %>%
-        dplyr::mutate(., SSE = SSE)
+        dplyr::mutate(., RMSE = RMSE)
       
       if(rank.method == 'LL') {
         AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(desc(LL)))
@@ -133,15 +139,15 @@ Resist.boot <-
         AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(AIC))
       } else if(rank.method == 'R2'){
         AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(desc(R2m)))
-      } else if(rank.method == 'SSE'){
-        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(SSE))
+      } else if(rank.method == 'RMSE'){
+        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(RMSE))
       } else {
         AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(AICc))
       }
       
       AIC.tab.list[[i]] <- AICc.tab
     } # Close iteration loop
-    
+
     # Get average weight, rank, & R2
     group.list <- AIC.tab.list %>% plyr::ldply(.) %>% dplyr::group_by(., surface)
     boot.avg <-
@@ -153,7 +159,7 @@ Resist.boot <-
                        avg.rank = mean(rank),
                        avg.R2m = mean(R2m),
                        avg.LL = mean(LL),
-                       avg.SSE = mean(SSE)) %>% 
+                       avg.RMSE = mean(RMSE)) %>% 
       plyr::arrange(., avg.rank)
     
     Freq_Percent <-
@@ -178,25 +184,25 @@ Resist.boot <-
 #!#!#!#!#!#!#!#!#!#!#!#!
 
 # Make to-from population list
-To.From.ID <- function(POPS) {
-  tmp <- matrix(nrow = POPS, ncol = POPS)
-  dimnames(tmp) <- list(1:POPS, 1:POPS)
-  tmp2 <- as.data.frame(which(row(tmp) < col(tmp), arr.ind = TRUE))
-  tmp2[[2]] <- dimnames(tmp)[[2]][tmp2$col]
-  tmp2[[1]] <- dimnames(tmp)[[2]][tmp2$row]
-  colnames(tmp2) <- c("pop1", "pop2")
-  as.numeric(tmp2$pop1)
-  as.numeric(tmp2$pop2)
-  ID <- plyr::arrange(tmp2, as.numeric(pop1), as.numeric(pop2))
-  #   ID<-tmp2[with(tmp2, order(pop1, pop2)), ]
-  p1 <- ID[POPS - 1, 1]
-  p2 <- ID[POPS - 1, 2]
-  ID[POPS - 1, 1] <- p2
-  ID[POPS - 1, 2] <- p1
-  ID$pop1 <- factor(ID$pop1)
-  ID$pop2 <- factor(ID$pop2)
-  return(ID)
-}
+# To.From.ID <- function(POPS) {
+#   tmp <- matrix(nrow = POPS, ncol = POPS)
+#   dimnames(tmp) <- list(1:POPS, 1:POPS)
+#   tmp2 <- as.data.frame(which(row(tmp) < col(tmp), arr.ind = TRUE))
+#   tmp2[[2]] <- dimnames(tmp)[[2]][tmp2$col]
+#   tmp2[[1]] <- dimnames(tmp)[[2]][tmp2$row]
+#   colnames(tmp2) <- c("pop1", "pop2")
+#   as.numeric(tmp2$pop1)
+#   as.numeric(tmp2$pop2)
+#   ID <- plyr::arrange(tmp2, as.numeric(pop1), as.numeric(pop2))
+#   #   ID<-tmp2[with(tmp2, order(pop1, pop2)), ]
+#   p1 <- ID[POPS - 1, 1]
+#   p2 <- ID[POPS - 1, 2]
+#   ID[POPS - 1, 1] <- p2
+#   ID[POPS - 1, 2] <- p1
+#   ID$pop1 <- factor(ID$pop1)
+#   ID$pop2 <- factor(ID$pop2)
+#   return(ID)
+# }
 
 # Create ZZ matrix for mixed effects model
 ZZ.mat <- function(ID) {
@@ -219,8 +225,8 @@ boot.AICc <- function(response, resistance, ID, ZZ, k, obs, pred.dat, keep = NUL
                       keep = keep)
   
   R.sq <- MuMIn::r.squaredGLMM(fit.mod)[[1]]
-  mod.AIC <- AIC(fit.mod)
   LL <- logLik(fit.mod)
+  mod.AIC <- (-2 * LL) + (2 * k)
   AICc <- mod.AIC + ((2 * k * (k + 1)) / max((obs - k - 1), 1))
   
   pred.dat$resistance <- (pred.dat$resistance - attributes(resistance)[[2]]) / attributes(resistance)[[3]]
@@ -229,12 +235,14 @@ boot.AICc <- function(response, resistance, ID, ZZ, k, obs, pred.dat, keep = NUL
                   pred.dat,
                   re.form = NA)
   
-  SSE <- sum((pred -  pred.dat$response) ^ 2)
+  MSE_mod <- mean((fitted(fit.mod) - response) ^ 2)
+  SSE_mod <- sum((fitted(fit.mod) - response) ^ 2)
+  RMSE_mod <- sqrt(MSE_mod)
   
   out <- data.frame(AIC = mod.AIC, 
                     AICc = AICc, 
                     R2m = R.sq,
                     LL = LL,
-                    SSE = SSE)
+                    RMSE = RMSE_mod)
   return(out)
 }

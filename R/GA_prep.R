@@ -36,7 +36,7 @@
 #' @param crossover Default = "gareal_blxCrossover". This crossover method greatly improved optimization during preliminary testing
 #' @param maxiter Maximum number of iterations to run before the GA search is halted. If using standard \code{ga} optimizer, the default = 1000. If using \code{gaisl = TRUE}, then this is set to 15x the \code{migrationInterval}
 #' @param pop.size Number of individuals to create each generation. If \code{gaisl = TRUE}, then this number is automatically calculated as \code{numIslands} * \code{island.pop} 
-#' @param parallel A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specify the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.
+#' @param parallel A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specify the number of cores to use. 
 #' @param gaisl Should the genetic algorithm use the islands parallel optimization? (Default = FALSE)
 #' @param island.pop The number of individuals to populate each island. (Default = 20)
 #' @param numIslands If \code{gaisl = TRUE}, an integer value which specifies the number of islands to use in the genetic evolution (by default will be set to 4)

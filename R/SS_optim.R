@@ -157,16 +157,16 @@ SS_optim <- function(CS.inputs = NULL,
             )
           )
         
-        aic <-
-          AIC(
-            MLPE.lmm(
-              resistance = lower(cd),
-              pairwise.genetic = CS.inputs$response,
-              REML = F,
-              ID = CS.inputs$ID,
-              ZZ = CS.inputs$ZZ
-            )
-          )
+        # aic <-
+        #   AIC(
+        #     MLPE.lmm(
+        #       resistance = lower(cd),
+        #       pairwise.genetic = CS.inputs$response,
+        #       REML = F,
+        #       ID = CS.inputs$ID,
+        #       ZZ = CS.inputs$ZZ
+        #     )
+        #   )
         
         LL <-
           logLik(
@@ -190,6 +190,7 @@ SS_optim <- function(CS.inputs = NULL,
         }
         
         n <- CS.inputs$n.Pops
+        aic <- (-2 * LL) + (2 * k)
         AICc <-
           # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
           (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -348,15 +349,15 @@ SS_optim <- function(CS.inputs = NULL,
             ZZ = CS.inputs$ZZ
           )
         )
-        aic <- AIC(
-          MLPE.lmm(
-            REML = F,
-            resistance = lower(cd),
-            pairwise.genetic = CS.inputs$response,
-            ID = CS.inputs$ID,
-            ZZ = CS.inputs$ZZ
-          )
-        )
+        # aic <- AIC(
+        #   MLPE.lmm(
+        #     REML = F,
+        #     resistance = lower(cd),
+        #     pairwise.genetic = CS.inputs$response,
+        #     ID = CS.inputs$ID,
+        #     ZZ = CS.inputs$ZZ
+        #   )
+        # )
         
         LL <-
           logLik(
@@ -383,6 +384,7 @@ SS_optim <- function(CS.inputs = NULL,
         names(k.list)[i] <- GA.inputs$layer.names[i]
         
         n <- CS.inputs$n.Pops
+        aic <- (-2 * LL) + (2 * k)
         AICc <-
           # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
           (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -448,17 +450,6 @@ SS_optim <- function(CS.inputs = NULL,
           col.names = F
         )
         
-        Dist.AIC <-
-          AIC(
-            MLPE.lmm(
-              resistance = lower(cd),
-              pairwise.genetic = CS.inputs$response,
-              REML = FALSE,
-              ID = CS.inputs$ID,
-              ZZ = CS.inputs$ZZ
-            )
-          )
-        
         fit.stats <-
           r.squaredGLMM(
             MLPE.lmm(
@@ -496,29 +487,30 @@ SS_optim <- function(CS.inputs = NULL,
         
         names(MLPE.list)[i + 1] <- "Distance"
         
-        if (GA.inputs$method == "AIC") {
-          dist.obj <- Dist.AIC
-        } else if (GA.inputs$method == "R2") {
-          dist.obj <- fit.stats[[1]]
-        } else {
-          dist.obj <- LL[[1]]
-        }
         
         k <- 2
         k.list[[i + 1]] <- k
         names(k.list)[i + 1] <- 'Distance'
         
         n <- CS.inputs$n.Pops
+        aic <- (-2 * LL) + (2 * k)
         AICc <-
           # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
           (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
         
+        if (GA.inputs$method == "AIC") {
+          dist.obj <- -aic
+        } else if (GA.inputs$method == "R2") {
+          dist.obj <- fit.stats[[1]]
+        } else {
+          dist.obj <- LL[[1]]
+        }
         
         Dist.AICc <-
           data.frame("Distance",
                      dist.obj,
                      k,
-                     Dist.AIC,
+                     aic,
                      AICc,
                      fit.stats[[1]],
                      fit.stats[[2]],
@@ -550,31 +542,33 @@ SS_optim <- function(CS.inputs = NULL,
         mod$reTrms$Zt <- CS.inputs$ZZ
         dfun <- do.call(mkLmerDevfun, mod)
         opt <- optimizeLmer(dfun)
-        aic <- Null.AIC <-
-          AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+        # aic <- Null.AIC <-
+        #   AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
         fit.stats <-
           r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
         LL <-
           logLik(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
         
+        k <- 1
+        n <- CS.inputs$n.Pops
+        aic <- (-2 * LL) + (2 * k)
+        AICc <-
+          # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+          (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+        
         if (GA.inputs$method == "AIC") {
-          null.obj <- Null.AIC
+          null.obj <- -aic
         } else if (GA.inputs$method == "R2") {
           null.obj <- fit.stats[[1]]
         } else {
           null.obj <- LL[[1]]
         }
-        k <- 1
-        n <- CS.inputs$n.Pops
-        AICc <-
-          # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-          (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
         
         Null.AICc <-
           data.frame("Null",
                      null.obj,
                      k,
-                     Null.AIC,
+                     aic,
                      AICc,
                      fit.stats[[1]],
                      fit.stats[[2]],
@@ -701,10 +695,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -764,6 +754,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -929,10 +920,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- Dist.AIC <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
+           
             fit.stats <- r.squaredGLMM(
               fit.mod
             )
@@ -969,6 +957,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -1153,10 +1142,6 @@ SS_optim <- function(CS.inputs = NULL,
               fit.mod
             ))
             
-            aic <- AIC(
-              fit.mod
-            )
-            
             LL <- logLik(
               fit.mod
             )[[1]]
@@ -1175,6 +1160,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -1374,10 +1360,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -1407,6 +1389,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -1473,10 +1456,6 @@ SS_optim <- function(CS.inputs = NULL,
                                    ZZ = gdist.inputs$ZZ,
                                    REML = TRUE)
           
-          aic <- Dist.AIC <- suppressWarnings(AIC(
-            fit.mod
-          ))
-          
           fit.stats <- r.squaredGLMM(
             fit.mod
           )
@@ -1498,23 +1477,26 @@ SS_optim <- function(CS.inputs = NULL,
           k.list[[i + 1]] <- k
           names(k.list)[i + 1] <- 'Distance'
           
+
+          
+          n <- gdist.inputs$n.Pops
+          aic <- (-2 * LL) + (2 * k)
+          AICc <-
+            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+          
           if (GA.inputs$method == "AIC") {
-            dist.obj <- -Dist.AIC
+            dist.obj <- -aic
           } else if (GA.inputs$method == "R2") {
             dist.obj <- fit.stats[[1]]
           } else {
             dist.obj <- LL[[1]]
           }
           
-          n <- gdist.inputs$n.Pops
-          AICc <-
-            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
-          
           Dist.AICc <- data.frame("Distance",
                                   dist.obj,
                                   k,
-                                  Dist.AIC,
+                                  aic,
                                   AICc,
                                   fit.stats[[1]],
                                   fit.stats[[2]],
@@ -1543,8 +1525,7 @@ SS_optim <- function(CS.inputs = NULL,
           mod$reTrms$Zt <- gdist.inputs$ZZ
           dfun <- do.call(mkLmerDevfun, mod)
           opt <- optimizeLmer(dfun)
-          aic <- Null.AIC <-
-            AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          
           fit.stats <-
             r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           LL <-
@@ -1552,23 +1533,26 @@ SS_optim <- function(CS.inputs = NULL,
           ROW <- nrow(gdist.inputs$ID)
           k <- 1
           
+          
+          n <- gdist.inputs$n.Pops
+          aic <- (-2 * LL) + (2 * k)
+          AICc <-
+            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+          
           if (GA.inputs$method == "AIC") {
-            null.obj <- -Null.AIC
+            null.obj <- -aic
           } else if (GA.inputs$method == "R2") {
             null.obj <- fit.stats[[1]]
           } else {
             null.obj <- LL[[1]]
           }
-          n <- gdist.inputs$n.Pops
-          AICc <-
-            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
           
           Null.AICc <-
             data.frame("Null",
                        null.obj,
                        k,
-                       Null.AIC,
+                       aic,
                        AICc,
                        fit.stats[[1]],
                        fit.stats[[2]],
@@ -1729,10 +1713,6 @@ SS_optim <- function(CS.inputs = NULL,
               fit.mod
             ))
             
-            aic <- AIC(
-              fit.mod
-            )
-            
             LL <- logLik(
               fit.mod
             )[[1]]
@@ -1751,6 +1731,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -1955,10 +1936,6 @@ SS_optim <- function(CS.inputs = NULL,
               fit.mod
             ))
             
-            aic <- AIC(
-              fit.mod
-            )
-            
             LL <- logLik(
               fit.mod
             )[[1]]
@@ -2000,6 +1977,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -2181,10 +2159,6 @@ SS_optim <- function(CS.inputs = NULL,
               fit.mod
             ))
             
-            aic <- AIC(
-              fit.mod
-            )
-            
             LL <- logLik(
               fit.mod
             )[[1]]
@@ -2203,6 +2177,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -2401,10 +2376,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -2434,6 +2405,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -2499,10 +2471,7 @@ SS_optim <- function(CS.inputs = NULL,
                                    data = dat,
                                    ZZ = gdist.inputs$ZZ,
                                    REML = TRUE)
-          
-          aic <- Dist.AIC <- suppressWarnings(AIC(
-            fit.mod
-          ))
+
           
           fit.stats <- r.squaredGLMM(
             fit.mod
@@ -2525,23 +2494,24 @@ SS_optim <- function(CS.inputs = NULL,
           k.list[[i + 1]] <- k
           names(k.list)[i + 1] <- 'Distance'
           
+          n <- gdist.inputs$n.Pops
+          aic <- (-2 * LL) + (2 * k)
+          AICc <-
+            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+          
           if (GA.inputs$method == "AIC") {
-            dist.obj <- -Dist.AIC
+            dist.obj <- -aic
           } else if (GA.inputs$method == "R2") {
             dist.obj <- fit.stats[[1]]
           } else {
             dist.obj <- LL[[1]]
           }
           
-          n <- gdist.inputs$n.Pops
-          AICc <-
-            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
-          
           Dist.AICc <- data.frame("Distance",
                                   dist.obj,
                                   k,
-                                  Dist.AIC,
+                                  aic,
                                   AICc,
                                   fit.stats[[1]],
                                   fit.stats[[2]],
@@ -2570,8 +2540,7 @@ SS_optim <- function(CS.inputs = NULL,
           mod$reTrms$Zt <- gdist.inputs$ZZ
           dfun <- do.call(mkLmerDevfun, mod)
           opt <- optimizeLmer(dfun)
-          aic <- Null.AIC <-
-            AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+         
           fit.stats <-
             r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           LL <-
@@ -2579,23 +2548,25 @@ SS_optim <- function(CS.inputs = NULL,
           ROW <- nrow(gdist.inputs$ID)
           k <- 1
           
+          n <- gdist.inputs$n.Pops
+          aic <- (-2 * LL) + (2 * k)
+          AICc <-
+            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+          
           if (GA.inputs$method == "AIC") {
-            null.obj <- -Null.AIC
+            null.obj <- -aic
           } else if (GA.inputs$method == "R2") {
             null.obj <- fit.stats[[1]]
           } else {
             null.obj <- LL[[1]]
           }
-          n <- gdist.inputs$n.Pops
-          AICc <-
-            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
           
           Null.AICc <-
             data.frame("Null",
                        null.obj,
                        k,
-                       Null.AIC,
+                       aic,
                        AICc,
                        fit.stats[[1]],
                        fit.stats[[2]],
@@ -2725,10 +2696,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -2788,6 +2755,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -2953,10 +2921,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- Dist.AIC <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- r.squaredGLMM(
               fit.mod
             )
@@ -2993,6 +2957,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- gdist.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -3130,10 +3095,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -3165,6 +3126,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -3329,10 +3291,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -3359,6 +3317,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -3425,10 +3384,6 @@ SS_optim <- function(CS.inputs = NULL,
                                    ZZ = jl.inputs$ZZ,
                                    REML = TRUE)
           
-          aic <- Dist.AIC <- suppressWarnings(AIC(
-            fit.mod)   
-          )
-          
           fit.stats <- suppressWarnings(r.squaredGLMM(
             fit.mod
           ))
@@ -3449,24 +3404,26 @@ SS_optim <- function(CS.inputs = NULL,
           
           k.list[[i + 1]] <- k
           names(k.list)[i + 1] <- 'Distance'
+
+          
+          n <- jl.inputs$n.Pops
+          aic <- (-2 * LL) + (2 * k)
+          AICc <-
+            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
           
           if (GA.inputs$method == "AIC") {
-            dist.obj <- -Dist.AIC
+            dist.obj <- -aic
           } else if (GA.inputs$method == "R2") {
             dist.obj <- fit.stats[[1]]
           } else {
             dist.obj <- LL[[1]]
           }
           
-          n <- jl.inputs$n.Pops
-          AICc <-
-            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
-          
           Dist.AICc <- data.frame("Distance",
                                   dist.obj,
                                   k,
-                                  Dist.AIC,
+                                  aic,
                                   AICc,
                                   fit.stats[[1]],
                                   fit.stats[[2]],
@@ -3495,8 +3452,7 @@ SS_optim <- function(CS.inputs = NULL,
           mod$reTrms$Zt <- jl.inputs$ZZ
           dfun <- do.call(mkLmerDevfun, mod)
           opt <- optimizeLmer(dfun)
-          aic <- Null.AIC <-
-            AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+          
           fit.stats <-
             r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           LL <-
@@ -3504,23 +3460,26 @@ SS_optim <- function(CS.inputs = NULL,
           ROW <- nrow(jl.inputs$ID)
           k <- 1
           
+          
+          n <- jl.inputs$n.Pops
+          aic <- (-2 * LL) + (2 * k)
+          AICc <-
+            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+          
           if (GA.inputs$method == "AIC") {
-            null.obj <- -Null.AIC
+            null.obj <- -aic
           } else if (GA.inputs$method == "R2") {
             null.obj <- fit.stats[[1]]
           } else {
             null.obj <- LL[[1]]
           }
-          n <- jl.inputs$n.Pops
-          AICc <-
-            # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-            (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
           
           Null.AICc <-
             data.frame("Null",
                        null.obj,
                        k,
-                       Null.AIC,
+                       aic,
                        AICc,
                        fit.stats[[1]],
                        fit.stats[[2]],
@@ -3643,10 +3602,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      data = dat,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
-            
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
+
             
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
@@ -3700,6 +3656,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -3860,10 +3817,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      data = dat,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
-            
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
+
             
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
@@ -3894,6 +3848,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -3956,10 +3911,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      data = dat,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
-            
-            aic <- Dist.AIC <- suppressWarnings(AIC(
-              fit.mod
-            ))
+
             
             fit.stats <- r.squaredGLMM(
               fit.mod
@@ -3981,24 +3933,26 @@ SS_optim <- function(CS.inputs = NULL,
             
             k.list[[i + 1]] <- k
             names(k.list)[i + 1] <- 'Distance'
+
+            
+            n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
+            AICc <-
+              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
             
             if (GA.inputs$method == "AIC") {
-              dist.obj <- -Dist.AIC
+              dist.obj <- -aic
             } else if (GA.inputs$method == "R2") {
               dist.obj <- fit.stats[[1]]
             } else {
               dist.obj <- LL[[1]]
             }
             
-            n <- jl.inputs$n.Pops
-            AICc <-
-              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
-            
             Dist.AICc <- data.frame("Distance",
                                     dist.obj,
                                     k,
-                                    Dist.AIC,
+                                    aic,
                                     AICc,
                                     fit.stats[[1]],
                                     fit.stats[[2]],
@@ -4027,32 +3981,33 @@ SS_optim <- function(CS.inputs = NULL,
             mod$reTrms$Zt <- jl.inputs$ZZ
             dfun <- do.call(mkLmerDevfun, mod)
             opt <- optimizeLmer(dfun)
-            aic <- Null.AIC <-
-              AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+            
             fit.stats <-
               r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
             LL <-
               logLik(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
             ROW <- nrow(jl.inputs$ID)
             k <- 1
+
+            n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
+            AICc <-
+              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
             
             if (GA.inputs$method == "AIC") {
-              null.obj <- -Null.AIC
+              null.obj <- -aic
             } else if (GA.inputs$method == "R2") {
               null.obj <- fit.stats[[1]]
             } else {
               null.obj <- LL[[1]]
             }
-            n <- jl.inputs$n.Pops
-            AICc <-
-              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
             
             Null.AICc <-
               data.frame("Null",
                          null.obj,
                          k,
-                         Null.AIC,
+                         aic,
                          AICc,
                          fit.stats[[1]],
                          fit.stats[[2]],
@@ -4162,10 +4117,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -4220,6 +4171,7 @@ SS_optim <- function(CS.inputs = NULL,
             names(k.list)[i] <- GA.inputs$layer.names[i]
             
             n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -4376,10 +4328,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- suppressWarnings(AIC(
-              fit.mod
-            ))
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -4446,6 +4394,7 @@ SS_optim <- function(CS.inputs = NULL,
             
             n <- jl.inputs$n.Pops
             
+            aic <- (-2 * LL) + (2 * k)
             AICc <-
               # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
               (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
@@ -4509,10 +4458,6 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
             
-            aic <- Dist.AIC <- suppressWarnings(AIC(
-              fit.mod)   
-            )
-            
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
             ))
@@ -4534,23 +4479,24 @@ SS_optim <- function(CS.inputs = NULL,
             k.list[[i + 1]] <- k
             names(k.list)[i + 1] <- 'Distance'
             
+            n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
+            AICc <-
+              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+            
             if (GA.inputs$method == "AIC") {
-              dist.obj <- -Dist.AIC
+              dist.obj <- -aic
             } else if (GA.inputs$method == "R2") {
               dist.obj <- fit.stats[[1]]
             } else {
               dist.obj <- LL[[1]]
             }
             
-            n <- jl.inputs$n.Pops
-            AICc <-
-              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
-            
             Dist.AICc <- data.frame("Distance",
                                     dist.obj,
                                     k,
-                                    Dist.AIC,
+                                    aic,
                                     AICc,
                                     fit.stats[[1]],
                                     fit.stats[[2]],
@@ -4579,8 +4525,7 @@ SS_optim <- function(CS.inputs = NULL,
             mod$reTrms$Zt <- jl.inputs$ZZ
             dfun <- do.call(mkLmerDevfun, mod)
             opt <- optimizeLmer(dfun)
-            aic <- Null.AIC <-
-              AIC(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+           
             fit.stats <-
               r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
             LL <-
@@ -4588,23 +4533,26 @@ SS_optim <- function(CS.inputs = NULL,
             ROW <- nrow(jl.inputs$ID)
             k <- 1
             
+
+            n <- jl.inputs$n.Pops
+            aic <- (-2 * LL) + (2 * k)
+            AICc <-
+              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
+              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
+            
             if (GA.inputs$method == "AIC") {
-              null.obj <- -Null.AIC
+              null.obj <- -aic
             } else if (GA.inputs$method == "R2") {
               null.obj <- fit.stats[[1]]
             } else {
               null.obj <- LL[[1]]
             }
-            n <- jl.inputs$n.Pops
-            AICc <-
-              # (-2 * LL) + (((2 * k) * (k + 1)) / (n - k - 1))
-              (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
             
             Null.AICc <-
               data.frame("Null",
                          null.obj,
                          k,
-                         Null.AIC,
+                         aic,
                          AICc,
                          fit.stats[[1]],
                          fit.stats[[2]],

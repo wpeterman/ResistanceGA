@@ -6,12 +6,18 @@
 \usage{
 To.From.ID(sampled_pops,
                   pop_n = NULL,
+                  spLoc = NULL,
+                  nb = NULL,
                   ...)
 }
 \arguments{
 \item{sampled_pops}{Provide an integer value representing the number of individuals or populations that were sampled}
 
 \item{pop_n}{Provide a vector of length equal to `sampled_pops`, indicating the number of individuals sampled at each population. Only needed if going from a population- to an individual-based analysis}
+
+\item{spLoc}{\code{\link[sp]{SpatialPoints}} object of sample locations}
+
+\item{nb}{Distance between points that should be considered as part of the same group or neighborhood. If \code{spLoc} is specified, \code{nb} must also be specified. See Details.}
 
 \item{...}{Additional arguments. Currently only `dist` argument is accepted.}
 }
@@ -23,20 +29,29 @@ Convenience function to make to-from object needed for specifying MLPE random ef
 }
 \details{
 This function creates an object indicating the population pairs that distance values were calculated between. Note: Distance values must be taken from the lower half of a distance matrix. You can use \code{\link[ResistanceGA]{lower}} to obtain these values. When specifying a MLPE model using \code{\link[ResistanceGA]{mlpe_rga}}, \code{pop1} from \code{To.From.ID} must be added to the data frame containing model data, and must be specified as the random effect.
+
+By providing \code{spLoc}, you can add an additional random effect to account for spatial proximity of sample locations. You must also specify \code{nb}, which indicates the maximum distance (in units of your \code{spLoc} object) that locations are considered to be part of the same neighborhood.
 }
 \examples{
 ## Standard use
-To.From.ID(sampled_pops = 3)
+To.From.ID(sampled_pops = 4)
 
 ## If going from population to individual-level 
-To.From.ID(sampled_pops = 3,
-           pop_n = c(1,2,3))
+To.From.ID(sampled_pops = 4,
+           pop_n = c(1,2,3,1))
          
 ## A vector of pairwise distances can also be expanded            
-To.From.ID(sampled_pops = 3,
-           pop_n = c(1,2,3),
-           dist = c(.5, .2, .1)) 
-                       
+To.From.ID(sampled_pops = 4,
+           pop_n = c(1,2,3,1),
+           dist = runif(6)) 
+           
+## Spatial location incorporated
+spLoc <- SpatialPoints(cbind(c(1,2,9,10), 
+                             c(1,2,9,10)))
+          
+To.From.ID(sampled_pops = 4,
+           spLoc = spLoc,
+           nb = 3)              
 }
 \author{
 Bill Peterman <Bill.Peterman@gmail.com>

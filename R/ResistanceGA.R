@@ -13,22 +13,26 @@
 #'  *** Use of this package to run CIRCUITSCAPE is limited to Windows machines due its use of the Circuitscape .exe file. However, Julia can be installed on any operating system, making this a more versatile option. 
 #'  
 #' 
-#' @import raster GA lme4 ggplot2 gdistance
+#' @import raster GA lme4 ggplot2 gdistance 
 #' @importFrom utils combn menu
 #' @importFrom ggExtra removeGrid ggMarginal
-#' @importFrom Matrix fac2sparse
+#' @importFrom Matrix fac2sparse drop0
 #' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text 
 #' @importFrom dplyr mutate group_by summarise filter tally left_join
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom plyr arrange rbind.fill ldply
 #' @importFrom spatstat as.im blur as.matrix.im
+#' @importFrom spdep dnearneigh nb2mat
 #' @importFrom grDevices dev.off tiff topo.colors
 #' @importFrom graphics abline filled.contour par
 #' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif as.formula sigma
 #' @importFrom utils file_test read.csv read.delim read.table write.table
 #' @importFrom JuliaCall julia_setup julia_library julia_call julia_installed_package julia_install_package
 #' @importFrom XRJulia findJulia juliaEval RJulia juliaGet
+#' @importFrom parallel makeCluster detectCores stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach %do% %dopar% foreach
 #' 
 #' @references Please cite: 
 #' Peterman, W.E., G.M. Connette, R.D. Semlitsch, and L.S. Eggert. 2014. Ecological resistance surfaces predict fine-scale genetic differentiation in a terrestrial woodland salamander. Molecular Ecology 23:2402--2413. \href{http://goo.gl/RJb6Go}{Peterman et al.}
