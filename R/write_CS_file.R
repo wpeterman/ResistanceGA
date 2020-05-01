@@ -42,7 +42,7 @@ write.CS_4.0 <- function(BATCH,
   } 
   
   if(isTRUE(is_resistance)) {
-    RESISTANCE <- "connect_using_avg_resistances = True"
+    RESISTANCE <- "connect_using_avg_resistances = False"
     HABITAT_RES <- "habitat_map_is_resistances = True"
   } else {
     RESISTANCE <- "connect_using_avg_resistances = False"
