@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.39
+--------
+* Fixed JuliaCall load error
+
 ResistanceGA 4.1-0.38
 --------
 * 30 April commit

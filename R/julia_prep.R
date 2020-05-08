@@ -161,6 +161,7 @@ jl.prep <- function(n.Pops,
                    "https://github.com/Circuitscape/Circuitscape.jl", sep = "\n")))
   }
   
+  try(JuliaCall::julia_library("Circuitscape"), silent = T)
   JuliaCall::julia_library("Circuitscape")
   
   wd <- getwd()
@@ -246,7 +247,7 @@ jl.prep <- function(n.Pops,
     # }
     
     if(Julia_link == 'JuliaCall'){
-      out <- julia_call('compute', temp.ini)[-1,-1]
+        out <- julia_call('compute', temp.ini)[-1,-1]
       
     } else {
       cs.jl <- RJulia()

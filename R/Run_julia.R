@@ -142,6 +142,7 @@ Run_CS.jl <- function(jl.inputs = NULL,
   
   if(Julia_link == 'JuliaCall') {
     JuliaCall::julia_setup(JULIA_HOME = JULIA_HOME)
+    try(JuliaCall::julia_library("Circuitscape"), silent = T)
     JuliaCall::julia_library("Circuitscape")
   } else {
     juliaEval("using Circuitscape")
@@ -308,10 +309,10 @@ Run_CS.jl <- function(jl.inputs = NULL,
   if(Julia_link == 'JuliaCall') {
     if(!is.null(write.criteria)) {
       t1 <- proc.time()[3]
-      out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
       rt <- proc.time()[3] - t1
     } else {
-      out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
     }
   } else { # use XRJulia
     cs.jl <- RJulia()
