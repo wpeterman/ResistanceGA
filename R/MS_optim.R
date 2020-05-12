@@ -6,11 +6,13 @@
 #' @param gdist.inputs Object created from running \code{\link[ResistanceGA]{gdist.prep}} function. Defined if optimizing using gdistance
 #' @param jl.inputs Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
+#' @param diagnostic_plots Plotting and saving of diagnostic plots (Default = TRUE)
 #' @return This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.
 #' @usage MS_optim(CS.inputs, 
 #'              gdist.inputs, 
 #'              jl.inputs,
-#'              GA.inputs)
+#'              GA.inputs,
+#'              diagnostic_plots = TRUE)
 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
@@ -24,7 +26,8 @@
 MS_optim <- function(CS.inputs = NULL,
                      gdist.inputs = NULL,
                      jl.inputs = NULL,
-                     GA.inputs) {
+                     GA.inputs,
+                     diagnostic_plots = TRUE) {
   if (!is.null(GA.inputs$scale)) {
     stop(
       "This function should NOT be used if you intend to apply kernel smoothing to your resistance surfaces"
@@ -131,15 +134,17 @@ MS_optim <- function(CS.inputs = NULL,
            type <- "continuous",
            type <- "categorical")
     
-    Diagnostic.Plots(
-      resistance.mat = lower(cd),
-      genetic.dist = CS.inputs$response,
-      plot.dir = GA.inputs$Plots.dir,
-      type = "continuous",
-      name = NAME,
-      ID = CS.inputs$ID,
-      ZZ = CS.inputs$ZZ
-    )
+    if(isTRUE(diagnostic_plots)){
+      Diagnostic.Plots(
+        resistance.mat = lower(cd),
+        genetic.dist = CS.inputs$response,
+        plot.dir = GA.inputs$Plots.dir,
+        type = "continuous",
+        name = NAME,
+        ID = CS.inputs$ID,
+        ZZ = CS.inputs$ZZ
+      )
+    }
     
     dat <- CS.inputs$df
     dat$cd <- scale(lower(cd))
@@ -511,15 +516,17 @@ MS_optim <- function(CS.inputs = NULL,
            type <- "continuous",
            type <- "categorical")
     
-    Diagnostic.Plots(
-      resistance.mat = cd,
-      genetic.dist = gdist.inputs$response,
-      plot.dir = GA.inputs$Plots.dir,
-      type = type,
-      name = NAME,
-      ID = gdist.inputs$ID,
-      ZZ = gdist.inputs$ZZ
-    )
+    if(isTRUE(diagnostic_plots)){
+      Diagnostic.Plots(
+        resistance.mat = cd,
+        genetic.dist = gdist.inputs$response,
+        plot.dir = GA.inputs$Plots.dir,
+        type = type,
+        name = NAME,
+        ID = gdist.inputs$ID,
+        ZZ = gdist.inputs$ZZ
+      )
+    }
     
     if(!is.null(gdist.inputs$covariates)) { 
       MLPE.results <- NULL
@@ -864,15 +871,17 @@ MS_optim <- function(CS.inputs = NULL,
            type <- "continuous",
            type <- "categorical")
     
-    Diagnostic.Plots(
-      resistance.mat = dat$cd,
-      genetic.dist = jl.inputs$response,
-      plot.dir = GA.inputs$Plots.dir,
-      type = type,
-      name = NAME,
-      ID = jl.inputs$ID,
-      ZZ = jl.inputs$ZZ
-    )
+    if(isTRUE(diagnostic_plots)){
+      Diagnostic.Plots(
+        resistance.mat = dat$cd,
+        genetic.dist = jl.inputs$response,
+        plot.dir = GA.inputs$Plots.dir,
+        type = type,
+        name = NAME,
+        ID = jl.inputs$ID,
+        ZZ = jl.inputs$ZZ
+      )
+    }
     
     # Get parameter estimates
     MLPE.results <- MLPE.lmm_coef(

@@ -8,6 +8,7 @@
 #' @param GA.inputs Object created from running \code{\link[ResistanceGA]{GA.prep}} function
 #' @param dist_mod Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)
 #' @param null_mod Logical, if TRUE, an intercept-only model will be calculated and added to the output table (default = TRUE)
+#' @param diagnostic_plots Plotting and saving of diagnostic plots (Default = TRUE)
 #' @return This function optimizes resistance surfaces in isolation. Following optimization of all surfaces, several summary objects are created.\cr
 #' \enumerate{
 #' \item Diagnostic plots of model fit are output to the "Results/Plots" directory that is automatically generated within the folder containing the optimized ASCII files.
@@ -22,7 +23,8 @@
 #'  jl.inputs,
 #'  GA.inputs,
 #'  dist_mod, 
-#'  null_mod)
+#'  null_mod,
+#'  diagnostic_plots = TRUE)
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
 #' @export
 #' 
@@ -37,7 +39,8 @@ SS_optim <- function(CS.inputs = NULL,
                      jl.inputs = NULL,
                      GA.inputs,
                      dist_mod = TRUE,
-                     null_mod = TRUE) {
+                     null_mod = TRUE,
+                     diagnostic_plots = TRUE) {
   
   if (!is.null(GA.inputs$scale)) {
     stop(
@@ -136,15 +139,17 @@ SS_optim <- function(CS.inputs = NULL,
                     paste0(GA.inputs$Results.dir, NAME, ".asc"),
                     overwrite = TRUE)
         
-        Diagnostic.Plots(
-          resistance.mat = lower(cd),
-          genetic.dist = CS.inputs$response,
-          plot.dir = GA.inputs$Plots.dir,
-          type = "categorical",
-          name = NAME,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ
-        )
+        if(isTRUE(diagnostic_plots)){
+          Diagnostic.Plots(
+            resistance.mat = lower(cd),
+            genetic.dist = CS.inputs$response,
+            plot.dir = GA.inputs$Plots.dir,
+            type = "categorical",
+            name = NAME,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ
+          )
+        }
         
         fit.stats <-
           r.squaredGLMM(
@@ -323,15 +328,17 @@ SS_optim <- function(CS.inputs = NULL,
                     paste0(GA.inputs$Results.dir, NAME, ".asc"),
                     overwrite = TRUE)
         
-        Diagnostic.Plots(
-          resistance.mat = lower(cd),
-          genetic.dist = CS.inputs$response,
-          plot.dir = GA.inputs$Plots.dir,
-          type = "continuous",
-          name = NAME,
-          ID = CS.inputs$ID,
-          ZZ = CS.inputs$ZZ
-        )
+        if(isTRUE(diagnostic_plots)){
+          Diagnostic.Plots(
+            resistance.mat = lower(cd),
+            genetic.dist = CS.inputs$response,
+            plot.dir = GA.inputs$Plots.dir,
+            type = "continuous",
+            name = NAME,
+            ID = CS.inputs$ID,
+            ZZ = CS.inputs$ZZ
+          )
+        }
         
         Plot.trans(
           PARM = single.GA@solution[-1],
@@ -676,15 +683,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             fit.mod <- mlpe_rga(formula = gdist.inputs$formula,
                                 data = dat,
@@ -893,15 +902,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -920,7 +931,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      ZZ = gdist.inputs$ZZ,
                                      REML = TRUE)
             
-           
+            
             fit.stats <- r.squaredGLMM(
               fit.mod
             )
@@ -1078,15 +1089,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             # fit.stats <- r.squaredGLMM(
             #   MLPE.lmm2(
@@ -1299,15 +1312,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -1477,7 +1492,7 @@ SS_optim <- function(CS.inputs = NULL,
           k.list[[i + 1]] <- k
           names(k.list)[i + 1] <- 'Distance'
           
-
+          
           
           n <- gdist.inputs$n.Pops
           aic <- (-2 * LL) + (2 * k)
@@ -1654,15 +1669,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             # fit.stats <- r.squaredGLMM(
             #   MLPE.lmm2(
@@ -1876,15 +1893,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -2095,15 +2114,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             # fit.stats <- r.squaredGLMM(
             #   MLPE.lmm2(
@@ -2315,15 +2336,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -2471,7 +2494,7 @@ SS_optim <- function(CS.inputs = NULL,
                                    data = dat,
                                    ZZ = gdist.inputs$ZZ,
                                    REML = TRUE)
-
+          
           
           fit.stats <- r.squaredGLMM(
             fit.mod
@@ -2540,7 +2563,7 @@ SS_optim <- function(CS.inputs = NULL,
           mod$reTrms$Zt <- gdist.inputs$ZZ
           dfun <- do.call(mkLmerDevfun, mod)
           opt <- optimizeLmer(dfun)
-         
+          
           fit.stats <-
             r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           LL <-
@@ -2589,7 +2612,7 @@ SS_optim <- function(CS.inputs = NULL,
     
     # >>> Julia <<< -------------------------------------------------
     if (!is.null(jl.inputs)) {
-
+      
       setwd(jl.inputs$JULIA_HOME)
       # MLPE with Covariates ----------------------------------------------------
       
@@ -2677,15 +2700,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             fit.mod <- mlpe_rga(formula = gdist.inputs$formula,
                                 data = dat,
@@ -2894,15 +2919,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = cd,
-              genetic.dist = gdist.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = gdist.inputs$ID,
-              ZZ = gdist.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = cd,
+                genetic.dist = gdist.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = gdist.inputs$ID,
+                ZZ = gdist.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -3076,15 +3103,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = dat$cd,
-              genetic.dist = jl.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = dat$cd,
+                genetic.dist = jl.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ
+              )
+            }
             
             fit.mod <- mlpe_rga(formula = jl.inputs$formula,
                                 data = dat,
@@ -3265,15 +3294,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = dat$cd,
-              genetic.dist = jl.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = dat$cd,
+                genetic.dist = jl.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -3404,7 +3435,7 @@ SS_optim <- function(CS.inputs = NULL,
           
           k.list[[i + 1]] <- k
           names(k.list)[i + 1] <- 'Distance'
-
+          
           
           n <- jl.inputs$n.Pops
           aic <- (-2 * LL) + (2 * k)
@@ -3584,15 +3615,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = dat$cd,
-              genetic.dist = jl.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = dat$cd,
+                genetic.dist = jl.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ
+              )
+            }
             
             fit.mod <- mlpe_rga(formula = jl.inputs$formula,
                                 data = dat,
@@ -3602,7 +3635,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      data = dat,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
-
+            
             
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
@@ -3792,15 +3825,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = dat$cd,
-              genetic.dist = jl.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = dat$cd,
+                genetic.dist = jl.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -3817,7 +3852,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      data = dat,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
-
+            
             
             fit.stats <- suppressWarnings(r.squaredGLMM(
               fit.mod
@@ -3911,7 +3946,7 @@ SS_optim <- function(CS.inputs = NULL,
                                      data = dat,
                                      ZZ = jl.inputs$ZZ,
                                      REML = TRUE)
-
+            
             
             fit.stats <- r.squaredGLMM(
               fit.mod
@@ -3933,7 +3968,7 @@ SS_optim <- function(CS.inputs = NULL,
             
             k.list[[i + 1]] <- k
             names(k.list)[i + 1] <- 'Distance'
-
+            
             
             n <- jl.inputs$n.Pops
             aic <- (-2 * LL) + (2 * k)
@@ -3988,7 +4023,7 @@ SS_optim <- function(CS.inputs = NULL,
               logLik(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
             ROW <- nrow(jl.inputs$ID)
             k <- 1
-
+            
             n <- jl.inputs$n.Pops
             aic <- (-2 * LL) + (2 * k)
             AICc <-
@@ -4098,15 +4133,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = dat$cd,
-              genetic.dist = jl.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "categorical",
-              name = NAME,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = dat$cd,
+                genetic.dist = jl.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "categorical",
+                name = NAME,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ
+              )
+            }
             
             fit.mod <- mlpe_rga(formula = jl.inputs$formula,
                                 data = dat,
@@ -4302,15 +4339,17 @@ SS_optim <- function(CS.inputs = NULL,
             ga.list[[i]] <- single.GA
             names(ga.list[i]) <- NAME
             
-            Diagnostic.Plots(
-              resistance.mat = dat$cd,
-              genetic.dist = jl.inputs$response,
-              plot.dir = GA.inputs$Plots.dir,
-              type = "continuous",
-              name = NAME,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ
-            )
+            if(isTRUE(diagnostic_plots)){
+              Diagnostic.Plots(
+                resistance.mat = dat$cd,
+                genetic.dist = jl.inputs$response,
+                plot.dir = GA.inputs$Plots.dir,
+                type = "continuous",
+                name = NAME,
+                ID = jl.inputs$ID,
+                ZZ = jl.inputs$ZZ
+              )
+            }
             
             Plot.trans(
               PARM = single.GA@solution[-1],
@@ -4525,7 +4564,7 @@ SS_optim <- function(CS.inputs = NULL,
             mod$reTrms$Zt <- jl.inputs$ZZ
             dfun <- do.call(mkLmerDevfun, mod)
             opt <- optimizeLmer(dfun)
-           
+            
             fit.stats <-
               r.squaredGLMM(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
             LL <-
@@ -4533,7 +4572,7 @@ SS_optim <- function(CS.inputs = NULL,
             ROW <- nrow(jl.inputs$ID)
             k <- 1
             
-
+            
             n <- jl.inputs$n.Pops
             aic <- (-2 * LL) + (2 * k)
             AICc <-

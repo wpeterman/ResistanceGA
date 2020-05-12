@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.40
+--------
+* Ability to turn off diagnostic plotting in SS & MS optim functions (Default = TRUE)
+
 ResistanceGA 4.1-0.39
 --------
 * Fixed JuliaCall load error
