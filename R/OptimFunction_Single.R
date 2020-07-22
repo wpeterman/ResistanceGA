@@ -238,7 +238,7 @@ Resistance.Opt_single <-
         if (!is.null(gdist.inputs)) {
           
           # if(cellStats(r, "mean") == 0) { # Skip iteration
-          if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration            
+          if(mean(raster::values(r), na.rm = TRUE) == 0) { # Skip iteration            
             obj.func.opt <- -99999
             
           } 
@@ -340,7 +340,7 @@ Resistance.Opt_single <-
         if (!is.null(jl.inputs)) {
           
           ## Turned off 3/15/2019
-          if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration
+          if(mean(raster::values(r), na.rm = TRUE) == 0) { # Skip iteration
             obj.func.opt <- -99999
             
           }

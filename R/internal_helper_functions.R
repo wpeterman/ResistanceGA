@@ -20,16 +20,16 @@ expand.mat_vec <- function(pop_n,
 
 #' @description Function to create expanded pop-to-ind data frame. Use internally to generate vector of indices to retain for analysis
 expand.keep <- function(pop_n){
-    
-    keep.mat <- matrix(1, length(pop_n), length(pop_n))
-    diag(keep.mat) <- 0
-    
-    keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
-                         rep(1:ncol(keep.mat), times = pop_n)]
-    
-    keep <- lower(keep.mat)
-
-    return(keep)
+  
+  keep.mat <- matrix(1, length(pop_n), length(pop_n))
+  diag(keep.mat) <- 0
+  
+  keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
+                       rep(1:ncol(keep.mat), times = pop_n)]
+  
+  keep <- lower(keep.mat)
+  
+  return(keep)
 }
 
 #' @description Function to create expanded pop-to-ind data frame. Use internally to convert population-based pairiwse distances to individual-based vector
@@ -46,30 +46,30 @@ expand.mat <- function(mat,
       n.mat[lower.tri(n.mat)] <- mat
       mat <- n.mat
     }
-  
-  if(length(pop_n) != ncol(mat)) {
-    stop("Number of populations in pop_n does not match number of populations sampled!")
-  }
-  
-  keep.mat <- matrix(1, length(pop_n), length(pop_n))
-  diag(keep.mat) <- 0
-  
-  keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
-                       rep(1:ncol(keep.mat), times = pop_n)]
-  
-  keep <- lower(keep.mat)
-  
-  mat <- mat[rep(1:nrow(mat), times = pop_n), 
-             rep(1:ncol(mat), times = pop_n)]
-  
-  if(format == 'vector'){
-    out <- lower(mat)[keep == 1]
     
-  } else {
-    out <- mat
-  }
-  
-  return(out)
+    if(length(pop_n) != ncol(mat)) {
+      stop("Number of populations in pop_n does not match number of populations sampled!")
+    }
+    
+    keep.mat <- matrix(1, length(pop_n), length(pop_n))
+    diag(keep.mat) <- 0
+    
+    keep.mat <- keep.mat[rep(1:nrow(keep.mat), times = pop_n), 
+                         rep(1:ncol(keep.mat), times = pop_n)]
+    
+    keep <- lower(keep.mat)
+    
+    mat <- mat[rep(1:nrow(mat), times = pop_n), 
+               rep(1:ncol(mat), times = pop_n)]
+    
+    if(format == 'vector'){
+      out <- lower(mat)[keep == 1]
+      
+    } else {
+      out <- mat
+    }
+    
+    return(out)
   }
 }
 
@@ -368,18 +368,18 @@ ZZ.mat <- function(ID, drop = NULL) { ## Added 11/5/2019
   
   # Sparse correlation matrix -----------------------------------------------------------
   if(any("corr_" %in% names(ID))) {
-
+    
     if(any("pop1.pop" %in% names(ID))) {
       # ID.num$pop1 <- as.numeric(ID.num$pop1.pop)
       # ID.num$pop2 <- as.numeric(ID.num$pop2.pop)
-    
+      
       # Zl.corr <-
       #   lapply(c("pop1.pop", "pop2.pop"), function(nm) # c("pop1", "pop2")
       #     Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
       
       ID.num$pop1 <- as.numeric(ID.num$pop1.ind)
       ID.num$pop2 <- as.numeric(ID.num$pop2.ind)
-    
+      
       Zl.corr <-
         lapply(c("pop1.ind", "pop2.ind"), function(nm) # c("pop1", "pop2")
           Matrix::fac2sparse(ID[[nm]], "d", drop = FALSE))
@@ -397,8 +397,8 @@ ZZ.mat <- function(ID, drop = NULL) { ## Added 11/5/2019
     
     for(i in 1:dim(Zl.corr[[1]])[1]){
       # for(j in 1:dim(Zl.corr[[1]])[2]) {
-        Zl.corr[[1]][i,] <- (ID.num$pop1 == i & ID.num$corr_ == 1)
-        # Zl.corr[[1]][i,j] <- ifelse(ID.num$pop1[j] == i & ID.num$cor.grp[j] == 1, 1, 0)
+      Zl.corr[[1]][i,] <- (ID.num$pop1 == i & ID.num$corr_ == 1)
+      # Zl.corr[[1]][i,j] <- ifelse(ID.num$pop1[j] == i & ID.num$cor.grp[j] == 1, 1, 0)
       # }
     }
     
@@ -415,7 +415,7 @@ ZZ.mat <- function(ID, drop = NULL) { ## Added 11/5/2019
   
   
   if(any("pop1.pop" %in% names(ID))) {
- 
+    
     ### TEST
     # ID$gd<-rnorm(nrow(ID))
     # df <- data.frame(pop = ID$pop1.ind,
@@ -535,10 +535,8 @@ SCALE <- function(data, MIN, MAX, threshold = 1e-5) {
     data[is.finite(raster::values(data))] <- 0
     data
   } else {
-    # Mn = cellStats(data, stat = 'min')
-    # Mx = cellStats(data, stat = 'max')
-    Mn = min(data@data@values, na.rm = TRUE)
-    Mx = max(data@data@values, na.rm = TRUE)
+    Mn = min(raster::values(data), na.rm = TRUE)
+    Mx = max(raster::values(data), na.rm = TRUE)
     (MAX - MIN) / (Mx - Mn) * (data - Mx) + MAX
   }
 }
