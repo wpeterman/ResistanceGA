@@ -338,14 +338,16 @@ SS_optim <- function(CS.inputs = NULL,
             ID = CS.inputs$ID,
             ZZ = CS.inputs$ZZ
           )
+          
+          Plot.trans(
+            PARM = single.GA@solution[-1],
+            Resistance = GA.inputs$Resistance.stack[[i]],
+            transformation = EQ,
+            print.dir = GA.inputs$Plots.dir
+          )
         }
         
-        Plot.trans(
-          PARM = single.GA@solution[-1],
-          Resistance = GA.inputs$Resistance.stack[[i]],
-          transformation = EQ,
-          print.dir = GA.inputs$Plots.dir
-        )
+        
         
         fit.stats <- r.squaredGLMM(
           MLPE.lmm(
@@ -912,14 +914,14 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
-            
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
             
             fit.mod <- mlpe_rga(formula = gdist.inputs$formula,
                                 data = dat,
@@ -1322,14 +1324,15 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
             
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
             
             # fit.stats <-
             #   r.squaredGLMM(
@@ -1903,14 +1906,14 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
-            
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
             
             # fit.stats <-
             #   r.squaredGLMM(
@@ -2346,14 +2349,16 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
             
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
+            
             
             # fit.stats <-
             #   r.squaredGLMM(
@@ -2929,14 +2934,16 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = gdist.inputs$ID,
                 ZZ = gdist.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
             
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
+            
             
             fit.mod <- mlpe_rga(formula = gdist.inputs$formula,
                                 data = dat,
@@ -3304,14 +3311,14 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = jl.inputs$ID,
                 ZZ = jl.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
-            
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
             
             fit.mod <- mlpe_rga(formula = jl.inputs$formula,
                                 data = dat,
@@ -3835,14 +3842,16 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = jl.inputs$ID,
                 ZZ = jl.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
             
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
+            
             
             fit.mod <- mlpe_rga(formula = jl.inputs$formula,
                                 data = dat,
@@ -4349,14 +4358,14 @@ SS_optim <- function(CS.inputs = NULL,
                 ID = jl.inputs$ID,
                 ZZ = jl.inputs$ZZ
               )
+              
+              Plot.trans(
+                PARM = single.GA@solution[-1],
+                Resistance = GA.inputs$Resistance.stack[[i]],
+                transformation = EQ,
+                print.dir = GA.inputs$Plots.dir
+              )
             }
-            
-            Plot.trans(
-              PARM = single.GA@solution[-1],
-              Resistance = GA.inputs$Resistance.stack[[i]],
-              transformation = EQ,
-              print.dir = GA.inputs$Plots.dir
-            )
             
             fit.mod <- mlpe_rga(formula = jl.inputs$formula,
                                 data = dat,
