@@ -16,6 +16,7 @@ devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Dow
 library(ResistanceGA) # Installs package and the other required packages needed
 ```
 Once the package is installed, you can further explore the functions by opening the 'Vignette' using the code below, or you can view the vignette directly [**here**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/resistancega.pdf "Vignette")
+**NOTE: The Vignette is quite dated, and has not been updated to fully reflect the features now incorporated in the current version.**
 ```
 vignette('ResistanceGA')  # Opens PDF
 ```
@@ -23,15 +24,10 @@ vignette('ResistanceGA')  # Opens PDF
 
 ### Other notes
 
-If you wish to optimize using CIRCUITSCAPE, you must have CIRCUITSCAPE installed.
-Version 4.0 or higher is required.
-Official CIRCUITSCAPE releases can be found [**here**](https://code.google.com/p/circuitscape/downloads/list "CS downloads")
+Optimization with CIRCUITSCAPE (v4) is still possible, although not actively supported in the most recent version.
+If you wish to optimize using CIRCUITSCAPE, you it is highly recommended that you install Julia and the CIRCUITSCAPE Julia package
+General instructions [**here**](https://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/julia_guide.pdf "Julia Guide")
 
-
-Using `ResistanceGA` to optimize with CIRCUITSCAPE has been most thoroughly tested on **_Windows_** machines. To run CIRCUITSCAPE on Linux (tested with Ubuntu 16.04):    
-1.  Install CIRCUITSCAPE---Default installation directory is `/usr/local/bin/csrun.py`   
-2. To call CIRCUITSCAPE from R, change file permissions using ` sudo chomod 755 /usr/local/bin/csrun.py `  
-    * This will allow `csrun.py` to be executed without specifying paths.   
 
 ***
 This approach has been developed from the methods first utilized in Peterman et al. (2014). I have also written a preprint manuscript further describing this `R` package. **_Please cite these papers if you use these methods!_**
