@@ -15,17 +15,15 @@ devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE) # Dow
 
 library(ResistanceGA) # Installs package and the other required packages needed
 ```
-Once the package is installed, you can further explore the functions by opening the 'Vignette' using the code below, or you can view the vignette directly [**here**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/resistancega.pdf "Vignette")
-**NOTE: The Vignette is quite dated, and has not been updated to fully reflect the features now incorporated in the current version.**
-```
-vignette('ResistanceGA')  # Opens PDF
-```
+Once the package is installed, you can view the vignette directly [**here.**](http://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/resistancega.pdf "Vignette")
+**NOTE: The Vignette is quite dated, and has not been updated to fully reflect the features now incorporated in the current version. See below for an important update related to using CIRCUITSCAPE**
+
 *****
 
 ### Other notes
 
 Optimization with CIRCUITSCAPE (v4) is still possible, although not actively supported in the most recent version.
-If you wish to optimize using CIRCUITSCAPE, you it is highly recommended that you install Julia and the CIRCUITSCAPE Julia package
+If you wish to optimize using CIRCUITSCAPE, it is highly recommended that you install Julia and the CIRCUITSCAPE Julia package.
 General instructions [**here**](https://petermanresearch.weebly.com/uploads/2/5/9/2/25926970/julia_guide.pdf "Julia Guide")
 
 
