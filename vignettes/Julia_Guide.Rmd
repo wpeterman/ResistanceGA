@@ -25,7 +25,7 @@ One of the greatest limitations of using `ResistancaGA` for landscape resistance
  
  * Next, install the latest version of `ResistanceGA`  
 ```{r Rga install, eval=FALSE}
-devtools::install_github("wpeterman/ResistanceGA")
+devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE)
 ```
 
 ## Optimizing with Julia
@@ -50,7 +50,7 @@ Next prepare the GA and Julia inputs. You need to specify the full path to the J
 ```{r load julia, eval=FALSE}
 ## Specify path the to `bin` directory
 ## This path may vary depending upon Julia version or operating system
-JULIA_HOME <- "C:/Users/peterman.73/AppData/Local/Programs/Julia 1.5.0/bin/"
+JULIA_HOME <- "C:/Users/peterman.73/AppData/Local/Programs/Julia 1.5.2/bin/"
 JuliaCall::julia_setup(JULIA_HOME)
 ```
 
