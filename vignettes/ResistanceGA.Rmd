@@ -1,14 +1,14 @@
 ---
-title: "A Vignette/Tutorial to use ResistanceGA"
+title: "A Dated Vignette/Tutorial to use ResistanceGA"
 author: "Bill Peterman"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
   pdf_document: rmarkdown::pdf_document
   html_document: rmarkdown::html_vignette
 vignette: |
-  %\VignetteIndexEntry{ResistanceGA User Guide} 
-  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{A Dated Vignette/Tutorial to use ResistanceGA} 
   %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -24,6 +24,8 @@ ResistanceGA
 An R Package for Optimizing Resistance Surfaces using Genetic Algorithms
 ------
 ### Background
+
+**NOTE: This is a dated guide that does not cover all of the most recent additions to the package. There is still value to looking at and working through this document. Please be sure to reference the other guide for installing and using the CIRCUITSCAPE package in the Julia language**
 
 With this vignette/tutorial, hopefully you'll get an idea of what each of the functions in this package can do, as well present an example (using simulated data) of how you can optimize resistance surfaces in isolation as well as simultaneously to create novel resistance surfaces. This 'package' (I use that term very loosely) has largely been developed from functions I wrote to conduct different landscape genetic analyses. See [Peterman et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/mec.12747/abstract "Published Molecular Ecology Study") for the original conception of optimizing resistance surfaces using optimization functions. This approach was limited to optimization of continuous surfaces in isolation. Since that paper, I've further developed the optimization method to utilize genetic algorithms, implemented using the `ga` function from the [GA package](http://cran.r-project.org/web/packages/GA/index.html "GA package, CRAN") in R. By moving to genetic algorithms, much more complex parameter space can be effectively searched, which allows for the optimization of categorical resistance surfaces, as well as optimization of multiple resistance surfaces simultaneously. 
 

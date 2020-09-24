@@ -2618,7 +2618,7 @@ SS_optim <- function(CS.inputs = NULL,
     # >>> Julia <<< -------------------------------------------------
     if (!is.null(jl.inputs)) {
       
-      setwd(jl.inputs$JULIA_HOME)
+      # setwd(jl.inputs$JULIA_HOME)
       # MLPE with Covariates ----------------------------------------------------
       
       if(!is.null(jl.inputs$covariates)) { 
