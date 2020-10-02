@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.44
+--------
+* Fixed potential bug in Bootstrap function
+
 ResistanceGA 4.1-0.43
 --------
 * Corrected directory setting

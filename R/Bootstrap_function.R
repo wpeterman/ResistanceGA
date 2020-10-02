@@ -134,15 +134,15 @@ Resist.boot <-
         dplyr::mutate(., RMSE = RMSE)
       
       if(rank.method == 'LL') {
-        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(desc(LL)))
+        AICc.tab <- dplyr::mutate(AICc.tab, rank = dplyr::dense_rank(desc(LL)))
       } else if (rank.method == 'AIC') {
-        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(AIC))
+        AICc.tab <- dplyr::mutate(AICc.tab, rank = dplyr::dense_rank(AIC))
       } else if(rank.method == 'R2'){
-        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(desc(R2m)))
+        AICc.tab <- dplyr::mutate(AICc.tab, rank = dplyr::dense_rank(desc(R2m)))
       } else if(rank.method == 'RMSE'){
-        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(RMSE))
+        AICc.tab <- dplyr::mutate(AICc.tab, rank = dplyr::dense_rank(RMSE))
       } else {
-        AICc.tab <- dplyr::mutate(AICc.tab, rank = dense_rank(AICc))
+        AICc.tab <- dplyr::mutate(AICc.tab, rank = dplyr::dense_rank(AICc))
       }
       
       AIC.tab.list[[i]] <- AICc.tab

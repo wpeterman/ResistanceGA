@@ -18,7 +18,7 @@
 #' @importFrom ggExtra removeGrid ggMarginal
 #' @importFrom Matrix fac2sparse drop0
 #' @importFrom plyr arrange rbind.fill ldply create_progress_bar progress_text 
-#' @importFrom dplyr mutate group_by summarise filter tally left_join
+#' @importFrom dplyr mutate group_by summarise filter tally left_join dense_rank
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom plyr arrange rbind.fill ldply
