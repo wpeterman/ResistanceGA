@@ -33,11 +33,10 @@ write.CS_4.0 <- function(BATCH,
     LOG <- "log_level = INFO"
   }
   
-  if(precision=='none') {
-    precision <- "precision = None"
-  } else if (precision=='single') {
+  if(isTRUE(precision)) {
     precision <- "precision = single"
   } else {
+    # double precision is the default in Cicuitscape.jl
     precision <- ""
   }
   
