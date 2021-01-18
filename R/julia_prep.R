@@ -296,7 +296,9 @@ jl.prep <- function(n.Pops,
   # Format inputs -----------------------------------------------------------
   if(isTRUE(precision)) {
     precision <- 'single'
-  } 
+  } else {
+    precision <- 'None'
+  }
   
   if(isTRUE(cholmod) && (precision == 'single')) {
     stop(cat(paste0('\n', 
