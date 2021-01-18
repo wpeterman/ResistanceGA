@@ -33,13 +33,11 @@ write.CS_4.0 <- function(BATCH,
     LOG <- "log_level = INFO"
   }
   
-  if(!isTRUE(precision)) {
-    precision <- "precision = None"
-  }
-  
-  if(precision == 'single') {
+  if(isTRUE(precision == 'single')) {
     precision <- "precision = single"
-  } 
+  } else {
+    precision <- "precision = None"
+    } 
   
   if(isTRUE(is_resistance)) {
     RESISTANCE <- "connect_using_avg_resistances = False"
