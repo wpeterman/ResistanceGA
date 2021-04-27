@@ -1,3 +1,7 @@
+ResistanceGA 4.1-0.46
+--------
+* A lot of clean up of code and updating NAMESPACE [2021 April 27]
+
 ResistanceGA 4.1-0.45
 --------
 * Fixed bug with using experimental single precision option when optimizing with CS Julia [2021 Jan 14]

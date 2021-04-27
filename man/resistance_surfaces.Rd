@@ -4,7 +4,9 @@
 \name{resistance_surfaces}
 \alias{resistance_surfaces}
 \title{Data file. Simulated resistance surfaces}
-\format{RasterStack object of length 3}
+\format{
+RasterStack object of length 3
+}
 \usage{
 data(resistance_surfaces)
 }

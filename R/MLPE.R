@@ -109,14 +109,14 @@ MLPE.lmm <-
     
     # Fit model
     mod <-
-      lFormula(response ~ resistance + (1 | pop1),
-               data = dat,
-               REML = REML)
+      lme4::lFormula(response ~ resistance + (1 | pop1),
+                     data = dat,
+                     REML = REML)
     mod$reTrms$Zt <- ZZ
-    dfun <- do.call(mkLmerDevfun, mod)
-    opt <- optimizeLmer(dfun)
+    dfun <- do.call(lme4::mkLmerDevfun, mod)
+    opt <- lme4::optimizeLmer(dfun)
     MOD <-
-      (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+      (lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
     return(MOD)
   }
 
@@ -140,14 +140,14 @@ MLPE.lmm2 <- function(resistance, response, REML = FALSE, ID, ZZ) {
   
   # Fit model
   mod <-
-    lFormula(response ~ scale(resistance) + (1 | pop1),
-             data = dat,
-             REML = REML)
+    lme4::lFormula(response ~ scale(resistance) + (1 | pop1),
+                   data = dat,
+                   REML = REML)
   mod$reTrms$Zt <- ZZ
-  dfun <- do.call(mkLmerDevfun, mod)
-  opt <- optimizeLmer(dfun)
+  dfun <- do.call(lme4::mkLmerDevfun, mod)
+  opt <- lme4::optimizeLmer(dfun)
   MOD <-
-    (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+    (lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
   return(MOD)
 }
 
@@ -177,10 +177,10 @@ MLPE.lmm_coef <-
           cd <- read.csv(resist.mat[i], header = F)
           cd.l <- lower(cd)
           cd.l <- cd.l[cd.l != -1]
-
+          
           scale.cd <- scale(cd.l, center = TRUE, scale = TRUE)
           cs.unscale <- cd.l
-
+          
           # Assign value to layer
           LAYER <- assign(resist.names[i], value = dat$cs.matrix)
           
@@ -228,8 +228,8 @@ MLPE.lmm_coef <-
                           data = dat,
                           REML = TRUE,
                           ZZ = ZZ)
-            
-            
+          
+          
           #   lFormula(formula,
           #            data = inputs,
           #            REML = TRUE)
@@ -282,14 +282,14 @@ MLPE.lmm_coef <-
           
           # Fit model
           mod <-
-            lFormula(response ~ LAYER + (1 | pop1),
-                     data = dat,
-                     REML = TRUE)
+            lme4::lFormula(response ~ LAYER + (1 | pop1),
+                           data = dat,
+                           REML = TRUE)
           mod$reTrms$Zt <- ZZ
-          dfun <- do.call(mkLmerDevfun, mod)
-          opt <- optimizeLmer(dfun)
+          dfun <- do.call(lme4::mkLmerDevfun, mod)
+          opt <- lme4::optimizeLmer(dfun)
           Mod.Summary <-
-            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+            summary(lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           COEF <- Mod.Summary$coefficients
           row.names(COEF) <- c("Intercept", resist.names[i])
           COEF.Table <- rbind(COEF.Table, COEF)
@@ -321,14 +321,14 @@ MLPE.lmm_coef <-
           
           # Fit model
           mod <-
-            lFormula(response ~ LAYER + (1 | pop1),
-                     data = dat,
-                     REML = TRUE)
+            lme4::lFormula(response ~ LAYER + (1 | pop1),
+                           data = dat,
+                           REML = TRUE)
           mod$reTrms$Zt <- ZZ
-          dfun <- do.call(mkLmerDevfun, mod)
-          opt <- optimizeLmer(dfun)
+          dfun <- do.call(lme4::mkLmerDevfun, mod)
+          opt <- lme4::optimizeLmer(dfun)
           Mod.Summary <-
-            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+            summary(lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           COEF <- Mod.Summary$coefficients
           row.names(COEF) <- c("Intercept", resist.names[i])
           COEF.Table <- rbind(COEF.Table, COEF)
@@ -360,14 +360,14 @@ MLPE.lmm_coef <-
           
           # Fit model
           mod <-
-            lFormula(response ~ LAYER + (1 | pop1),
-                     data = dat,
-                     REML = TRUE)
+            lme4::lFormula(response ~ LAYER + (1 | pop1),
+                           data = dat,
+                           REML = TRUE)
           mod$reTrms$Zt <- ZZ
-          dfun <- do.call(mkLmerDevfun, mod)
-          opt <- optimizeLmer(dfun)
+          dfun <- do.call(lme4::mkLmerDevfun, mod)
+          opt <- lme4::optimizeLmer(dfun)
           Mod.Summary <-
-            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+            summary(lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           COEF <- Mod.Summary$coefficients
           row.names(COEF) <- c("Intercept", resist.names[i])
           COEF.Table <- rbind(COEF.Table, COEF)
@@ -406,14 +406,14 @@ MLPE.lmm_coef <-
           
           # Fit model
           mod <-
-            lFormula(response ~ LAYER + (1 | pop1),
-                     data = dat,
-                     REML = TRUE)
+            lme4::lFormula(response ~ LAYER + (1 | pop1),
+                           data = dat,
+                           REML = TRUE)
           mod$reTrms$Zt <- ZZ
-          dfun <- do.call(mkLmerDevfun, mod)
-          opt <- optimizeLmer(dfun)
+          dfun <- do.call(lme4::mkLmerDevfun, mod)
+          opt <- lme4::optimizeLmer(dfun)
           Mod.Summary <-
-            summary(mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+            summary(lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
           COEF <- Mod.Summary$coefficients
           row.names(COEF) <- c("Intercept", resist.names[i])
           COEF.Table <- rbind(COEF.Table, COEF)

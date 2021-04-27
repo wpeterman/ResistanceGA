@@ -4,7 +4,9 @@
 \name{raster_true}
 \alias{raster_true}
 \title{Data file. Simulated true resistance surfaces}
-\format{RasterStack object of length 3}
+\format{
+RasterStack object of length 3
+}
 \usage{
 data(raster_true)
 }

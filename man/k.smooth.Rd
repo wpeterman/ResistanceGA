@@ -9,7 +9,7 @@ k.smooth (raster, sigma, SCALE)
 \arguments{
 \item{raster}{A RasterLayer object to be smoothed}
 
-\item{sigma}{The standard deviation of the Gaussian smoothing parameter (see \code{\link[spatstat]{blur}} documentation in the \code{spatstat} package.)}
+\item{sigma}{The standard deviation of the Gaussian smoothing parameter (see \code{\link[spatstat.core]{blur}} documentation in the \code{spatstat} package.)}
 
 \item{SCALE}{Logical. Should the smoothed raster surface be scaled to range from 0-10 (Default = FALSE)}
 }

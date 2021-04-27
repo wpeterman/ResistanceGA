@@ -7,7 +7,8 @@
 MS_optim(CS.inputs, 
              gdist.inputs, 
              jl.inputs,
-             GA.inputs)
+             GA.inputs,
+             diagnostic_plots = TRUE)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
@@ -17,6 +18,8 @@ MS_optim(CS.inputs,
 \item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function. Defined if optimizing using CIRCUITSCAPE run in Julia}
 
 \item{GA.inputs}{Object created from running \code{\link[ResistanceGA]{GA.prep}} function}
+
+\item{diagnostic_plots}{Plotting and saving of diagnostic plots (Default = TRUE)}
 }
 \value{
 This function optimizes multiple resistance surfaces, returning a Genetic Algorithm (GA) object with summary information. Diagnostic plots of model fit are output to the "Results/Plots" folder that is automatically generated within the folder containing the optimized ASCII files. A text summary of the optimization settings and results is printed to the results folder.

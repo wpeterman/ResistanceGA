@@ -13,7 +13,8 @@
 #'  *** Use of this package to run CIRCUITSCAPE is limited to Windows machines due its use of the Circuitscape .exe file. However, Julia can be installed on any operating system, making this a more versatile option. 
 #'  
 #' 
-#' @import raster GA lme4 ggplot2 gdistance 
+#' @import raster GA ggplot2 gdistance 
+#' @importFrom lme4 mkMerMod lFormula glFormula mkGlmerDevfun optimizeGlmer mkLmerDevfun optimizeLmer GHrule 
 #' @importFrom utils combn menu
 #' @importFrom ggExtra removeGrid ggMarginal
 #' @importFrom Matrix fac2sparse drop0
@@ -22,7 +23,8 @@
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom plyr arrange rbind.fill ldply
-#' @importFrom spatstat as.im blur as.matrix.im
+#' @importFrom spatstat.core blur 
+#' @importFrom spatstat.geom as.im  as.matrix.im
 #' @importFrom spdep dnearneigh nb2mat
 #' @importFrom grDevices dev.off tiff topo.colors
 #' @importFrom graphics abline filled.contour par

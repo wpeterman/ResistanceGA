@@ -4,7 +4,9 @@
 \name{samples}
 \alias{samples}
 \title{Data file. Example sample location file}
-\format{A 25 x 3 data frame}
+\format{
+A 25 x 3 data frame
+}
 \usage{
 data(samples)
 }

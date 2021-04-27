@@ -114,7 +114,7 @@ GA.prep(ASCII.dir,
 
 \item{pop.size}{Number of individuals to create each generation. If \code{gaisl = TRUE}, then this number is automatically calculated as \code{numIslands} * \code{island.pop}}
 
-\item{parallel}{A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specify the number of cores to use. Parallel processing currently only works when optimizing using least cost paths. It will fail if used with CIRCUITSCAPE, so this is currently not an option.}
+\item{parallel}{A logical argument specifying if parallel computing should be used (TRUE) or not (FALSE, default) for evaluating the fitness function. You can also specify the number of cores to use.}
 
 \item{gaisl}{Should the genetic algorithm use the islands parallel optimization? (Default = FALSE)}
 

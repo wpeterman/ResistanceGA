@@ -170,11 +170,14 @@ Run_CS.jl <- function(jl.inputs = NULL,
     if(Sys.info()[['sysname']] == "Windows") {
       EXPORT.dir <- paste0(tempdir(),"/")
       EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
+      EXPORT.dir <- paste0(EXPORT.dir,'\\')
     } else {
-      EXPORT.dir <- paste0(tempdir(),"/")
+      EXPORT.dir <- paste0(tempdir(),"\\")
     }
     if(!is.null(scratch)) {
       EXPORT.dir <- scratch
+      EXPORT.dir <- paste0(EXPORT.dir,'\\')
+      scratch <- paste0(scratch,'\\')
     }
   }
   
@@ -184,10 +187,12 @@ Run_CS.jl <- function(jl.inputs = NULL,
   
   if(Sys.info()[['sysname']] == "Windows") {
     EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
+    EXPORT.dir <- paste0(EXPORT.dir,'\\')
   }
   
   if(Sys.info()[['sysname']] == "Linux") {
     EXPORT.dir <- paste0(normalizePath(EXPORT.dir), "/")
+    EXPORT.dir <- paste0(EXPORT.dir,'\\')
   }
   
   # temp_rast <- rm.rast <- gsub('/','//', rm.rast)
@@ -301,18 +306,18 @@ Run_CS.jl <- function(jl.inputs = NULL,
   
   
   # Run CIRCUITSCAPE.jl -----------------------------------------------------
-  if(Sys.info()[['sysname']] == "Windows") {
-    setwd(JULIA_HOME)
-  }
+  # if(Sys.info()[['sysname']] == "Windows") {
+  #   setwd(JULIA_HOME)
+  # }
   rt <- NULL
   
   if(Julia_link == 'JuliaCall') {
     if(!is.null(write.criteria)) {
       t1 <- proc.time()[3]
-        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        out <- JuliaCall::julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
       rt <- proc.time()[3] - t1
     } else {
-        out <- julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+        out <- JuliaCall::julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
     }
   } else { # use XRJulia
     cs.jl <- RJulia()

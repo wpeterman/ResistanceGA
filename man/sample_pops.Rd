@@ -4,7 +4,9 @@
 \name{sample_pops}
 \alias{sample_pops}
 \title{Data file. A list of three \code{sp} objects}
-\format{A list of length 3}
+\format{
+A list of length 3
+}
 \usage{
 data(sample_pops)
 }
@@ -14,7 +16,7 @@ Sample file to be used with examples in the vignette
 \details{
 50 Point locations in each list that correspond to sample points (populations) used in genetic simulations
 
-\itemize{    
+ \itemize{    
    \item sample_cat. Sample locations used in categorical surface genetic simulation example
    \item sample_cont. Sample locations used in continuous surface genetic simulation example
    \item sample_multi. Sample locations used in multi surface genetic simulation example

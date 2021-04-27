@@ -12,7 +12,8 @@ Resist.boot(mod.names,
                    obs, 
                    rank.method, 
                    genetic.mat,
-                   keep = NULL)
+                   keep = NULL,
+                   n.cores = NULL)
 }
 \arguments{
 \item{mod.names}{A vector of the model names to be assessed}
@@ -27,11 +28,13 @@ Resist.boot(mod.names,
 
 \item{obs}{Total number of observations (populations or individuals) in your original analysis}
 
-\item{rank.method}{What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'SSE'). Default = 'AICc'}
+\item{rank.method}{What metric should be used to rank models during bootstrap analysis? c('AIC', 'AICc', 'R2', 'LL', 'RMSE'). Default = 'AIC'}
 
 \item{genetic.mat}{Genetic distance matrix without row or column names.}
 
 \item{keep}{Optional vector of pairwise observations to keep (1) or omit (0)}
+
+\item{n.cores}{Number of cores to use when running bootstrap in parallel. Default 2 less than total available.}
 }
 \value{
 A data frame reporting the average model weight, average rank, number of times a model was the top model in the set, and the frequency a model was best.

@@ -9,7 +9,8 @@ SS_optim(CS.inputs,
  jl.inputs,
  GA.inputs,
  dist_mod, 
- null_mod)
+ null_mod,
+ diagnostic_plots = TRUE)
 }
 \arguments{
 \item{CS.inputs}{Object created from running \code{\link[ResistanceGA]{CS.prep}} function. Defined if optimizing using CIRCUITSCAPE}
@@ -23,6 +24,8 @@ SS_optim(CS.inputs,
 \item{dist_mod}{Logical, if TRUE, a Distance model will be calculated and added to the output table (default = TRUE)}
 
 \item{null_mod}{Logical, if TRUE, an intercept-only model will be calculated and added to the output table (default = TRUE)}
+
+\item{diagnostic_plots}{Plotting and saving of diagnostic plots (Default = TRUE)}
 }
 \value{
 This function optimizes resistance surfaces in isolation. Following optimization of all surfaces, several summary objects are created.\cr

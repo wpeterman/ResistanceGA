@@ -39,7 +39,7 @@
 #'                      data = df)
 #'                                 
 #' # Fit model with only select pairs
-#'  keep <- c(1,0,1,1,1,1,0,0,1,0)
+#'  keep <- c(1,1,1,1,1,1,0,1,1,0)
 #'  
 #'  out.select <- mlpe_rga(formula = y ~ x + (1 | pop),
 #'                         data = df,
@@ -95,29 +95,29 @@ mlpe_rga <-
         cat("REML will be ignored when fitting a generalized MLPE model.")
       }
       mod <-
-        glFormula(formula,
-                  data = data,
-                  ...)
+        lme4::glFormula(formula,
+                        data = data,
+                        ...)
       mod$reTrms$Zt <- ZZ
-      dfun <- do.call(mkGlmerDevfun, mod)
-      opt <- optimizeGlmer(dfun)
+      dfun <- do.call(lme4::mkGlmerDevfun, mod)
+      opt <- lme4::optimizeGlmer(dfun)
       
     } else {
       
       # > lmer ---------------------------------------------------------------
       
       mod <-
-        lFormula(formula,
-                 data = data,
-                 REML = REML)
+        lme4::lFormula(formula,
+                       data = data,
+                       REML = REML)
       mod$reTrms$Zt <- ZZ
-      dfun <- do.call(mkLmerDevfun, mod)
-      opt <- optimizeLmer(dfun)
+      dfun <- do.call(lme4::mkLmerDevfun, mod)
+      opt <- lme4::optimizeLmer(dfun)
       
     }
     
     MOD <-
-      (mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
+      (lme4::mkMerMod(environment(dfun), opt, mod$reTrms, fr = mod$fr))
     
     return(MOD)
   }

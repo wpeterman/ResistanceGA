@@ -20,7 +20,8 @@ precision = FALSE,
 JULIA_HOME = NULL,
 Julia_link = NULL,
 rm.files = TRUE,
-scratch = NULL)
+scratch = NULL,
+is_resistance = TRUE)
 }
 \arguments{
 \item{jl.inputs}{Object created from running \code{\link[ResistanceGA]{jl.prep}} function}
@@ -56,6 +57,8 @@ scratch = NULL)
 \item{rm.files}{Should all temporary files be removed after Julia run (Default = TRUE). Only necessary to specify if \code{jl.inputs} are not specified.}
 
 \item{scratch}{Scratch directory for use if write access is limited. Must be specified if raster results are desired for outputs.}
+
+\item{is_resistance}{Default = TRUE. Is the landscape represented as a resistance (TRUE) or conductance (FALSE) surface?}
 }
 \value{
 Vector of CIRCUITSCAPE resistance distances (lower half of resistance matrix) OR a full square distance matrix if `full.mat` = TRUE. Alternatively, a raster object of the cumulative current map can be returned when \code{CurrentMap = TRUE} and \code{output = "raster"}. The `full.mat` cannot be requested if only select pairs are being analyzed.

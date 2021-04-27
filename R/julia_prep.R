@@ -171,7 +171,7 @@ jl.prep <- function(n.Pops,
     
     if(Sys.info()[['sysname']] == "Windows") {
       td <- paste0(normalizePath(tempdir(), winslash = "/"), "/")
-      setwd(JULIA_HOME)
+      # setwd(JULIA_HOME)
       
     } else {
       td <- paste0(tempdir(),"/")
@@ -193,7 +193,7 @@ jl.prep <- function(n.Pops,
     #   }
     # }
     
-    write.table(samples[1:5,], 
+    write.table(ResistanceGA::samples[1:5,], 
                 paste0(td,'samples.txt'), 
                 quote = FALSE,
                 sep = "\t",

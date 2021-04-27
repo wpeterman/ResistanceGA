@@ -1,4 +1,4 @@
-#' @description Function to create expanded keep and random effect grp object
+## Function to create expanded keep and random effect grp object
 expand.mat_vec <- function(pop_n, 
                            mat) {
   
@@ -18,7 +18,7 @@ expand.mat_vec <- function(pop_n,
   return(out)
 }
 
-#' @description Function to create expanded pop-to-ind data frame. Use internally to generate vector of indices to retain for analysis
+## Function to create expanded pop-to-ind data frame. Use internally to generate vector of indices to retain for analysis
 expand.keep <- function(pop_n){
   
   keep.mat <- matrix(1, length(pop_n), length(pop_n))
@@ -32,7 +32,7 @@ expand.keep <- function(pop_n){
   return(keep)
 }
 
-#' @description Function to create expanded pop-to-ind data frame. Use internally to convert population-based pairiwse distances to individual-based vector
+## Function to create expanded pop-to-ind data frame. Use internally to convert population-based pairiwse distances to individual-based vector
 expand.mat <- function(mat,
                        pop_n,
                        format = 'vector') {
@@ -73,7 +73,7 @@ expand.mat <- function(mat,
   }
 }
 
-#' @description Function to create expanded pop-to-pop data frame
+## Function to create expanded pop-to-pop data frame
 expand.mat_ <- function(from_mat,
                         to_mat,
                         pop_n) {

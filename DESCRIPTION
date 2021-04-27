@@ -24,7 +24,11 @@ Imports:
     lme4 (>= 1.0),
     Matrix,
     MuMIn,
-    spatstat (>= 2.0-0),
+    spatstat.core,
+    spatstat.geom,
+    spdep,
+    doParallel,
+    foreach,
     JuliaCall,
     XRJulia
 Suggests:
@@ -32,4 +36,5 @@ Suggests:
     rmarkdown
 License: GPL (>= 2)
 LazyData: true
-RoxygenNote: 6.1.1
+Encoding: UTF-8
+RoxygenNote: 7.1.1
