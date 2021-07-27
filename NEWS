@@ -1,3 +1,8 @@
+ResistanceGA 4.1-0.47
+--------
+* Updated `all_comb` function to correctly accomodate a specified number of layers without single surface optimization [2021 July 7]
+* Updated `GA.prep` function `percent.elite` to conform to new standards in the GA package [2021 July 27]
+
 ResistanceGA 4.1-0.46
 --------
 * A lot of clean up of code and updating NAMESPACE [2021 April 27]

@@ -26,7 +26,7 @@
 #' 
 #' 4 --> k = the number of layers optimized plus the intercept
 #' @param pop.mult Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.
-#' @param percent.elite Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.
+#' @param percent.elite An integer percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.
 #' @param type Default is "real-valued"
 #' @param population Default is "gareal_Population" from GA
 #' @param selection Default is "gareal_lsSelection" from GA
@@ -49,7 +49,7 @@
 #' @param poptim A value in the range [0,1] specifying the probability of performing a local search at each iteration of GA (default 0.0). Only change if your optimization is relatively fast.
 #' @param pressel A value in the range [0,1] specifying the pressure selection (default 1.00). The local search is started from a random solution selected with probability proportional to fitness. High values of pressel tend to select the solutions with the largest fitness, whereas low values of pressel assign quasi-uniform probabilities to any solution.
 #' @param control A list of control parameters. See 'Details' section in \code{\link[stats]{optim}}
-#' @param hessian	Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on paramter estimates (not yet implemented). Default = FALSE
+#' @param hessian	Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on parameter estimates (not yet implemented). Default = FALSE
 #' @param opt.digits The number of significant digits that the objective function will be assessed at. By default, no rounding occurs.
 #' @param seed Integer random number seed to replicate \code{ga} optimization
 #' @param monitor Default = TRUE, which prints the average and best fitness values at each iteration. 
@@ -94,7 +94,7 @@
 #'                scale.surfaces = NULL,
 #'                k.value = 2,
 #'                pop.mult = 15,
-#'                percent.elite = 0.05,
+#'                percent.elite = 5,
 #'                type = "real-valued",
 #'                pcrossover = 0.85,
 #'                pmutation = 0.125,
@@ -145,7 +145,7 @@ GA.prep <- function(ASCII.dir,
                     scale.surfaces = NULL,
                     k.value = 2,
                     pop.mult = 15,
-                    percent.elite = 0.05,
+                    percent.elite = 5,
                     type = "real-valued",
                     pcrossover = 0.85,
                     pmutation = 0.125,

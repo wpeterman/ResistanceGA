@@ -145,6 +145,7 @@ all_comb <- function(gdist.inputs = NULL,
   if(max.combination > GA.inputs$n.layers) {
     max.combination <- GA.inputs$n.layers
   }
+  
   comb.list <- vector(mode = "list", length = (max.combination - 1))
   
   
@@ -554,14 +555,19 @@ all_comb <- function(gdist.inputs = NULL,
         }
         
         ## Make suggestions
-        suggest.sample <- sample(GA.input_orig$pop.size, GA.input_orig$pop.size, replace = F)
+        suggest.sample <- sample(GA.input_orig$pop.size, floor(GA.input_orig$pop.size * 0.5), replace = F)
         suggest <- vector(mode = 'list', length = length(all.combs[[j]]))
         
-        for(s in 1:length(all.combs[[j]])) {
-          suggest[[s]] <- best.list[[all.combs[[j]][s]]][suggest.sample,]
+        if(length(best.list) != 0){
+          for(s in 1:length(all.combs[[j]])) {
+            suggest[[s]] <- best.list[[all.combs[[j]][s]]][suggest.sample,]
+          }
+          
+          suggest.c <- do.call(cbind, suggest)
+        } else {
+          suggest.c <- NULL
         }
         
-        suggest.c <- do.call(cbind, suggest)
         
         # sc.surf <- GA.input_orig$inputs$scale.surfaces[all.combs[[j]]]
         

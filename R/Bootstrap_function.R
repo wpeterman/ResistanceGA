@@ -14,7 +14,7 @@
 #' @param n.cores Number of cores to use when running bootstrap in parallel. Default 2 less than total available.
 #' @return A data frame reporting the average model weight, average rank, number of times a model was the top model in the set, and the frequency a model was best.
 #' 
-#' @details This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surfaces that is top ranked across all bootstrap iterations.
+#' @details This is a 'pseudo' bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surface that is top ranked across all bootstrap iterations.
 #' 
 #' @export
 #' @author Bill Peterman <Bill.Peterman@@gmail.com>
