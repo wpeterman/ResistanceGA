@@ -41,7 +41,7 @@
 #' 
 #' Peterman, W. E. 2018. ResistanceGA: An R package for the optimization of resistance surfaces using genetic algorithms. Methods in Ecology and Evolution 9:1638--1647. \href{https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12984}{"MEE Publication"}
 #' 
-#' @author Bill Peterman \email{bill.peterman@@gmail.com}
+#' @author Bill Peterman \email{peterman.73@@osu.edu}
 #' 
 NULL
 

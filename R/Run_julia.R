@@ -170,14 +170,14 @@ Run_CS.jl <- function(jl.inputs = NULL,
     if(Sys.info()[['sysname']] == "Windows") {
       EXPORT.dir <- paste0(tempdir(),"/")
       EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
-      EXPORT.dir <- paste0(EXPORT.dir,'\\')
+      EXPORT.dir <- paste0(EXPORT.dir,'/')
     } else {
-      EXPORT.dir <- paste0(tempdir(),"\\")
+      EXPORT.dir <- paste0(normalizePath(tempdir()),"/")
     }
     if(!is.null(scratch)) {
-      EXPORT.dir <- scratch
-      EXPORT.dir <- paste0(EXPORT.dir,'\\')
-      scratch <- paste0(scratch,'\\')
+      # EXPORT.dir <- scratch
+      EXPORT.dir <- scratch <- paste0(normalizePath(scratch),'/')
+      # scratch <- paste0(scratch,'/')
     }
   }
   
@@ -185,20 +185,18 @@ Run_CS.jl <- function(jl.inputs = NULL,
                                    tmpdir = tempdir(),
                                    fileext = ".asc") 
   
-  if(Sys.info()[['sysname']] == "Windows") {
-    EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
-    EXPORT.dir <- paste0(EXPORT.dir,'\\')
-  }
-  
-  if(Sys.info()[['sysname']] == "Linux") {
-    EXPORT.dir <- paste0(normalizePath(EXPORT.dir), "/")
-    EXPORT.dir <- paste0(EXPORT.dir,'\\')
-  }
-  
-  # temp_rast <- rm.rast <- gsub('/','//', rm.rast)
+  # if(Sys.info()[['sysname']] == "Windows") {
+  #   EXPORT.dir <- normalizePath(EXPORT.dir, winslash = "/")
+  #   EXPORT.dir <- paste0(EXPORT.dir,'\\')
+  # }
+  # 
+  # if(Sys.info()[['sysname']] == "Linux") {
+  #   EXPORT.dir <- paste0(normalizePath(EXPORT.dir), "/")
+  #   EXPORT.dir <- paste0(EXPORT.dir,'/')
+  # }
   
   if(!is.null(scratch)) {
-    temp_rast <- rm.rast <- paste0(scratch, basename(rm.rast))
+    suppressWarnings(temp_rast <- rm.rast <- normalizePath(paste0(scratch, basename(rm.rast))))
   }
   
   
@@ -248,46 +246,22 @@ Run_CS.jl <- function(jl.inputs = NULL,
   }
   
   ## 20190611 Testing modify pair inclusion 
-  # if (is.null(jl.inputs$pairs_to_include)) {
+  ## Turned off because slower to calculate specific pairs in circuitscape
+  ## Specified pairs are analyzed in the MLPE model
+  # if(is.null(jl.inputs$pairs_to_include)) {
   PAIRS_TO_INCLUDE <-
     paste0("included_pairs_file = (Browse for a file with pairs to include or exclude)")
   PAIRS <- paste0("use_included_pairs = False")
-  # } else {
-  #   PAIRS_TO_INCLUDE <-
-  #     paste0("included_pairs_file = ", jl.inputs$pairs_to_include)
-  #   PAIRS <- paste0("use_included_pairs = True")
-  # }
   
-  # if(!is.null(scratch)) {
-  #   # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
-  #   # scratch2 <- gsub("/", "//", scratch)
-  #   # temp_rast2 <- gsub("/", "\\", temp_rast)
-  #   cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)
-  #   
-  #   write.CS_4.0(
-  #     BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-  #     OUT = paste0("output_file = ", scratch, "//", tmp.name, ".out"),
-  #     HABITAT = paste0("habitat_file = ", temp_rast),
-  #     LOCATION.FILE = paste0("point_file = ", cs.pt2),
-  #     CONNECTION = paste0("connect_four_neighbors_only =", connect),
-  #     MAP = MAP,
-  #     CURRENT.MAP = CURRENT.MAP,
-  #     PAIRS_TO_INCLUDE = PAIRS_TO_INCLUDE,
-  #     PAIRS = PAIRS,
-  #     PARALLELIZE = jl.inputs$parallel,
-  #     CORES = jl.inputs$cores,
-  #     solver = jl.inputs$solver,
-  #     precision = jl.inputs$precision,
-  #     silent = jl.inputs$silent
-  #   )
-  # } else {
-  # EXPORT.dir2 <- gsub("/", "\\", EXPORT.dir)
-  # temp_rast2 <- gsub("/", "\\", temp_rast)
-  cs.pt2 <- gsub("/", "//", jl.inputs$CS_Point.File)   
+  
+  # cs.pt2 <- gsub("/", '/', jl.inputs$CS_Point.File)   
+  cs.pt2 <- normalizePath(jl.inputs$CS_Point.File)   
+  suppressWarnings(OUT <- paste0("output_file = ", normalizePath(paste0(EXPORT.dir, tmp.name, ".out"))))
+  suppressWarnings(BATCH <- normalizePath(paste0(EXPORT.dir, tmp.name, ".ini")))
   
   write.CS_4.0(
-    BATCH = paste0(EXPORT.dir, tmp.name, ".ini"),
-    OUT = paste0("output_file = ", EXPORT.dir, tmp.name, ".out"),
+    BATCH = BATCH,
+    OUT = OUT,
     HABITAT = paste0("habitat_file = ", temp_rast),
     LOCATION.FILE = paste0("point_file = ", cs.pt2),
     CONNECTION = paste0("connect_four_neighbors_only =", connect),
@@ -314,10 +288,14 @@ Run_CS.jl <- function(jl.inputs = NULL,
   if(Julia_link == 'JuliaCall') {
     if(!is.null(write.criteria)) {
       t1 <- proc.time()[3]
-        out <- JuliaCall::julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+      out <- JuliaCall::julia_call('compute', normalizePath(
+        paste0(EXPORT.dir, tmp.name, ".ini")
+      ))[-1,-1]
       rt <- proc.time()[3] - t1
     } else {
-        out <- JuliaCall::julia_call('compute', paste0(EXPORT.dir, tmp.name, ".ini"))[-1,-1]
+      out <- JuliaCall::julia_call('compute', normalizePath(
+        paste0(EXPORT.dir, tmp.name, ".ini")
+        ))[-1,-1]
     }
   } else { # use XRJulia
     cs.jl <- RJulia()
@@ -326,7 +304,7 @@ Run_CS.jl <- function(jl.inputs = NULL,
     ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
     cs.out <- cs.jl$Call("compute", ini.file) 
     Sys.sleep(0.5)
-    out <- as.matrix(read.table(paste0(scratch, "//", tmp.name, "_resistances.out"),
+    out <- as.matrix(read.table(paste0(scratch, '/', tmp.name, "_resistances.out"),
                                 quote="\"", comment.char=""))[-1,-1]
     # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
     # out <- juliaGet(cs.out)[-1,-1] ## Slow!
@@ -338,14 +316,17 @@ Run_CS.jl <- function(jl.inputs = NULL,
   
   if (output == "raster" & CurrentMap == TRUE) {
     rm.files <- FALSE
-    if(EXPORT.dir == paste0(tempdir(), "//") & is.null(scratch)) {
-      stop("Specify an `EXPORT.dir` or `scratch` directory to write CIRCUITSCAPE results")
+    if(normalizePath(EXPORT.dir) == normalizePath(paste0(tempdir(), '/')) & is.null(scratch)) {
+      cat("All results were written to the temporary directory.\nYou may want to specify another directory.")
+      
+      rast <- raster(normalizePath(paste0(EXPORT.dir, '/', tmp.name, "_cum_curmap.asc")))
+      
     } 
     
-    if(EXPORT.dir != paste0(tempdir(), "//")) {
-      rast <- raster(paste0(EXPORT.dir, "//", tmp.name, "_cum_curmap.asc"))
+    if(normalizePath(EXPORT.dir) != normalizePath(paste0(tempdir(), '/'))) {
+      rast <- raster(normalizePath(paste0(EXPORT.dir, '/', tmp.name, "_cum_curmap.asc")))
     } else {
-      rast <- raster(paste0(scratch, "//", tmp.name, "_cum_curmap.asc"))
+      rast <- raster(normalizePath(paste0(scratch, '/', tmp.name, "_cum_curmap.asc")))
     }
     
     # NAME <- basename(rast@file@name)
@@ -354,11 +335,11 @@ Run_CS.jl <- function(jl.inputs = NULL,
     
     ## Remove files
     if(isTRUE(rm.files)) {
-      unlink.list <- list.files(EXPORT.dir, 
+      unlink.list <- list.files(normalizePath(EXPORT.dir), 
                                 pattern = tmp.name,
                                 all.files = TRUE,
                                 full.names = TRUE)
-      unlink.list2 <- list.files(EXPORT.dir, 
+      unlink.list2 <- list.files(normalizePath(EXPORT.dir), 
                                  pattern = basename(temp_rast),
                                  all.files = TRUE,
                                  full.names = TRUE)
@@ -368,7 +349,7 @@ Run_CS.jl <- function(jl.inputs = NULL,
       unlink(rm.rast, force = TRUE)
       
       if(!is.null(scratch)){
-        unlink.list2 <- list.files(scratch,
+        unlink.list2 <- list.files(normalizePath(scratch),
                                    pattern = tmp.name,
                                    all.files = TRUE,
                                    full.names = TRUE)
@@ -446,20 +427,20 @@ Run_CS.jl <- function(jl.inputs = NULL,
     if(!is.null(write.files)) {
       if(!is.null(rt)) {
         if(rt > write.criteria){
-          copy.files <- list(paste0(EXPORT.dir, tmp.name, ".ini"),
-                             temp_rast)
-          file.copy(copy.files, write.files)
+          copy.files <- list(normalizePath(paste0(EXPORT.dir, tmp.name, ".ini")),
+                             normalizePath(temp_rast))
+          file.copy(copy.files, normalizePath(write.files))
         }
       } else {
-        copy.files <- list(paste0(EXPORT.dir, tmp.name, ".ini"),
-                           temp_rast)
-        file.copy(copy.files, write.files)
+        copy.files <- list(normalizePath(paste0(EXPORT.dir, tmp.name, ".ini")),
+                           normalizePath(temp_rast))
+        file.copy(copy.files, normalizePath(write.files))
       }
     }
     
     ## Remove files
     if(isTRUE(rm.files)) {
-      unlink.list <- list.files(EXPORT.dir, 
+      unlink.list <- list.files(normalizePath(EXPORT.dir), 
                                 pattern = tmp.name,
                                 all.files = TRUE,
                                 full.names = TRUE)
@@ -467,7 +448,7 @@ Run_CS.jl <- function(jl.inputs = NULL,
       del.files <- sapply(unlink.list, unlink, force = TRUE)
       
       if(!is.null(scratch)){
-        unlink.list2 <- list.files(scratch,
+        unlink.list2 <- list.files(normalizePath(scratch),
                                    pattern = tmp.name,
                                    all.files = TRUE,
                                    full.names = TRUE)

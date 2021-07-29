@@ -1,0 +1,590 @@
+---
+title: 'Getting Started with ResistanceGA'
+author: "Bill Peterman"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document: rmarkdown::html_vignette
+  pdf_document: rmarkdown::pdf_document
+vignette: |
+  %\VignetteIndexEntry{Getting Started with ResistanceGA} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Background
+
+`ResistanceGA` is an R package built around the use of a genetic algorithm optimization approach for assigning resistance values to landscape features. The genetic algorithm used comes from the `GA` package. There are numerous options and settings available to adjust within the genetic algorithm itself. Most of these can be adjusted or used within `ResistanceGA`, but most have defaults that do not need to be adjusted. Many of the defaults I've set are the result of trial and error with toy data sets, but they seem to have held up through the analysis of many different data sets. Having said this, you may want to explore how adjusting some of the `GA` settings affects your results. This vignette is largely meant to replace the original (now very dated) vignette, but I have not removed this older vignette from the package for posterity and continuity.
+
+If you haven't already done so, install `ResistanceGA`.
+
+```{r, eval=FALSE}
+devtools::install_github("wpeterman/ResistanceGA", build_vignettes = TRUE)
+```
+
+If this fails, you may want to try installing the `tinytex` R package and trying again, or else turn off the building of vignettes.
+
+The data used in this document were simulated using the `RandomFields` and `PopGenReport` packages, and are part of the `ResistanceGA` package. The test data we'll use today consist of:
+
+-   Original raster surfaces (`data("raster_orig")`)
+-   True resistance surfaces created by transforming the original surfaces (`data("raster_true")`)
+-   Spatial locations of populations used for genetic simulations
+-   Matrices of pairwise chord distances (Dc; `data("sample_pops")`)
+
+Let's take a quick look at some these data objects.
+
+```{r fig.width=6, fig.asp=0.65}
+library(ResistanceGA)
+
+plot(raster_orig)
+
+plot(raster_true)
+
+plot(raster_true$multi_true, main = 'Multivariate Resistance')
+plot(sample_pops$sample_multi, add = T, pch = 19, col = 'blue')
+
+par(mfrow = c(2,1))
+plot(lower(Dc_list$Dc_multi) ~
+       c(dist(sample_pops$sample_multi@coords)),
+     xlab = 'Euclidean distance', ylab = 'Chord distance')
+
+plot(lower(Dc_list$Dc_multi) ~
+       lower(resist_list$resist_multi),
+     xlab = 'Resistance distance', ylab = 'Chord distance')
+par(mfrow = c(1,1))
+
+```
+
+\pagebreak
+
+# Basic Functions
+
+## Preparation Functions
+
+Prior to running `ResistanceGA`, two preparation functions will always need to be run. These functions take your data, specified inputs, and run settings and package them up for optimization of your resistance surface(s) using the `GA` package.
+
+## GA.prep
+
+With this function, you specify all the details and options of how you want to conduct optimization with the genetic algorithm. There are a LOT of settings! **However, only two things must be specified: `ASCII.dir` and `Results.dir`.** The `ASCII.dir` can be a raster object, a raster stack, or the path to a directory containing `.asc` raster files. The `Results.dir` is where you want files generated during the analysis to be written.
+
+```{r eval = F}
+GA.prep(ASCII.dir,            # REQUIRED
+        Results.dir = NULL,   # REQUIRED
+        min.cat = NULL,
+        max.cat = 2500,
+        max.cont = 2500,
+        min.scale = NULL,
+        max.scale = NULL,
+        cont.shape = NULL,
+        select.trans = 'M',
+        method = "LL",
+        scale = FALSE,
+        scale.surfaces = NULL,
+        k.value = 2,
+        pop.mult = 15,
+        percent.elite = 0.05,
+        type = "real-valued",
+        pcrossover = 0.85,
+        pmutation = 0.125,
+        maxiter = 1000,
+        run = NULL,
+        keepBest = TRUE,
+        population = gaControl(type)$population,
+        selection = gaControl(type)$selection,
+        crossover = "gareal_blxCrossover",
+        mutation = gaControl(type)$mutation,
+        pop.size = NULL,
+        parallel = FALSE,
+        gaisl = FALSE,
+        island.pop = 20,
+        numIslands = NULL,
+        migrationRate = NULL,
+        migrationInterval = NULL,
+        optim = FALSE,
+        optim.method = "L-BFGS-B", 
+        poptim = 0.0,
+        pressel = 1.00,
+        control = list(fnscale = -1, maxit = 100),
+        hessian = FALSE,
+        opt.digits = NULL,
+        seed = NULL,
+        monitor = TRUE,
+        quiet = FALSE)
+```
+
+### GA parameters you may want to adjust
+
+While all that you need to specify to set up the genetic algorithm is your raster information and a directory for results, there are a few other parameters that one may want to adjust.\
+1) `select.trans`: By default only Monomolecular family transformations are explored. If you want to specify more nonlinear, Ricker family transformations, you can change the this parameter to 'A' for all transformations, or 'R' for only Ricker. It is also possible to specify specific transformations for certain layers (see the GA.prep documentation)\
+2) `shape.min` & `shape.max`: You may want to limit/constrain the amount of non-linearity in the explored transformations. You can specify lower and upper limits to the shape parameter here.\
+3) `pop.size`: How many individuals do you want to create each iteration? A larger population gives a greater 'gene pool' to select from, but comes at the cost of additional computational time.\
+4) `maxiter`: When initially exploring/setting up a run, you may only want to conduct one or two iterations to confirm that everything is working as expected.\
+5) `run`: How many iterations need to pass before the genetic algorithm stops? By default, this is 25, but you may want to increase or decrease this depending upon your data.
+
+## gdist.prep
+
+Running this function is necessary prior to using `ResistanceGA` with `gdistance`. **The minimum information that needs to be specified for conducting an analysis is `n.Pops`, `response`, and `samples`.**
+
+```{r eval = FALSE}
+gdist.prep(n.Pops,           # REQUIRED 
+           response = NULL,  # REQUIRED
+           samples,          # REQUIRED
+           covariates = NULL,
+           formula = NULL,
+           transitionFunction = function(x)  1 / mean(x),
+           directions = 8,
+           longlat = FALSE,
+           method = 'commuteDistance',
+           min.max_dist = NULL,
+           keep = NULL)
+```
+
+## jl.prep
+
+If using CIRCUITSCAPE, [programmed in the Julia language](https://github.com/Circuitscape/Circuitscape.jl), this preparation function needs to be run. This approach is the fastest and most flexible approach for landscape resistance optimization with `ResistanceGA`. It does require that [Julia \>= v1.4.0](https://julialang.org/) and the CIRCUITSCAPE package are installed on your computer. See the `Julia_Guide` for further details on getting this set up. **The minimum information that needs to be specified for conducting an analysis is `n.Pops`, `response`, `CS_Point.File`, and `JULIA_HOME`.**
+
+```{r eval = FALSE}
+jl.prep(n.Pops,             # REQUIRED
+        response = NULL,    # REQUIRED
+        CS_Point.File,      # REQUIRED
+        covariates = NULL,
+        formula = NULL,
+        JULIA_HOME = NULL,  # REQUIRED
+        Neighbor.Connect = 8, 
+        pairs_to_include = NULL, 
+        pop2ind = NULL,
+        nb = NULL,
+        parallel = FALSE, 
+        cores = NULL,
+        cholmod = TRUE,
+        precision = FALSE, 
+        run_test = TRUE,
+        write.files = NULL,
+        write.criteria = NULL,
+        silent = TRUE,
+        Julia_link = 'JuliaCall',
+        scratch = NULL,
+        rm.files = TRUE)
+```
+
+## Plot.trans
+
+This function implements the transformations used by `ResistanceGA` to modify continuous surfaces. It can be used to explore different transformations, as well as the effects of shape and scale parameters.
+
+-   1 = "Inverse-Reverse Monomolecular"
+
+-   2 = "Inverse-Reverse Ricker"
+
+-   3 = "Monomolecular"
+
+-   4 = "Ricker"
+
+-   5 = "Reverse Monomolecular"
+
+-   6 = 'Reverse Ricker"
+
+-   7 = "Inverse Monomolecular"
+
+-   8 = "Inverse Ricker"
+
+-   9 = "Distance"
+
+```{r eval = FALSE}
+Plot.trans(PARM, 
+           Resistance, 
+           transformation,
+           scale, 
+           print.dir,
+           marginal.plot, 
+           marg.type, 
+           Name)
+```
+
+You can specify an actual surface to see how the distribution of values are shifted, or you can simply give a range of values to create a hypothetical transformation to see the general shape and direction of a transformation.
+
+```{r fig.width=6, fig.asp=0.65}
+(Plot.trans(PARM = c(14.5, 100), 
+            Resistance = raster_orig$cont_orig, 
+            transformation = 1))
+
+## This creates the same plot
+# (Plot.trans(PARM = c(2.5, 100), 
+#             Resistance = raster_orig$cont_orig, 
+#             transformation = "Reverse Monomolecular"))
+
+(Plot.trans(PARM = c(2.5, 100), 
+            Resistance = c(1,10), 
+            transformation = 1))
+```
+
+Feel free to explore the different transformations and effects of the shape parameter. \pagebreak
+
+## Run_gdistance
+
+Convenience function to run `gdistance`. Provide the output from `gdist.prep` function as well as a resistance surface.
+
+```{r eval=F}
+gdist.inputs <- gdist.prep(n.Pops = length(sample_pops$sample_cont),
+                           samples = sample_pops$sample_cont)
+
+gdist.out <- Run_gdistance(gdist.inputs = gdist.inputs,
+                           r = raster_true$cont_true)
+```
+
+## Run_CS.jl
+
+Convenience function to run CIRCUITSCAPE in Julia.
+
+```{r, echo=F, eval=T}
+try(jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
+                         CS_Point.File = sample_pops$sample_cont,
+                     JULIA_HOME = "C:/Users/peterman.73/AppData/Local/Programs/Julia-1.6.1/bin/"), silent = T)
+```
+
+```{r eval=F}
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
+                     CS_Point.File = sample_pops$sample_cont,
+                     JULIA_HOME = "C:/Users/peterman.73/AppData/Local/Programs/Julia-1.6.1/bin/")
+jl.out <- Run_CS.jl(jl.inputs = jl.inputs,
+                    r = raster_true$cont_true)
+```
+
+This function can also be used to produce cumulative current map outputs. Be sure to provide an EXPORT.dir and specify the output format to be `raster`
+
+```{r fig.width=6, fig.asp=0.65}
+jl.out <- Run_CS.jl(jl.inputs = jl.inputs,
+                    r = raster_true$cont_true,
+                    CurrentMap = TRUE,
+                    output = 'raster',
+                    EXPORT.dir = "C:/Rga/")
+plot(jl.out)
+```
+
+## mlpe_rga
+
+Function to run Maximum Likelihood Population Effects (MLPE) mixed effects model. Requires a vector of genetic and resistance distances, a vector of population identities.
+
+```{r eval=F}
+# Get lower half of distance matrices
+gd <- lower(Dc_list$Dc_cont) # Genetic distance
+rd <- lower(resist_list$resist_cont) # Resistance distance
+
+## Run `To.From.ID`
+id <- To.From.ID(length(sample_pops$sample_cont))
+
+df <-data.frame(gd = gd,
+                rd = rd,
+                pop = id$pop1)
+
+mlpe.mod <- mlpe_rga(gd ~ rd + (1 | pop),
+                     data = df)
+```
+
+# Examples
+
+## Workshop example
+
+Let's do a worked example together. `ResistanceGA` is rather computationally intensive approach, even with small toy data set, so this will take a bit of time. Run with `gdistance` in parallel on 5 cores took \~8 minutes on my laptop. Let's analyze the provided surfaces, using the genetic distance data simulated from the continuous surface and sample points.
+
+```{r, eval = F, echo=T}
+dir.create("C:/Rga/ExampleAnalysis/", recursive = T)
+results_dir <- "C:/Rga/ExampleAnalysis/"
+
+## For simplicity, pull out the genetic and spatial data from the package data objects
+gen_dist <- lower(Dc_list$Dc_cont)
+r_stack <- raster_orig
+sample_locs <- sample_pops$sample_cont
+
+## First, run GA.prep . In the interest of time, we'll reduce the total number of iterations (`maxiter`) to 10. Run in `parallel` on at least 2 cores, more if available.  
+## Check # of cores available to use
+## DON'T USE ALL CORES!
+parallel::detectCores()
+
+##  ** [You fill in the function!] **
+GA.inputs <- GA.prep(ASCII.dir = r_stack,
+                     Results.dir = results_dir,
+                     pop.size = 25,
+                     maxiter = 10,
+                     parallel = 5)
+
+
+## Next, run prep for your optimization method. We'll use `gdistance` here, as it should work seamlessly for all
+## Feel free to use `jl.prep` and Julia instead, if you have everything installed and working.
+##  ** [You fill in the function!] **
+gdist.inputs <- gdist.prep(n.Pops = length(sample_locs),
+                           response = gen_dist,
+                           samples = sample_locs)
+
+## Alternatively
+# jl.inputs <- jl.prep()
+
+
+## Finally, optimize your surface(s)
+## Single Surface
+ss_results <- SS_optim(gdist.inputs = gdist.inputs,
+                       GA.inputs = GA.inputs)
+
+## Multiple Surfaces
+ms_results <- MS_optim(gdist.inputs = gdist.inputs,
+                       GA.inputs = GA.inputs)
+
+## If optimizing all surfaces together, it may make sense to use the `all_comb` to have a more comprehensive analysis. We'll need to adjust our `GA.prep` function `Results.dir` to accommodate this. Set the `iters` parameter to 100.
+
+GA.inputs2 <- GA.prep(ASCII.dir = r_stack,
+                     Results.dir = 'all_comb',
+                     pop.size = 25,
+                     maxiter = 10,
+                     parallel = 5)
+
+ac_results <- all_comb(gdist.inputs = gdist.inputs,
+                       GA.inputs = GA.inputs2,
+                       results.dir = results_dir,
+                       iters = 100)
+
+
+```
+
+Let's take a look at the results from our analysis. **Keep in mind that the 'true' data generating surface is the continuous raster that was transformed using an Inverse Monomolecular transformation (transformation \#7) with a `shape = 2.75` and `scale = 100`**. First, it's prudent to assess the MLPE model diagnostics for each of the optimized surfaces. Navigate to your specified results directory where you can find 'xxx_DiagnosticPlots.tif' files. All diagnostic plots seem pretty good, so we should have some confidence in our interpreting our models moving forward.
+
+Next, assuming you ran the `all_comb` function, take a look at the 'All_Combinations_Summary.csv' table. If you didn't run the `all_comb` function, you can navigate to the "ExampleAnalysis" directory in the workshop folder. We didn't set a seed, so everyone may be seeing slightly different results (this is a stochastic process). In my analysis, the continuous surface ('cont_orig') was clearly the best-supported model. Also as part of the `all_comb` function a pseudo bootstrap procedure is conducted ("Bootstrap_Results.csv"). In my example, the continuous surface was the top ranked model in 83% of bootstrap iterations. Taken together, we can confidently conclude that the continuous surface is the primary driver of gene flow across this landscape.
+
+From this small example with a toy data set, we can see that optimization approaches such as `ResistanceGA` can quite accurately optimize and recover the data generating surface(s). However, overfitting to noisy genetic data is a very real possibility and a challenge. These approaches are fallible. Also, remember that this approach relies on a stochastic algorithm, so multiple optimization runs to confirm convergence/consistency are highly recommended. There is definitely need for hard thinking and more in-depth research to identify appropriate selection and/or penalization criteria when optimizing resistance surfaces. My general sense of working with these problems is that categorical data is inherently challenging to incorporate. `ResistanceGA` does allow its inclusion, but When possible, I try to convert categorical data into some kind of continuous measure: distance from feature, density, etc. These decisions are no less straightforward, but may make subsequent model selection and interpretation more reliable and straightforward.
+
+## Further Examples
+
+Below is code with moderate annotation for how to run a variety of different analyses with `ResistanceGA` using Circuitscape in Julia. For each section in the code below, the 'true' data generating surface is the name of the section header.
+
+### Single Surface
+
+```{r eval = F, echo=T}
+## Path to your Julia installation
+JULIA_HOME <- "C:/Users/peterman.73/AppData/Local/Programs/Julia-1.6.1/bin/"
+
+# Single Surface ----------------------------------------------------------
+
+# # >> Categorical ----------------------------------------------------------
+dir.create("C:/Rga/single/cat5", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig$cat_orig,
+                     Results.dir = "C:/Rga/single/cat5/",
+                     max.cat = 500,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cat),
+                     response = lower(Dc_list$Dc_cat),
+                     CS_Point.File = sample_pops$sample_cat,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ss.cat <- SS_optim(jl.inputs = jl.inputs,
+                   GA.inputs = GA.inputs)
+
+# >> Continuous -----------------------------------------------------------
+dir.create("C:/Rga/single/cont", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig$cont_orig,
+                     Results.dir = "C:/Rga/single/cont/",
+                     max.cont = 500,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
+                     response = lower(Dc_list$Dc_cont),
+                     CS_Point.File = sample_pops$sample_cont,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ss.cont <- SS_optim(jl.inputs = jl.inputs,
+                    GA.inputs = GA.inputs)
+
+
+
+
+# >> Continuous: Keep -----------------------------------------------------
+# Sometimes we have samples that are very close together spatially and we don't necessarily expect there to be a prominent or meaningful effect of the landscape between between them. In these instances, we can identify which pairwise distances we want to retain, and omit the others from inclusion in our MLPE model.
+
+dir.create("C:/Rga/single/cont_keep", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig$cont_orig,
+                     Results.dir = "C:/Rga/single/cont_keep/",
+                     max.cont = 500,
+                     parallel = 5)
+
+## Keep only pairs that are > 4 distance units apart
+keep <- c(dist(sample_pops$sample_cont@coords))
+keep[keep < 4] <- 0
+keep[keep > 0] <- 1
+
+length(keep)
+sum(keep)
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
+                     response = lower(Dc_list$Dc_cont),
+                     CS_Point.File = sample_pops$sample_cont,
+                     JULIA_HOME = JULIA_HOME,
+                     pairs_to_include = keep,
+                     cholmod = T)
+
+ss.cont_keep <- SS_optim(jl.inputs = jl.inputs,
+                         GA.inputs = GA.inputs)
+
+
+
+# >> Categorical: Thematic Resolution -------------------------------------
+## Another application of ResistanceGA is identification of thematic resolution of categorical land cover surfaces.In these analyses, we try to determine the best way to characterize our land cover surface. For this example, we reclassify category 5 from the original categorical raster to be part of category 1. 
+
+dir.create("C:/Rga/single/cat4", recursive = T)
+
+cat4 <- subs(raster_orig$cat_orig, data.frame(c(1,2,3,4,5),
+                                              c(1,2,3,4,1)))
+names(cat4) <- 'cat4'
+cat_stack <- stack(cat4,
+                   raster_orig$cat_orig)
+
+GA.inputs <- GA.prep(ASCII.dir = cat_stack,
+                     Results.dir = "C:/Rga/single/cat4/",
+                     max.cat = 500,
+                     parallel = 8)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cat),
+                     response = lower(Dc_list$Dc_cat),
+                     CS_Point.File = sample_pops$sample_cat,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ss.cat4 <- SS_optim(jl.inputs = jl.inputs,
+                    GA.inputs = GA.inputs)
+
+```
+
+### Multiple Surfaces
+
+```{r eval = F, echo=T}
+# Multisurface ---------------------------------------------------------
+
+
+# >> Multi ----------------------------------------------------------------
+dir.create("C:/Rga/multi/multi", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig,
+                     Results.dir = "C:/Rga/multi/multi/",
+                     max.cat = 500,
+                     max.cont = 500,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_multi),
+                     response = lower(Dc_list$Dc_multi),
+                     CS_Point.File = sample_pops$sample_multi,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ms <- MS_optim(jl.inputs = jl.inputs,
+               GA.inputs = GA.inputs)
+
+
+# All combination ---------------------------------------------------------
+
+## Sometimes we want to go beyond just comparing single surfaces or running specific multi-surface combinations.In these instances, you may want to use the `all_comb` function to run all combinations of your surfaces.
+
+# >> cat ------------------------------------------------------------------
+
+
+dir.create("C:/Rga/multi/all_comb_cat", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig,
+                     Results.dir = 'all_comb',
+                     max.cat = 500,
+                     max.cont = 500,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cat),
+                     response = lower(Dc_list$Dc_cat),
+                     CS_Point.File = sample_pops$sample_cat,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ac_cat <- all_comb(jl.inputs = jl.inputs,
+                   GA.inputs = GA.inputs,
+                   results.dir = "C:/Rga/multi/all_comb_cat/",
+                   replicate = 3)
+
+
+
+# >> cont -----------------------------------------------------------------
+
+
+dir.create("C:/Rga/multi/all_comb_cont", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig,
+                     Results.dir = 'all_comb',
+                     max.cat = 500,
+                     max.cont = 500,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
+                     response = lower(Dc_list$Dc_cont),
+                     CS_Point.File = sample_pops$sample_cont,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ac_cont <- all_comb(jl.inputs = jl.inputs,
+                    GA.inputs = GA.inputs,
+                    results.dir = "C:/Rga/multi/all_comb_cont/",
+                    replicate = 3)
+
+
+# >> multi ----------------------------------------------------------------
+
+
+dir.create("C:/Rga/multi/all_comb_multi", recursive = T)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig,
+                     Results.dir = 'all_comb',
+                     max.cat = 500,
+                     max.cont = 500,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_multi),
+                     response = lower(Dc_list$Dc_multi),
+                     CS_Point.File = sample_pops$sample_multi,
+                     JULIA_HOME = JULIA_HOME,
+                     cholmod = T)
+
+ac_multi <- all_comb(jl.inputs = jl.inputs,
+                     GA.inputs = GA.inputs,
+                     results.dir = "C:/Rga/multi/all_comb_multi/",
+                     replicate = 3)
+
+# >> Continuous linear -----------------------------------------------------
+dir.create("C:/Rga/single/cont_linear", recursive = T)
+
+Plot.trans(PARM = c(15,100),
+           Resistance = c(1,10),
+           transformation = 1)
+
+GA.inputs <- GA.prep(ASCII.dir = raster_orig$cont_orig,
+                     Results.dir = "C:/Rga/single/cont_linear/",
+                     max.cont = 500,
+                     shape.min = 14.9,
+                     shape.max = 15.1,
+                     parallel = 5)
+
+
+jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
+                     response = lower(Dc_list$Dc_cont),
+                     CS_Point.File = sample_pops$sample_cont,
+                     JULIA_HOME = JULIA_HOME,
+                     ss.cont_lin <- SS_optim(jl.inputs = jl.inputs,
+                                             GA.inputs = GA.inputs)
+```
+
+`ResistanceGA` is very much an active and evolving package. If you have issues or questions, please don't hesitate to reach out (peterman.73\@osu.edu).

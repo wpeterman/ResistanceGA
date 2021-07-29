@@ -389,45 +389,8 @@ Resistance.Opt_single <-
                 obj.func.opt <- obj.func[[1]]
               }
             } # Positive parameter value
-            
-            # if (method == "AIC") {
-            #   obj.func <- suppressWarnings(AIC(
-            #     MLPE.lmm2(
-            #       resistance = cd,
-            #       response = jl.inputs$response,
-            #       ID = jl.inputs$ID,
-            #       ZZ = jl.inputs$ZZ,
-            #       REML = FALSE
-            #     )
-            #   ))
-            #   obj.func.opt <- obj.func * -1
-            # } else if (method == "R2") {
-            #   obj.func <- suppressWarnings(r.squaredGLMM(
-            #     MLPE.lmm2(
-            #       resistance = cd,
-            #       response =
-            #         jl.inputs$response,
-            #       ID = jl.inputs$ID,
-            #       ZZ = jl.inputs$ZZ,
-            #       REML = FALSE
-            #     )
-            #   ))
-            #   obj.func.opt <- obj.func[[1]]
-            # } else {
-            #   obj.func <- suppressWarnings(logLik(
-            #     MLPE.lmm2(
-            #       resistance = cd,
-            #       response = jl.inputs$response,
-            #       ID = jl.inputs$ID,
-            #       ZZ = jl.inputs$ZZ,
-            #       REML = FALSE
-            #     )
-            #   ))
-            #   obj.func.opt <- obj.func[[1]]
-            # }
           } # End Keep loop
         } # End Julia Loop
-        
       } # End drop Loop
       
       rt <- Sys.time() - t1

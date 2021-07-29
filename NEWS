@@ -1,3 +1,8 @@
+ResistanceGA 4.2
+--------
+* Added a new 'Getting Started' vignette.
+* Updated code to create paths across platforms [2021 July 29]
+
 ResistanceGA 4.1-0.47
 --------
 * Updated `all_comb` function to correctly accomodate a specified number of layers without single surface optimization [2021 July 7]

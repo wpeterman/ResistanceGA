@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Bill Peterman" />
+
+<meta name="date" content="2021-07-28" />
+
+<title>Using Julia with ResistanceGA</title>
+
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using Julia with ResistanceGA</h1>
+<h4 class="author">Bill Peterman</h4>
+<h4 class="date">28 July 2021</h4>
+
+
+
+<div id="description" class="section level2">
+<h2>Description</h2>
+<p>One of the greatest limitations of using <code>ResistancaGA</code> for landscape resistance optimization is computation time. This time increases as the number of samples in space increases and/or the dimensions of the raster surface increase. Recently, <a href="https://circuitscape.org/" title="Link to CIRCUITSCAPE">CIRCUITSCAPE</a> was re-written in the <a href="https://julialang.org/" title="Julia Homepage">Julia computing language</a>. This implementation can be 4–10x faster than the original CIRCUITSCAPE, which is implemented in Python. This short document details the steps needed to use CIRCUITSCAPE in Julia when optimizing with <code>ResistanceGA</code></p>
+</div>
+<div id="download-and-installation" class="section level2">
+<h2>Download and Installation</h2>
+<ul>
+<li>First, you need to <a href="https://julialang.org/downloads/" title="Julia Download">download Julia</a><br />
+</li>
+<li>Following installation of Julia, follow <a href="https://github.com/Circuitscape/Circuitscape.jl">directions for installing the Circuitscape package</a>. In short, open the Julia command-line console, then type/paste the following:</li>
+</ul>
+<pre><code>using Pkg
+Pkg.add(&quot;Circuitscape&quot;)
+Pkg.test(&quot;Circuitscape&quot;)</code></pre>
+<ul>
+<li>Next, install the latest version of <code>ResistanceGA</code></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;wpeterman/ResistanceGA&quot;</span>, <span class="at">build_vignettes =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="optimizing-with-julia" class="section level2">
+<h2>Optimizing with Julia</h2>
+<p>For the most part, optimizing with Julia is very similar to using <code>Circuitscape</code> of <code>gdistance</code>. The development package has some example data sets that we can use for demonstration purposes.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ResistanceGA)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Sample locations</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>sp.dat <span class="ot">&lt;-</span> sample_pops<span class="sc">$</span>sample_cont </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Continuous landscape surface</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>cont.rast <span class="ot">&lt;-</span> raster_orig<span class="sc">$</span>cont_orig</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Genetic distance measured between sample locations (chord distance)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>gen.dist <span class="ot">&lt;-</span> Dc_list<span class="sc">$</span>Dc_cont</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cont.rast)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sp.dat, <span class="at">add =</span> T, <span class="at">pch =</span> <span class="dv">19</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAACfFBMVEUAAAAAADoAAGYAOpAAZrYApgAFqAAMqgASrAAZrwAfsQAmswAttQAwtgAxtwA1uAA2uAA6AAA6ADo6AGY6kNs7ugA9ugBAvABCvABDvQBHvgBMvwBOwABTwQBUwgBawwBcxABfxQBhxQBjxgBmAABmtv9mxwBoxwBqyABsyABwyQB0ygB1ywB3ywB5zAB9zQB/zQCBzgCDzgCFzwCHzwCJ0ACL0ACP0QCQOgCQ2/+R0gCT0gCX0wCZ1ACb1ACd1QCf1QCh1gCj1gCl1wCn1wCq2ACs2ACu2QCw2QCy2gC02gC2ZgC22wC2//+52wC73AC93AC/3QDB3QDD3gDG3gDI3wDK3wDM4ADP4ADR4QDT4QDV4gDY4gDa4wDbkDrb///c4wDf5ADh5ADj5QDm1hLm1xDm2Q7m2g3m3Avm3Qnm3wfm4QXm4gTm5ALm5gDnySTnyiLnyyHnzR/nzh3nzxvn0Bnn0hfn0xbn1BTovzbowDXowTPowjHowy/oxC3oxSvoxiroxyjoyCbpt0npuEfpuUPpuUXpukLpuz7pu0DpvDzpvTrpvjjqs1jqs1rqs1zqtFTqtFbqtVDqtVLqtk3qtk/qt0vrsWXrsWfrsWnrsWvrsWzrsW7rsl3rsl/rsmHrsmPssXDssXLssXTssXbssXjssXrssXzssn/ssoHtsoPtsoXts4fts4nts4vttI3ttI/ttZHttpTutpbuuJruuJzuuZ7uuqDuu6TuvKbuvajvvqzvv63vwK/vwbHvwrPvw7XvxbnwyL3wy8Pwzsfw0cvw0s3w08/x2dfx29jx4N7x4uDy6+ry7Ozy8vL/tmb/25D//7b//9v///+yiBoKAAAACXBIWXMAAA7DAAAOwwHHb6hkAAANhUlEQVR4nO2diX8UZx3Gty3eZxVPPKqlKArWi0oxtFVLATmkhpC0gRQKpcASQUAJpUIDRkywClqghdaKYgQ1SrWKWu+7XgH6D/k8M+/sObPPTDKT2Wx+389nswN59915v8z85r0pvGA0pJD3CTQ7JkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCkLKmROuucbo0RNnV0OX5DxF5qgic0uhy/I+AtN0MRml8MXZPOFE/eQmaSCytl9FnwYfArsBuvAMDgF7gednZ2HwAlwFNwDvgW+Ch4AxWLxbvAlwD8uBl8Bm8B20N9vgkyQCTJBjbKbBzaCoNSPgS+CdrAALFmypBdsBV2ASX4BzgMagK+7AIU8BKiYHul0Czh61ASZIBNkghplBwFL3ghYrG8CimLxbgYMvXDHUn8UIF53stSXwJcBZR07dmwfYMoBcBEwSHcAChsZMUEmqKUFXZ3vt7iuXRGV3dQW1FOY7h+MBgd12S0FLNJJsANQ1HrwGTAXIIazvtgGPgS+Br4OfgB+Dk6fPv0I+D04Av4F1oBvACa7cKGpBV2dX9LSc9194dlNaUFXZt4UHI5G3GSNBOHW9ATh/X68WlDQ+K4gL3jN9fz4tJ4gxCB3CUXHoM8DhtlHwXfALjAIHnZWFlSM4OBWYx2SFcYHwX4wMjLybUBXrD+eBQ8DVjOpu7OzuQXhJvOLFnH9mCCdXRJBUDRVBJWLHCnIN3TngmpDrSaoB2XywlBP1FPsXnAOfA+w1Oz2OghQOnx227YDBw5UGULDlckYrH8M8EnG67+A34HnwRD4JGCz99Ch5hbUc82tCEPTXhiboB3btnmCNmzITFAhhCQFDMsyQVr/MX91PkJ0LEE4uwfxiiEIB+kIerEjvQttLBXFZdfdF0dQSUKdoA2Vfno9PzCUhqCXOPIRVKooLpsWKagPsKN+YKDiMtm+fTubGbzd0FDd4cejTXgdZwwvulS8zU6cOPEsYHhnn9oZQDEM1KwwItfGpXmpIzQZIihiREKSxSCnBdWhcQpil+FxkLaglznCkvHsRxMbSvoU82+yq/MTCiqwHQY/eN+NV0kQjlMV9HJHSLIrM6fzxKclKnD6FcWyoIFqPzDk+fFxgrzjom+oKw1Br3BEJctfUDBIeAzUPnArn1579+7dvNkd9/Xhx6lT9Nrf38+6I4cd2XnPXP4AGKjZabZypRD0SkdUsp6MbzGdXaWgwcG4gvr4kTQEvcZR8U0Vvx4tRDWyG2SZ9AMiu5wFvcERfYtFtrOjskyWXGZXLajK0NKK+s9eT9DmwE9qgt7iiEyW+DGWtqAfAjZU/wROg7Kf227r7u5mTMZrCaPuYYDjdeyh/y5g/z4O2WHGbjd2swVt2KcAKwm9vULQDEdkssvX3xT1q4gskyWX2dUKWrWq5IeCuovFIgc+AkG8atIU9HZHSDJfTVRfcXSWyZLL7BoIwo/MBd3gCEuGFlJlr3HcEiVMr7KrF7Sq7AeGMhZ0oyM02bJCoZDwBktfENsRHAVktxdLfPJk9ZOsvb2dbVbWBlkxXAQ4Qsh+frrds2cPc2CA5jgik9wOPgf8gC0EzXaEP+bHVKJxfr42u5wFvd+RT2s+TnZKEBRlKehmR7MJKhe/XlCdoSwFfcTRbILK2f0EMEgzClPQF0CtIZT2CcAozA6zpwEjMZNDCEemOd2BFUZ+mjF9NWA8P3JECPqYY3IJWjtxghY6JrcgKAoE4ThVQZ9wTDJB9YacIO84TUF3OZr3Mc9aH6cZoIK46hbADvuNGzfiRDl7YVbptLu6uhYvdscI0OxdZBS+ePHic4BzOjmBgYJ4Fz7iQPO28dd/2tG8V1CEoI2cHzQLPJCtoLsdk1IQr6CsBXU4QpONZj6qESO7aEGei1muX7rLE7Q48JOaoHsdYcnYFZT1qIbOjlU7/hOyR4wWOFvzXWCLu1q2ez34N74VtLe7v7t06RJHCP8OUFf8L+AYIqdgURAnclI7w//wsBC03hGSzG/IL8u70z6GILa2sxLU64jsD4oa8YzOMllymV3MKwivTARtcYQJeh3vrow7zPQ86UhBvqG5boyMtDtDl1IUtMkRUg/yw0+2fdIx5knfAdi1xT6Ht4FXgzeBue50+ypOHTU//HyUJf8t+B8YHh7+Kfg1YLBm/OZkKvbr/xKcPSsE7XGEJJsAQXFmuSYUxEp3moJ2OvK5xeLMk64UBAeeILxPlKCDjnyCdMIryJPg++HUBe/tlr6+Sj+pC9rvyOkxH2OeNAel+ByfMcNpuMG9d3bix5YtaIGWDOFW4AzxYN3LMwABmZM32dT9GWCVk8H6ccC1LwjxjUsz5MiroqjnSTcQ5C3tgSBv+DAjQQOOnCZQxciuTlChShAOMhX0mCPkMT/WEo3z8y6XEmVB1Yb8xWHeYbcztDMDQccdzduafxVg5fBFoMJPPx8tu9wfIAU/n2bj9EnwG8B+fnbgowrDoMw4y0+w84yDh+w845YFodG38uufckwOQW1tgZ7+WkHsRcxC0OOOvKYBly+JqHrQ2AXhF4vwGp+gJx05XUGRczfL2VULagv8+IJ2BX5CBJXUj0vQ9x153WJyDmThPeDN4N1g0J9BtY5dXW4iOf545kcOrphbC/4JKhdwnDt3jnsMcGMTjgGy055LZJjL1q1C0HlHbjFoVEyPqBPE6nKFoG1nzmQqaMTRbI/5cnYNBBU46hxDEBThxW6R5IKecTTvUyxakFf0SEHVhgISC3rW0byClgN2b7A1z46ZA4DNzKBui0jL2eGcmcDhGUZfVuwGa2fEOhYuXEhBXMzCuuS+fULQrxzRyZK2N5pH0GBvCoKec0QmS7xgIwdBfJLhlYmgPzqikiVfsDFhgnxD93h+fOoE1RtamFTQnx0Nk+UqiB317wMfACwSe+TdjgEo8PnzByuKP2/ePIrh7UaXUFvwp1EP4cXjA51uTzj2w3MSFUJ946//q6NhskQLNiZQ0GnW4BoLWl4sFtnfxUNee4kF/cNR8S21aRIu2MhSEM4ujiDGo4oraFyCnneIWyzBgo0MBXkS6gQdrPQzL3i8+4K8w3EJ+rejcbIkj7G0BXGaOzvMXGm9KZuMwux+Z3e8P7LK10McQ1+zxiXr6OgIPgFpXNvCNie3KOBelGyosumxerUQ9B9HSDKu+Xf3VpIFGzkIItxOKgtBkZHHkXzBRo6C8Mv15RKlIkiTeMFG2n3SZUHLAz8Rggo1dLhPDGYqKPGCjbSvoPeC1wJvNneh0M3isnee3e9P+NBZ1fQCx5B7x1Ofk6c4jsj1LpyTyQrjnQAfS/d8Y5Qo5ewqBXF9mAmqyS5MEAptgoLsQgR5pa4TVGdo3dBQ4KeVBXHKN3dv426SHP4rTSLfv3+/2/SNs6K6ukpi5vhvs2dDDN7bOHJMtezT58ZK3GCA00GZM+J4uucbo0QpZ5dU0Jw5c94JuAiOl05bmwkyQTWC1gZ+qgV1BX6mmCAuN2A1mb1WFwC72iGim0OAm0F/fz/brSsB/vp2zohhPOcqQW4IgBYHq5XUy9FoTqTiACL/GwFOTV+6tCUF8XoIEcSlhCbIBNVkZ4JEdiwKW6PsKGPfJ6t8jL6s6m0AqCFyYI+CuGMSuzw4Q5O/5vxPxO/dbhevImAu/D9Kgo23Fy0yQSbIBE1lQXoxCyuHLAo7hjk7nNsjMVhzGhSLjBriBx0UxMD8DsA5VxxE3LlzJzvoPw7ojJucUNbfAHM9fLi5BcVYzDKlBcVZijClBUUvZin36qR2YhE0taA4V9B4z0fR1ILiLGYZ7/komltQjMUs4z+jxjS5oInOLocvyPgLTZDKLnPSPd8YJco+u5C/i/dXcZNligkSmCCBCRKYIIEJEpgggQkSmCDBhH/hZMMECUyQwAQJTJDABAlMkMAECUyQwAQJTJDABAlMkCBNQbF2/L78+hUyrTcNaXrsLDMlRUGxNnK8MtObF9Iw7dX5+E1PYdpY94ZMlfQExdoKdNSfndY4bWnX1THuLpoq6QmKs5nsaGG6N7MoVtprbh3j/rSpkqKgeNsR+4JipF127Yox7nCcKukJirmhtVfcGGk5BWmMe2SnSrMKGg1idOsISvUW86ewtdYtFjOixgrSbr5xawXpmM/kUf2Yr/hf21vpMR+zVjeqK4qXrw+miLZURTHmDnwuojRK2+PPJePvx7SJeKpYY1VgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSGCCBCZIYIIEJkhgggQmSPB/+hwoi1YRNEQAAAAASUVORK5CYII=" /><!-- --></p>
+<p>Next prepare the GA and Julia inputs. You need to specify the full path to the Julia software on your computer, and connect Julia to R. The first time you run Julia within an R session, it will be quite slow as a lot is being prepared in the background.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Specify path the to `bin` directory</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">## This path may vary depending upon Julia version or operating system</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>JULIA_HOME <span class="ot">&lt;-</span> <span class="st">&quot;C:/Users/peterman.73/AppData/Local/Programs/Julia 1.5.2/bin/&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>JuliaCall<span class="sc">::</span><span class="fu">julia_setup</span>(JULIA_HOME)</span></code></pre></div>
+<p>If you get this error:</p>
+<pre><code>Error: Error happens in Julia.
+InitError: could not load library &quot;libdSFMT&quot;
+The specified module could not be found.</code></pre>
+<p>re-run the <code>jl.prep</code> function. This should only occur once, if at all.</p>
+<p>Next run the preparation functions.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>GA.inputs <span class="ot">&lt;-</span> <span class="fu">GA.prep</span>(<span class="at">ASCII.dir =</span> cont.rast,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Results.dir =</span> <span class="st">&quot;C:/Rga_examples/&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">parallel =</span> <span class="dv">4</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>jl.inputs <span class="ot">&lt;-</span> <span class="fu">jl.prep</span>(<span class="at">n.Pops =</span> <span class="fu">length</span>(sp.dat),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">response =</span> <span class="fu">lower</span>(gen.dist),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">CS_Point.File =</span> sp.dat,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">JULIA_HOME =</span> JULIA_HOME)</span></code></pre></div>
+<p>If everything is working correctly, you should see the following message in the console:</p>
+<pre><code>[1] &quot;Test: Run Circuitscape from Julia&quot;
+
+Test Passed</code></pre>
+<p>The default method for solving the resistance surface is to use <code>cholmod = TRUE</code>. As described on the Circuitscape Julia page, this is where the speed gains are achieved. However, this approach can be VERY memory intensive, so may not be practical if dealing with large rasters. As an alternative when using large rasters, you may want to switch to the <em>experimental</em> single precision method. This requires setting <code>cholmod = FALSE</code> and <code>precision  = TRUE</code>.</p>
+<p>Finally, optimize your resistance surface(s).</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>jl.optim <span class="ot">&lt;-</span> <span class="fu">SS_optim</span>(<span class="at">jl.inputs =</span> jl.inputs,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">GA.inputs =</span> GA.inputs)</span></code></pre></div>
+<p>The use of <code>SS_optim</code>, <code>MS_optim</code>, and <code>all_comb</code> are the same as before. You just need to provide the <code>jl.inputs</code> object created from the <code>jl.prep</code> function to optimize with Julia.</p>
+<p>Good luck, and please let me know if you encounter issues!</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

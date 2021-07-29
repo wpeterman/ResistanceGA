@@ -20,7 +20,7 @@ GA.prep(ASCII.dir,
                scale.surfaces = NULL,
                k.value = 2,
                pop.mult = 15,
-               percent.elite = 0.05,
+               percent.elite = 5,
                type = "real-valued",
                pcrossover = 0.85,
                pmutation = 0.125,
@@ -90,7 +90,7 @@ GA.prep(ASCII.dir,
 
 \item{pop.mult}{Value will be multiplied with number of parameters in surface to determine 'popSize' in GA. By default this is set to 15.}
 
-\item{percent.elite}{Percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.}
+\item{percent.elite}{An integer percent used to determine the number of best fitness individuals to survive at each generation ('elitism' in GA). By default the top 5\% individuals will survive at each iteration.}
 
 \item{type}{Default is "real-valued"}
 
@@ -136,7 +136,7 @@ GA.prep(ASCII.dir,
 
 \item{control}{A list of control parameters. See 'Details' section in \code{\link[stats]{optim}}}
 
-\item{hessian}{Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on paramter estimates (not yet implemented). Default = FALSE}
+\item{hessian}{Logical. Should a numerically differentiated Hessian matrix be returned? This will allow for the calculation of standard errors on parameter estimates (not yet implemented). Default = FALSE}
 
 \item{opt.digits}{The number of significant digits that the objective function will be assessed at. By default, no rounding occurs.}
 

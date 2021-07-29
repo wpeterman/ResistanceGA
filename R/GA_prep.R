@@ -307,7 +307,7 @@ GA.prep <- function(ASCII.dir,
     # if ("tmp" %in% dir(Results.dir) == FALSE)
     #   dir.create(file.path(Results.dir, "tmp"))
     # Write.dir <- paste0(Results.dir, "tmp/")
-    Write.dir <- paste0(tempdir(),'\\')
+    Write.dir <- paste0(normalizePath(tempdir()),'/')
     
     
     if ("Plots" %in% dir(Results.DIR) == FALSE)

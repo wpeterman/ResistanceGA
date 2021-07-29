@@ -43,7 +43,7 @@ A data frame reporting the average model weight, average rank, number of times a
 This is a 'pseudo' bootstrap procedure that will subsample a specified proportion of the sample locations/individuals, and will refit the MLPE model using the previously optimized resistance surface.
 }
 \details{
-This is a 'pseudo'bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surfaces that is top ranked across all bootstrap iterations.
+This is a 'pseudo' bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surface that is top ranked across all bootstrap iterations.
 }
 \examples{
  
