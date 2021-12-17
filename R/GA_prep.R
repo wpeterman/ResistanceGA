@@ -249,7 +249,7 @@ GA.prep <- function(ASCII.dir,
     ))
     Results.dir <- paste0(getwd(),"\\")
   }
-
+  
   if ((Results.dir != 'all.comb') & (Results.dir != 'all_comb')) {
     TEST.dir <- !file_test("-d", Results.dir)
     if (TEST.dir == TRUE) {
@@ -263,18 +263,6 @@ GA.prep <- function(ASCII.dir,
     }
   }
   
-  # if ((class(ASCII.dir)[1] == 'RasterStack' |
-  #      class(ASCII.dir)[1] == 'RasterLayer') & is.null(Results.dir)) {
-  #   warning(paste0(
-  #     "'Results.dir' was not specified. Results will be exported to ",
-  #     getwd()
-  #   ))
-  #   Results.dir <- getwd()
-  # }
-  
-  # if (class(ASCII.dir)[1] != 'RasterStack' & is.null(Results.dir)) {
-  #   Results.dir <- ASCII.dir
-  # }
   
   if (class(ASCII.dir)[1] == 'RasterStack' |
       class(ASCII.dir)[1] == 'RasterLayer') {
