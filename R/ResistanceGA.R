@@ -153,6 +153,18 @@ NULL
 #' @keywords datasets
 NULL
 
+#' Data file. Example raster output from CIRCUITSCAPE Julia
+#' 
+#' A raster file
+#' 
+#' @docType data
+#' @name jl_out
+#' @format A RasterLayer
+#' @usage data(jl_out)
+#' @description  Sample file used with examples in the vignette
+#' @keywords datasets
+NULL
+
 #' Data file. Simulated resistance surfaces
 #' 
 #' A raster stack containing three raster surfaces

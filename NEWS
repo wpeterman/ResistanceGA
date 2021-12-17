@@ -1,3 +1,12 @@
+ResistanceGA 4.2-2
+--------
+* Updated files so vignettes can be built across platforms [16 December 2021]
+
+ResistanceGA 4.2-1
+--------
+* Added checks and warning messages to `GA.prep`, `gdist.prep`, and `jl.prep` [3 August 2021]
+* Updated README file [3 August 2020]
+
 ResistanceGA 4.2
 --------
 * Added a new 'Getting Started' vignette.

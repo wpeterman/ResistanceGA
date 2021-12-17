@@ -329,7 +329,7 @@ jl.prep <- function(n.Pops,
     site <- c(1:length(CS_Point.File))
     
     cs.txt <- data.frame(site, CS_Point.File)
-    
+    cs_coords <- cs.txt[,2:3]
     write.table(
       cs.txt,
       # file = sp_file,
@@ -348,6 +348,7 @@ jl.prep <- function(n.Pops,
     site <- CS_Point.txt[, 3]
     CS_Point.txt <- data.frame(site, CS_Point.txt[, c(1, 2)])
     CS_Point.txt <- CS_Point.txt[order(site), ]
+    cs_coords <- CS_Point.txt[, c(1, 2)]
     CS_Point.File <- sub(".asc", ".txt", x = CS_Point.File)
     write.table(
       CS_Point.txt,
@@ -549,6 +550,12 @@ jl.prep <- function(n.Pops,
     pairs_to_include.file <- paste0(td, "include_pairs.txt")
     ID.keep <- ID[keep == 1,]
     
+  }
+  
+  ## Check slope
+  m <- lm(gd ~ c(dist(cs_coords)), data = df)
+  if(coef(m)[2] < 0){
+    warning('Genetic distance decreases with distance. This is likely to result in a failed optimization.\nCheck your measure carefully and consider subtracting your values from 1 to reverse the relationship.')
   }
   
   

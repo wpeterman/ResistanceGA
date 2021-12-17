@@ -93,7 +93,7 @@ gdist.prep <-
     if (n.Pops != length(sp)) {
       stop("n.Pops does not equal the number of sample locations")
     }
-    
+
     if(!is.null(keep)) {
       ID <- To.From.ID(n.Pops)
       
@@ -127,6 +127,12 @@ gdist.prep <-
       } else {
         formula <- gd ~ cd + (1 | pop)
       }
+    }
+    
+    ## Check slope
+    m <- lm(gd ~ c(dist(sp@coords)), data = df)
+    if(coef(m)[2] < 0){
+      warning('Genetic distance decreases with distance. This is likely to result in a failed optimization.\nCheck your measure carefully and consider subtracting your values from 1 to reverse the relationship.')
     }
     
     

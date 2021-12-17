@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Background
 
-`ResistanceGA` is an R package built around the use of a genetic algorithm optimization approach for assigning resistance values to landscape features. The genetic algorithm used comes from the `GA` package. There are numerous options and settings available to adjust within the genetic algorithm itself. Most of these can be adjusted or used within `ResistanceGA`, but most have defaults that do not need to be adjusted. Many of the defaults I've set are the result of trial and error with toy data sets, but they seem to have held up through the analysis of many different data sets. Having said this, you may want to explore how adjusting some of the `GA` settings affects your results. This vignette is largely meant to replace the original (now very dated) vignette, but I have not removed this older vignette from the package for posterity and continuity.
+`ResistanceGA` is an R package built around the use of a genetic algorithm optimization approach for assigning resistance values to landscape features. The genetic algorithm used comes from the `GA` package. There are numerous options and settings available to adjust within the genetic algorithm itself. Most of these can be adjusted or used within `ResistanceGA`, but most have defaults that do not need to be adjusted. Many of the defaults I've set are the result of trial and error with toy data sets, but they seem to have held up through the analysis of many different data sets. Having said this, you may want to explore how adjusting some of the `GA` settings affects your results. This vignette is largely meant to replace the original (now very dated) vignette, but I have not removed this older vignette from the package for posterity and continuity. This vignette is largely based off of workshops I've led on using `ResistanceGA`.
 
 If you haven't already done so, install `ResistanceGA`.
 
@@ -238,30 +238,28 @@ gdist.out <- Run_gdistance(gdist.inputs = gdist.inputs,
 
 Convenience function to run CIRCUITSCAPE in Julia.
 
-```{r, echo=F, eval=T}
-try(jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
-                         CS_Point.File = sample_pops$sample_cont,
-                     JULIA_HOME = "C:/Users/peterman.73/AppData/Local/Programs/Julia-1.6.1/bin/"), silent = T)
-```
-
 ```{r eval=F}
 jl.inputs <- jl.prep(n.Pops = length(sample_pops$sample_cont),
                      CS_Point.File = sample_pops$sample_cont,
                      JULIA_HOME = "C:/Users/peterman.73/AppData/Local/Programs/Julia-1.6.1/bin/")
-jl.out <- Run_CS.jl(jl.inputs = jl.inputs,
+jl_out <- Run_CS.jl(jl.inputs = jl.inputs,
                     r = raster_true$cont_true)
 ```
 
 This function can also be used to produce cumulative current map outputs. Be sure to provide an EXPORT.dir and specify the output format to be `raster`
 
-```{r fig.width=6, fig.asp=0.65}
-jl.out <- Run_CS.jl(jl.inputs = jl.inputs,
+```{r eval=FALSE}
+jl_out <- Run_CS.jl(jl.inputs = jl.inputs,
                     r = raster_true$cont_true,
                     CurrentMap = TRUE,
                     output = 'raster',
                     EXPORT.dir = "C:/Rga/")
-plot(jl.out)
 ```
+
+```{r fig.width=6, fig.asp=0.65}
+plot(jl_out)
+```
+
 
 ## mlpe_rga
 
@@ -285,9 +283,9 @@ mlpe.mod <- mlpe_rga(gd ~ rd + (1 | pop),
 
 # Examples
 
-## Workshop example
+## Worked example
 
-Let's do a worked example together. `ResistanceGA` is rather computationally intensive approach, even with small toy data set, so this will take a bit of time. Run with `gdistance` in parallel on 5 cores took \~8 minutes on my laptop. Let's analyze the provided surfaces, using the genetic distance data simulated from the continuous surface and sample points.
+`ResistanceGA` is rather computationally intensive approach, even with small toy data set, so this will take a bit of time. Run with `gdistance` in parallel on 5 cores took \~8 minutes on my laptop. Let's analyze the provided surfaces, using the genetic distance data simulated from the continuous surface and sample points.
 
 ```{r, eval = F, echo=T}
 dir.create("C:/Rga/ExampleAnalysis/", recursive = T)

@@ -1,6 +1,6 @@
 Package: ResistanceGA
 Title: Optimize resistance surfaces using genetic algorithms
-Version: 4.2
+Version: 4.2-2
 Author: Bill Peterman <Bill.Peterman@gmail.com>
 Maintainer: Bill Peterman <bill.peterman@gmail.com>
 Description: This package contains functions to optimize
@@ -10,7 +10,7 @@ Description: This package contains functions to optimize
     novel resistance surfaces.
 VignetteBuilder: knitr
 Depends:
-    R (>= 3.4),
+    R (>= 4.0),
     raster
 Imports: 
     ggExtra,
@@ -37,4 +37,4 @@ Suggests:
 License: GPL (>= 2)
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

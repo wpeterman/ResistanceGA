@@ -257,6 +257,12 @@ GA.prep <- function(ASCII.dir,
     }
   }
   
+  if(!is.null(select.trans)){
+    if(!is.list(select.trans)){
+      stop("Select transformations must by provided as a list. See Details.")
+    }
+  }
+  
   # if ((class(ASCII.dir)[1] == 'RasterStack' |
   #      class(ASCII.dir)[1] == 'RasterLayer') & is.null(Results.dir)) {
   #   warning(paste0(
