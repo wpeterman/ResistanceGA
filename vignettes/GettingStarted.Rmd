@@ -254,12 +254,8 @@ jl_out <- Run_CS.jl(jl.inputs = jl.inputs,
                     CurrentMap = TRUE,
                     output = 'raster',
                     EXPORT.dir = "C:/Rga/")
-```
-
-```{r fig.width=6, fig.asp=0.65}
 plot(jl_out)
 ```
-
 
 ## mlpe_rga
 
