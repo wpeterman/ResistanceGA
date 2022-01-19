@@ -117,7 +117,10 @@ SS_optim <- function(CS.inputs = NULL,
         }
         
         single.GA@solution <-
-          single.GA@solution / min(single.GA@solution)
+          SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+        
+        # single.GA@solution <-
+        #   single.GA@solution / min(single.GA@solution)
         df <- data.frame(id = unique(r), t(single.GA@solution))
         r <- subs(r, df)
         NAME <- GA.inputs$layer.names[i]
@@ -658,7 +661,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             df <- data.frame(id = unique(r), t(single.GA@solution))
             r <- subs(r, df)
             NAME <- GA.inputs$layer.names[i]
@@ -1056,7 +1062,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             # df <- data.frame(id = unique(r), t(single.GA@solution))
             # r <- subs(r, df)
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
@@ -1644,7 +1653,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             df <- data.frame(id = unique(r), t(single.GA@solution))
             r <- subs(r, df)
             NAME <- GA.inputs$layer.names[i]
@@ -2083,7 +2095,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             # df <- data.frame(id = unique(r), t(single.GA@solution))
             # r <- subs(r, df)
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
@@ -2676,7 +2691,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             # df <- data.frame(id = unique(r), t(single.GA@solution))
             # r <- subs(r, df)
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
@@ -3075,7 +3093,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             # df <- data.frame(id = unique(r), t(single.GA@solution))
             # r <- subs(r, df)
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
@@ -3591,7 +3612,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             # df <- data.frame(id = unique(r), t(single.GA@solution))
             # r <- subs(r, df)
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
@@ -4112,7 +4136,10 @@ SS_optim <- function(CS.inputs = NULL,
             }
             
             single.GA@solution <-
-              single.GA@solution / min(single.GA@solution)
+              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            # single.GA@solution <-
+            #   single.GA@solution / min(single.GA@solution)
             # df <- data.frame(id = unique(r), t(single.GA@solution))
             # r <- subs(r, df)
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))

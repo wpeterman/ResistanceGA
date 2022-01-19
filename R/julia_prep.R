@@ -553,7 +553,8 @@ jl.prep <- function(n.Pops,
   }
   
   ## Check slope
-  m <- lm(gd ~ c(dist(cs_coords)), data = df)
+  cd <- c(dist(cs_coords))[keep==1]
+  m <- lm(gd ~ cd, data = df)
   if(coef(m)[2] < 0){
     warning('Genetic distance decreases with distance. This is likely to result in a failed optimization.\nCheck your measure carefully and consider subtracting your values from 1 to reverse the relationship.')
   }

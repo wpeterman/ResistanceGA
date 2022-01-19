@@ -9,8 +9,8 @@
 #' @param max.cont The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 2500)
 #' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details
 #' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)
-#' @param shape.min The minimum value for the shape parameter used for transformimg resistance surfaces. If unspecified, used 0.5
-#' @param shape.max The maximum value for the shape parameter used for transformimg resistance surfaces. If unspecified, used 14.5
+#' @param shape.min The minimum value for the shape parameter used for transforming resistance surfaces. If unspecified, used 0.5
+#' @param shape.max The maximum value for the shape parameter used for transforming resistance surfaces. If unspecified, used 14.5
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. Default = "M"; see Details.
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
@@ -530,6 +530,7 @@ GA.prep <- function(ASCII.dir,
       pop.mult = pop.mult,
       percent.elite = percent.elite,
       Min.Max = Min.Max,
+      max.cat = max.cat,
       method = method,
       k.value = k.value,
       opt.digits = opt.digits,
@@ -578,6 +579,7 @@ GA.prep <- function(ASCII.dir,
       pop.mult = pop.mult,
       percent.elite = percent.elite,
       Min.Max = Min.Max,
+      max.cat = max.cat,
       method = method,
       k.value = k.value,
       opt.digits = opt.digits,

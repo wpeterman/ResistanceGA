@@ -85,7 +85,9 @@ MS_optim <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
+        # parm <- ga.p / min(ga.p)
+        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
+        
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -470,7 +472,8 @@ MS_optim <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
+        # parm <- ga.p / min(ga.p)
+        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -821,7 +824,8 @@ MS_optim <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
+        # parm <- ga.p / min(ga.p)
+        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         

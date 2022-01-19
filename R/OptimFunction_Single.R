@@ -45,7 +45,8 @@ Resistance.Opt_single <-
     
     
     if (GA.inputs$surface.type[iter] == "cat") {
-      PARM <- PARM / min(PARM)
+      # PARM <- PARM / min(PARM)
+      PARM <- SCALE.vector(PARM, 1, GA.inputs$max.cat)
       parm <- PARM
       df <-
         data.frame(id = unique(r), PARM) # Data frame with original raster values and replacement values
