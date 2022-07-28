@@ -98,8 +98,14 @@ Combine_Surfaces <-
           keep <- 0
         }
         
+        parm <- parm / min(parm)
+        if(max(parm) > GA.inputs$max.cat){
+          parm <- SCALE.vector(PARM, 1, GA.inputs$max.cat)
+        }
+        
         # parm <- parm / min(parm)
-        parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+        # parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+        
         df <-
           data.frame(id = unique(r[[i]]), parm) # Data frame with original raster values and replacement values
         r[[i]] <- subs(r[[i]], df)

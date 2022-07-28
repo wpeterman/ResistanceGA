@@ -255,7 +255,6 @@ Resistance.Opt_multi <- function(PARM,
     # if(cellStats(r, "mean") == 0) { # Skip iteration
     if(mean(r[], na.rm = TRUE) == 0) { # Skip iteration      
       obj.func.opt <- -99999
-      
     }
     
     if(!exists('obj.func.opt')) {

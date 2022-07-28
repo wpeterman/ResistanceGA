@@ -5,8 +5,8 @@
 #' @param ASCII.dir Directory containing all raster objects to optimized. If optimizing using least cost paths, a RasterStack or RasterLayer object can be specified.
 #' @param Results.dir If a RasterStack is provided in place of a directory containing .asc files for ASCII.dir, then a directory to export optimization results must be specified. It is critical that there are NO SPACES in the directory, as this will cause the function to fail. If using the \code{\link[ResistanceGA]{all_comb}} function, specify \code{Results.dir} as "all_comb".
 #' @param min.cat The minimum value to be assessed during optimization of categorical resistance surfaces (Default = 1 / max.cat)
-#' @param max.cat The maximum value to be assessed during optimization of categorical resistance surfaces (Default = 2500)
-#' @param max.cont The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 2500)
+#' @param max.cat The maximum value to be assessed during optimization of categorical resistance surfaces (Default = 1000)
+#' @param max.cont The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 1000)
 #' @param min.scale The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details
 #' @param max.scale The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)
 #' @param shape.min The minimum value for the shape parameter used for transforming resistance surfaces. If unspecified, used 0.5
@@ -81,8 +81,8 @@
 #' @usage GA.prep(ASCII.dir,
 #'                Results.dir = NULL,
 #'                min.cat = NULL,
-#'                max.cat = 2500,
-#'                max.cont = 2500,
+#'                max.cat = 1000,
+#'                max.cont = 1000,
 #'                min.scale = NULL,
 #'                max.scale = NULL,
 #'                shape.min = NULL,
@@ -132,8 +132,8 @@
 GA.prep <- function(ASCII.dir,
                     Results.dir = NULL,
                     min.cat = NULL,
-                    max.cat = 2500,
-                    max.cont = 2500,
+                    max.cat = 1000,
+                    max.cont = 1000,
                     min.scale = NULL,
                     max.scale = NULL,
                     shape.min = NULL,
