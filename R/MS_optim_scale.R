@@ -78,7 +78,8 @@ MS_optim.scale <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
+        # parm <- ga.p / min(ga.p)
+        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -152,22 +153,22 @@ MS_optim.scale <- function(CS.inputs = NULL,
     )
     
     df <- data.frame(gd = CS.inputs$response,
-                      rd = lower(cd),
-                      pop = CS.inputs$ID$pop1)
+                     rd = lower(cd),
+                     pop = CS.inputs$ID$pop1)
     
     MLPE.model <- mlpe_rga(gd ~ rd + (1 | pop),
-                    data = df)
+                           data = df)
     
     fit.stats <-
       r.squaredGLMM(
         MLPE.model
       )
-
+    
     aic <-
       AIC(
         MLPE.model
       )
-
+    
     LL <-
       logLik(
         MLPE.model
@@ -343,7 +344,8 @@ MS_optim.scale <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
+        # parm <- ga.p / min(ga.p)
+        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -610,7 +612,8 @@ MS_optim.scale <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        parm <- ga.p / min(ga.p)
+        # parm <- ga.p / min(ga.p)
+        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -656,9 +659,9 @@ MS_optim.scale <- function(CS.inputs = NULL,
                 paste0(GA.inputs$Results.dir, NAME, ".asc"),
                 overwrite = TRUE)
     
-    ifelse(length(unique(RAST)) > 15,
-           type <- "continuous",
-           type <- "categorical")
+    type <- ifelse(length(unique(RAST)) > 15,
+                   "continuous",
+                   "categorical")
     
     # type <- "continuous"
     

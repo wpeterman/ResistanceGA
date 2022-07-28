@@ -202,13 +202,12 @@ Resistance.Opt_multi.scale <-
         )
       
       # if(cellStats(r, "mean") == 0) { # Skip iteration
-      if(mean(r@data@values, na.rm = TRUE) == 0) { # Skip iteration        
+      if(mean(r[], na.rm = TRUE) == 0) { # Skip iteration      
         obj.func.opt <- -99999
-        
       }
       
       if(!exists('obj.func.opt')) {
-        cd <- try(Run_CS.jl(jl.inputs, r), TRUE)
+        cd <- try(Run_CS.jl(jl.inputs, r, full.mat = FALSE), TRUE)
       }
       
       if(exists('cd') && isTRUE(class(cd) == 'try-error')) {
@@ -216,43 +215,78 @@ Resistance.Opt_multi.scale <-
       } 
       
       if(exists('cd') && isTRUE(class(cd) != 'try-error')) { # Continue with iteration
+        dat <- jl.inputs$df
         
-        
-        if (method == "AIC") {
-          obj.func <- suppressWarnings(AIC(
-            MLPE.lmm2(
-              resistance = cd,
-              response = jl.inputs$response,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func * -1
-        } else if (method == "R2") {
-          obj.func <- suppressWarnings(r.squaredGLMM(
-            MLPE.lmm2(
-              resistance = cd,
-              response =
-                jl.inputs$response,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
+        if(is.null(nrow(cd))) {
+          dat$cd <- scale(cd)
         } else {
-          obj.func <- suppressWarnings(logLik(
-            MLPE.lmm2(
-              resistance = cd,
-              response = jl.inputs$response,
-              ID = jl.inputs$ID,
-              ZZ = jl.inputs$ZZ,
-              REML = FALSE
-            )
-          ))
-          obj.func.opt <- obj.func[[1]]
+          cd.l <- scale(lower(cd))
+          dat$cd <- cd.l
         }
+        
+        fit.mod <-  mlpe_rga(formula = gd ~ cd + (1 | pop),
+                             data = dat,
+                             ZZ = jl.inputs$ZZ,
+                             REML = FALSE)
+        
+        if(lme4::fixef(fit.mod)['cd'] < 0) {
+          obj.func.opt <- -99999
+        } else {
+          if (method == "AIC") {
+            obj.func <- suppressWarnings(AIC(
+              fit.mod
+            ))
+            obj.func.opt <- obj.func * -1
+          } else if (method == "R2") {
+            obj.func <-
+              suppressWarnings(r.squaredGLMM(
+                fit.mod
+              ))
+            obj.func.opt <- obj.func[[1]]
+            
+          } else {
+            obj.func <- suppressWarnings(logLik(
+              fit.mod
+            ))
+            obj.func.opt <- obj.func[[1]]
+          }
+        } # Positive parameter value
+        
+        # if (method == "AIC") {
+        #   obj.func <- suppressWarnings(AIC(
+        #     MLPE.lmm2(
+        #       resistance = cd,
+        #       response = jl.inputs$response,
+        #       ID = jl.inputs$ID,
+        #       ZZ = jl.inputs$ZZ,
+        #       REML = FALSE
+        #     )
+        #   ))
+        #   obj.func.opt <- obj.func * -1
+        # } else if (method == "R2") {
+        #   obj.func <- suppressWarnings(r.squaredGLMM(
+        #     MLPE.lmm2(
+        #       resistance = cd,
+        #       response =
+        #         jl.inputs$response,
+        #       ID = jl.inputs$ID,
+        #       ZZ = jl.inputs$ZZ,
+        #       REML = FALSE
+        #     )
+        #   ))
+        #   obj.func.opt <- obj.func[[1]]
+        # } else {
+        #   obj.func <- suppressWarnings(logLik(
+        #     MLPE.lmm2(
+        #       resistance = cd,
+        #       response = jl.inputs$response,
+        #       ID = jl.inputs$ID,
+        #       ZZ = jl.inputs$ZZ,
+        #       REML = FALSE
+        #     )
+        #   ))
+        #   obj.func.opt <- obj.func[[1]]
+        # }
       }
     }
     
