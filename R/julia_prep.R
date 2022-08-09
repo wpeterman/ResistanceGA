@@ -247,7 +247,7 @@ jl.prep <- function(n.Pops,
     # }
     
     if(Julia_link == 'JuliaCall'){
-        out <- julia_call('compute', temp.ini)[-1,-1]
+      out <- julia_call('compute', temp.ini)[-1,-1]
       
     } else {
       cs.jl <- RJulia()
@@ -394,7 +394,7 @@ jl.prep <- function(n.Pops,
       if(!is.null(pop2ind)){
         keep.vec <- expand.keep(pop2ind)
         gd.mat <- matrix(0, n.Pops, n.Pops)
-
+        
         
         cov.list <- vector('list', length(names(covariates)))
         for(i in 1:length(cov.list)){
@@ -412,7 +412,7 @@ jl.prep <- function(n.Pops,
         response <- response[keep.vec == 1]
         
         if(!is.null(nb)){
-
+          
           df <- data.frame(gd = response,
                            cov.df,
                            pop = ID$pop,
@@ -525,7 +525,7 @@ jl.prep <- function(n.Pops,
   # }
   
   if (!is.null(pairs_to_include)) {
-
+    
     keep <-  pairs_to_include
     
     df <- df[keep == 1,]
@@ -553,10 +553,12 @@ jl.prep <- function(n.Pops,
   }
   
   ## Check slope
-  cd <- c(dist(cs_coords))[keep==1]
-  m <- lm(gd ~ cd, data = df)
-  if(coef(m)[2] < 0){
-    warning('Genetic distance decreases with distance. This is likely to result in a failed optimization.\nCheck your measure carefully and consider subtracting your values from 1 to reverse the relationship.')
+  if(!is.null(response)){
+    cd <- c(dist(cs_coords))[keep==1]
+    m <- lm(gd ~ cd, data = df)
+    if(coef(m)[2] < 0){
+      warning('Genetic distance decreases with distance. This is likely to result in a failed optimization.\nCheck your measure carefully and consider subtracting your values from 1 to reverse the relationship.')
+    }
   }
   
   

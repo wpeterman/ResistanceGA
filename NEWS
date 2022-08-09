@@ -1,3 +1,7 @@
+ResistanceGA 4.2-5
+--------
+* Fixed bug that prevented `jl.prep` from being run when `response = NULL`
+
 ResistanceGA 4.2-4
 --------
 * Updated rescaling of categorical values to ensure maximum resistance <= specified maximum
