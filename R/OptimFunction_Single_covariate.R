@@ -13,7 +13,7 @@
 #' @param quiet Logical, if TRUE AICc and iteration duration will not be printed to the screen at the completion of each iteration.
 #' @return Objective function value (either AIC, R2, or LL) from mixed effect model
 #' @noRd
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 Resistance.Opt_single.cov <-
   function(PARM,
            Resistance,

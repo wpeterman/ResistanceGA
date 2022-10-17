@@ -25,7 +25,7 @@
 #'  dist_mod, 
 #'  null_mod,
 #'  diagnostic_plots = TRUE)
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @export
 #' 
 #' @examples  

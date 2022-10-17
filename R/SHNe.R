@@ -6,7 +6,7 @@
 #' @param pop.size Provide a vector of values that indicates Ne for each sampled population. These values should be ordered the same as your sample populations
 #' @param output Default is 'df', will return a data frame with distance measures. If 'matrix' is specified, then a list containing a matrix for each distance measure is produced.
 #' @return Either a data frame or a list of matrices containing the SHNe metrics
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @references Prunier, J. G., V. Dubut, L. Chikhi, and S. Blanchet. 2017. Contribution of spatial heterogeneity in effective population sizes to the variance in pairwise measures of genetic differentiation. Methods in Ecology and Evolution 8:1866-1877.
 #' 
 #' #' @examples  
@@ -17,7 +17,7 @@
 #'                  )
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage SHNe(n.samples,
 #'             pop.size,
 #'             output = 'df')

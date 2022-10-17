@@ -15,7 +15,7 @@
 #' @return A multipanel panel .tif including histogram of residuals and qqplot of fitted mixed effects model
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage Diagnostic.Plots(resistance.mat, genetic.dist, XLAB,YLAB, plot.dir, type, name, ID, ZZ)
 #' 
 #' @examples  

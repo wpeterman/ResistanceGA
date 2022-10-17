@@ -22,7 +22,7 @@
 #'   GA.inputs,
 #'   dist_mod, 
 #'   null_mod)
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @noRd
 SS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,

@@ -33,7 +33,7 @@
 #'            nb = 3)              
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage To.From.ID(sampled_pops,
 #'                   pop_n = NULL,
 #'                   spLoc = NULL,

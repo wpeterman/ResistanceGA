@@ -13,6 +13,7 @@
 #' @param shape.max The maximum value for the shape parameter used for transforming resistance surfaces. If unspecified, used 14.5
 #' @param cont.shape A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)
 #' @param select.trans Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. Default = "M"; see Details.
+#' @param cat.levels Number of unique levels to permit in categorical surface (Default = 15). See Details
 #' @param method Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")
 #' @param scale Logical. To optimize a kernel smoothing scaling parameter during optimization, set to TRUE (Default = FALSE). See Details below.
 #' @param scale.surfaces (Optional) If doing multisurface optimization with kernel smoothing, indicate which surfaces should be smoothed. A vector equal in length to the number of resistance surfaces to be optimized using MS_optim.scale that is used to indicate whether a surface should (1) or should not (0) have kernel smoothing applied. See details.
@@ -56,7 +57,7 @@
 #' @param quiet Logical. If TRUE, the objective function and step run time will not be printed to the screen after each step. Only \code{ga} summary information will be printed following each iteration. (Default = FALSE)
 #' @return An R object that is a required input into optimization functions
 #'
-#' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories containing these surfaces must be created.
+#' @details Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories containing these surfaces must be created. It is preferable to provide a RasterStack.
 #'
 #' When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 #' 
@@ -72,12 +73,14 @@
 #' \code{select.trans = list("M", "A", "R", c(5,6))}\cr
 #' will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NA} to accommodate this.
 #' 
+#' \code{cat.levels} defaults to 15. This means that when a raster surface has <= 15 unique levels, it will be treated as a categorical surface in the analysis. This value can be increased, but optimization of surfaces with many levels may take more time. Additionally, depending upon the prevalence and configuration of categorical features and spatial sample locations, some levels are likely to be poorly estimated. This may be evident if estimated resistance values vary substantially between runs of ResistanceGA.
+#' 
 #' Setting \code{gaisl = TRUE} has the potential greatly reduce the optimization run time, potentially with greater accuracy. This is a distributed multiple-population GA, where the population is partitioned into several subpopulations and assigned to separated islands. Independent GAs are executed in each island, and only occasionally sparse exchanges of individuals are performed among the islands. 
 #'
 #' It is recommended to first run GA optimization with the default settings
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage GA.prep(ASCII.dir,
 #'                Results.dir = NULL,
 #'                min.cat = NULL,
@@ -89,6 +92,7 @@
 #'                shape.max = NULL,
 #'                cont.shape = NULL,
 #'                select.trans = NULL,
+#'                cat.levels = 15,
 #'                method = "LL",
 #'                scale = FALSE,
 #'                scale.surfaces = NULL,
@@ -140,6 +144,7 @@ GA.prep <- function(ASCII.dir,
                     shape.max = NULL,
                     cont.shape = NULL,
                     select.trans = NULL,
+                    cat.levels = 15,
                     method = "LL",
                     scale = FALSE,
                     scale.surfaces = NULL,
@@ -325,7 +330,7 @@ GA.prep <- function(ASCII.dir,
   for (i in 1:n.layers) {
     n.levels <- length(unique(r[[i]]))
     
-    if (n.levels <= 15 &
+    if (n.levels <= cat.levels &
         n.levels > 2 &
         !is.null(scale) &
         scale.surfaces[i] == 1) {
@@ -364,7 +369,7 @@ GA.prep <- function(ASCII.dir,
         eqs[[i]] <- eq.set(select.trans[[i]])
       }
       
-    } else if (n.levels <= 15) {
+    } else if (n.levels <= cat.levels) {
       Level.val <- unique(r[[i]])
       parm.type[i, 1] <- "cat"
       parm.type[i, 2] <- n.levels

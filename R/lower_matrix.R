@@ -8,7 +8,7 @@
 #' @details This is a convenience function to obtain the lower half of a matrix, which is required as input for several other functions
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' 
 #' @examples  
 #' ## Not run:
