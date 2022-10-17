@@ -13,7 +13,7 @@
 #'                    GA.inputs)
 
 #' @noRd
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 MS_optim.scale <- function(CS.inputs = NULL,
                            gdist.inputs = NULL,
                            jl.inputs = NULL,

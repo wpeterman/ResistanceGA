@@ -17,7 +17,7 @@
 #' @details This is a 'pseudo' bootstrap procedure that subsamples distance and genetic matrices, refits the MLPE model for each surface. AICc is calculated based on the number of parameters specified. Ranking of models during the bootstrap analysis is based on the specified \code{rank.method}, which defaults to 'AICc'. The objective of this procedure is to identify the surface that is top ranked across all bootstrap iterations.
 #' 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage Resist.boot(mod.names, 
 #'                    dist.mat, 
 #'                    n.parameters, 

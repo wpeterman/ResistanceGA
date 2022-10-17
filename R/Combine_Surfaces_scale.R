@@ -35,7 +35,7 @@
 #'                               File.name, 
 #'                               rescale, 
 #'                               p.contribution)
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @noRd
 #' @examples  
 #' ## Not run:

@@ -13,7 +13,7 @@
 #' @details An AIC value will only be returned if \code{REML = FALSE}
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage MLPE.lmm(resistance, 
 #'                 pairwise.genetic, 
 #'                 REML = FALSE, 

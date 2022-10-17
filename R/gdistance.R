@@ -18,7 +18,7 @@
 #' the formula \code{response} will use the vector of values specified for the \code{response} parameter. Make sure that covariate names match variable names provided in \code{covariates}
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 
 #' @usage gdist.prep(n.Pops, 
 #'                   response = NULL,

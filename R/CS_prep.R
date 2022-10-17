@@ -17,7 +17,7 @@
 #' @return An R object that is a required input into optimization functions
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage CS.prep(n.Pops, 
 #' response, 
 #' covariates = NULL,

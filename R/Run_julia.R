@@ -48,7 +48,7 @@
 #' is_resistance = TRUE)
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' 
 #' @examples  
 #' ## Not run:

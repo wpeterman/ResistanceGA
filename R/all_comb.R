@@ -30,7 +30,7 @@
 #'                 dist_mod = TRUE,
 #'                 null_mod = TRUE,
 #'                 ...)
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @export
 #' 
 #' @examples  
