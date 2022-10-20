@@ -46,7 +46,7 @@
 #'                         keep = keep)
 
 #' @export
-#' @author Bill Peterman <Bill.Peterman@@gmail.com>
+#' @author Bill Peterman <Peterman.73@@osu.edu>
 #' @usage mlpe_rga(formula,
 #'                 data, 
 #'                 REML = FALSE, 

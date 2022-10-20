@@ -1,3 +1,7 @@
+ResistanceGA 4.2-7
+--------
+* Fixed bug in `gdist.prep` that caused an error when not specifying a response variable.
+
 ResistanceGA 4.2-6
 --------
 * Updated GA.prep code to allow specification of how many unique values can be considered in a categorical surface
