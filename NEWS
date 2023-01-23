@@ -1,3 +1,7 @@
+ResistanceGA 4.2-8
+--------
+* Fixed bug causing Errors when optimizing multiple categorical surfaces.
+
 ResistanceGA 4.2-7
 --------
 * Fixed bug in `gdist.prep` that caused an error when not specifying a response variable.
