@@ -85,9 +85,11 @@ MS_optim <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        # parm <- ga.p / min(ga.p)
-        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
-        
+        parm <- ga.p / min(ga.p)
+        if(max(parm) > GA.inputs$max.cat){
+          parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+        }
+
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -472,8 +474,10 @@ MS_optim <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        # parm <- ga.p / min(ga.p)
-        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
+        parm <- ga.p / min(ga.p)
+        if(max(parm) > GA.inputs$max.cat){
+          parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+        }
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -596,7 +600,7 @@ MS_optim <- function(CS.inputs = NULL,
       (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
     
     Result.txt(
-      GA.results = multi.GA_nG.o,
+      GA.results = multi.GA_nG,
       GA.inputs = GA.inputs,
       method = gdist.inputs$method,
       Run.Time = rt,
@@ -647,7 +651,7 @@ MS_optim <- function(CS.inputs = NULL,
         "LL"
       )
     
-    out <- list(GA.summary = multi.GA_nG.o,
+    out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
                 MLPE.model_REML = fit.mod_REML,
                 AICc.tab = AICc.tab,
@@ -824,8 +828,10 @@ MS_optim <- function(CS.inputs = NULL,
       if (GA.inputs$surface.type[i] == "cat") {
         ga.p <-
           GA.opt[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i + 1])]
-        # parm <- ga.p / min(ga.p)
-        parm <- SCALE.vector(ga.p, 1, GA.inputs$max.cat)
+        parm <- ga.p / min(ga.p)
+        if(max(parm) > GA.inputs$max.cat){
+          parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+        }
         Opt.parm[(GA.inputs$parm.index[i] + 1):(GA.inputs$parm.index[i +
                                                                        1])] <- parm
         
@@ -981,7 +987,7 @@ MS_optim <- function(CS.inputs = NULL,
       (aic) + (((2 * k) * (k + 1)) / max((n - k - 1), 1))
     
     Result.txt(
-      GA.results = multi.GA_nG.o,
+      GA.results = multi.GA_nG,
       GA.inputs = GA.inputs,
       method = "CIRCUITSCAPE.jl",
       Run.Time = rt,
@@ -1034,7 +1040,7 @@ MS_optim <- function(CS.inputs = NULL,
     
     setwd(wd)
     
-    out <- list(GA.summary = multi.GA_nG.o,
+    out <- list(GA.summary = multi.GA_nG,
                 MLPE.model = MLPE.model,
                 MLPE.model_REML = fit.mod_REML,
                 AICc.tab = AICc.tab,
