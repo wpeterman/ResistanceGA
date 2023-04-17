@@ -59,5 +59,5 @@ A wrapper function to run both \code{\link[ResistanceGA]{SS_optim}} and \code{\l
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

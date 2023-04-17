@@ -23,7 +23,7 @@
 #' @importFrom akima interp
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom plyr arrange rbind.fill ldply
-#' @importFrom spatstat.core blur 
+#' @importFrom spatstat.explore blur 
 #' @importFrom spatstat.geom as.im  as.matrix.im
 #' @importFrom spdep dnearneigh nb2mat
 #' @importFrom grDevices dev.off tiff topo.colors

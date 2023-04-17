@@ -54,5 +54,5 @@ To.From.ID(sampled_pops = 4,
            nb = 3)              
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

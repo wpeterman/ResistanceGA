@@ -100,5 +100,5 @@ If \code{nb} is specified, this indicates the maximum distance (in units of your
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

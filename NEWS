@@ -1,3 +1,7 @@
+ResistanceGA 4.2-9
+--------
+* Updated imports to accommodate new package requirements.
+
 ResistanceGA 4.2-8
 --------
 * Fixed bug causing Errors when optimizing multiple categorical surfaces.

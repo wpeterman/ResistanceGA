@@ -7,14 +7,15 @@
 GA.prep(ASCII.dir,
                Results.dir = NULL,
                min.cat = NULL,
-               max.cat = 2500,
-               max.cont = 2500,
+               max.cat = 1000,
+               max.cont = 1000,
                min.scale = NULL,
                max.scale = NULL,
                shape.min = NULL,
                shape.max = NULL,
                cont.shape = NULL,
                select.trans = NULL,
+               cat.levels = 15,
                method = "LL",
                scale = FALSE,
                scale.surfaces = NULL,
@@ -56,21 +57,23 @@ GA.prep(ASCII.dir,
 
 \item{min.cat}{The minimum value to be assessed during optimization of categorical resistance surfaces (Default = 1 / max.cat)}
 
-\item{max.cat}{The maximum value to be assessed during optimization of categorical resistance surfaces (Default = 2500)}
+\item{max.cat}{The maximum value to be assessed during optimization of categorical resistance surfaces (Default = 1000)}
 
-\item{max.cont}{The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 2500)}
+\item{max.cont}{The maximum value to be assessed during optimization of continuous resistance surfaces (Default = 1000)}
 
 \item{min.scale}{The minimum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.01). See details}
 
 \item{max.scale}{The maximum scaling parameter value to be assessed during optimization of resistance surfaces with kernel smoothing (Default = 0.1 * maximum dimension of the raster surface)}
 
-\item{shape.min}{The minimum value for the shape parameter used for transformimg resistance surfaces. If unspecified, used 0.5}
+\item{shape.min}{The minimum value for the shape parameter used for transforming resistance surfaces. If unspecified, used 0.5}
 
-\item{shape.max}{The maximum value for the shape parameter used for transformimg resistance surfaces. If unspecified, used 14.5}
+\item{shape.max}{The maximum value for the shape parameter used for transforming resistance surfaces. If unspecified, used 14.5}
 
 \item{cont.shape}{A vector of hypothesized relationships that each continuous resistance surface will have in relation to the genetic distance response (Default = NULL; see details)}
 
 \item{select.trans}{Option to specify which transformations are applied to continuous surfaces. Must be provided as a list. "A" = All, "M" = Monomolecular only, "R" = Ricker only. Default = "M"; see Details.}
+
+\item{cat.levels}{Number of unique levels to permit in categorical surface (Default = 15). See Details}
 
 \item{method}{Objective function to be optimized. Select "AIC", "R2", or "LL" to optimize resistance surfaces based on AIC, variance explained (R2), or log-likelihood. (Default = "LL")}
 
@@ -153,7 +156,7 @@ An R object that is a required input into optimization functions
 This function prepares and compiles objects and commands for optimization with the GA package
 }
 \details{
-Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories containing these surfaces must be created.
+Only files that you wish to optimize, either in isolation or simultaneously, should be included in the specified \code{ASCII.dir}. If you wish to optimize different combinations of surfaces, different directories containing these surfaces must be created. It is preferable to provide a RasterStack.
 
 When \code{scale = TRUE}, the standard deviation of the Gaussian kernel smoothing function (sigma) will also be optimized during optimization. Only continuous surfaces or binary categorical surfaces (e.g., forest/no forest; 1/0) surfaces can be optimized when \code{scale = TRUE}
 
@@ -169,6 +172,8 @@ If it is desired that only certain transformations be assessed for continuous su
 \code{select.trans = list("M", "A", "R", c(5,6))}\cr
 will result in surface one only being optimized with Monomolecular transformations, surface two with all transformations, surface three with only Ricker transformations, and surface four with Reverse Ricker and Reverse Monomolecular only. If a categorical surface is among the rasters to be optimized, it is necessary to specify \code{NA} to accommodate this.
 
+\code{cat.levels} defaults to 15. This means that when a raster surface has <= 15 unique levels, it will be treated as a categorical surface in the analysis. This value can be increased, but optimization of surfaces with many levels may take more time. Additionally, depending upon the prevalence and configuration of categorical features and spatial sample locations, some levels are likely to be poorly estimated. This may be evident if estimated resistance values vary substantially between runs of ResistanceGA.
+
 Setting \code{gaisl = TRUE} has the potential greatly reduce the optimization run time, potentially with greater accuracy. This is a distributed multiple-population GA, where the population is partitioned into several subpopulations and assigned to separated islands. Independent GAs are executed in each island, and only occasionally sparse exchanges of individuals are performed among the islands. 
 
 It is recommended to first run GA optimization with the default settings
@@ -181,5 +186,5 @@ It is recommended to first run GA optimization with the default settings
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }
