@@ -29,5 +29,5 @@ Execute gdistance
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

@@ -27,5 +27,5 @@ The sigma parameter indicates the standard deviation of the Gaussian smoothing f
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

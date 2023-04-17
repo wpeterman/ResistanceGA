@@ -63,5 +63,5 @@ The Distance transformation sets all values equal to one. Because of the flexibi
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

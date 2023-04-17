@@ -62,5 +62,5 @@ Because of the flexibility of the Ricker function to take a monomolecular shape 
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

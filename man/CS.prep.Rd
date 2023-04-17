@@ -73,5 +73,5 @@ the formula \code{response} will use the vector of values specified for the \cod
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

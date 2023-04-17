@@ -26,5 +26,5 @@ This is a convenience function to obtain the lower half of a matrix, which is re
 ## End (Not run)
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }

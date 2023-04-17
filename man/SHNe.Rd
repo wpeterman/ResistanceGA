@@ -39,7 +39,5 @@ SHNe.out <- SHNe(n.samples = length(Ne),
                  )
 }
 \author{
-Bill Peterman <Bill.Peterman@gmail.com>
-
-Bill Peterman <Bill.Peterman@gmail.com>
+Bill Peterman <Peterman.73@osu.edu>
 }
