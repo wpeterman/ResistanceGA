@@ -3,7 +3,7 @@
 #' Apply Gaussian kernel smoothing of specified sigma
 #'
 #' @param raster A RasterLayer object to be smoothed
-#' @param sigma The standard deviation of the Gaussian smoothing parameter (see \code{\link[spatstat.core]{blur}} documentation in the \code{spatstat} package.)
+#' @param sigma The standard deviation of the Gaussian smoothing parameter (see \code{\link[spatstat.explore]{blur}} documentation in the \code{spatstat.explore} package.)
 #' @param SCALE Logical. Should the smoothed raster surface be scaled to range from 0-10 (Default = FALSE)
 
 #' @usage k.smooth (raster, sigma, SCALE)
@@ -24,7 +24,7 @@ k.smooth <- function(raster,
   r.mat <- raster::as.matrix(raster)
   x <- spatstat.geom::as.im(r.mat)
   
-  x.blur <- spatstat.core::blur(x = x,
+  x.blur <- spatstat.explore::blur(x = x,
                            sigma = sigma,
                            normalise = TRUE,
                            bleed = FALSE)
