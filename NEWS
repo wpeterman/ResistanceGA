@@ -1,3 +1,7 @@
+ResistanceGA 4.2-10
+--------
+* Fixed bug that always rescaled categorical variables to the maximum specified resistance value.
+
 ResistanceGA 4.2-9
 --------
 * Updated imports to accommodate new package requirements.

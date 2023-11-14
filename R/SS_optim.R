@@ -3092,13 +3092,20 @@ SS_optim <- function(CS.inputs = NULL,
               single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
             }
             
-            single.GA@solution <-
-              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
-            
+            ## Turned off 11/14/2023
             # single.GA@solution <-
-            #   single.GA@solution / min(single.GA@solution)
-            # df <- data.frame(id = unique(r), t(single.GA@solution))
-            # r <- subs(r, df)
+            #   SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            ##
+            ga.p <- single.GA@solution
+            parm <- ga.p / min(ga.p)
+            if(max(parm) > GA.inputs$max.cat){
+              parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+            }
+            
+            single.GA@solution <- parm
+            ##
+            
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
             r <- subs(GA.inputs$Resistance.stack[[i]], df) ## Modified 2019-03-26
             NAME <- GA.inputs$layer.names[i]
@@ -4135,13 +4142,20 @@ SS_optim <- function(CS.inputs = NULL,
               single.GA@solution <- t(as.matrix(single.GA@solution[1,]))
             }
             
-            single.GA@solution <-
-              SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
-            
+            ## Turned off 11/14/2023
             # single.GA@solution <-
-            #   single.GA@solution / min(single.GA@solution)
-            # df <- data.frame(id = unique(r), t(single.GA@solution))
-            # r <- subs(r, df)
+            #   SCALE.vector(single.GA@solution, 1, GA.inputs$max.cat)
+            
+            ##
+            ga.p <- single.GA@solution
+            parm <- ga.p / min(ga.p)
+            if(max(parm) > GA.inputs$max.cat){
+              parm <- SCALE.vector(parm, 1, GA.inputs$max.cat)
+            }
+            
+            single.GA@solution <- parm
+            ##
+            
             df <- data.frame(id = unique(GA.inputs$Resistance.stack[[i]]), t(single.GA@solution))
             r <- subs(GA.inputs$Resistance.stack[[i]], df) ## Modified 2019-03-26
             NAME <- GA.inputs$layer.names[i]
