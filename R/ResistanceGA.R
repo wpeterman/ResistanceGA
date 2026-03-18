@@ -31,7 +31,6 @@
 #' @importFrom stats AIC lm logLik qqline qqnorm resid residuals runif as.formula sigma
 #' @importFrom utils file_test read.csv read.delim read.table write.table
 #' @importFrom JuliaCall julia_setup julia_library julia_call julia_installed_package julia_install_package
-#' @importFrom XRJulia findJulia juliaEval RJulia juliaGet
 #' @importFrom parallel makeCluster detectCores stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach %do% %dopar% foreach

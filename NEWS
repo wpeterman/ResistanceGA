@@ -1,3 +1,7 @@
+ResistanceGA 4.2-11
+--------
+* Removed dependency and support for `XRJulia`
+
 ResistanceGA 4.2-10
 --------
 * Fixed bug that always rescaled categorical variables to the maximum specified resistance value.

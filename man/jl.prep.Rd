@@ -22,7 +22,6 @@ jl.prep(n.Pops,
                write.files = NULL,
                write.criteria = NULL,
                silent = TRUE,
-               Julia_link = 'JuliaCall',
                scratch = NULL,
                rm.files = TRUE)
 }
@@ -41,9 +40,9 @@ jl.prep(n.Pops,
 
 \item{Neighbor.Connect}{Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)}
 
-\item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations in the MLPE model.}
+\item{pairs_to_include}{Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairwise observations in the MLPE model.}
 
-\item{pop2ind}{Default is NULL. A vector with length equivalent to the number of populations sapled. Each value of the vector indicates the number of samples from each respective population.}
+\item{pop2ind}{Default is NULL. A vector with length equivalent to the number of populations sampled. Each value of the vector indicates the number of samples from each respective population.}
 
 \item{nb}{Default is NULL. Optionally, specify a distance between points that should be considered as part of the same group or neighborhood. See Details.}
 
@@ -62,8 +61,6 @@ jl.prep(n.Pops,
 \item{write.criteria}{Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.}
 
 \item{silent}{(Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug.}
-
-\item{Julia_link}{Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package}
 
 \item{scratch}{Scratch directory for use if write access is limited.}
 

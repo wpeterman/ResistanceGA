@@ -2,6 +2,7 @@
 % Please edit documentation in R/ResistanceGA.R
 \docType{package}
 \name{ResistanceGA-package}
+\alias{ResistanceGA}
 \alias{ResistanceGA-package}
 \title{About this R package}
 \description{

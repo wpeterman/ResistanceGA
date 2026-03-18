@@ -19,7 +19,6 @@
 #' @param cholmod (Logical; Default = TRUE). Should the cholmod solver be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param precision (Logical; Default = FALSE). Should experimental single precision method be used? See details. Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details). Only necessary to specify if \code{jl.inputs} are not specified.
-#' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package or the 'XRJulia' package. Will Default to using 'JuliaCall' if not specified here or in \code{jl.inputs}
 #' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE). Only necessary to specify if \code{jl.inputs} are not specified.
 #' @param scratch Scratch directory for use if write access is limited. Must be specified if raster results are desired for outputs.
 #' @param is_resistance Default = TRUE. Is the landscape represented as a resistance (TRUE) or conductance (FALSE) surface?
@@ -42,7 +41,6 @@
 #' cholmod = TRUE,
 #' precision = FALSE, 
 #' JULIA_HOME = NULL,
-#' Julia_link = NULL,
 #' rm.files = TRUE,
 #' scratch = NULL,
 #' is_resistance = TRUE)
@@ -69,7 +67,6 @@ Run_CS.jl <- function(jl.inputs = NULL,
                       cholmod = TRUE,
                       precision = FALSE,
                       JULIA_HOME = NULL,
-                      Julia_link = NULL,
                       rm.files = TRUE,
                       scratch = NULL,
                       is_resistance = TRUE) {
@@ -87,15 +84,15 @@ Run_CS.jl <- function(jl.inputs = NULL,
   }
   
   
-  if(is.null(Julia_link) & !is.null(jl.inputs)) {
-    Julia_link <- jl.inputs$Julia_link
-  } else if(is.null(Julia_link) & is.null(jl.inputs)) {
+  # if(is.null(Julia_link) & !is.null(jl.inputs)) {
+  #   Julia_link <- jl.inputs$Julia_link
+  # } else if(is.null(Julia_link) & is.null(jl.inputs)) {
     Julia_link <- 'JuliaCall'
-  }
-  
-  if(Julia_link == 'XRJulia') {
-    JULIA_HOME <- findJulia()
-  } 
+  # }
+  # 
+  # if(Julia_link == 'XRJulia') {
+  #   JULIA_HOME <- findJulia()
+  # } 
   
   if(is.null(jl.inputs) & is.null(JULIA_HOME)) {
     stop("Specify either `jl.inputs` or `JULIA_HOME` and `CS_Point.File`!")
@@ -111,7 +108,7 @@ Run_CS.jl <- function(jl.inputs = NULL,
                          pairs_to_include = pairs_to_include,
                          JULIA_HOME = JULIA_HOME,
                          scratch = scratch,
-                         Julia_link = Julia_link,
+                         # Julia_link = Julia_link,
                          parallel = parallel,
                          cores = cores,
                          cholmod = cholmod,
@@ -140,13 +137,13 @@ Run_CS.jl <- function(jl.inputs = NULL,
     JULIA_HOME <- jl.inputs$JULIA_HOME
   }
   
-  if(Julia_link == 'JuliaCall') {
+  # if(Julia_link == 'JuliaCall') {
     JuliaCall::julia_setup(JULIA_HOME = JULIA_HOME)
     try(JuliaCall::julia_library("Circuitscape"), silent = T)
     JuliaCall::julia_library("Circuitscape")
-  } else {
-    juliaEval("using Circuitscape")
-  }
+  # } else {
+  #   juliaEval("using Circuitscape")
+  # }
   
   
   if(!exists('r')) {
@@ -285,7 +282,7 @@ Run_CS.jl <- function(jl.inputs = NULL,
   # }
   rt <- NULL
   
-  if(Julia_link == 'JuliaCall') {
+  # if(Julia_link == 'JuliaCall') {
     if(!is.null(write.criteria)) {
       t1 <- proc.time()[3]
       out <- JuliaCall::julia_call('compute', normalizePath(
@@ -297,18 +294,18 @@ Run_CS.jl <- function(jl.inputs = NULL,
         paste0(EXPORT.dir, tmp.name, ".ini")
         ))[-1,-1]
     }
-  } else { # use XRJulia
-    cs.jl <- RJulia()
-    cs.jl$Using("Circuitscape")
-    
-    ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
-    cs.out <- cs.jl$Call("compute", ini.file) 
-    Sys.sleep(0.5)
-    out <- as.matrix(read.table(paste0(scratch, '/', tmp.name, "_resistances.out"),
-                                quote="\"", comment.char=""))[-1,-1]
-    # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
-    # out <- juliaGet(cs.out)[-1,-1] ## Slow!
-  }
+  # } else { # use XRJulia
+  #   cs.jl <- RJulia()
+  #   cs.jl$Using("Circuitscape")
+  #   
+  #   ini.file <- paste0(EXPORT.dir, tmp.name, ".ini")
+  #   cs.out <- cs.jl$Call("compute", ini.file) 
+  #   Sys.sleep(0.5)
+  #   out <- as.matrix(read.table(paste0(scratch, '/', tmp.name, "_resistances.out"),
+  #                               quote="\"", comment.char=""))[-1,-1]
+  #   # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+  #   # out <- juliaGet(cs.out)[-1,-1] ## Slow!
+  # }
   
   if(wd != getwd()) {
     setwd(wd)

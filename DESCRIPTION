@@ -1,6 +1,6 @@
 Package: ResistanceGA
 Title: Optimize resistance surfaces using genetic algorithms
-Version: 4.2-10
+Version: 4.2-11
 Author: Bill Peterman <peterman.73@osu.edu>
 Maintainer: Bill Peterman <peterman.73@osu.edu>
 Description: This package contains functions to optimize
@@ -29,12 +29,11 @@ Imports:
     spdep,
     doParallel,
     foreach,
-    JuliaCall,
-    XRJulia
+    JuliaCall
 Suggests:
     knitr,
     rmarkdown
 License: GPL (>= 2)
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3

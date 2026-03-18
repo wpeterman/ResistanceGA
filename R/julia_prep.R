@@ -9,8 +9,8 @@
 #' @param formula If covariates are included in the model, specify the R formula for the fixed effects portion of the MLPE model.
 #' @param JULIA_HOME Path to the folder containing the Julia binary (See Details)
 #' @param Neighbor.Connect Select 4 or 8 to designate the connection scheme to use in CIRCUITSCAPE (Default = 8)
-#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairiwse observations in the MLPE model. 
-#' @param pop2ind Default is NULL. A vector with length equivalent to the number of populations sapled. Each value of the vector indicates the number of samples from each respective population.
+#' @param pairs_to_include Default is NULL. If you wish to use the advanced CIRCUITSCAPE setting mode to include or exclude certain pairs of sample locations, provide a vector consisting of 1 (keep) or 0 (drop) for each pairwise observation (see example). This is an option if you do not want to assess all pairwise observations in the MLPE model. 
+#' @param pop2ind Default is NULL. A vector with length equivalent to the number of populations sampled. Each value of the vector indicates the number of samples from each respective population.
 #' @param nb Default is NULL. Optionally, specify a distance between points that should be considered as part of the same group or neighborhood. See Details.
 #' @param parallel (Logical; Default = FALSE) Do you want to run CIRCUITSCAPE in parallel?
 #' @param cores If `parallel = TRUE`, how many cores should be used for parallel processing?
@@ -20,7 +20,6 @@
 #' @param write.files (Default = NULL). If a directory is specified, then the .ini and .asc files used in the CS.jl run will be exported.
 #' @param write.criteria Criteria for writing .ini and .asc files. If a time in seconds is not specified, then all files will be written if a \code{write.files} directory is specified.
 #' @param silent (Default = TRUE) No updates or logging of CIRCUITSCAPE will occur. May be useful to set to FALSE to debug. 
-#' @param Julia_link Specify whether R should connect to Julia using the 'JuliaCall' package (Default), or the 'XRJulia' package
 #' @param scratch Scratch directory for use if write access is limited. 
 #' @param rm.files Should all temporary files be removed after Julia run (Default = TRUE)
 
@@ -46,7 +45,6 @@
 #'                write.files = NULL,
 #'                write.criteria = NULL,
 #'                silent = TRUE,
-#'                Julia_link = 'JuliaCall',
 #'                scratch = NULL,
 #'                rm.files = TRUE)
 #' @details 
@@ -90,7 +88,6 @@ jl.prep <- function(n.Pops,
                     write.files = NULL,
                     write.criteria = NULL,
                     silent = TRUE,
-                    Julia_link = 'JuliaCall',
                     scratch = NULL,
                     rm.files = TRUE) {
   
@@ -106,9 +103,9 @@ jl.prep <- function(n.Pops,
     stop("Response and covariates must have the same number of observations")
   } 
   
-  if(Julia_link == 'XRJulia') {
-    JULIA_HOME <- findJulia() 
-  }
+  # if(Julia_link == 'XRJulia') {
+  #   JULIA_HOME <- findJulia() 
+  # }
   
   if(!is.null(write.files)) {
     write.files <- paste0(normalizePath(write.files, winslash = '/'), "/")
@@ -125,8 +122,8 @@ jl.prep <- function(n.Pops,
   # }
   
   # Setup Julia -------------------------------------------------------------
-  
-  if(Julia_link != 'XRJulia'){
+  Julia_link <- 'JuliaCall'
+  # if(Julia_link != 'XRJulia'){
     if(!is.null(JULIA_HOME)) {
       if(isTRUE(dir.exists(JULIA_HOME))) {
         julia_setup(JULIA_HOME = JULIA_HOME)
@@ -134,14 +131,14 @@ jl.prep <- function(n.Pops,
         stop("Specified JULIA_HOME directory does not exist")
       } 
       
-    } else {
-      jl.setup <- try(julia_setup(), TRUE)
-      JULIA_HOME <- XRJulia::findJulia()
-      JULIA_HOME <- paste0(dirname(JULIA_HOME), "/")
-      
-      if(class(jl.setup) == "try-error")
-        stop("Specified JULIA_HOME directory does not exist")
-    }        
+    # } else {
+    #   jl.setup <- try(julia_setup(), TRUE)
+    #   JULIA_HOME <- XRJulia::findJulia()
+    #   JULIA_HOME <- paste0(dirname(JULIA_HOME), "/")
+    #   
+    #   if(class(jl.setup) == "try-error")
+    #     stop("Specified JULIA_HOME directory does not exist")
+    # }        
   }
   JULIA_HOME <- normalizePath(JULIA_HOME)
   
@@ -246,19 +243,19 @@ jl.prep <- function(n.Pops,
     )
     # }
     
-    if(Julia_link == 'JuliaCall'){
+    # if(Julia_link == 'JuliaCall'){
       out <- julia_call('compute', temp.ini)[-1,-1]
       
-    } else {
-      cs.jl <- RJulia()
-      cs.jl$Using("Circuitscape")
-      
-      cs.out <- cs.jl$Call("compute", temp.ini) 
-      out <- as.matrix(read.table(paste0(scratch, "//", tmp.name, "_resistances.out"),
-                                  quote="\"", comment.char=""))[-1,-1]
-      # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
-      # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
-    }
+    # } else {
+    #   cs.jl <- RJulia()
+    #   cs.jl$Using("Circuitscape")
+    #   
+    #   cs.out <- cs.jl$Call("compute", temp.ini) 
+    #   out <- as.matrix(read.table(paste0(scratch, "//", tmp.name, "_resistances.out"),
+    #                               quote="\"", comment.char=""))[-1,-1]
+    #   # out <- read.delim(paste0(scratch, "/", tmp.name, "_resistances.out"), header = FALSE)[-1,-1]
+    #   # out <- juliaGet(cs.out)[-1,-1] ## SLOW!!!
+    # }
     
     if(wd != getwd()) {
       setwd(wd)
